@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MiFinanza – Perfil</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0f0f13; --card: #17171d; --card2: #1e1e27;
+    --accent: #b8f564; --accent2: #4fd1c5; --danger: #ff6b6b;
+    --text: #f0f0f5; --subtext: #8888a0; --border: rgba(255,255,255,0.06);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; min-height: 100vh; display: flex; justify-content: center; }
+
+  .phone { width: 390px; min-height: 100vh; background: var(--bg); }
+
+  .hero { padding: 52px 24px 24px; display: flex; flex-direction: column; align-items: center; text-align: center; animation: fadeUp 0.4s ease both; position: relative; }
+
+  .hero::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 200px; background: radial-gradient(ellipse at 50% 0%, rgba(184,245,100,0.07) 0%, transparent 70%); pointer-events: none; }
+
+  .avatar-wrap { position: relative; margin-bottom: 14px; }
+
+  .avatar { width: 80px; height: 80px; border-radius: 50%; background: linear-gradient(135deg, var(--accent), var(--accent2)); display: flex; align-items: center; justify-content: center; font-family: 'Syne', sans-serif; font-size: 32px; font-weight: 800; color: #0f0f13; cursor: pointer; transition: transform 0.2s; border: 3px solid rgba(184,245,100,0.3); }
+
+  .avatar:hover { transform: scale(1.05); }
+
+  .avatar-edit { position: absolute; bottom: 0; right: 0; width: 26px; height: 26px; background: var(--card); border-radius: 50%; border: 2px solid var(--bg); display: flex; align-items: center; justify-content: center; font-size: 12px; cursor: pointer; }
+
+  .hero-nombre { font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 800; background: linear-gradient(90deg, #fff 30%, var(--accent)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 4px; }
+
+  .hero-moneda { font-size: 13px; color: var(--subtext); margin-bottom: 16px; }
+
+  .frase-personal { background: rgba(184,245,100,0.06); border: 1px solid rgba(184,245,100,0.15); border-radius: 14px; padding: 12px 16px; font-size: 13px; color: var(--accent); font-style: italic; line-height: 1.5; cursor: pointer; transition: background 0.2s; width: 100%; text-align: center; }
+
+  .frase-personal:hover { background: rgba(184,245,100,0.1); }
+
+  .frase-hint { font-size: 10px; color: var(--subtext); margin-top: 5px; }
+
+  .seccion { margin: 0 24px 14px; background: var(--card); border-radius: 20px; padding: 18px 20px; border: 1px solid var(--border); animation: fadeUp 0.4s ease both; opacity: 0; }
+
+  .seccion-titulo { font-size: 11px; color: var(--subtext); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 14px; }
+
+  .tono-opciones { display: flex; flex-direction: column; gap: 8px; }
+
+  .tono-item { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 14px; border: 1px solid var(--border); cursor: pointer; transition: all 0.2s; background: var(--card2); }
+
+  .tono-item.active { background: rgba(184,245,100,0.08); border-color: rgba(184,245,100,0.25); }
+
+  .tono-icon { font-size: 20px; flex-shrink: 0; }
+  .tono-info { flex: 1; }
+  .tono-nombre  { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 2px; }
+  .tono-ejemplo { font-size: 11px; color: var(--subtext); }
+
+  .tono-check { width: 20px; height: 20px; border-radius: 50%; border: 2px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 11px; flex-shrink: 0; transition: all 0.2s; }
+
+  .tono-item.active .tono-check { background: var(--accent); border-color: var(--accent); color: #0f0f13; }
+
+  .colores-wrap { display: flex; gap: 10px; justify-content: space-around; }
+
+  .color-item { display: flex; flex-direction: column; align-items: center; gap: 6px; cursor: pointer; }
+
+  .color-circulo { width: 44px; height: 44px; border-radius: 50%; border: 3px solid transparent; transition: transform 0.2s, border-color 0.2s; }
+
+  .color-item.active .color-circulo { border-color: white; transform: scale(1.1); }
+
+  .color-nombre { font-size: 10px; color: var(--subtext); }
+  .color-item.active .color-nombre { color: var(--text); }
+
+  .cats-wrap { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+
+  .cat-tag { background: var(--card2); border: 1px solid var(--border); border-radius: 100px; padding: 6px 12px; font-size: 12px; color: var(--text); display: flex; align-items: center; gap: 6px; cursor: pointer; transition: all 0.2s; }
+
+  .cat-tag:hover { border-color: rgba(255,107,107,0.3); }
+
+  .cat-tag .remove { color: var(--subtext); font-size: 14px; line-height: 1; transition: color 0.2s; }
+
+  .cat-tag:hover .remove { color: var(--danger); }
+
+  .btn-add-cat { background: none; border: 1px dashed var(--subtext); border-radius: 100px; padding: 6px 14px; font-size: 12px; color: var(--subtext); cursor: pointer; font-family: 'DM Sans', sans-serif; transition: all 0.2s; }
+
+  .btn-add-cat:hover { border-color: var(--accent); color: var(--accent); }
+
+  .notif-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--border); }
+
+  .notif-item:last-child { border-bottom: none; }
+
+  .notif-left { display: flex; align-items: center; gap: 10px; }
+  .notif-icon   { font-size: 18px; }
+  .notif-nombre { font-size: 14px; color: var(--text); font-weight: 500; }
+  .notif-desc   { font-size: 11px; color: var(--subtext); margin-top: 1px; }
+
+  .switch { width: 42px; height: 24px; background: var(--card2); border-radius: 100px; border: 1px solid var(--border); position: relative; cursor: pointer; transition: background 0.3s, border-color 0.3s; flex-shrink: 0; }
+
+  .switch.on { background: rgba(184,245,100,0.25); border-color: rgba(184,245,100,0.4); }
+
+  .switch::after { content: ''; position: absolute; top: 3px; left: 3px; width: 16px; height: 16px; border-radius: 50%; background: var(--subtext); transition: transform 0.3s, background 0.3s; }
+
+  .switch.on::after { transform: translateX(18px); background: var(--accent); }
+
+  .moneda-opts { display: flex; gap: 8px; flex-wrap: wrap; }
+
+  .moneda-chip { background: var(--card2); border: 1px solid var(--border); border-radius: 10px; padding: 8px 14px; font-size: 13px; color: var(--subtext); cursor: pointer; transition: all 0.2s; }
+
+  .moneda-chip.active { background: rgba(184,245,100,0.1); border-color: rgba(184,245,100,0.3); color: var(--accent); font-weight: 600; }
+
+  .btn-guardar { margin: 0 24px 16px; width: calc(100% - 48px); background: var(--accent); color: #0f0f13; border: none; border-radius: 16px; padding: 16px; font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 700; cursor: pointer; transition: opacity 0.2s; animation: fadeUp 0.4s 0.5s ease both; opacity: 0; }
+
+  .btn-guardar:hover { opacity: 0.9; }
+
+  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(6px); z-index: 200; display: none; align-items: flex-end; justify-content: center; }
+
+  .modal-overlay.visible { display: flex; }
+
+  .modal { width: 390px; background: var(--card); border-radius: 28px 28px 0 0; padding: 24px 24px 40px; border-top: 1px solid var(--border); animation: slideUp 0.3s ease; }
+
+  @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+
+  .modal-handle { width: 40px; height: 4px; background: var(--border); border-radius: 100px; margin: 0 auto 20px; }
+
+  .modal-title { font-family: 'Syne', sans-serif; font-size: 17px; font-weight: 700; color: var(--text); margin-bottom: 8px; }
+
+  .modal-sub { font-size: 12px; color: var(--subtext); margin-bottom: 16px; }
+
+  .modal textarea { width: 100%; background: var(--card2); border: 1px solid var(--border); border-radius: 14px; padding: 14px; color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 14px; outline: none; resize: none; height: 90px; line-height: 1.5; margin-bottom: 14px; }
+
+  .modal textarea:focus { border-color: rgba(184,245,100,0.3); }
+
+  .frases-ejemplo { margin-bottom: 16px; }
+  .frases-ejemplo p { font-size: 11px; color: var(--subtext); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.08em; }
+
+  .frase-sugerida { background: var(--card2); border: 1px solid var(--border); border-radius: 10px; padding: 9px 12px; font-size: 12px; color: var(--subtext); cursor: pointer; margin-bottom: 6px; transition: all 0.2s; font-style: italic; }
+
+  .frase-sugerida:hover { border-color: rgba(184,245,100,0.25); color: var(--accent); }
+
+  .btn-ok { width: 100%; background: var(--accent); color: #0f0f13; border: none; border-radius: 14px; padding: 14px; font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 700; cursor: pointer; }
+
+  .btn-cancelar { width: 100%; background: none; border: none; color: var(--subtext); font-size: 13px; cursor: pointer; padding: 10px; font-family: 'DM Sans', sans-serif; }
+
+  /* NAVBAR */
+  .navbar { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 390px; background: rgba(15,15,19,0.96); backdrop-filter: blur(20px); border-top: 1px solid var(--border); padding: 10px 0 22px; display: flex; justify-content: space-around; align-items: center; z-index: 99; }
+  .nav-item { display: flex; flex-direction: column; align-items: center; gap: 3px; cursor: pointer; opacity: 0.4; transition: opacity 0.2s; flex: 1; }
+  .nav-item.active { opacity: 1; }
+  .nav-icon  { font-size: 20px; }
+  .nav-label { font-size: 10px; color: var(--subtext); letter-spacing: 0.04em; }
+  .nav-item.active .nav-label { color: var(--accent); }
+  .nav-dot { width: 4px; height: 4px; border-radius: 50%; background: var(--accent); }
+
+  .spacer { height: 110px; }
+
+  .toast { position: fixed; top: 24px; left: 50%; transform: translateX(-50%) translateY(-80px); background: var(--card2); border: 1px solid var(--border); border-radius: 14px; padding: 12px 20px; font-size: 13px; color: var(--text); z-index: 300; transition: transform 0.3s ease; white-space: nowrap; }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+  .toast.ok  { border-color: rgba(184,245,100,0.3); color: var(--accent); }
+  .toast.err { border-color: rgba(255,107,107,0.3); color: var(--danger); }
+
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+</style>
+</head>
+<body>
+<div class="phone">
+
+  <div class="hero">
+    <div class="avatar-wrap">
+      <div class="avatar" id="avatar-letra">C</div>
+      <div class="avatar-edit">✏️</div>
+    </div>
+    <div class="hero-nombre" id="hero-nombre">Carlos</div>
+    <div class="hero-moneda" id="hero-moneda">Dólar estadounidense · USD</div>
+    <div class="frase-personal" id="frase-display" onclick="abrirFrase()">
+      "No solo es ahorrar — es construir la vida que quiero."
+    </div>
+    <div class="frase-hint">Toca para editar tu frase personal</div>
+  </div>
+
+  <div class="seccion" style="animation-delay:0.1s">
+    <div class="seccion-titulo">Moneda</div>
+    <div class="moneda-opts">
+      <div class="moneda-chip" data-cod="USD" data-label="Dólar estadounidense · USD" onclick="setMoneda(this)">🇺🇸 USD</div>
+      <div class="moneda-chip" data-cod="EUR" data-label="Euro · EUR"                 onclick="setMoneda(this)">🇪🇺 EUR</div>
+      <div class="moneda-chip" data-cod="COP" data-label="Peso colombiano · COP"      onclick="setMoneda(this)">🇨🇴 COP</div>
+      <div class="moneda-chip" data-cod="MXN" data-label="Peso mexicano · MXN"        onclick="setMoneda(this)">🇲🇽 MXN</div>
+      <div class="moneda-chip" data-cod="VES" data-label="Bolívar · VES"              onclick="setMoneda(this)">🇻🇪 VES</div>
+      <div class="moneda-chip" data-cod="DOP" data-label="Peso dominicano · DOP"      onclick="setMoneda(this)">🇩🇴 DOP</div>
+    </div>
+  </div>
+
+  <div class="seccion" style="animation-delay:0.2s">
+    <div class="seccion-titulo">¿Cómo quieres que te hable la app?</div>
+    <div class="tono-opciones">
+      <div class="tono-item" data-tono="Directo" onclick="setTono(this)">
+        <div class="tono-icon">⚡</div>
+        <div class="tono-info">
+          <div class="tono-nombre">Directo</div>
+          <div class="tono-ejemplo">"Este mes gastaste de más en comida."</div>
+        </div>
+        <div class="tono-check">✓</div>
+      </div>
+      <div class="tono-item" data-tono="Motivacional" onclick="setTono(this)">
+        <div class="tono-icon">🔥</div>
+        <div class="tono-info">
+          <div class="tono-nombre">Motivacional</div>
+          <div class="tono-ejemplo">"¡Vas bien! Puedes recortar un poco en comida."</div>
+        </div>
+        <div class="tono-check">✓</div>
+      </div>
+      <div class="tono-item" data-tono="Suave" onclick="setTono(this)">
+        <div class="tono-icon">🌿</div>
+        <div class="tono-info">
+          <div class="tono-nombre">Suave</div>
+          <div class="tono-ejemplo">"Quizás podrías revisar el gasto en comida."</div>
+        </div>
+        <div class="tono-check">✓</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="seccion" style="animation-delay:0.3s">
+    <div class="seccion-titulo">Color principal</div>
+    <div class="colores-wrap">
+      <div class="color-item" data-color="#b8f564" onclick="setColor(this)">
+        <div class="color-circulo" style="background:#b8f564"></div>
+        <div class="color-nombre">Verde</div>
+      </div>
+      <div class="color-item" data-color="#4fd1c5" onclick="setColor(this)">
+        <div class="color-circulo" style="background:#4fd1c5"></div>
+        <div class="color-nombre">Turquesa</div>
+      </div>
+      <div class="color-item" data-color="#f5c842" onclick="setColor(this)">
+        <div class="color-circulo" style="background:#f5c842"></div>
+        <div class="color-nombre">Dorado</div>
+      </div>
+      <div class="color-item" data-color="#ff8c61" onclick="setColor(this)">
+        <div class="color-circulo" style="background:#ff8c61"></div>
+        <div class="color-nombre">Naranja</div>
+      </div>
+      <div class="color-item" data-color="#b47aff" onclick="setColor(this)">
+        <div class="color-circulo" style="background:#b47aff"></div>
+        <div class="color-nombre">Morado</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="seccion" style="animation-delay:0.35s">
+    <div class="seccion-titulo">Mis categorías</div>
+    <div class="cats-wrap" id="cats-wrap"></div>
+    <button class="btn-add-cat" onclick="agregarCat()">+ Agregar categoría</button>
+  </div>
+
+  <div class="seccion" style="animation-delay:0.4s">
+    <div class="seccion-titulo">Notificaciones</div>
+    <div class="notif-item">
+      <div class="notif-left">
+        <div class="notif-icon">📌</div>
+        <div><div class="notif-nombre">Gastos fijos</div><div class="notif-desc">Aviso cuando se registra un gasto fijo</div></div>
+      </div>
+      <div class="switch on" onclick="this.classList.toggle('on')"></div>
+    </div>
+    <div class="notif-item">
+      <div class="notif-left">
+        <div class="notif-icon">🎯</div>
+        <div><div class="notif-nombre">Progreso de metas</div><div class="notif-desc">Resumen semanal de tus metas</div></div>
+      </div>
+      <div class="switch on" onclick="this.classList.toggle('on')"></div>
+    </div>
+    <div class="notif-item">
+      <div class="notif-left">
+        <div class="notif-icon">⚠️</div>
+        <div><div class="notif-nombre">Alertas de gasto</div><div class="notif-desc">Si una categoría sube mucho</div></div>
+      </div>
+      <div class="switch on" onclick="this.classList.toggle('on')"></div>
+    </div>
+    <div class="notif-item">
+      <div class="notif-left">
+        <div class="notif-icon">📊</div>
+        <div><div class="notif-nombre">Resumen mensual</div><div class="notif-desc">Cómo te fue al cerrar el mes</div></div>
+      </div>
+      <div class="switch" onclick="this.classList.toggle('on')"></div>
+    </div>
+  </div>
+
+  <button class="btn-guardar" onclick="guardar()">Guardar cambios</button>
+
+  <div class="spacer"></div>
+</div>
+
+<!-- NAVBAR: 5 ítems, todos con onclick, Perfil activo -->
+<nav class="navbar">
+  <div class="nav-item" onclick="location.href='index.html'">
+    <span class="nav-icon">🏠</span>
+    <span class="nav-label">Inicio</span>
+  </div>
+  <div class="nav-item" onclick="location.href='mifinanza-movimientos.html'">
+    <span class="nav-icon">📋</span>
+    <span class="nav-label">Movimientos</span>
+  </div>
+  <div class="nav-item" onclick="location.href='mifinanza-estadisticas-v2.html'">
+    <span class="nav-icon">📊</span>
+    <span class="nav-label">Estadísticas</span>
+  </div>
+  <div class="nav-item" onclick="location.href='mifinanza-metas.html'">
+    <span class="nav-icon">🎯</span>
+    <span class="nav-label">Metas</span>
+  </div>
+  <div class="nav-item active">
+    <span class="nav-icon">👤</span>
+    <span class="nav-label">Perfil</span>
+    <div class="nav-dot"></div>
+  </div>
+</nav>
+
+<div class="modal-overlay" id="modal-frase">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Tu frase personal</div>
+    <div class="modal-sub">Aparece en tu dashboard cada vez que abres la app</div>
+    <textarea id="frase-input" placeholder="Escribe algo que te motive..."></textarea>
+    <div class="frases-ejemplo">
+      <p>O elige una:</p>
+      <div class="frase-sugerida" onclick="usarFrase(this)">"El dinero es una herramienta. Yo decido cómo usarla."</div>
+      <div class="frase-sugerida" onclick="usarFrase(this)">"Cada dólar que ahorro hoy es libertad mañana."</div>
+      <div class="frase-sugerida" onclick="usarFrase(this)">"Ahorrar y disfrutar no son opuestos."</div>
+      <div class="frase-sugerida" onclick="usarFrase(this)">"Pequeños pasos, grandes resultados."</div>
+    </div>
+    <button class="btn-ok" onclick="guardarFrase()">Guardar frase</button>
+    <button class="btn-cancelar" onclick="cerrarFrase()">Cancelar</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+  const SUPABASE_URL = 'https://gapeweomesgawnodarsp.supabase.co'
+  const SUPABASE_KEY = 'sb_publishable_u7ug3SBOsuz2zb56gqBLjw_aLJ0Vvp8'
+  const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY)
+
+  let colorActual = '#b8f564'
+
+  function toast(msg, tipo = 'ok') {
+    const t = document.getElementById('toast')
+    t.textContent = msg
+    t.className = `toast ${tipo} show`
+    setTimeout(() => { t.className = 'toast' }, 2500)
+  }
+
+  async function cargarPerfil() {
+    const { data, error } = await db.from('perfil').select('*').eq('id', 1).single()
+    if (error || !data) return
+
+    document.getElementById('hero-nombre').textContent  = data.nombre || 'Carlos'
+    document.getElementById('avatar-letra').textContent = (data.nombre || 'C')[0].toUpperCase()
+
+    if (data.frase) document.getElementById('frase-display').textContent = data.frase
+
+    if (data.moneda) {
+      document.querySelectorAll('.moneda-chip').forEach(c => {
+        c.classList.toggle('active', c.dataset.cod === data.moneda)
+      })
+      const chip = document.querySelector(`.moneda-chip[data-cod="${data.moneda}"]`)
+      if (chip) document.getElementById('hero-moneda').textContent = chip.dataset.label
+    }
+
+    if (data.tono) {
+      document.querySelectorAll('.tono-item').forEach(t => {
+        t.classList.toggle('active', t.dataset.tono === data.tono)
+      })
+    }
+
+    if (data.color) {
+      colorActual = data.color
+      document.documentElement.style.setProperty('--accent', data.color)
+      document.querySelectorAll('.color-item').forEach(c => {
+        c.classList.toggle('active', c.dataset.color === data.color)
+      })
+    }
+
+    if (data.categorias) {
+      renderCats(data.categorias.split(',').map(c => c.trim()).filter(Boolean))
+    }
+  }
+
+  const iconsCat = {
+    'Comida':'🍔','Alquiler':'🏠','Remesas':'🌍','Tecnología':'💻',
+    'Gym':'🏋️','Línea':'📱','Salud':'❤️','Antojos':'🍩',
+    'Transporte':'🚗','Ocio':'🎬','Ropa':'👕'
+  }
+
+  function renderCats(lista) {
+    const wrap = document.getElementById('cats-wrap')
+    wrap.innerHTML = ''
+    lista.forEach(cat => {
+      const icon = iconsCat[cat] || '📦'
+      const tag  = document.createElement('div')
+      tag.className = 'cat-tag'
+      tag.innerHTML = `${icon} ${cat} <span class="remove" onclick="removeCat(this)">×</span>`
+      wrap.appendChild(tag)
+    })
+  }
+
+  function getCats() {
+    return [...document.querySelectorAll('.cat-tag')].map(t => t.textContent.replace('×','').trim())
+  }
+
+  function removeCat(el) { el.closest('.cat-tag').remove() }
+
+  function agregarCat() {
+    const emoji  = prompt('Emoji de la categoría (ej: 🚗):') || '📦'
+    const nombre = prompt('Nombre de la categoría:')
+    if (!nombre) return
+    const wrap = document.getElementById('cats-wrap')
+    const tag  = document.createElement('div')
+    tag.className = 'cat-tag'
+    tag.innerHTML = `${emoji} ${nombre} <span class="remove" onclick="removeCat(this)">×</span>`
+    wrap.appendChild(tag)
+  }
+
+  function setTono(el) {
+    document.querySelectorAll('.tono-item').forEach(t => t.classList.remove('active'))
+    el.classList.add('active')
+  }
+
+  function setColor(el) {
+    document.querySelectorAll('.color-item').forEach(c => c.classList.remove('active'))
+    el.classList.add('active')
+    colorActual = el.dataset.color
+    document.documentElement.style.setProperty('--accent', colorActual)
+  }
+
+  function setMoneda(el) {
+    document.querySelectorAll('.moneda-chip').forEach(c => c.classList.remove('active'))
+    el.classList.add('active')
+    document.getElementById('hero-moneda').textContent = el.dataset.label
+  }
+
+  function abrirFrase()  { document.getElementById('modal-frase').classList.add('visible') }
+  function cerrarFrase() { document.getElementById('modal-frase').classList.remove('visible') }
+
+  function usarFrase(el) { document.getElementById('frase-input').value = el.textContent }
+
+  function guardarFrase() {
+    const f = document.getElementById('frase-input').value.trim()
+    if (f) document.getElementById('frase-display').textContent = f
+    cerrarFrase()
+  }
+
+  document.getElementById('modal-frase').addEventListener('click', function(e) {
+    if (e.target === this) cerrarFrase()
+  })
+
+  async function guardar() {
+    const nombre  = document.getElementById('hero-nombre').textContent.trim()
+    const frase   = document.getElementById('frase-display').textContent.trim()
+    const moneda  = document.querySelector('.moneda-chip.active')?.dataset.cod  || 'USD'
+    const tono    = document.querySelector('.tono-item.active')?.dataset.tono   || 'Directo'
+    const color   = colorActual
+    const cats    = getCats().join(',')
+
+    const btn = document.querySelector('.btn-guardar')
+    btn.disabled = true
+    btn.textContent = 'Guardando...'
+
+    const { error } = await db.from('perfil').update({
+      nombre, frase, moneda, tono, color, categorias: cats
+    }).eq('id', 1)
+
+    btn.disabled = false
+    btn.textContent = 'Guardar cambios'
+
+    if (error) { toast('Error al guardar', 'err'); return }
+    toast('Perfil guardado ✓')
+  }
+
+  cargarPerfil()
+</script>
+</body>
+</html>

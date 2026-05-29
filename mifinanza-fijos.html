@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MiFinanza – Gastos Fijos</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0f0f13;
+    --card: #17171d;
+    --card2: #1e1e27;
+    --accent: #b8f564;
+    --accent2: #4fd1c5;
+    --danger: #ff6b6b;
+    --text: #f0f0f5;
+    --subtext: #8888a0;
+    --border: rgba(255,255,255,0.06);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; min-height: 100vh; display: flex; justify-content: center; }
+  .phone { width: 390px; min-height: 100vh; background: var(--bg); }
+  .header { padding: 52px 24px 20px; animation: fadeUp 0.4s ease both; }
+  .header-title { font-family: 'Syne', sans-serif; font-size: 24px; font-weight: 800; background: linear-gradient(90deg, #fff 30%, var(--accent)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+  .header-sub { font-size: 13px; color: var(--subtext); margin-top: 2px; }
+  .resumen { margin: 0 24px 20px; background: var(--card); border-radius: 20px; padding: 16px 20px; border: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; animation: fadeUp 0.4s 0.1s ease both; opacity: 0; }
+  .resumen-left label { font-size: 11px; color: var(--subtext); text-transform: uppercase; letter-spacing: 0.1em; display: block; margin-bottom: 4px; }
+  .resumen-total { font-family: 'Syne', sans-serif; font-size: 26px; font-weight: 800; color: var(--danger); }
+  .resumen-right { text-align: right; }
+  .resumen-right label { font-size: 11px; color: var(--subtext); text-transform: uppercase; letter-spacing: 0.1em; display: block; margin-bottom: 4px; }
+  .resumen-count { font-family: 'Syne', sans-serif; font-size: 26px; font-weight: 800; color: var(--accent2); }
+  .lista-wrap { padding: 0 24px; animation: fadeUp 0.4s 0.2s ease both; opacity: 0; }
+  .seccion-label { font-size: 11px; color: var(--subtext); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 10px; padding-left: 2px; }
+  .fijo-card { background: var(--card); border-radius: 18px; padding: 14px 16px; margin-bottom: 10px; border: 1px solid var(--border); transition: opacity 0.3s, border-color 0.3s; }
+  .fijo-card.inactivo { opacity: 0.45; border-color: transparent; }
+  .fijo-top { display: flex; align-items: center; gap: 12px; }
+  .fijo-icon { width: 42px; height: 42px; border-radius: 13px; background: var(--card2); display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
+  .fijo-info { flex: 1; }
+  .fijo-nombre { font-size: 15px; font-weight: 600; color: var(--text); }
+  .fijo-fecha { font-size: 12px; color: var(--subtext); margin-top: 2px; }
+  .fijo-right { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; }
+  .fijo-monto { font-family: 'Syne', sans-serif; font-size: 16px; font-weight: 700; color: var(--danger); }
+  .switch { width: 40px; height: 22px; background: var(--card2); border-radius: 100px; border: 1px solid var(--border); position: relative; cursor: pointer; transition: background 0.3s, border-color 0.3s; flex-shrink: 0; }
+  .switch.on { background: rgba(184,245,100,0.25); border-color: rgba(184,245,100,0.4); }
+  .switch::after { content: ''; position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; border-radius: 50%; background: var(--subtext); transition: transform 0.3s, background 0.3s; }
+  .switch.on::after { transform: translateX(18px); background: var(--accent); }
+  .fijo-acciones { display: flex; gap: 8px; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border); }
+  .btn-accion { flex: 1; background: var(--card2); border: none; border-radius: 10px; padding: 8px; font-size: 12px; color: var(--subtext); cursor: pointer; font-family: 'DM Sans', sans-serif; transition: background 0.2s, color 0.2s; }
+  .btn-accion:hover { background: rgba(255,255,255,0.08); color: var(--text); }
+  .btn-accion.danger:hover { background: rgba(255,107,107,0.1); color: var(--danger); }
+  .loading { text-align: center; color: var(--subtext); font-size: 14px; padding: 40px 0; }
+  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(6px); z-index: 200; display: none; align-items: flex-end; justify-content: center; }
+  .modal-overlay.visible { display: flex; }
+  .modal { width: 390px; background: var(--card); border-radius: 28px 28px 0 0; padding: 24px 24px 40px; border-top: 1px solid var(--border); animation: slideUp 0.3s ease; }
+  @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+  .modal-handle { width: 40px; height: 4px; background: var(--border); border-radius: 100px; margin: 0 auto 20px; }
+  .modal-title { font-family: 'Syne', sans-serif; font-size: 18px; font-weight: 700; color: var(--text); margin-bottom: 20px; }
+  .inp { width:100%;background:#1e1e27;border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:12px 14px;color:#f0f0f5;font-family:'DM Sans',sans-serif;font-size:15px;outline:none; }
+  .lbl { font-size:11px;color:#8888a0;text-transform:uppercase;letter-spacing:0.08em;display:block;margin-bottom:6px; }
+  .fld { margin-bottom:14px; }
+  .btn-ok { width:100%;background:var(--accent);color:#0f0f13;border:none;border-radius:14px;padding:15px;font-family:'Syne',sans-serif;font-size:15px;font-weight:700;cursor:pointer;margin-top:6px; }
+  .btn-no { width:100%;background:none;border:none;color:var(--subtext);font-size:14px;cursor:pointer;padding:12px;font-family:'DM Sans',sans-serif; }
+
+  /* FAB: centro, flotando sobre la navbar */
+  .fab {
+    position: fixed;
+   bottom: 90px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--accent);
+    color: #0f0f13;
+    width: 58px;
+    height: 58px;
+    border-radius: 50%;
+    border: none;
+    font-size: 28px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 8px 32px rgba(184,245,100,0.4);
+    transition: transform 0.2s, box-shadow 0.2s;
+    z-index: 100;
+  }
+  .fab:hover { transform: translateX(-50%) scale(1.08); box-shadow: 0 12px 40px rgba(184,245,100,0.55); }
+
+  /* NAVBAR */
+  .navbar { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 390px; background: rgba(15,15,19,0.96); backdrop-filter: blur(20px); border-top: 1px solid var(--border); padding: 10px 0 22px; display: flex; justify-content: space-around; align-items: center; z-index: 99; }
+  .nav-item { display: flex; flex-direction: column; align-items: center; gap: 3px; cursor: pointer; opacity: 0.4; transition: opacity 0.2s; flex: 1; }
+  .nav-item.active { opacity: 1; }
+  .nav-icon { font-size: 20px; }
+  .nav-label { font-size: 10px; color: var(--subtext); letter-spacing: 0.04em; }
+  .nav-item.active .nav-label { color: var(--accent); }
+  .nav-dot { width: 4px; height: 4px; border-radius: 50%; background: var(--accent); }
+
+  .spacer { height: 130px; }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+</style>
+</head>
+<body>
+<div class="phone">
+  <div class="header">
+    <div class="header-title">Gastos Fijos</div>
+    <div class="header-sub">Lo que sale cada mes automáticamente</div>
+  </div>
+
+  <div class="resumen">
+    <div class="resumen-left">
+      <label>Total mensual</label>
+      <div class="resumen-total" id="total-mensual">$0</div>
+    </div>
+    <div class="resumen-right">
+      <label>Activos</label>
+      <div class="resumen-count" id="total-activos">0</div>
+    </div>
+  </div>
+
+  <div class="lista-wrap">
+    <div class="seccion-label">Este mes</div>
+    <div id="lista-fijos"><div class="loading">Cargando...</div></div>
+  </div>
+
+  <div class="spacer"></div>
+</div>
+
+<!-- FAB flotante en el centro -->
+<button class="fab" onclick="abrirModal()">+</button>
+
+<!-- NAVBAR: 5 ítems, todos con onclick -->
+<nav class="navbar">
+  <div class="nav-item" onclick="location.href='index.html'">
+    <span class="nav-icon">🏠</span>
+    <span class="nav-label">Inicio</span>
+  </div>
+  <div class="nav-item" onclick="location.href='mifinanza-movimientos.html'">
+    <span class="nav-icon">📋</span>
+    <span class="nav-label">Movimientos</span>
+  </div>
+  <div class="nav-item" onclick="location.href='mifinanza-estadisticas-v2.html'">
+    <span class="nav-icon">📊</span>
+    <span class="nav-label">Estadísticas</span>
+  </div>
+  <div class="nav-item" onclick="location.href='mifinanza-metas.html'">
+    <span class="nav-icon">🎯</span>
+    <span class="nav-label">Metas</span>
+  </div>
+  <div class="nav-item" onclick="location.href='mifinanza-perfil.html'">
+    <span class="nav-icon">👤</span>
+    <span class="nav-label">Perfil</span>
+  </div>
+</nav>
+
+<!-- Modal nuevo gasto fijo -->
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Nuevo gasto fijo</div>
+    <div class="fld"><label class="lbl">Nombre</label><input type="text" id="f-nombre" class="inp" placeholder="Ej: Netflix, Alquiler..."></div>
+    <div class="fld"><label class="lbl">Categoría</label>
+      <select id="f-categoria" class="inp">
+        <option>🏠 Alquiler</option><option>📱 Línea</option><option>🌍 Remesas</option>
+        <option>💻 Tecnología</option><option>🏋️ Gym</option><option>❤️ Salud</option>
+        <option>💳 Crédito</option><option>📦 Otros</option>
+      </select>
+    </div>
+    <div class="fld"><label class="lbl">Monto</label><input type="number" id="f-monto" class="inp" placeholder="$0.00"></div>
+    <div class="fld"><label class="lbl">Fecha de inicio</label><input type="date" id="f-fecha" class="inp"></div>
+    <button class="btn-ok" onclick="guardarFijo()">Guardar</button>
+    <button class="btn-no" onclick="cerrarModal()">Cancelar</button>
+  </div>
+</div>
+
+<!-- Modal desactivar gasto fijo -->
+<div class="modal-overlay" id="modal-desactivar">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">¿Desactivar gasto fijo?</div>
+    <p style="font-size:14px;color:var(--subtext);margin-bottom:18px;">Vas a desactivar <strong id="nombre-fijo-confirm" style="color:var(--text)"></strong>. El historial anterior quedará guardado.</p>
+    <div class="fld">
+      <label class="lbl">¿Hasta qué fecha estuvo activo?</label>
+      <input type="date" id="fecha-fin-input" class="inp">
+    </div>
+    <button class="btn-ok" onclick="confirmarDesactivar()">Confirmar</button>
+    <button class="btn-no" onclick="cancelarDesactivar()">Cancelar</button>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+  const SUPABASE_URL = 'https://gapeweomesgawnodarsp.supabase.co'
+  const SUPABASE_KEY = 'sb_publishable_u7ug3SBOsuz2zb56gqBLjw_aLJ0Vvp8'
+  const dbClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY)
+
+  let fijos = [];
+
+  async function cargarFijos() {
+    const { data, error } = await dbClient.from('gastos_fijos').select('*').order('created_at');
+    if (error) { console.error(error); return; }
+    fijos = data;
+    renderFijos();
+  }
+
+  function renderFijos() {
+    const lista = document.getElementById('lista-fijos');
+    lista.innerHTML = '';
+
+    const ordenados = [...fijos].sort((a, b) => b.activo - a.activo);
+
+    if (ordenados.length === 0) {
+      lista.innerHTML = '<div class="loading">No hay gastos fijos aún</div>';
+    }
+
+    ordenados.forEach(f => {
+      const iconos = { 'Alquiler':'🏠','Línea':'📱','Remesas':'🌍','Tecnología':'💻','Gym':'🏋️','Salud':'❤️','Crédito':'💳','Otros':'📦' };
+      const catNombre = f.categoria ? f.categoria.replace(/[^\w\s]/g, '').trim() : 'Otros';
+      const icon = iconos[catNombre] || '📦';
+
+      const div = document.createElement('div');
+      div.className = 'fijo-card' + (f.activo ? '' : ' inactivo');
+      div.innerHTML = `
+        <div class="fijo-top">
+          <div class="fijo-icon">${icon}</div>
+          <div class="fijo-info">
+            <div class="fijo-nombre">${f.nombre}</div>
+            <div class="fijo-fecha">Desde ${f.fecha_inicio || '—'}</div>
+          </div>
+          <div class="fijo-right">
+            <div class="fijo-monto">$${f.monto}</div>
+            <div class="switch ${f.activo ? 'on' : ''}" onclick="toggleActivo('${f.id}')"></div>
+          </div>
+        </div>
+        <div class="fijo-acciones">
+          <button class="btn-accion" onclick="editarMonto('${f.id}', ${f.monto})">✏️ Editar monto</button>
+          <button class="btn-accion danger" onclick="eliminarFijo('${f.id}')">🗑 Eliminar</button>
+        </div>
+      `;
+      lista.appendChild(div);
+    });
+
+    const activos = fijos.filter(f => f.activo);
+    const total = activos.reduce((s, f) => s + parseFloat(f.monto), 0);
+    document.getElementById('total-mensual').textContent = '$' + total.toLocaleString();
+    document.getElementById('total-activos').textContent = activos.length;
+  }
+
+  async function toggleActivo(id) {
+    const f = fijos.find(f => f.id === id);
+    if (!f) return;
+
+    if (f.activo) {
+      const hoy = new Date().toISOString().split('T')[0];
+      document.getElementById('fecha-fin-input').value = hoy;
+      document.getElementById('nombre-fijo-confirm').textContent = f.nombre;
+      idFijoDesactivar = id;
+      document.getElementById('modal-desactivar').classList.add('visible');
+    } else {
+      const { error } = await dbClient.from('gastos_fijos')
+        .update({ activo: true, fecha_fin: null })
+        .eq('id', id);
+      if (error) { alert('Error: ' + error.message); return; }
+      f.activo = true;
+      f.fecha_fin = null;
+      renderFijos();
+    }
+  }
+
+  let idFijoDesactivar = null;
+
+  async function confirmarDesactivar() {
+    const fecha = document.getElementById('fecha-fin-input').value;
+    if (!fecha) { alert('Selecciona una fecha'); return; }
+    const { error } = await dbClient.from('gastos_fijos')
+      .update({ activo: false, fecha_fin: fecha })
+      .eq('id', idFijoDesactivar);
+    if (error) { alert('Error: ' + error.message); return; }
+    const f = fijos.find(f => f.id === idFijoDesactivar);
+    if (f) { f.activo = false; f.fecha_fin = fecha; }
+    document.getElementById('modal-desactivar').classList.remove('visible');
+    renderFijos();
+  }
+
+  function cancelarDesactivar() {
+    document.getElementById('modal-desactivar').classList.remove('visible');
+  }
+
+  async function editarMonto(id, montoActual) {
+    const nuevo = prompt('Nuevo monto:', montoActual);
+    if (!nuevo || isNaN(nuevo)) return;
+    const { error } = await dbClient.from('gastos_fijos').update({ monto: parseFloat(nuevo) }).eq('id', id);
+    if (error) { alert('Error: ' + error.message); return; }
+    const f = fijos.find(f => f.id === id);
+    if (f) f.monto = parseFloat(nuevo);
+    renderFijos();
+  }
+
+  async function eliminarFijo(id) {
+    if (!confirm('¿Eliminar este gasto fijo? El historial quedará guardado.')) return;
+    const { error } = await dbClient.from('gastos_fijos').delete().eq('id', id);
+    if (error) { alert('Error: ' + error.message); return; }
+    fijos = fijos.filter(f => f.id !== id);
+    renderFijos();
+  }
+
+  function abrirModal() { document.getElementById('modal').classList.add('visible'); }
+  function cerrarModal() { document.getElementById('modal').classList.remove('visible'); }
+
+  async function guardarFijo() {
+    const nombre    = document.getElementById('f-nombre').value.trim();
+    const categoria = document.getElementById('f-categoria').value;
+    const monto     = parseFloat(document.getElementById('f-monto').value);
+    const fecha     = document.getElementById('f-fecha').value;
+    if (!nombre || isNaN(monto) || !fecha) { alert('Completa todos los campos'); return; }
+    const dia = new Date(fecha).getDate();
+    const { data, error } = await dbClient.from('gastos_fijos').insert([{ nombre, categoria, monto, dia_del_mes: dia, activo: true, fecha_inicio: fecha }]).select();
+    if (error) { alert('Error: ' + error.message); return; }
+    fijos.push(data[0]);
+    cerrarModal();
+    renderFijos();
+  }
+
+  document.getElementById('modal').addEventListener('click', function(e) {
+    if (e.target === this) cerrarModal();
+  });
+
+  cargarFijos();
+</script>
+</body>
+</html>
