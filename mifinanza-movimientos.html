@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MiFinanza – Movimientos</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0f0f13;
+    --card: #17171d;
+    --card2: #1e1e27;
+    --accent: #b8f564;
+    --accent2: #4fd1c5;
+    --danger: #ff6b6b;
+    --text: #f0f0f5;
+    --subtext: #8888a0;
+    --border: rgba(255,255,255,0.06);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; min-height: 100vh; display: flex; justify-content: center; }
+  .phone { width: 390px; min-height: 100vh; background: var(--bg); }
+  .header { padding: 52px 24px 16px; animation: fadeUp 0.4s ease both; }
+  .header-title { font-family: 'Syne', sans-serif; font-size: 24px; font-weight: 800; background: linear-gradient(90deg, #fff 30%, var(--accent)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+  .header-sub { font-size: 13px; color: var(--subtext); margin-top: 2px; }
+  .mes-selector { margin: 0 24px 16px; display: flex; align-items: center; justify-content: space-between; background: var(--card); border-radius: 16px; padding: 12px 16px; border: 1px solid var(--border); animation: fadeUp 0.4s 0.1s ease both; opacity: 0; }
+  .mes-btn { background: none; border: none; color: var(--subtext); font-size: 20px; cursor: pointer; padding: 4px 8px; border-radius: 8px; transition: background 0.2s, color 0.2s; }
+  .mes-btn:hover { background: var(--card2); color: var(--text); }
+  .mes-actual { font-family: 'Syne', sans-serif; font-size: 16px; font-weight: 700; color: var(--accent2); letter-spacing: 0.06em; }
+  .resumen-row { margin: 0 24px 16px; display: flex; gap: 10px; animation: fadeUp 0.4s 0.15s ease both; opacity: 0; }
+  .res-item { flex: 1; background: var(--card); border-radius: 14px; padding: 12px 14px; border: 1px solid var(--border); }
+  .res-label { font-size: 10px; color: var(--subtext); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 4px; display: flex; align-items: center; gap: 5px; }
+  .dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+  .dot-green { background: var(--accent); } .dot-red { background: var(--danger); }
+  .res-value { font-family: 'Syne', sans-serif; font-size: 16px; font-weight: 700; }
+  .val-green { color: var(--accent); } .val-red { color: var(--danger); }
+  .filtro-wrap { margin: 0 24px 16px; animation: fadeUp 0.4s 0.2s ease both; opacity: 0; }
+  .filtro-scroll { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; }
+  .filtro-scroll::-webkit-scrollbar { display: none; }
+  .filtro-chip { background: var(--card); border: 1px solid var(--border); border-radius: 100px; padding: 6px 14px; font-size: 12px; color: var(--subtext); cursor: pointer; white-space: nowrap; transition: all 0.2s; flex-shrink: 0; }
+  .filtro-chip.active { background: rgba(184,245,100,0.12); border-color: rgba(184,245,100,0.3); color: var(--accent); font-weight: 600; }
+  .lista-wrap { padding: 0 24px; animation: fadeUp 0.4s 0.25s ease both; opacity: 0; }
+  .dia-grupo { margin-bottom: 20px; }
+  .dia-label { font-size: 11px; color: var(--subtext); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 8px; padding-left: 2px; }
+  .movimiento { background: var(--card); border-radius: 16px; padding: 13px 16px; display: flex; align-items: center; gap: 12px; margin-bottom: 8px; border: 1px solid var(--border); cursor: pointer; transition: transform 0.15s; }
+  .movimiento:hover { transform: translateX(3px); }
+  .mov-icon { width: 40px; height: 40px; border-radius: 13px; background: var(--card2); display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+  .mov-info { flex: 1; min-width: 0; }
+  .mov-desc { font-size: 14px; color: var(--text); font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .mov-cat { font-size: 11px; color: var(--subtext); margin-top: 2px; }
+  .mov-right { text-align: right; flex-shrink: 0; }
+  .mov-amount { font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 700; }
+  .amount-gasto { color: var(--danger); } .amount-ingreso { color: var(--accent); }
+  .mov-hora { font-size: 11px; color: var(--subtext); margin-top: 2px; }
+  .loading { text-align: center; color: var(--subtext); font-size: 14px; padding: 40px 0; }
+
+  .fab {
+    position: fixed;
+    bottom: 90px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--accent);
+    color: #0f0f13;
+    width: 58px;
+    height: 58px;
+    border-radius: 50%;
+    border: none;
+    font-size: 28px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 8px 32px rgba(184,245,100,0.4);
+    transition: transform 0.2s, box-shadow 0.2s;
+    z-index: 100;
+  }
+  .fab:hover { transform: translateX(-50%) scale(1.08); box-shadow: 0 12px 40px rgba(184,245,100,0.55); }
+
+  .navbar { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 390px; background: rgba(15,15,19,0.96); backdrop-filter: blur(20px); border-top: 1px solid var(--border); padding: 10px 0 22px; display: flex; justify-content: space-around; align-items: center; z-index: 99; }
+  .nav-item { display: flex; flex-direction: column; align-items: center; gap: 3px; cursor: pointer; opacity: 0.4; transition: opacity 0.2s; flex: 1; }
+  .nav-item.active { opacity: 1; }
+  .nav-icon { font-size: 20px; }
+  .nav-label { font-size: 10px; color: var(--subtext); letter-spacing: 0.04em; }
+  .nav-item.active .nav-label { color: var(--accent); }
+  .nav-dot { width: 4px; height: 4px; border-radius: 50%; background: var(--accent); }
+
+  .spacer { height: 130px; }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+
+  .inp { width:100%;background:#1e1e27;border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:12px 14px;color:#f0f0f5;font-family:'DM Sans',sans-serif;font-size:15px;outline:none; }
+  .lbl { font-size:11px;color:#8888a0;text-transform:uppercase;letter-spacing:0.08em;display:block;margin-bottom:6px; }
+  .fld { margin-bottom:12px; }
+  .modal-base { position:fixed;inset:0;background:rgba(0,0,0,0.7);backdrop-filter:blur(6px);z-index:200;display:none;align-items:flex-end;justify-content:center; }
+  .modal-box { width:390px;background:#17171d;border-radius:28px 28px 0 0;padding:24px 24px 40px;border-top:1px solid rgba(255,255,255,0.06); }
+  .modal-handle { width:40px;height:4px;background:rgba(255,255,255,0.06);border-radius:100px;margin:0 auto 20px; }
+  .modal-title { font-family:'Syne',sans-serif;font-size:18px;font-weight:700;color:#f0f0f5;margin-bottom:18px; }
+  .btn-ok { width:100%;border:none;border-radius:14px;padding:15px;font-family:'Syne',sans-serif;font-size:15px;font-weight:700;cursor:pointer;margin-bottom:8px; }
+  .btn-no { width:100%;background:none;border:none;color:#8888a0;font-size:14px;cursor:pointer;padding:10px;font-family:'DM Sans',sans-serif; }
+</style>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#b8f564">
+</head>
+<body>
+<div class="phone">
+  <div class="header">
+    <div class="header-title">Movimientos</div>
+    <div class="header-sub" id="mes-subtitle">Cargando...</div>
+  </div>
+
+  <div class="mes-selector">
+    <button class="mes-btn" onclick="cambiarMes(-1)">‹</button>
+    <span class="mes-actual" id="mes-label">—</span>
+    <button class="mes-btn" onclick="cambiarMes(1)">›</button>
+  </div>
+
+  <div class="resumen-row">
+    <div class="res-item">
+      <div class="res-label"><span class="dot dot-green"></span>Ingresos</div>
+      <div class="res-value val-green" id="total-ingresos">$0</div>
+    </div>
+    <div class="res-item">
+      <div class="res-label"><span class="dot dot-red"></span>Gastos</div>
+      <div class="res-value val-red" id="total-gastos">$0</div>
+    </div>
+  </div>
+
+  <div class="filtro-wrap">
+    <div class="filtro-scroll" id="filtros">
+      <div class="filtro-chip active" onclick="filtrar(this, 'todas')">Todas</div>
+      <div class="filtro-chip" onclick="filtrar(this, 'ingresos')">💰 Ingresos</div>
+      <div class="filtro-chip" onclick="filtrar(this, '🍔 Comida')">🍔 Comida</div>
+      <div class="filtro-chip" onclick="filtrar(this, '🏠 Alquiler')">🏠 Alquiler</div>
+      <div class="filtro-chip" onclick="filtrar(this, '🌍 Remesas')">🌍 Remesas</div>
+      <div class="filtro-chip" onclick="filtrar(this, '💻 Tecnología')">💻 Tecnología</div>
+      <div class="filtro-chip" onclick="filtrar(this, '🏋️ Gym')">🏋️ Gym</div>
+      <div class="filtro-chip" onclick="filtrar(this, '❤️ Salud')">❤️ Salud</div>
+      <div class="filtro-chip" onclick="filtrar(this, '📦 Otros')">📦 Otros</div>
+    </div>
+  </div>
+
+  <div class="lista-wrap" id="lista">
+    <div class="loading">Cargando movimientos...</div>
+  </div>
+
+  <div class="spacer"></div>
+</div>
+
+<button class="fab" onclick="abrirMenu()">+</button>
+
+<nav class="navbar">
+  <div class="nav-item" onclick="location.href='index.html'">
+    <span class="nav-icon">🏠</span>
+    <span class="nav-label">Inicio</span>
+  </div>
+  <div class="nav-item active" onclick="location.href='mifinanza-movimientos.html'">
+    <span class="nav-icon">📋</span>
+    <span class="nav-label">Movimientos</span>
+    <div class="nav-dot"></div>
+  </div>
+  <div class="nav-item" onclick="location.href='mifinanza-estadisticas-v2.html'">
+    <span class="nav-icon">📊</span>
+    <span class="nav-label">Estadísticas</span>
+  </div>
+  <div class="nav-item" onclick="location.href='mifinanza-metas.html'">
+    <span class="nav-icon">🎯</span>
+    <span class="nav-label">Metas</span>
+  </div>
+  <div class="nav-item" onclick="location.href='mifinanza-perfil.html'">
+    <span class="nav-icon">👤</span>
+    <span class="nav-label">Perfil</span>
+  </div>
+</nav>
+
+<div class="modal-base" id="menu-fab">
+  <div class="modal-box">
+    <div class="modal-handle"></div>
+    <button onclick="abrirGasto()" style="width:100%;background:#1e1e27;border:1px solid rgba(255,255,255,0.06);border-radius:14px;padding:16px;color:#f0f0f5;font-family:'DM Sans',sans-serif;font-size:15px;cursor:pointer;margin-bottom:10px;text-align:left;">💸 Registrar gasto</button>
+    <button onclick="abrirIngreso()" style="width:100%;background:#1e1e27;border:1px solid rgba(255,255,255,0.06);border-radius:14px;padding:16px;color:#f0f0f5;font-family:'DM Sans',sans-serif;font-size:15px;cursor:pointer;margin-bottom:10px;text-align:left;">💰 Registrar ingreso</button>
+    <button onclick="abrirGastoFijo()" style="width:100%;background:#1e1e27;border:1px solid rgba(255,255,255,0.06);border-radius:14px;padding:16px;color:#f0f0f5;font-family:'DM Sans',sans-serif;font-size:15px;cursor:pointer;margin-bottom:10px;text-align:left;">📌 Gasto fijo</button>
+    <button onclick="cerrarMenu()" class="btn-no">Cancelar</button>
+  </div>
+</div>
+
+<div class="modal-base" id="modal-gasto">
+  <div class="modal-box">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Nuevo gasto</div>
+    <div class="fld"><label class="lbl">Fecha</label><input type="date" id="g-fecha" class="inp"></div>
+    <div class="fld"><label class="lbl">Descripción</label><input type="text" id="g-descripcion" class="inp" placeholder="Ej: Almuerzo, Gasolina..."></div>
+    <div class="fld"><label class="lbl">Categoría</label>
+      <select id="g-categoria" class="inp">
+        <option>🍔 Comida</option><option>🏠 Alquiler</option><option>🌍 Remesas</option>
+        <option>💻 Tecnología</option><option>🏋️ Gym</option><option>📱 Línea</option>
+        <option>❤️ Salud</option><option>🍩 Antojos</option><option>⛽ Gasolina</option>
+        <option>👕 Ropa</option><option>📦 Otros</option>
+      </select>
+    </div>
+    <div class="fld" style="margin-bottom:18px"><label class="lbl">Monto</label><input type="number" id="g-monto" class="inp" placeholder="$0.00"></div>
+    <button onclick="guardarGasto()" class="btn-ok" style="background:#b8f564;color:#0f0f13">Guardar gasto</button>
+    <button onclick="cerrarGasto()" class="btn-no">Cancelar</button>
+  </div>
+</div>
+
+<div class="modal-base" id="modal-ingreso">
+  <div class="modal-box">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Nuevo ingreso</div>
+    <div class="fld"><label class="lbl">Fecha</label><input type="date" id="i-fecha" class="inp"></div>
+    <div class="fld"><label class="lbl">Concepto</label><input type="text" id="i-concepto" class="inp" placeholder="Ej: Nómina, Freelance..."></div>
+    <div class="fld"><label class="lbl">Tipo</label>
+      <select id="i-tipo" class="inp">
+        <option>💼 Nómina</option><option>💵 Efectivo</option><option>⭐ Extra</option><option>📦 Otro</option>
+      </select>
+    </div>
+    <div class="fld" style="margin-bottom:18px"><label class="lbl">Monto</label><input type="number" id="i-monto" class="inp" placeholder="$0.00"></div>
+    <button onclick="guardarIngreso()" class="btn-ok" style="background:#4fd1c5;color:#0f0f13">Guardar ingreso</button>
+    <button onclick="cerrarIngreso()" class="btn-no">Cancelar</button>
+  </div>
+</div>
+
+<div class="modal-base" id="modal-fijo">
+  <div class="modal-box">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Nuevo gasto fijo</div>
+    <div class="fld"><label class="lbl">Nombre</label><input type="text" id="f-nombre" class="inp" placeholder="Ej: Alquiler, Netflix..."></div>
+    <div class="fld"><label class="lbl">Categoría</label>
+      <select id="f-categoria" class="inp">
+        <option>🏠 Alquiler</option><option>📱 Línea</option><option>🌍 Remesas</option>
+        <option>💻 Tecnología</option><option>🏋️ Gym</option><option>❤️ Salud</option>
+        <option>💳 Crédito</option><option>📦 Otros</option>
+      </select>
+    </div>
+    <div class="fld"><label class="lbl">Monto</label><input type="number" id="f-monto" class="inp" placeholder="$0.00"></div>
+    <div class="fld" style="margin-bottom:18px"><label class="lbl">Fecha de inicio</label><input type="date" id="f-fecha" class="inp"></div>
+    <button onclick="guardarFijo()" class="btn-ok" style="background:#b8f564;color:#0f0f13">Guardar gasto fijo</button>
+    <button onclick="cerrarGastoFijo()" class="btn-no">Cancelar</button>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="auth.js"></script>
+<script>
+
+  const meses = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+  let mesActual = new Date().getMonth();
+  let anioActual = new Date().getFullYear();
+  let categoriaActiva = 'todas';
+  let todosMovimientos = [];
+
+  function actualizarMesLabel() {
+    document.getElementById('mes-label').textContent = meses[mesActual] + ' ' + anioActual;
+    document.getElementById('mes-subtitle').textContent = meses[mesActual] + ' ' + anioActual;
+  }
+
+  function cambiarMes(dir) {
+    mesActual += dir;
+    if (mesActual > 11) { mesActual = 0; anioActual++; }
+    if (mesActual < 0)  { mesActual = 11; anioActual--; }
+    actualizarMesLabel();
+    cargarMovimientos();
+  }
+
+  async function cargarMovimientos() {
+    document.getElementById('lista').innerHTML = '<div class="loading">Cargando...</div>';
+    const inicio = anioActual + '-' + String(mesActual + 1).padStart(2,'0') + '-01';
+    const fin = new Date(anioActual, mesActual + 1, 0).toISOString().split('T')[0];
+    const uid = window.currentUserId
+    const [{ data: gastos }, { data: ingresos }] = await Promise.all([
+      dbClient.from('gastos').select('*').eq('usuario_id', uid).gte('fecha', inicio).lte('fecha', fin).order('fecha', { ascending: false }),
+      dbClient.from('ingresos').select('*').eq('usuario_id', uid).gte('fecha', inicio).lte('fecha', fin).order('fecha', { ascending: false })
+    ]);
+    const movGastos   = (gastos   || []).map(g => ({ ...g, tipo: 'gasto' }));
+    const movIngresos = (ingresos || []).map(i => ({ ...i, tipo: 'ingreso', descripcion: i.concepto, categoria: i.tipo }));
+    todosMovimientos = [...movGastos, ...movIngresos].sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+    const totalIng = movIngresos.reduce((s, i) => s + parseFloat(i.monto), 0);
+    const totalGas = movGastos.reduce((s, g) => s + parseFloat(g.monto), 0);
+    document.getElementById('total-ingresos').textContent = '$' + totalIng.toLocaleString();
+    document.getElementById('total-gastos').textContent   = '$' + totalGas.toLocaleString();
+    renderLista();
+  }
+
+  function filtrar(el, cat) {
+    document.querySelectorAll('.filtro-chip').forEach(c => c.classList.remove('active'));
+    el.classList.add('active');
+    categoriaActiva = cat;
+    renderLista();
+  }
+
+  const iconsCat = { 'Comida':'🍔','Alquiler':'🏠','Remesas':'🌍','Tecnología':'💻','Gym':'🏋️','Salud':'❤️','Línea':'📱','Antojos':'🍩','Gasolina':'⛽','Ropa':'👕','Crédito':'💳','Otros':'📦' };
+
+  function getIcon(categoria) {
+    if (!categoria) return '📦';
+    for (const [key, icon] of Object.entries(iconsCat)) {
+      if (categoria.includes(key)) return icon;
+    }
+    return '📦';
+  }
+
+  function renderLista() {
+    const lista = document.getElementById('lista');
+    lista.innerHTML = '';
+    let filtrados = todosMovimientos;
+    if (categoriaActiva === 'ingresos') {
+      filtrados = todosMovimientos.filter(m => m.tipo === 'ingreso');
+    } else if (categoriaActiva !== 'todas') {
+      filtrados = todosMovimientos.filter(m => m.tipo === 'gasto' && m.categoria && m.categoria.includes(categoriaActiva.replace(/[^\w\s]/g,'').trim()));
+    }
+    if (filtrados.length === 0) {
+      lista.innerHTML = '<div class="loading">Sin movimientos este mes</div>';
+      return;
+    }
+    const grupos = {};
+    filtrados.forEach(m => {
+      if (!grupos[m.fecha]) grupos[m.fecha] = [];
+      grupos[m.fecha].push(m);
+    });
+    const hoy  = new Date().toISOString().split('T')[0];
+    const ayer = new Date(Date.now() - 86400000).toISOString().split('T')[0];
+    Object.entries(grupos).forEach(([fecha, items]) => {
+      const grupo = document.createElement('div');
+      grupo.className = 'dia-grupo';
+      const label = document.createElement('div');
+      label.className = 'dia-label';
+      const fechaObj = new Date(fecha + 'T00:00:00');
+      const dias = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
+      const mesesAbr = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+      label.textContent = fecha === hoy ? 'Hoy' : fecha === ayer ? 'Ayer' : dias[fechaObj.getDay()] + ', ' + fechaObj.getDate() + ' ' + mesesAbr[fechaObj.getMonth()];
+      grupo.appendChild(label);
+      items.forEach(m => {
+        const div = document.createElement('div');
+        div.className = 'movimiento';
+        const esIngreso = m.tipo === 'ingreso';
+        const icon = esIngreso ? '💰' : getIcon(m.categoria);
+        div.innerHTML = `
+          <div class="mov-icon">${icon}</div>
+          <div class="mov-info">
+            <div class="mov-desc">${m.descripcion || m.concepto}</div>
+            <div class="mov-cat">${m.categoria || ''}</div>
+          </div>
+          <div class="mov-right">
+            <div class="mov-amount ${esIngreso ? 'amount-ingreso' : 'amount-gasto'}">
+              ${esIngreso ? '+' : '-'}$${parseFloat(m.monto).toLocaleString()}
+            </div>
+            <div class="mov-hora">${fecha}</div>
+          </div>
+        `;
+        grupo.appendChild(div);
+      });
+      lista.appendChild(grupo);
+    });
+  }
+
+  const hoy = new Date().toISOString().split('T')[0];
+
+  function abrirMenu()       { document.getElementById('menu-fab').style.display = 'flex' }
+  function cerrarMenu()      { document.getElementById('menu-fab').style.display = 'none' }
+  function abrirGasto()      { cerrarMenu(); document.getElementById('g-fecha').value = hoy; document.getElementById('modal-gasto').style.display = 'flex' }
+  function cerrarGasto()     { document.getElementById('modal-gasto').style.display = 'none' }
+  function abrirIngreso()    { cerrarMenu(); document.getElementById('i-fecha').value = hoy; document.getElementById('modal-ingreso').style.display = 'flex' }
+  function cerrarIngreso()   { document.getElementById('modal-ingreso').style.display = 'none' }
+  function abrirGastoFijo()  { cerrarMenu(); document.getElementById('modal-fijo').style.display = 'flex' }
+  function cerrarGastoFijo() { document.getElementById('modal-fijo').style.display = 'none' }
+
+  async function guardarGasto() {
+    const fecha       = document.getElementById('g-fecha').value
+    const descripcion = document.getElementById('g-descripcion').value.trim()
+    const categoria   = document.getElementById('g-categoria').value
+    const monto       = parseFloat(document.getElementById('g-monto').value)
+    if (!descripcion || isNaN(monto)) { alert('Completa descripción y monto'); return }
+    const { error } = await dbClient.from('gastos').insert([{ fecha, descripcion, categoria, monto, usuario_id: window.currentUserId }])
+    if (error) { alert('Error: ' + error.message) }
+    else { alert('✅ Gasto guardado'); cerrarGasto(); cargarMovimientos() }
+  }
+
+  async function guardarIngreso() {
+    const fecha    = document.getElementById('i-fecha').value
+    const concepto = document.getElementById('i-concepto').value.trim()
+    const tipo     = document.getElementById('i-tipo').value
+    const monto    = parseFloat(document.getElementById('i-monto').value)
+    if (!concepto || isNaN(monto)) { alert('Completa concepto y monto'); return }
+    const { error } = await dbClient.from('ingresos').insert([{ fecha, concepto, tipo, monto, usuario_id: window.currentUserId }])
+    if (error) { alert('Error: ' + error.message) }
+    else { alert('✅ Ingreso guardado'); cerrarIngreso(); cargarMovimientos() }
+  }
+
+  async function guardarFijo() {
+    const nombre    = document.getElementById('f-nombre').value.trim()
+    const categoria = document.getElementById('f-categoria').value
+    const monto     = parseFloat(document.getElementById('f-monto').value)
+    const fecha     = document.getElementById('f-fecha').value
+    if (!nombre || isNaN(monto) || !fecha) { alert('Completa todos los campos'); return }
+    const dia = new Date(fecha).getDate()
+    const { error } = await dbClient.from('gastos_fijos').insert([{ nombre, categoria, monto, dia_del_mes: dia, activo: true, fecha_inicio: fecha, usuario_id: window.currentUserId }])
+    if (error) { alert('Error: ' + error.message) }
+    else { alert('✅ Gasto fijo guardado'); cerrarGastoFijo(); cargarMovimientos() }
+  }
+
+  actualizarMesLabel();
+  document.addEventListener('auth-ready', cargarMovimientos);
+</script>
+</body>
+</html>

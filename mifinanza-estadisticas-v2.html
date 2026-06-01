@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MiFinanza – Estadísticas</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0f0f13; --card: #17171d; --card2: #1e1e27;
+    --accent: #b8f564; --accent2: #4fd1c5; --danger: #ff6b6b;
+    --gold: #f5c842; --text: #f0f0f5; --subtext: #8888a0;
+    --border: rgba(255,255,255,0.06);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; min-height: 100vh; display: flex; justify-content: center; }
+
+  .phone { width: 390px; min-height: 100vh; background: var(--bg); }
+
+  .header { padding: 52px 24px 20px; animation: fadeUp 0.4s ease both; }
+
+  .header-title {
+    font-family: 'Syne', sans-serif; font-size: 24px; font-weight: 800;
+    background: linear-gradient(90deg, #fff 30%, var(--accent));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  }
+
+  .header-sub { font-size: 13px; color: var(--subtext); margin-top: 2px; }
+
+  .modo-tabs {
+    margin: 0 24px 16px; display: flex; background: var(--card);
+    border-radius: 14px; padding: 4px; gap: 4px;
+    border: 1px solid var(--border); animation: fadeUp 0.4s 0.08s ease both; opacity: 0;
+  }
+
+  .modo-tab { flex: 1; text-align: center; padding: 9px 6px; border-radius: 10px; font-size: 12px; font-weight: 600; color: var(--subtext); cursor: pointer; transition: all 0.2s; }
+  .modo-tab.active { background: rgba(184,245,100,0.15); color: var(--accent); }
+
+  .buscador-wrap { margin: 0 24px 16px; animation: fadeUp 0.4s 0.12s ease both; opacity: 0; }
+  .buscador-label { font-size: 11px; color: var(--subtext); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 8px; }
+
+  .meses-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+
+  .mes-chip { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 8px 4px; text-align: center; font-size: 12px; color: var(--subtext); cursor: pointer; transition: all 0.2s; }
+  .mes-chip.active { background: rgba(184,245,100,0.12); border-color: rgba(184,245,100,0.3); color: var(--accent); font-weight: 700; }
+  .mes-chip.sin-datos { opacity: 0.3; cursor: default; }
+
+  .periodo-wrap { margin: 0 24px 16px; animation: fadeUp 0.4s 0.12s ease both; opacity: 0; }
+  .periodo-scroll { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; }
+  .periodo-scroll::-webkit-scrollbar { display: none; }
+
+  .periodo-chip { background: var(--card); border: 1px solid var(--border); border-radius: 100px; padding: 7px 16px; font-size: 12px; color: var(--subtext); cursor: pointer; white-space: nowrap; flex-shrink: 0; transition: all 0.2s; }
+  .periodo-chip.active { background: rgba(184,245,100,0.12); border-color: rgba(184,245,100,0.3); color: var(--accent); font-weight: 600; }
+
+  .resumen-row { margin: 0 24px 16px; display: flex; gap: 10px; animation: fadeUp 0.4s 0.18s ease both; opacity: 0; }
+
+  .res-item { flex: 1; background: var(--card); border-radius: 16px; padding: 13px 10px; border: 1px solid var(--border); text-align: center; }
+  .res-label { font-size: 9px; color: var(--subtext); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 5px; }
+  .res-value { font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 700; }
+  .res-sub   { font-size: 9px; color: var(--subtext); margin-top: 3px; }
+
+  .cats-card { margin: 0 24px 16px; background: var(--card); border-radius: 20px; padding: 18px; border: 1px solid var(--border); animation: fadeUp 0.4s 0.22s ease both; opacity: 0; }
+  .cats-title { font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 14px; }
+
+  .cat-row { margin-bottom: 12px; }
+  .cat-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
+  .cat-left  { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--text); }
+  .cat-right { text-align: right; }
+  .cat-total { font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700; color: var(--danger); }
+  .cat-prom  { font-size: 10px; color: var(--subtext); }
+  .cat-bar-track { background: var(--card2); border-radius: 100px; height: 5px; overflow: hidden; }
+  .cat-bar-fill  { height: 100%; border-radius: 100px; background: linear-gradient(90deg, var(--accent2), var(--accent)); transition: width 0.7s ease; }
+
+  .analisis-card { margin: 0 24px 16px; background: var(--card); border-radius: 20px; padding: 18px; border: 1px solid var(--border); animation: fadeUp 0.4s 0.26s ease both; opacity: 0; }
+  .analisis-title { font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 12px; }
+
+  .cat-select { width: 100%; background: var(--card2); border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px; color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 13px; outline: none; margin-bottom: 14px; cursor: pointer; }
+  .cat-select option { background: #1e1e27; }
+
+  .evol-barras { display: flex; align-items: flex-end; gap: 6px; height: 80px; margin-bottom: 8px; }
+  .eb-grupo { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; }
+  .eb-val   { font-size: 9px; font-weight: 700; color: var(--text); }
+  .eb-barra { width: 100%; border-radius: 4px 4px 0 0; min-height: 3px; transition: height 0.5s ease; }
+  .eb-barra.normal { background: rgba(79,209,197,0.6); }
+  .eb-barra.alto   { background: rgba(255,107,107,0.8); }
+  .eb-barra.bajo   { background: rgba(184,245,100,0.7); }
+  .eb-mes { font-size: 9px; color: var(--subtext); }
+  .analisis-nota { font-size: 12px; color: var(--subtext); text-align: center; line-height: 1.4; margin-top: 4px; }
+
+  .alertas-card { margin: 0 24px 16px; background: var(--card); border-radius: 20px; padding: 18px; border: 1px solid var(--border); animation: fadeUp 0.4s 0.3s ease both; opacity: 0; }
+  .alertas-title { font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 12px; }
+
+  .alerta-item { display: flex; gap: 10px; align-items: flex-start; padding: 11px; border-radius: 12px; margin-bottom: 8px; border: 1px solid transparent; }
+  .alerta-item.roja  { background: rgba(255,107,107,0.07); border-color: rgba(255,107,107,0.15); }
+  .alerta-item.verde { background: rgba(184,245,100,0.07); border-color: rgba(184,245,100,0.15); }
+  .alerta-item.gold  { background: rgba(245,200,66,0.07);  border-color: rgba(245,200,66,0.15); }
+  .alerta-icon   { font-size: 18px; flex-shrink: 0; }
+  .alerta-titulo { font-size: 13px; font-weight: 600; margin-bottom: 2px; }
+  .alerta-desc   { font-size: 11px; color: var(--subtext); line-height: 1.4; }
+  .alerta-item.roja  .alerta-titulo { color: var(--danger); }
+  .alerta-item.verde .alerta-titulo { color: var(--accent); }
+  .alerta-item.gold  .alerta-titulo { color: var(--gold); }
+
+  .loading-wrap { text-align: center; color: var(--subtext); font-size: 13px; padding: 40px 0; }
+
+  /* NAVBAR */
+  .navbar { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 390px; background: rgba(15,15,19,0.96); backdrop-filter: blur(20px); border-top: 1px solid var(--border); padding: 10px 0 22px; display: flex; justify-content: space-around; align-items: center; z-index: 99; }
+  .nav-item { display: flex; flex-direction: column; align-items: center; gap: 3px; cursor: pointer; opacity: 0.4; transition: opacity 0.2s; flex: 1; }
+  .nav-item.active { opacity: 1; }
+  .nav-icon  { font-size: 20px; }
+  .nav-label { font-size: 10px; color: var(--subtext); letter-spacing: 0.04em; }
+  .nav-item.active .nav-label { color: var(--accent); }
+  .nav-dot { width: 4px; height: 4px; border-radius: 50%; background: var(--accent); }
+
+  .spacer { height: 100px; }
+
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+</style>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#b8f564">
+</head>
+<body>
+<div class="phone">
+
+  <div class="header">
+    <div class="header-title">Estadísticas</div>
+    <div class="header-sub">Entiende tus patrones de gasto</div>
+  </div>
+
+  <div class="modo-tabs">
+    <div class="modo-tab active" id="tab-periodo" onclick="setModo('periodo')">Por período</div>
+    <div class="modo-tab" id="tab-mes"    onclick="setModo('mes')">Por mes</div>
+    <div class="modo-tab" id="tab-anio"   onclick="setModo('anio')">Año completo</div>
+  </div>
+
+  <div id="vista-periodo">
+    <div class="periodo-wrap">
+      <div class="periodo-scroll">
+        <div class="periodo-chip active" onclick="setPeriodo(2, this)">2 meses</div>
+        <div class="periodo-chip" onclick="setPeriodo(3, this)">3 meses</div>
+        <div class="periodo-chip" onclick="setPeriodo(4, this)">4 meses</div>
+        <div class="periodo-chip" onclick="setPeriodo(5, this)">5 meses</div>
+      </div>
+    </div>
+  </div>
+
+  <div id="vista-mes" style="display:none">
+    <div class="buscador-wrap">
+      <div class="buscador-label">Selecciona un mes</div>
+      <div class="meses-grid" id="meses-grid"></div>
+    </div>
+  </div>
+
+  <div id="loading-wrap" class="loading-wrap">Cargando datos...</div>
+
+  <div id="contenido" style="display:none">
+
+    <div class="resumen-row">
+      <div class="res-item">
+        <div class="res-label" id="lbl-ing">Prom. ingresos</div>
+        <div class="res-value" style="color:var(--accent)"  id="val-ing">—</div>
+        <div class="res-sub"   id="sub-ing">por mes</div>
+      </div>
+      <div class="res-item">
+        <div class="res-label" id="lbl-gas">Prom. gastos</div>
+        <div class="res-value" style="color:var(--danger)"  id="val-gas">—</div>
+        <div class="res-sub"   id="sub-gas">por mes</div>
+      </div>
+      <div class="res-item">
+        <div class="res-label" id="lbl-aho">Prom. ahorro</div>
+        <div class="res-value" style="color:var(--accent2)" id="val-aho">—</div>
+        <div class="res-sub"   id="sub-aho">por mes</div>
+      </div>
+    </div>
+
+    <div class="cats-card">
+      <div class="cats-title" id="cats-title">Gasto por categoría</div>
+      <div id="cats-wrap"></div>
+    </div>
+
+    <div class="analisis-card" id="analisis-card">
+      <div class="analisis-title">📈 Evolución por categoría</div>
+      <select class="cat-select" id="cat-select" onchange="renderAnalisis()"></select>
+      <div class="evol-barras" id="evol-barras"></div>
+      <div class="analisis-nota" id="analisis-nota"></div>
+    </div>
+
+    <div class="alertas-card">
+      <div class="alertas-title">🔔 Análisis inteligente</div>
+      <div id="alertas-wrap"></div>
+    </div>
+
+  </div>
+
+  <div class="spacer"></div>
+</div>
+
+<!-- NAVBAR: 5 ítems, todos con onclick, Estadísticas activo -->
+<nav class="navbar">
+  <div class="nav-item" onclick="location.href='index.html'">
+    <span class="nav-icon">🏠</span>
+    <span class="nav-label">Inicio</span>
+  </div>
+  <div class="nav-item" onclick="location.href='mifinanza-movimientos.html'">
+    <span class="nav-icon">📋</span>
+    <span class="nav-label">Movimientos</span>
+  </div>
+  <div class="nav-item active">
+    <span class="nav-icon">📊</span>
+    <span class="nav-label">Estadísticas</span>
+    <div class="nav-dot"></div>
+  </div>
+  <div class="nav-item" onclick="location.href='mifinanza-metas.html'">
+    <span class="nav-icon">🎯</span>
+    <span class="nav-label">Metas</span>
+  </div>
+  <div class="nav-item" onclick="location.href='mifinanza-perfil.html'">
+    <span class="nav-icon">👤</span>
+    <span class="nav-label">Perfil</span>
+  </div>
+</nav>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="auth.js"></script>
+<script>
+
+  const iconsCat = {
+    'Comida':'🍔','Alquiler':'🏠','Remesas':'🌍','Línea':'📱',
+    'Gym':'🏋️','Tecnología':'💻','Transporte':'🚗','Salud':'💊',
+    'Ocio':'🎬','Ropa':'👕','Otros':'📦'
+  }
+
+  const MESES_LABELS  = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic']
+  const MESES_NOMBRES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre']
+
+  let datos           = []
+  let modoActual      = 'periodo'
+  let periodoActual   = 2
+  let mesSeleccionado = null
+
+  async function cargarDatos() {
+    const uid = window.currentUserId
+    const [{ data: gastos, error: errG }, { data: ingresos, error: errI }] = await Promise.all([
+      dbClient.from('gastos').select('fecha, monto, categoria').eq('usuario_id', uid).order('fecha', { ascending: true }),
+      dbClient.from('ingresos').select('fecha, monto').eq('usuario_id', uid).order('fecha', { ascending: true })
+    ])
+
+    if (errG || errI) {
+      document.getElementById('loading-wrap').textContent = 'Error al cargar datos.'
+      return
+    }
+
+    const mapa = {}
+
+    ingresos.forEach(r => {
+      const key = r.fecha.substring(0, 7)
+      if (!mapa[key]) mapa[key] = { ingresos: 0, gastos: 0, cats: {} }
+      mapa[key].ingresos += parseFloat(r.monto || 0)
+    })
+
+    gastos.forEach(r => {
+      const key = r.fecha.substring(0, 7)
+      if (!mapa[key]) mapa[key] = { ingresos: 0, gastos: 0, cats: {} }
+      mapa[key].gastos += parseFloat(r.monto || 0)
+      const cat = r.categoria || 'Otros'
+      mapa[key].cats[cat] = (mapa[key].cats[cat] || 0) + parseFloat(r.monto || 0)
+    })
+
+    datos = Object.entries(mapa)
+      .sort((a, b) => b[0].localeCompare(a[0]))
+      .map(([key, val]) => {
+        const [anio, mesNum] = key.split('-').map(Number)
+        return {
+          key,
+          mes: MESES_LABELS[mesNum - 1],
+          mesNombre: MESES_NOMBRES[mesNum - 1],
+          mesNum, anio,
+          ingresos: Math.round(val.ingresos * 100) / 100,
+          gastos:   Math.round(val.gastos   * 100) / 100,
+          cats:     val.cats
+        }
+      })
+
+    if (datos.length === 0) {
+      document.getElementById('loading-wrap').textContent = 'No hay datos aún.'
+      return
+    }
+
+    const todasCats = new Set()
+    datos.forEach(d => Object.keys(d.cats).forEach(c => todasCats.add(c)))
+    const sel = document.getElementById('cat-select')
+    sel.innerHTML = ''
+    todasCats.forEach(cat => {
+      sel.innerHTML += `<option value="${cat}">${iconsCat[cat] || '📦'} ${cat}</option>`
+    })
+
+    document.getElementById('loading-wrap').style.display = 'none'
+    document.getElementById('contenido').style.display    = ''
+
+    renderPeriodo(periodoActual)
+  }
+
+  function setModo(modo) {
+    modoActual = modo
+    ;['periodo','mes','anio'].forEach(m => {
+      document.getElementById('tab-' + m).classList.toggle('active', m === modo)
+    })
+    document.getElementById('vista-periodo').style.display = modo === 'periodo' ? '' : 'none'
+    document.getElementById('vista-mes').style.display     = modo === 'mes'     ? '' : 'none'
+    document.getElementById('analisis-card').style.display = modo === 'mes'     ? 'none' : ''
+
+    if (modo === 'periodo') renderPeriodo(periodoActual)
+    if (modo === 'mes')     renderGridMeses()
+    if (modo === 'anio')    renderAnio()
+  }
+
+  function setPeriodo(n, el) {
+    periodoActual = n
+    document.querySelectorAll('.periodo-chip').forEach(c => c.classList.remove('active'))
+    el.classList.add('active')
+    renderPeriodo(n)
+  }
+
+  function renderPeriodo(n) {
+    const slice = datos.slice(0, Math.min(n, datos.length)).reverse()
+    const tIng  = slice.reduce((s, d) => s + d.ingresos, 0)
+    const tGas  = slice.reduce((s, d) => s + d.gastos,   0)
+    const pIng  = Math.round(tIng / slice.length)
+    const pGas  = Math.round(tGas / slice.length)
+    const pAho  = pIng - pGas
+
+    setResumen(
+      'Prom. ingresos', fmt(pIng), 'por mes',
+      'Prom. gastos',   fmt(pGas), 'por mes',
+      'Prom. ahorro',   (pAho >= 0 ? '+' : '') + fmt(pAho), 'por mes', pAho
+    )
+
+    dibujarCats(slice, false)
+    renderAnalisis()
+    renderAlertas(slice)
+  }
+
+  function renderGridMeses() {
+    const grid = document.getElementById('meses-grid')
+    grid.innerHTML = ''
+    datos.forEach((d, i) => {
+      const chip = document.createElement('div')
+      chip.className = 'mes-chip' + (mesSeleccionado === i ? ' active' : '')
+      chip.textContent = d.mes
+      chip.onclick = () => seleccionarMes(i)
+      grid.appendChild(chip)
+    })
+
+    const mesesConDatos = new Set(datos.map(d => d.key))
+    MESES_LABELS.forEach((lbl, i) => {
+      const key = `2026-${String(i + 1).padStart(2, '0')}`
+      if (!mesesConDatos.has(key)) {
+        const chip = document.createElement('div')
+        chip.className = 'mes-chip sin-datos'
+        chip.textContent = lbl
+        grid.appendChild(chip)
+      }
+    })
+
+    if (mesSeleccionado !== null) renderMes(mesSeleccionado)
+    else {
+      document.getElementById('cats-wrap').innerHTML    = ''
+      document.getElementById('alertas-wrap').innerHTML = ''
+      setResumen('Ingresos','—','','Gastos','—','','Ahorro','—','', 0)
+    }
+  }
+
+  function seleccionarMes(idx) {
+    mesSeleccionado = idx
+    renderGridMeses()
+    renderMes(idx)
+  }
+
+  function renderMes(idx) {
+    const d    = datos[idx]
+    const prev = datos[idx + 1]
+    const aho  = d.ingresos - d.gastos
+
+    setResumen(
+      'Ingresos', fmt(d.ingresos), d.mesNombre,
+      'Gastos',   fmt(d.gastos),   d.mesNombre,
+      'Ahorro',   (aho >= 0 ? '+' : '') + fmt(Math.abs(aho)), d.mesNombre, aho
+    )
+
+    dibujarCats([d], true)
+
+    const alertas = []
+    if (prev) {
+      Object.entries(d.cats).forEach(([cat, val]) => {
+        const vp  = prev.cats[cat] || 0
+        if (!vp) return
+        const pct = Math.round(((val - vp) / vp) * 100)
+        if (pct >= 15)  alertas.push({ tipo:'roja',  icon:'⚠️', titulo:`${cat} subió un ${pct}%`,              desc:`Pasaste de ${fmt(vp)} a ${fmt(val)} vs ${prev.mesNombre}.` })
+        if (pct <= -15) alertas.push({ tipo:'verde', icon:'✅', titulo:`Bajaste ${cat} un ${Math.abs(pct)}%`, desc:`De ${fmt(vp)} a ${fmt(val)} vs ${prev.mesNombre}. Buen trabajo.` })
+      })
+    }
+
+    if (aho > 0) alertas.push({ tipo:'verde', icon:'💚', titulo:`Ahorraste ${fmt(aho)} en ${d.mesNombre}`, desc:`El ${Math.round((aho / d.ingresos) * 100)}% de tus ingresos.` })
+    else         alertas.push({ tipo:'roja',  icon:'🚨', titulo:'Gastos superaron ingresos', desc:`Te fuiste ${fmt(Math.abs(aho))} en negativo en ${d.mesNombre}.` })
+
+    const catMax = Object.entries(d.cats).sort((a, b) => b[1] - a[1])[0]
+    if (catMax) {
+      const pctMax = Math.round((catMax[1] / d.gastos) * 100)
+      if (pctMax > 28) alertas.push({ tipo:'gold', icon:'💡', titulo:`${catMax[0]} fue tu mayor gasto`, desc:`Representó el ${pctMax}% de lo que gastaste en ${d.mesNombre} (${fmt(catMax[1])}).` })
+    }
+
+    mostrarAlertas(alertas)
+  }
+
+  function renderAnio() {
+    const tIng = datos.reduce((s, d) => s + d.ingresos, 0)
+    const tGas = datos.reduce((s, d) => s + d.gastos,   0)
+    const tAho = tIng - tGas
+
+    setResumen(
+      'Total ingresos', fmt(tIng), 'en el año',
+      'Total gastos',   fmt(tGas), 'en el año',
+      'Total ahorro',   (tAho >= 0 ? '+' : '') + fmt(Math.abs(tAho)), 'en el año', tAho
+    )
+
+    dibujarCats(datos, false)
+    renderAnalisis()
+    renderAlertas([...datos].reverse())
+  }
+
+  function fmt(n) {
+    return '$' + parseFloat(n || 0).toLocaleString('es-MX', { minimumFractionDigits: 0, maximumFractionDigits: 0 })
+  }
+
+  function setResumen(lIng, vIng, sIng, lGas, vGas, sGas, lAho, vAho, sAho, aho) {
+    document.getElementById('lbl-ing').textContent = lIng
+    document.getElementById('val-ing').textContent = vIng
+    document.getElementById('sub-ing').textContent = sIng
+    document.getElementById('lbl-gas').textContent = lGas
+    document.getElementById('val-gas').textContent = vGas
+    document.getElementById('sub-gas').textContent = sGas
+    document.getElementById('lbl-aho').textContent = lAho
+    document.getElementById('val-aho').textContent = vAho
+    document.getElementById('sub-aho').textContent = sAho
+    document.getElementById('val-aho').style.color = aho >= 0 ? 'var(--accent2)' : 'var(--danger)'
+  }
+
+  function dibujarCats(slice, soloMes) {
+    const totales = {}
+    slice.forEach(d => Object.entries(d.cats).forEach(([cat, val]) => { totales[cat] = (totales[cat] || 0) + val }))
+    const maxC = Math.max(...Object.values(totales))
+    const n    = slice.length
+
+    document.getElementById('cats-title').textContent = 'Gasto por categoría'
+    const wrap = document.getElementById('cats-wrap')
+    wrap.innerHTML = ''
+
+    Object.entries(totales).sort((a, b) => b[1] - a[1]).forEach(([cat, total]) => {
+      const pct  = Math.round((total / maxC) * 100)
+      const prom = soloMes ? null : Math.round(total / n)
+      const icon = iconsCat[cat] || '📦'
+      const row  = document.createElement('div')
+      row.className = 'cat-row'
+      row.innerHTML = `
+        <div class="cat-top">
+          <div class="cat-left">${icon} ${cat}</div>
+          <div class="cat-right">
+            <div class="cat-total">${fmt(total)}</div>
+            ${!soloMes ? `<div class="cat-prom">Prom: ${fmt(prom)}/mes</div>` : ''}
+          </div>
+        </div>
+        <div class="cat-bar-track"><div class="cat-bar-fill" style="width:${pct}%"></div></div>
+      `
+      wrap.appendChild(row)
+    })
+  }
+
+  function renderAnalisis() {
+    const cat   = document.getElementById('cat-select').value
+    const n     = modoActual === 'anio' ? datos.length : periodoActual
+    const slice = datos.slice(0, Math.min(n, datos.length)).reverse()
+    const vals  = slice.map(d => d.cats[cat] || 0)
+    const maxV  = Math.max(...vals) || 1
+    const prom  = Math.round(vals.reduce((s, v) => s + v, 0) / vals.length)
+
+    const wrap = document.getElementById('evol-barras')
+    wrap.innerHTML = ''
+    vals.forEach((v, i) => {
+      const h   = Math.round((v / maxV) * 68)
+      const tip = v > prom * 1.1 ? 'alto' : v < prom * 0.9 ? 'bajo' : 'normal'
+      const g   = document.createElement('div')
+      g.className = 'eb-grupo'
+      g.innerHTML = `<div class="eb-val">${fmt(v)}</div><div class="eb-barra ${tip}" style="height:${h}px"></div><div class="eb-mes">${slice[i].mes}</div>`
+      wrap.appendChild(g)
+    })
+
+    const ult = vals[vals.length - 1]
+    const ant = vals[vals.length - 2]
+    let nota = ''
+    if (!ant) { nota = `Promedio en ${cat}: ${fmt(prom)}/mes` }
+    else {
+      const pct = ant > 0 ? Math.round(((ult - ant) / ant) * 100) : 0
+      if (pct > 10)       nota = `⚠️ Este mes gastaste un ${pct}% más en ${cat} que el anterior.`
+      else if (pct < -10) nota = `✅ Bajaste ${cat} un ${Math.abs(pct)}% vs el mes anterior.`
+      else                nota = `${cat} estable. Promedio: ${fmt(prom)}/mes.`
+    }
+    document.getElementById('analisis-nota').textContent = nota
+  }
+
+  function renderAlertas(slice) {
+    const ult  = slice[slice.length - 1]
+    const prev = slice[slice.length - 2]
+    const alertas = []
+
+    if (prev) {
+      Object.entries(ult.cats).forEach(([cat, val]) => {
+        const vp  = prev.cats[cat] || 0
+        if (!vp) return
+        const pct = Math.round(((val - vp) / vp) * 100)
+        if (pct >= 15)  alertas.push({ tipo:'roja',  icon:'⚠️', titulo:`${cat} subió un ${pct}%`,              desc:`De ${fmt(vp)} a ${fmt(val)}. Este mes se te fue un poco la mano aquí.` })
+        if (pct <= -15) alertas.push({ tipo:'verde', icon:'✅', titulo:`Bajaste ${cat} un ${Math.abs(pct)}%`, desc:`De ${fmt(vp)} a ${fmt(val)}. Buen control este mes.` })
+      })
+    }
+
+    const aho = ult.ingresos - ult.gastos
+    if (aho > 0) alertas.push({ tipo:'verde', icon:'💚', titulo:`Ahorraste ${fmt(aho)} en ${ult.mesNombre}`, desc:`El ${Math.round((aho / ult.ingresos) * 100)}% de tus ingresos.` })
+    else         alertas.push({ tipo:'roja',  icon:'🚨', titulo:'Gastos superaron ingresos', desc:`Te fuiste ${fmt(Math.abs(aho))} en negativo en ${ult.mesNombre}.` })
+
+    const catMax = Object.entries(ult.cats).sort((a, b) => b[1] - a[1])[0]
+    if (catMax) {
+      const pctMax = Math.round((catMax[1] / ult.gastos) * 100)
+      if (pctMax > 28) alertas.push({ tipo:'gold', icon:'💡', titulo:`${catMax[0]} fue tu mayor gasto`, desc:`Representó el ${pctMax}% de lo que gastaste (${fmt(catMax[1])}).` })
+    }
+
+    mostrarAlertas(alertas)
+  }
+
+  function mostrarAlertas(alertas) {
+    const wrap = document.getElementById('alertas-wrap')
+    wrap.innerHTML = ''
+    if (!alertas.length) alertas.push({ tipo:'verde', icon:'✅', titulo:'Todo bajo control', desc:'Sin variaciones importantes en este período.' })
+    alertas.forEach(a => {
+      const div = document.createElement('div')
+      div.className = `alerta-item ${a.tipo}`
+      div.innerHTML = `<div class="alerta-icon">${a.icon}</div><div><div class="alerta-titulo">${a.titulo}</div><div class="alerta-desc">${a.desc}</div></div>`
+      wrap.appendChild(div)
+    })
+  }
+
+  document.addEventListener('auth-ready', cargarDatos)
+</script>
+</body>
+</html>
