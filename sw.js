@@ -1,5 +1,6 @@
-const CACHE = 'mifinanza-v1';
+const CACHE = 'mifinanza-v2';
 const PRECACHE = [
+  '/',
   '/index.html',
   '/mifinanza-movimientos.html',
   '/mifinanza-fijos.html',
