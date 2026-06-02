@@ -96,6 +96,8 @@
   .modal-title { font-family:'Syne',sans-serif;font-size:18px;font-weight:700;color:#f0f0f5;margin-bottom:18px; }
   .btn-ok { width:100%;border:none;border-radius:14px;padding:15px;font-family:'Syne',sans-serif;font-size:15px;font-weight:700;cursor:pointer;margin-bottom:8px; }
   .btn-no { width:100%;background:none;border:none;color:#8888a0;font-size:14px;cursor:pointer;padding:10px;font-family:'DM Sans',sans-serif; }
+  .btn-del { width:100%;background:none;border:1px solid rgba(255,107,107,0.25);border-radius:14px;padding:13px;color:#ff6b6b;font-size:14px;cursor:pointer;font-family:'DM Sans',sans-serif;margin-bottom:8px; }
+  .movimiento { cursor: pointer; }
 </style>
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#b8f564">
@@ -237,6 +239,33 @@
   </div>
 </div>
 
+<div class="modal-base" id="modal-editar">
+  <div class="modal-box">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="edit-title">Editar movimiento</div>
+    <div class="fld"><label class="lbl">Fecha</label><input type="date" id="e-fecha" class="inp"></div>
+    <div class="fld" id="fld-descripcion"><label class="lbl">Descripción</label><input type="text" id="e-descripcion" class="inp"></div>
+    <div class="fld" id="fld-concepto"><label class="lbl">Concepto</label><input type="text" id="e-concepto" class="inp"></div>
+    <div class="fld" id="fld-categoria"><label class="lbl">Categoría</label>
+      <select id="e-categoria" class="inp">
+        <option>🍔 Comida</option><option>🏠 Alquiler</option><option>🌍 Remesas</option>
+        <option>💻 Tecnología</option><option>🏋️ Gym</option><option>📱 Línea</option>
+        <option>❤️ Salud</option><option>🍩 Antojos</option><option>⛽ Gasolina</option>
+        <option>👕 Ropa</option><option>📦 Otros</option>
+      </select>
+    </div>
+    <div class="fld" id="fld-tipo"><label class="lbl">Tipo</label>
+      <select id="e-tipo" class="inp">
+        <option>💼 Nómina</option><option>💵 Efectivo</option><option>⭐ Extra</option><option>📦 Otro</option>
+      </select>
+    </div>
+    <div class="fld" style="margin-bottom:18px"><label class="lbl">Monto</label><input type="number" id="e-monto" class="inp" placeholder="$0.00"></div>
+    <button onclick="guardarEdicion()" class="btn-ok" id="edit-btn-ok" style="background:#b8f564;color:#0f0f13">Guardar cambios</button>
+    <button onclick="eliminarMovimiento()" class="btn-del">Eliminar</button>
+    <button onclick="cerrarEditar()" class="btn-no">Cancelar</button>
+  </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="auth.js"></script>
 <script>
@@ -344,6 +373,8 @@
             <div class="mov-hora">${fecha}</div>
           </div>
         `;
+        div.dataset.id   = m.id;
+        div.dataset.tipo = m.tipo;
         grupo.appendChild(div);
       });
       lista.appendChild(grupo);
@@ -394,6 +425,75 @@
     if (error) { alert('Error: ' + error.message) }
     else { alert('✅ Gasto fijo guardado'); cerrarGastoFijo(); cargarMovimientos() }
   }
+
+  let editando = null;
+
+  function abrirEditar(m) {
+    editando = m;
+    const esIngreso = m.tipo === 'ingreso';
+    document.getElementById('edit-title').textContent = esIngreso ? 'Editar ingreso' : 'Editar gasto';
+    document.getElementById('edit-btn-ok').style.background = esIngreso ? '#4fd1c5' : '#b8f564';
+    document.getElementById('e-fecha').value  = m.fecha;
+    document.getElementById('e-monto').value  = m.monto;
+    document.getElementById('fld-descripcion').style.display = esIngreso ? 'none' : '';
+    document.getElementById('fld-concepto').style.display    = esIngreso ? '' : 'none';
+    document.getElementById('fld-categoria').style.display   = esIngreso ? 'none' : '';
+    document.getElementById('fld-tipo').style.display        = esIngreso ? '' : 'none';
+    if (esIngreso) {
+      document.getElementById('e-concepto').value = m.concepto || m.descripcion || '';
+      const tipoSel = document.getElementById('e-tipo');
+      [...tipoSel.options].forEach(o => { if (o.value === m.categoria) tipoSel.value = m.categoria; });
+    } else {
+      document.getElementById('e-descripcion').value = m.descripcion || '';
+      const catSel = document.getElementById('e-categoria');
+      [...catSel.options].forEach(o => { if (o.value === m.categoria) catSel.value = m.categoria; });
+    }
+    document.getElementById('modal-editar').style.display = 'flex';
+  }
+
+  function cerrarEditar() {
+    document.getElementById('modal-editar').style.display = 'none';
+    editando = null;
+  }
+
+  async function guardarEdicion() {
+    if (!editando) return;
+    const fecha = document.getElementById('e-fecha').value;
+    const monto = parseFloat(document.getElementById('e-monto').value);
+    if (!fecha || isNaN(monto)) { alert('Completa todos los campos'); return; }
+    let error;
+    if (editando.tipo === 'ingreso') {
+      const concepto = document.getElementById('e-concepto').value.trim();
+      const tipo     = document.getElementById('e-tipo').value;
+      if (!concepto) { alert('Completa el concepto'); return; }
+      ({ error } = await dbClient.from('ingresos').update({ fecha, concepto, tipo, monto }).eq('id', editando.id).eq('usuario_id', window.currentUserId));
+    } else {
+      const descripcion = document.getElementById('e-descripcion').value.trim();
+      const categoria   = document.getElementById('e-categoria').value;
+      if (!descripcion) { alert('Completa la descripción'); return; }
+      ({ error } = await dbClient.from('gastos').update({ fecha, descripcion, categoria, monto }).eq('id', editando.id).eq('usuario_id', window.currentUserId));
+    }
+    if (error) { alert('Error: ' + error.message); return; }
+    cerrarEditar();
+    cargarMovimientos();
+  }
+
+  async function eliminarMovimiento() {
+    if (!editando) return;
+    if (!confirm('¿Eliminar este movimiento?')) return;
+    const tabla = editando.tipo === 'ingreso' ? 'ingresos' : 'gastos';
+    const { error } = await dbClient.from(tabla).delete().eq('id', editando.id).eq('usuario_id', window.currentUserId);
+    if (error) { alert('Error: ' + error.message); return; }
+    cerrarEditar();
+    cargarMovimientos();
+  }
+
+  document.getElementById('lista').addEventListener('click', function(e) {
+    const el = e.target.closest('.movimiento');
+    if (!el) return;
+    const found = todosMovimientos.find(m => String(m.id) === el.dataset.id && m.tipo === el.dataset.tipo);
+    if (found) abrirEditar(found);
+  });
 
   actualizarMesLabel();
   document.addEventListener('auth-ready', cargarMovimientos);
