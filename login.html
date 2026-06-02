@@ -149,9 +149,12 @@
   const SUPABASE_KEY = 'sb_publishable_u7ug3SBOsuz2zb56gqBLjw_aLJ0Vvp8'
   const dbClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY)
 
-  // Si ya hay sesión activa, ir directo a la app
+  // Detectar flujo recovery ANTES de que Supabase procese el hash
+  const esRecuperacion = window.location.hash.includes('type=recovery')
+
+  // Si ya hay sesión activa, ir directo a la app (nunca si es recovery)
   dbClient.auth.getSession().then(({ data: { session } }) => {
-    if (session) window.location.replace('index.html')
+    if (session && !esRecuperacion) window.location.replace('index.html')
   })
 
   function setTab(tab) {
@@ -290,6 +293,8 @@
   }
 
   // Detecta retorno desde el email de recuperación
+  // Doble protección: hash detectado en carga + evento Supabase
+  if (esRecuperacion) setTab('nueva-clave')
   dbClient.auth.onAuthStateChange((event) => {
     if (event === 'PASSWORD_RECOVERY') setTab('nueva-clave')
   })
