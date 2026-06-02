@@ -188,6 +188,13 @@
       return
     }
 
+    // Sin sesión = confirmación de email pendiente (desactivar en Supabase > Auth > Providers > Email > Confirm email)
+    if (!data.session) {
+      document.getElementById('loading').classList.remove('visible')
+      mostrarError('Revisa tu correo para confirmar la cuenta antes de entrar.')
+      return
+    }
+
     mostrarCarga('Configurando tu cuenta...', 'Vinculando tus datos...')
     await migrarDatosExistentes(data.user.id)
     window.location.replace('index.html')
