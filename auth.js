@@ -11,17 +11,32 @@ window.currentUserId = null
 // Oculta la página hasta verificar sesión (evita destellos)
 document.documentElement.style.visibility = 'hidden'
 
+let _authFired = false
+
+function _onSession(uid) {
+  if (_authFired) return
+  _authFired = true
+  window.currentUserId = uid
+  console.log('[auth] currentUserId establecido:', uid)
+  document.documentElement.style.visibility = 'visible'
+  document.dispatchEvent(new Event('auth-ready'))
+}
+
 window.dbClient.auth.onAuthStateChange((event, session) => {
-  console.log('[auth] event:', event, 'user:', session?.user?.id)
-  if (event === 'INITIAL_SESSION') {
-    if (!session) {
-      console.warn('[auth] Sin sesión activa → redirigiendo a login')
-      window.location.replace('login.html')
-    } else {
-      window.currentUserId = session.user.id
-      console.log('[auth] currentUserId establecido:', window.currentUserId)
-      document.documentElement.style.visibility = 'visible'
-      document.dispatchEvent(new Event('auth-ready'))
-    }
+  console.log('[auth] event:', event, 'uid:', session?.user?.id ?? null)
+  if (session) {
+    // Cualquier evento con sesión válida (INITIAL_SESSION, SIGNED_IN, TOKEN_REFRESHED)
+    _onSession(session.user.id)
+  } else if (event === 'SIGNED_OUT') {
+    window.location.replace('login.html')
+  } else if (event === 'INITIAL_SESSION') {
+    // Sin sesión en la carga inicial: puede ser token refresh en curso.
+    // Esperar 2s antes de redirigir por si llega TOKEN_REFRESHED.
+    setTimeout(() => {
+      if (!_authFired) {
+        console.warn('[auth] Sin sesión tras espera → redirigiendo a login')
+        window.location.replace('login.html')
+      }
+    }, 2000)
   }
 })
