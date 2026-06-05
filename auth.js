@@ -11,15 +11,17 @@ window.currentUserId = null
 // Oculta la página hasta verificar sesión (evita destellos)
 document.documentElement.style.visibility = 'hidden'
 
-window.dbClient.auth.getSession().then(({ data: { session } }) => {
-  console.log('[auth] session:', session)
-  if (!session) {
-    console.warn('[auth] Sin sesión activa → redirigiendo a login')
-    window.location.replace('login.html')
-    return
+window.dbClient.auth.onAuthStateChange((event, session) => {
+  console.log('[auth] event:', event, 'user:', session?.user?.id)
+  if (event === 'INITIAL_SESSION') {
+    if (!session) {
+      console.warn('[auth] Sin sesión activa → redirigiendo a login')
+      window.location.replace('login.html')
+    } else {
+      window.currentUserId = session.user.id
+      console.log('[auth] currentUserId establecido:', window.currentUserId)
+      document.documentElement.style.visibility = 'visible'
+      document.dispatchEvent(new Event('auth-ready'))
+    }
   }
-  window.currentUserId = session.user.id
-  console.log('[auth] currentUserId establecido:', window.currentUserId)
-  document.documentElement.style.visibility = 'visible'
-  document.dispatchEvent(new Event('auth-ready'))
 })
