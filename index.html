@@ -22,7 +22,9 @@
   .phone { width: 390px; min-height: 100vh; background: var(--bg); position: relative; overflow-x: hidden; }
   .phone::before { content: ''; position: absolute; top: -80px; left: -60px; width: 300px; height: 300px; background: radial-gradient(circle, rgba(184,245,100,0.08) 0%, transparent 70%); pointer-events: none; z-index: 0; }
   .header { padding: 52px 24px 18px; display: flex; justify-content: space-between; align-items: flex-start; position: relative; z-index: 1; animation: fadeUp 0.5s ease both; }
-  .greeting .mes { font-family: 'Syne', sans-serif; font-size: 16px; font-weight: 700; color: var(--accent2); letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 4px; }
+  .mes-nav { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+  .mes-arrow { background: none; border: none; color: #7eb87e; font-size: 20px; font-weight: 700; cursor: pointer; padding: 0 2px; line-height: 1; }
+  .greeting .mes { font-family: 'Syne', sans-serif; font-size: 16px; font-weight: 700; background: linear-gradient(90deg, #ffffff, #7eb87e); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; letter-spacing: 0.12em; text-transform: uppercase; }
   .greeting .nombre { font-family: 'Syne', sans-serif; font-size: 24px; font-weight: 800; background: linear-gradient(90deg, #ffffff 30%, #7eb87e); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
   .avatar { width: 42px; height: 42px; border-radius: 50%; background: linear-gradient(135deg, var(--accent), var(--accent2)); display: flex; align-items: center; justify-content: center; font-family: 'Syne', sans-serif; font-weight: 800; font-size: 16px; color: #0f0f13; flex-shrink: 0; }
   .balance-card { margin: 0 24px 14px; background: var(--card); border-radius: 24px; padding: 20px; border: 1px solid var(--border); animation: fadeUp 0.5s 0.1s ease both; opacity: 0; }
@@ -124,7 +126,11 @@
 <div class="phone">
   <div class="header">
     <div class="greeting">
-      <div class="mes" id="mes-header">Cargando...</div>
+      <div class="mes-nav">
+        <button class="mes-arrow" onclick="mesAnterior()">‹</button>
+        <span class="mes" id="mes-header">Cargando...</span>
+        <button class="mes-arrow" onclick="mesSiguiente()">›</button>
+      </div>
       <div class="nombre">Hola, Carlos 👋</div>
     </div>
     <div class="avatar">C</div>
@@ -276,13 +282,23 @@
 <script>
   const meses = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre']
   const hoy = new Date().toISOString().split('T')[0]
-  const mesActual = new Date().getMonth()
-  const anioActual = new Date().getFullYear()
-  const inicio = anioActual + '-' + String(mesActual + 1).padStart(2,'0') + '-01'
-  const fin = new Date(anioActual, mesActual + 1, 0).toISOString().split('T')[0]
+  let mesVer  = new Date().getMonth()
+  let anioVer = new Date().getFullYear()
 
-  document.getElementById('mes-header').textContent = meses[mesActual].toUpperCase() + ' ' + anioActual
-  document.getElementById('mes-badge').textContent  = meses[mesActual]
+  function actualizarCabecera() {
+    document.getElementById('mes-header').textContent = meses[mesVer].toUpperCase() + ' ' + anioVer
+    document.getElementById('mes-badge').textContent  = meses[mesVer]
+  }
+  actualizarCabecera()
+
+  function mesAnterior() {
+    mesVer--; if (mesVer < 0) { mesVer = 11; anioVer-- }
+    actualizarCabecera(); cargarDashboard()
+  }
+  function mesSiguiente() {
+    mesVer++; if (mesVer > 11) { mesVer = 0; anioVer++ }
+    actualizarCabecera(); cargarDashboard()
+  }
 
   async function cargarDashboard() {
     // Esperar a que window.currentUserId esté disponible sin depender
@@ -298,6 +314,8 @@
       })
     }
     if (!uid) return
+    const inicio = anioVer + '-' + String(mesVer + 1).padStart(2,'0') + '-01'
+    const fin    = new Date(anioVer, mesVer + 1, 0).toISOString().split('T')[0]
     console.log('[dashboard] uid al cargar:', uid)
     const [{ data: gastos, error: eGas }, { data: ingresos, error: eIng }, { data: fijos, error: eFij }, { data: metas, error: eMet }] = await Promise.all([
       dbClient.from('gastos').select('monto').eq('usuario_id', uid).gte('fecha', inicio).lte('fecha', fin),
