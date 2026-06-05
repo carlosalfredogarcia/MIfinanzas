@@ -23,17 +23,17 @@
   .phone::before { content: ''; position: absolute; top: -80px; left: -60px; width: 300px; height: 300px; background: radial-gradient(circle, rgba(184,245,100,0.08) 0%, transparent 70%); pointer-events: none; z-index: 0; }
   .header { padding: 52px 24px 18px; display: flex; justify-content: space-between; align-items: flex-start; position: relative; z-index: 1; animation: fadeUp 0.5s ease both; }
   .greeting .mes { font-family: 'Syne', sans-serif; font-size: 16px; font-weight: 700; color: var(--accent2); letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 4px; }
-  .greeting .nombre { font-family: 'Syne', sans-serif; font-size: 24px; font-weight: 800; background: linear-gradient(90deg, #ffffff 30%, var(--accent)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+  .greeting .nombre { font-family: 'Syne', sans-serif; font-size: 24px; font-weight: 800; background: linear-gradient(90deg, #ffffff 30%, #7eb87e); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
   .avatar { width: 42px; height: 42px; border-radius: 50%; background: linear-gradient(135deg, var(--accent), var(--accent2)); display: flex; align-items: center; justify-content: center; font-family: 'Syne', sans-serif; font-weight: 800; font-size: 16px; color: #0f0f13; flex-shrink: 0; }
   .balance-card { margin: 0 24px 14px; background: var(--card); border-radius: 24px; padding: 20px; border: 1px solid var(--border); animation: fadeUp 0.5s 0.1s ease both; opacity: 0; }
   .balance-label { font-size: 11px; color: var(--subtext); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
   .month-badge { background: rgba(184,245,100,0.1); color: var(--accent); font-size: 10px; padding: 2px 8px; border-radius: 20px; letter-spacing: 0.06em; }
   .balance-row { display: flex; gap: 10px; }
-  .balance-item { flex: 1; background: var(--card2); border-radius: 14px; padding: 12px; }
-  .balance-item-label { font-size: 10px; color: var(--subtext); text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 5px; display: flex; align-items: center; gap: 5px; }
+  .balance-item { flex: 1; background: var(--card2); border-radius: 14px; padding: 16px 12px; }
+  .balance-item-label { font-size: 11px; color: var(--subtext); text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 8px; display: flex; align-items: center; gap: 5px; }
   .dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
   .dot-green { background: var(--accent); } .dot-red { background: var(--danger); } .dot-blue { background: var(--accent2); }
-  .balance-item-value { font-family: 'Syne', sans-serif; font-size: 16px; font-weight: 700; }
+  .balance-item-value { font-family: 'Syne', sans-serif; font-size: 26px; font-weight: 700; }
   .val-green { color: var(--accent); } .val-red { color: var(--danger); } .val-blue { color: var(--accent2); }
   .saldo-card { margin: 0 24px 14px; border-radius: 20px; padding: 18px 20px; display: flex; justify-content: space-between; align-items: center; animation: fadeUp 0.5s 0.2s ease both; opacity: 0; transition: background 0.4s, border-color 0.4s; }
   .saldo-card.positivo { background: linear-gradient(135deg, rgba(184,245,100,0.13), rgba(184,245,100,0.04)); border: 1px solid rgba(184,245,100,0.22); }
@@ -41,8 +41,9 @@
   .saldo-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; display: block; margin-bottom: 4px; font-weight: 600; }
   .saldo-card.positivo .saldo-label { color: var(--accent); } .saldo-card.negativo .saldo-label { color: var(--danger); }
   .saldo-amount { font-family: 'Syne', sans-serif; font-size: 30px; font-weight: 800; }
-  .saldo-card.positivo .saldo-amount { color: var(--accent); } .saldo-card.negativo .saldo-amount { color: var(--danger); }
+  .saldo-card.positivo .saldo-amount { color: #7eb87e; } .saldo-card.negativo .saldo-amount { color: var(--danger); }
   .saldo-icon { font-size: 30px; opacity: 0.75; }
+  .saldo-card.positivo .saldo-icon { color: #7eb87e; font-weight: 700; }
   .frase { margin: 0 24px 14px; background: linear-gradient(135deg, rgba(184,245,100,0.07), rgba(79,209,197,0.04)); border: 1px solid rgba(184,245,100,0.14); border-radius: 14px; padding: 13px 16px; display: flex; align-items: center; gap: 10px; animation: fadeUp 0.5s 0.25s ease both; opacity: 0; }
   .frase-icon { font-size: 18px; }
   .frase-text { font-size: 13px; color: var(--accent); font-weight: 500; line-height: 1.45; }
@@ -78,7 +79,7 @@
     bottom: 90px;
     left: 50%;
     transform: translateX(-50%);
-    background: var(--accent);
+    background: #7eb87e;
     color: #0f0f13;
     width: 58px;
     height: 58px;
@@ -89,11 +90,11 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 8px 32px rgba(184,245,100,0.4);
+    box-shadow: 0 8px 32px rgba(126,184,126,0.4);
     transition: transform 0.2s, box-shadow 0.2s;
     z-index: 100;
   }
-  .fab:hover { transform: translateX(-50%) scale(1.08); box-shadow: 0 12px 40px rgba(184,245,100,0.55); }
+  .fab:hover { transform: translateX(-50%) scale(1.08); box-shadow: 0 12px 40px rgba(126,184,126,0.55); }
   .navbar { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 390px; background: rgba(15,15,19,0.96); backdrop-filter: blur(20px); border-top: 1px solid var(--border); padding: 10px 0 22px; display: flex; justify-content: space-around; align-items: center; z-index: 99; }
   .nav-item { display: flex; flex-direction: column; align-items: center; gap: 3px; cursor: pointer; opacity: 0.4; transition: opacity 0.2s; flex: 1; }
   .nav-item.active { opacity: 1; }
@@ -313,7 +314,7 @@
     } else {
       card.classList.add('positivo')
       amount.textContent = '$' + saldo.toLocaleString()
-      icon.textContent = '✅'
+      icon.textContent = '✓'
     }
 
     const frases = {
