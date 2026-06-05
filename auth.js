@@ -19,7 +19,7 @@ function _onSession(uid) {
   window.currentUserId = uid
   console.log('[auth] currentUserId establecido:', uid)
   document.documentElement.style.visibility = 'visible'
-  document.dispatchEvent(new Event('auth-ready'))
+  setTimeout(() => document.dispatchEvent(new Event('auth-ready')), 0)
 }
 
 window.dbClient.auth.onAuthStateChange((event, session) => {
