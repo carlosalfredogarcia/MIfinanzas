@@ -33,17 +33,16 @@
   .balance-item-label { font-size: 11px; color: var(--subtext); text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 8px; display: flex; align-items: center; gap: 5px; }
   .dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
   .dot-green { background: var(--accent); } .dot-red { background: var(--danger); } .dot-blue { background: var(--accent2); }
-  .balance-item-value { font-family: 'Syne', sans-serif; font-size: 26px; font-weight: 700; }
+  .balance-item-value { font-family: 'Syne', sans-serif; font-size: 28px; font-weight: 700; }
   .val-green { color: var(--accent); } .val-red { color: var(--danger); } .val-blue { color: var(--accent2); }
-  .saldo-card { margin: 0 24px 14px; border-radius: 20px; padding: 18px 20px; display: flex; justify-content: space-between; align-items: center; animation: fadeUp 0.5s 0.2s ease both; opacity: 0; transition: background 0.4s, border-color 0.4s; }
-  .saldo-card.positivo { background: linear-gradient(135deg, rgba(184,245,100,0.13), rgba(184,245,100,0.04)); border: 1px solid rgba(184,245,100,0.22); }
-  .saldo-card.negativo { background: linear-gradient(135deg, rgba(255,107,107,0.13), rgba(255,107,107,0.04)); border: 1px solid rgba(255,107,107,0.25); }
-  .saldo-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; display: block; margin-bottom: 4px; font-weight: 600; }
-  .saldo-card.positivo .saldo-label { color: var(--accent); } .saldo-card.negativo .saldo-label { color: var(--danger); }
-  .saldo-amount { font-family: 'Syne', sans-serif; font-size: 30px; font-weight: 800; }
-  .saldo-card.positivo .saldo-amount { color: #7eb87e; } .saldo-card.negativo .saldo-amount { color: var(--danger); }
-  .saldo-icon { font-size: 30px; opacity: 0.75; }
-  .saldo-card.positivo .saldo-icon { color: #7eb87e; font-weight: 700; }
+  .saldo-stripe { background: #1a2e1a; border-radius: 12px; padding: 14px 16px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; transition: background 0.4s; }
+  .saldo-stripe.negativo { background: #2e1a1a; }
+  .saldo-stripe-label { font-size: 10px; color: #7eb87e; text-transform: uppercase; letter-spacing: 0.1em; display: block; margin-bottom: 3px; font-weight: 600; }
+  .saldo-stripe.negativo .saldo-stripe-label { color: var(--danger); }
+  .saldo-stripe-amount { font-family: 'Syne', sans-serif; font-size: 32px; font-weight: 800; color: #7eb87e; }
+  .saldo-stripe.negativo .saldo-stripe-amount { color: var(--danger); }
+  .saldo-stripe-icon { font-size: 26px; font-weight: 700; color: #7eb87e; opacity: 0.85; }
+  .saldo-stripe.negativo .saldo-stripe-icon { color: var(--danger); }
   .frase { margin: 0 24px 14px; background: linear-gradient(135deg, rgba(184,245,100,0.07), rgba(79,209,197,0.04)); border: 1px solid rgba(184,245,100,0.14); border-radius: 14px; padding: 13px 16px; display: flex; align-items: center; gap: 10px; animation: fadeUp 0.5s 0.25s ease both; opacity: 0; }
   .frase-icon { font-size: 18px; }
   .frase-text { font-size: 13px; color: var(--accent); font-weight: 500; line-height: 1.45; }
@@ -133,7 +132,14 @@
     <div class="avatar">C</div>
   </div>
   <div class="balance-card">
-    <div class="balance-label">Resumen del mes <span class="month-badge" id="mes-badge">—</span></div>
+    <div class="balance-label">Resumen del mes · <span id="mes-badge">—</span></div>
+    <div class="saldo-stripe" id="saldo-card">
+      <div>
+        <span class="saldo-stripe-label">Saldo actual</span>
+        <div class="saldo-stripe-amount" id="saldo-amount">$0</div>
+      </div>
+      <div class="saldo-stripe-icon" id="saldo-icon">✓</div>
+    </div>
     <div class="balance-row">
       <div class="balance-item">
         <div class="balance-item-label"><span class="dot dot-green"></span>Ingresos</div>
@@ -148,10 +154,6 @@
         <div class="balance-item-value val-blue" id="total-fijos">$0</div>
       </div>
     </div>
-  </div>
-  <div class="saldo-card positivo" id="saldo-card">
-    <div><span class="saldo-label">Saldo actual</span><div class="saldo-amount" id="saldo-amount">$0</div></div>
-    <div class="saldo-icon" id="saldo-icon">✅</div>
   </div>
   <div class="frase"><span class="frase-icon">🎯</span><span class="frase-text" id="frase-text">Cargando...</span></div>
   <div class="meta-card">
@@ -308,11 +310,11 @@
     const icon   = document.getElementById('saldo-icon')
 
     if (saldo < 0) {
-      card.classList.remove('positivo'); card.classList.add('negativo')
+      card.classList.add('negativo')
       amount.textContent = '-$' + Math.abs(saldo).toLocaleString()
       icon.textContent = '⚠️'
     } else {
-      card.classList.add('positivo')
+      card.classList.remove('negativo')
       amount.textContent = '$' + saldo.toLocaleString()
       icon.textContent = '✓'
     }
