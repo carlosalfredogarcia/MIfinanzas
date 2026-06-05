@@ -1,4 +1,4 @@
-const CACHE = 'mifinanza-v2';
+const CACHE = 'mifinanza-v3';
 const PRECACHE = [
   '/',
   '/index.html',
