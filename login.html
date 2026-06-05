@@ -311,5 +311,10 @@
     else if (document.getElementById('form-nueva-clave').classList.contains('active'))  guardarNuevaClave()
   })
 </script>
+<script>
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/sw.js');
+  }
+</script>
 </body>
 </html>

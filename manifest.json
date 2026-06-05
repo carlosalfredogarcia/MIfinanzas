@@ -2,7 +2,7 @@
   "name": "MiFinanza",
   "short_name": "MiFinanza",
   "description": "Gestión de finanzas personales",
-  "start_url": "/",
+  "start_url": "/index.html",
   "scope": "/",
   "display": "standalone",
   "background_color": "#0f0f13",
