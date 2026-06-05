@@ -288,13 +288,18 @@
 
   async function cargarDashboard() {
     const uid = window.currentUserId
-    const [{ data: gastos }, { data: ingresos }, { data: fijos }, { data: metas }] = await Promise.all([
+    console.log('[dashboard] uid al cargar:', uid)
+    const [{ data: gastos, error: eGas }, { data: ingresos, error: eIng }, { data: fijos, error: eFij }, { data: metas, error: eMet }] = await Promise.all([
       dbClient.from('gastos').select('monto').eq('usuario_id', uid).gte('fecha', inicio).lte('fecha', fin),
       dbClient.from('ingresos').select('monto').eq('usuario_id', uid).gte('fecha', inicio).lte('fecha', fin),
       dbClient.from('gastos_fijos').select('*').eq('usuario_id', uid).eq('activo', true),
       dbClient.from('metas').select('*').eq('usuario_id', uid).eq('es_principal', true).single()
     ])
 
+    console.log('[dashboard] gastos:', gastos, 'error:', eGas)
+    console.log('[dashboard] ingresos:', ingresos, 'error:', eIng)
+    console.log('[dashboard] fijos:', fijos, 'error:', eFij)
+    console.log('[dashboard] metas:', metas, 'error:', eMet)
     const totalGas = (gastos   || []).reduce((s, g) => s + parseFloat(g.monto), 0)
     const totalIng = (ingresos || []).reduce((s, i) => s + parseFloat(i.monto), 0)
     const totalFij = (fijos    || []).reduce((s, f) => s + parseFloat(f.monto), 0)

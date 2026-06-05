@@ -12,11 +12,14 @@ window.currentUserId = null
 document.documentElement.style.visibility = 'hidden'
 
 window.dbClient.auth.getSession().then(({ data: { session } }) => {
+  console.log('[auth] session:', session)
   if (!session) {
+    console.warn('[auth] Sin sesión activa → redirigiendo a login')
     window.location.replace('login.html')
     return
   }
   window.currentUserId = session.user.id
+  console.log('[auth] currentUserId establecido:', window.currentUserId)
   document.documentElement.style.visibility = 'visible'
   document.dispatchEvent(new Event('auth-ready'))
 })
