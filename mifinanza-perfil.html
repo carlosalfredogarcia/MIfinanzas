@@ -353,6 +353,15 @@
   }
 
   async function cargarPerfil() {
+    if (!window.currentUserId) {
+      await new Promise(resolve => {
+        const iv = setInterval(() => {
+          if (window.currentUserId) { clearInterval(iv); resolve() }
+        }, 50)
+        setTimeout(() => { clearInterval(iv); resolve() }, 5000)
+      })
+    }
+    if (!window.currentUserId) return
     const { data, error } = await dbClient.from('perfil').select('*').eq('usuario_id', window.currentUserId).single()
     if (error || !data) return
 
@@ -484,7 +493,7 @@
     window.location.replace('login.html')
   }
 
-  document.addEventListener('auth-ready', cargarPerfil)
+  cargarPerfil()
 </script>
 <script>
   if ('serviceWorker' in navigator) {

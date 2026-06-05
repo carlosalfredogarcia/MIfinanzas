@@ -197,6 +197,15 @@
   let fijos = [];
 
   async function cargarFijos() {
+    if (!window.currentUserId) {
+      await new Promise(resolve => {
+        const iv = setInterval(() => {
+          if (window.currentUserId) { clearInterval(iv); resolve() }
+        }, 50)
+        setTimeout(() => { clearInterval(iv); resolve() }, 5000)
+      })
+    }
+    if (!window.currentUserId) return
     const { data, error } = await dbClient.from('gastos_fijos').select('*').eq('usuario_id', window.currentUserId).order('created_at');
     if (error) { console.error(error); return; }
     fijos = data;
@@ -325,7 +334,7 @@
     if (e.target === this) cerrarModal();
   });
 
-  document.addEventListener('auth-ready', cargarFijos);
+  cargarFijos();
 </script>
 <script>
   if ('serviceWorker' in navigator) {

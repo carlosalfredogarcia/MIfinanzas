@@ -295,9 +295,18 @@
 
   async function cargarMovimientos() {
     document.getElementById('lista').innerHTML = '<div class="loading">Cargando...</div>';
+    let uid = window.currentUserId
+    if (!uid) {
+      uid = await new Promise(resolve => {
+        const iv = setInterval(() => {
+          if (window.currentUserId) { clearInterval(iv); resolve(window.currentUserId) }
+        }, 50)
+        setTimeout(() => { clearInterval(iv); resolve(null) }, 5000)
+      })
+    }
+    if (!uid) return
     const inicio = anioActual + '-' + String(mesActual + 1).padStart(2,'0') + '-01';
     const fin = new Date(anioActual, mesActual + 1, 0).toISOString().split('T')[0];
-    const uid = window.currentUserId
     const [{ data: gastos }, { data: ingresos }] = await Promise.all([
       dbClient.from('gastos').select('*').eq('usuario_id', uid).gte('fecha', inicio).lte('fecha', fin).order('fecha', { ascending: false }),
       dbClient.from('ingresos').select('*').eq('usuario_id', uid).gte('fecha', inicio).lte('fecha', fin).order('fecha', { ascending: false })
@@ -500,7 +509,7 @@
   });
 
   actualizarMesLabel();
-  document.addEventListener('auth-ready', cargarMovimientos);
+  cargarMovimientos();
 </script>
 <script>
   if ('serviceWorker' in navigator) {

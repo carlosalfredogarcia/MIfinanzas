@@ -729,6 +729,15 @@
   }
 
   async function cargarMetas() {
+    if (!window.currentUserId) {
+      await new Promise(resolve => {
+        const iv = setInterval(() => {
+          if (window.currentUserId) { clearInterval(iv); resolve() }
+        }, 50)
+        setTimeout(() => { clearInterval(iv); resolve() }, 5000)
+      })
+    }
+    if (!window.currentUserId) return
     const { data, error } = await dbClient
       .from('metas')
       .select('*')
@@ -1021,7 +1030,7 @@
   }
 
   poblarSelectores()
-  document.addEventListener('auth-ready', cargarMetas)
+  cargarMetas()
 </script>
 <script>
   if ('serviceWorker' in navigator) {

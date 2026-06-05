@@ -245,7 +245,16 @@
   let mesSeleccionado = null
 
   async function cargarDatos() {
-    const uid = window.currentUserId
+    let uid = window.currentUserId
+    if (!uid) {
+      uid = await new Promise(resolve => {
+        const iv = setInterval(() => {
+          if (window.currentUserId) { clearInterval(iv); resolve(window.currentUserId) }
+        }, 50)
+        setTimeout(() => { clearInterval(iv); resolve(null) }, 5000)
+      })
+    }
+    if (!uid) return
     const [{ data: gastos, error: errG }, { data: ingresos, error: errI }] = await Promise.all([
       dbClient.from('gastos').select('fecha, monto, categoria').eq('usuario_id', uid).order('fecha', { ascending: true }),
       dbClient.from('ingresos').select('fecha, monto').eq('usuario_id', uid).order('fecha', { ascending: true })
@@ -553,7 +562,7 @@
     })
   }
 
-  document.addEventListener('auth-ready', cargarDatos)
+  cargarDatos()
 </script>
 <script>
   if ('serviceWorker' in navigator) {
