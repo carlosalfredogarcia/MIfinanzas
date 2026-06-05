@@ -285,7 +285,19 @@
   document.getElementById('mes-badge').textContent  = meses[mesActual]
 
   async function cargarDashboard() {
-    const uid = window.currentUserId
+    // Esperar a que window.currentUserId esté disponible sin depender
+    // del timing del evento auth-ready (que puede llegar antes del listener)
+    let uid = window.currentUserId
+    if (!uid) {
+      uid = await new Promise(resolve => {
+        const iv = setInterval(() => {
+          if (window.currentUserId) { clearInterval(iv); resolve(window.currentUserId) }
+        }, 50)
+        // Si en 5s no llega, auth.js ya habrá redirigido a login
+        setTimeout(() => { clearInterval(iv); resolve(null) }, 5000)
+      })
+    }
+    if (!uid) return
     console.log('[dashboard] uid al cargar:', uid)
     const [{ data: gastos, error: eGas }, { data: ingresos, error: eIng }, { data: fijos, error: eFij }, { data: metas, error: eMet }] = await Promise.all([
       dbClient.from('gastos').select('monto').eq('usuario_id', uid).gte('fecha', inicio).lte('fecha', fin),
@@ -366,7 +378,7 @@
     }
   }
 
-  document.addEventListener('auth-ready', cargarDashboard)
+  cargarDashboard()
 
   function abrirMenu()       { document.getElementById('menu-fab').style.display = 'flex' }
   function cerrarMenu()      { document.getElementById('menu-fab').style.display = 'none' }
