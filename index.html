@@ -59,7 +59,7 @@
   .progress-fill { height: 100%; border-radius: 100px; background: linear-gradient(90deg, var(--accent2), var(--accent)); transition: width 1.2s ease; }
   .meta-detail { display: flex; justify-content: space-between; font-size: 12px; color: var(--subtext); }
   .meta-detail strong { color: var(--text); }
-  .fijos-card { margin: 0 24px 14px; background: var(--card); border-radius: 20px; padding: 18px 20px; border: 1px solid var(--border); animation: fadeUp 0.5s 0.4s ease both; opacity: 0; }
+  .fijos-card { margin: 0 24px 14px; background: var(--card); border-radius: 20px; padding: 18px 20px; border: 1px solid var(--border); animation: fadeUp 0.5s 0.4s ease both; opacity: 0; cursor: pointer; }
   .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
   .section-title { font-size: 11px; color: var(--subtext); text-transform: uppercase; letter-spacing: 0.1em; }
   .section-total { font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 700; color: var(--danger); }
@@ -170,7 +170,7 @@
     <div class="progress-track"><div class="progress-fill" id="meta-barra" style="width:0%"></div></div>
     <div class="meta-detail"><span>Llevas <strong id="meta-llevado">$0</strong></span><span>Faltan <strong id="meta-faltan">$0</strong></span></div>
   </div>
-  <div class="fijos-card">
+  <div class="fijos-card" onclick="location.href='mifinanza-fijos.html'">
     <div class="section-header">
       <span class="section-title">Gastos fijos</span>
       <span class="section-total" id="fijos-total">$0/mes</span>
