@@ -330,7 +330,7 @@
     const [{ data: gastos, error: eGas }, { data: ingresos, error: eIng }, { data: fijos, error: eFij }, { data: metas, error: eMet }] = await Promise.all([
       dbClient.from('gastos').select('monto').eq('usuario_id', uid).gte('fecha', inicio).lte('fecha', fin),
       dbClient.from('ingresos').select('monto').eq('usuario_id', uid).gte('fecha', inicio).lte('fecha', fin),
-      dbClient.from('gastos_fijos').select('*').eq('usuario_id', uid).eq('activo', true),
+      dbClient.from('gastos_fijos').select('*').eq('usuario_id', uid).lte('fecha_inicio', fin).or(`fecha_fin.gte.${inicio},fecha_fin.is.null`),
       dbClient.from('metas').select('*').eq('usuario_id', uid).eq('es_principal', true).single()
     ])
 
@@ -341,7 +341,7 @@
     const totalGas = (gastos   || []).reduce((s, g) => s + parseFloat(g.monto), 0)
     const totalIng = (ingresos || []).reduce((s, i) => s + parseFloat(i.monto), 0)
     const totalFij = (fijos    || []).reduce((s, f) => s + parseFloat(f.monto), 0)
-    const saldo    = totalIng - totalGas
+    const saldo    = totalIng - totalGas - totalFij
 
     document.getElementById('total-ingresos').textContent = '$' + totalIng.toLocaleString()
     document.getElementById('total-gastos').textContent   = '$' + totalGas.toLocaleString()

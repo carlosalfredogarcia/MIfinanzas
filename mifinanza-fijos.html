@@ -171,6 +171,7 @@
     </div>
     <div class="fld"><label class="lbl">Monto</label><input type="number" id="f-monto" class="inp" placeholder="$0.00"></div>
     <div class="fld"><label class="lbl">Fecha de inicio</label><input type="date" id="f-fecha" class="inp"></div>
+    <div class="fld"><label class="lbl">Fecha fin (opcional)</label><input type="date" id="f-fecha-fin" class="inp"></div>
     <button class="btn-ok" onclick="guardarFijo()">Guardar</button>
     <button class="btn-no" onclick="cerrarModal()">Cancelar</button>
   </div>
@@ -313,7 +314,7 @@
     renderFijos();
   }
 
-  function abrirModal() { document.getElementById('modal').classList.add('visible'); }
+  function abrirModal() { document.getElementById('f-fecha-fin').value = ''; document.getElementById('modal').classList.add('visible'); }
   function cerrarModal() { document.getElementById('modal').classList.remove('visible'); }
 
   async function guardarFijo() {
@@ -321,9 +322,10 @@
     const categoria = document.getElementById('f-categoria').value;
     const monto     = parseFloat(document.getElementById('f-monto').value);
     const fecha     = document.getElementById('f-fecha').value;
+    const fechaFin  = document.getElementById('f-fecha-fin').value || null;
     if (!nombre || isNaN(monto) || !fecha) { alert('Completa todos los campos'); return; }
     const dia = new Date(fecha).getDate();
-    const { data, error } = await dbClient.from('gastos_fijos').insert([{ nombre, categoria, monto, dia_del_mes: dia, activo: true, fecha_inicio: fecha, usuario_id: window.currentUserId }]).select();
+    const { data, error } = await dbClient.from('gastos_fijos').insert([{ nombre, categoria, monto, dia_del_mes: dia, activo: true, fecha_inicio: fecha, fecha_fin: fechaFin, usuario_id: window.currentUserId }]).select();
     if (error) { alert('Error: ' + error.message); return; }
     fijos.push(data[0]);
     cerrarModal();

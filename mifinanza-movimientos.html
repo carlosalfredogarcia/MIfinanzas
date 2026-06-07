@@ -307,15 +307,24 @@
     if (!uid) return
     const inicio = anioActual + '-' + String(mesActual + 1).padStart(2,'0') + '-01';
     const fin = new Date(anioActual, mesActual + 1, 0).toISOString().split('T')[0];
-    const [{ data: gastos }, { data: ingresos }] = await Promise.all([
+    const [{ data: gastos }, { data: ingresos }, { data: fijos }] = await Promise.all([
       dbClient.from('gastos').select('*').eq('usuario_id', uid).gte('fecha', inicio).lte('fecha', fin).order('fecha', { ascending: false }),
-      dbClient.from('ingresos').select('*').eq('usuario_id', uid).gte('fecha', inicio).lte('fecha', fin).order('fecha', { ascending: false })
+      dbClient.from('ingresos').select('*').eq('usuario_id', uid).gte('fecha', inicio).lte('fecha', fin).order('fecha', { ascending: false }),
+      dbClient.from('gastos_fijos').select('*').eq('usuario_id', uid).lte('fecha_inicio', fin).or(`fecha_fin.gte.${inicio},fecha_fin.is.null`)
     ]);
     const movGastos   = (gastos   || []).map(g => ({ ...g, tipo: 'gasto' }));
     const movIngresos = (ingresos || []).map(i => ({ ...i, tipo: 'ingreso', descripcion: i.concepto, categoria: i.tipo }));
-    todosMovimientos = [...movGastos, ...movIngresos].sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+    const movFijos    = (fijos    || []).map(f => {
+      const dia    = f.dia_del_mes ? String(f.dia_del_mes).padStart(2, '0') : '01';
+      const mesStr = String(mesActual + 1).padStart(2, '0');
+      let fechaFijo = `${anioActual}-${mesStr}-${dia}`;
+      if (fechaFijo < inicio) fechaFijo = inicio;
+      if (fechaFijo > fin)    fechaFijo = fin;
+      return { ...f, tipo: 'fijo', descripcion: f.nombre, fecha: fechaFijo };
+    });
+    todosMovimientos = [...movGastos, ...movIngresos, ...movFijos].sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
     const totalIng = movIngresos.reduce((s, i) => s + parseFloat(i.monto), 0);
-    const totalGas = movGastos.reduce((s, g) => s + parseFloat(g.monto), 0);
+    const totalGas = [...movGastos, ...movFijos].reduce((s, g) => s + parseFloat(g.monto), 0);
     document.getElementById('total-ingresos').textContent = '$' + totalIng.toLocaleString();
     document.getElementById('total-gastos').textContent   = '$' + totalGas.toLocaleString();
     renderLista();
@@ -345,7 +354,8 @@
     if (categoriaActiva === 'ingresos') {
       filtrados = todosMovimientos.filter(m => m.tipo === 'ingreso');
     } else if (categoriaActiva !== 'todas') {
-      filtrados = todosMovimientos.filter(m => m.tipo === 'gasto' && m.categoria && m.categoria.includes(categoriaActiva.replace(/[^\w\s]/g,'').trim()));
+      const catKey = categoriaActiva.replace(/[^\w\s]/g,'').trim();
+      filtrados = todosMovimientos.filter(m => (m.tipo === 'gasto' || m.tipo === 'fijo') && m.categoria && m.categoria.includes(catKey));
     }
     if (filtrados.length === 0) {
       lista.innerHTML = '<div class="loading">Sin movimientos este mes</div>';
@@ -370,14 +380,16 @@
       grupo.appendChild(label);
       items.forEach(m => {
         const div = document.createElement('div');
-        div.className = 'movimiento';
+        const esFijo    = m.tipo === 'fijo';
         const esIngreso = m.tipo === 'ingreso';
-        const icon = esIngreso ? '💰' : getIcon(m.categoria);
+        div.className = 'movimiento';
+        const icon     = esIngreso ? '💰' : esFijo ? '📌' : getIcon(m.categoria);
+        const catLabel = esFijo ? 'Gasto fijo' : (m.categoria || '');
         div.innerHTML = `
           <div class="mov-icon">${icon}</div>
           <div class="mov-info">
             <div class="mov-desc">${m.descripcion || m.concepto}</div>
-            <div class="mov-cat">${m.categoria || ''}</div>
+            <div class="mov-cat">${catLabel}</div>
           </div>
           <div class="mov-right">
             <div class="mov-amount ${esIngreso ? 'amount-ingreso' : 'amount-gasto'}">
@@ -386,8 +398,10 @@
             <div class="mov-hora">${fecha}</div>
           </div>
         `;
-        div.dataset.id   = m.id;
-        div.dataset.tipo = m.tipo;
+        if (!esFijo) {
+          div.dataset.id   = m.id;
+          div.dataset.tipo = m.tipo;
+        }
         grupo.appendChild(div);
       });
       lista.appendChild(grupo);
@@ -503,7 +517,7 @@
 
   document.getElementById('lista').addEventListener('click', function(e) {
     const el = e.target.closest('.movimiento');
-    if (!el) return;
+    if (!el || !el.dataset.id) return;
     const found = todosMovimientos.find(m => String(m.id) === el.dataset.id && m.tipo === el.dataset.tipo);
     if (found) abrirEditar(found);
   });
