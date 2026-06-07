@@ -24,11 +24,11 @@
 
   .avatar-wrap { position: relative; margin-bottom: 14px; }
 
-  .avatar { width: 80px; height: 80px; border-radius: 50%; background: linear-gradient(135deg, var(--accent), var(--accent2)); display: flex; align-items: center; justify-content: center; font-family: 'Syne', sans-serif; font-size: 32px; font-weight: 800; color: #0f0f13; cursor: pointer; transition: transform 0.2s; border: 3px solid rgba(184,245,100,0.3); }
+  .avatar { width: 80px; height: 80px; border-radius: 50%; background: linear-gradient(135deg, var(--accent), var(--accent2)); display: flex; align-items: center; justify-content: center; font-family: 'Syne', sans-serif; font-size: 32px; font-weight: 800; color: #0f0f13; cursor: pointer; transition: transform 0.2s; border: 3px solid rgba(184,245,100,0.3); position: relative; z-index: 9999; }
 
   .avatar:hover { transform: scale(1.05); }
 
-  .avatar-edit { position: absolute; bottom: 0; right: 0; width: 26px; height: 26px; background: var(--card); border-radius: 50%; border: 2px solid var(--bg); display: flex; align-items: center; justify-content: center; font-size: 12px; cursor: pointer; }
+  .avatar-edit { position: absolute; bottom: 0; right: 0; width: 26px; height: 26px; background: var(--card); border-radius: 50%; border: 2px solid var(--bg); display: flex; align-items: center; justify-content: center; font-size: 12px; cursor: pointer; z-index: 9999; }
 
   .hero-nombre { font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 800; background: linear-gradient(90deg, #fff 30%, var(--accent)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 4px; }
 
@@ -170,8 +170,8 @@
 
   <div class="hero">
     <div class="avatar-wrap">
-      <div class="avatar" id="avatar-letra">C</div>
-      <div class="avatar-edit">✏️</div>
+      <div class="avatar" id="avatar-letra" onclick="editarNombre()">C</div>
+      <div class="avatar-edit" onclick="editarNombre()">✏️</div>
     </div>
     <div class="hero-nombre" id="hero-nombre">Carlos</div>
     <div class="hero-moneda" id="hero-moneda">Dólar estadounidense · USD</div>
@@ -319,6 +319,16 @@
   </div>
 </nav>
 
+<div class="modal-overlay" id="modal-nombre">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Tu nombre</div>
+    <input type="text" id="nombre-input" placeholder="¿Cómo te llamas?" style="width:100%;background:#1e1e27;border:1px solid rgba(255,255,255,0.06);border-radius:14px;padding:14px;color:#f0f0f5;font-family:'DM Sans',sans-serif;font-size:15px;outline:none;margin-bottom:16px;display:block;">
+    <button class="btn-ok" onclick="confirmarNombre()">Guardar</button>
+    <button class="btn-cancelar" onclick="cerrarNombre()">Cancelar</button>
+  </div>
+</div>
+
 <div class="modal-overlay" id="modal-frase">
   <div class="modal">
     <div class="modal-handle"></div>
@@ -432,6 +442,23 @@
     wrap.appendChild(tag)
   }
 
+  function editarNombre() {
+    const modalEl = document.getElementById('modal-nombre')
+    const inputEl = document.getElementById('nombre-input')
+    if (!modalEl || !inputEl) return
+    inputEl.value = document.getElementById('hero-nombre').textContent.trim()
+    modalEl.style.display = 'flex'
+    setTimeout(() => inputEl.focus(), 100)
+  }
+  function cerrarNombre() { document.getElementById('modal-nombre').style.display = 'none' }
+  function confirmarNombre() {
+    const val = document.getElementById('nombre-input').value.trim()
+    if (!val) return
+    document.getElementById('hero-nombre').textContent = val
+    document.getElementById('avatar-letra').textContent = val[0].toUpperCase()
+    cerrarNombre()
+  }
+
   function setTono(el) {
     document.querySelectorAll('.tono-item').forEach(t => t.classList.remove('active'))
     el.classList.add('active')
@@ -461,6 +488,10 @@
     cerrarFrase()
   }
 
+  document.getElementById('modal-nombre').addEventListener('click', function(e) {
+    if (e.target === this) cerrarNombre()
+  })
+
   document.getElementById('modal-frase').addEventListener('click', function(e) {
     if (e.target === this) cerrarFrase()
   })
@@ -477,9 +508,10 @@
     btn.disabled = true
     btn.textContent = 'Guardando...'
 
-    const { error } = await dbClient.from('perfil').update({
+    const { error } = await dbClient.from('perfil').upsert({
+      usuario_id: window.currentUserId,
       nombre, frase, moneda, tono, color, categorias: cats
-    }).eq('usuario_id', window.currentUserId)
+    }, { onConflict: 'usuario_id' })
 
     btn.disabled = false
     btn.textContent = 'Guardar cambios'

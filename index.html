@@ -128,9 +128,9 @@
 <div class="phone">
   <div class="header">
     <div class="greeting">
-      <div class="nombre">Hola, Carlos 👋</div>
+      <div class="nombre" id="saludo-nombre">Hola, Carlos 👋</div>
     </div>
-    <div class="avatar">C</div>
+    <div class="avatar" id="avatar-header">C</div>
   </div>
   <div class="balance-card">
     <div class="mes-nav-header">
@@ -317,6 +317,13 @@
       })
     }
     if (!uid) return
+
+    const { data: perfil } = await dbClient.from('perfil').select('nombre').eq('usuario_id', uid).single()
+    if (perfil?.nombre) {
+      document.getElementById('saludo-nombre').textContent = 'Hola, ' + perfil.nombre + ' 👋'
+      document.getElementById('avatar-header').textContent = perfil.nombre[0].toUpperCase()
+    }
+
     const inicio = anioVer + '-' + String(mesVer + 1).padStart(2,'0') + '-01'
     const fin    = new Date(anioVer, mesVer + 1, 0).toISOString().split('T')[0]
     console.log('[dashboard] uid al cargar:', uid)
