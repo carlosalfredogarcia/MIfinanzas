@@ -94,6 +94,9 @@
 
   .spacer { height: 130px; }
   @keyframes fadeUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+  .form-group { margin-bottom: 10px; }
+  .form-label { font-size:11px;color:#8888a0;text-transform:uppercase;letter-spacing:0.08em;display:block;margin-bottom:5px; }
+  .form-input { width:100%;background:#1e1e27;border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:10px 14px;color:#f0f0f5;font-family:'DM Sans',sans-serif;font-size:15px;outline:none;display:block; }
 </style>
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="/icon-192.png">
@@ -170,7 +173,10 @@
     </div>
     <div class="fld"><label class="lbl">Monto</label><input type="number" id="f-monto" class="inp" placeholder="$0.00"></div>
     <div class="fld"><label class="lbl">Fecha de inicio</label><input type="date" id="f-fecha" class="inp"></div>
-    <div class="fld"><label class="lbl">Fecha fin (opcional)</label><input type="date" id="f-fecha-fin" class="inp"></div>
+    <div class="form-group">
+      <label class="form-label">FECHA FIN <span style="color:#555;">(opcional)</span></label>
+      <input type="date" id="fijo-fecha-fin" class="form-input">
+    </div>
     <button class="btn-ok" onclick="guardarFijo()">Guardar</button>
     <button class="btn-no" onclick="cerrarModal()">Cancelar</button>
   </div>
@@ -317,7 +323,7 @@
     document.getElementById('f-nombre').value = '';
     document.getElementById('f-monto').value = '';
     document.getElementById('f-fecha').value = '';
-    document.getElementById('f-fecha-fin').value = '';
+    document.getElementById('fijo-fecha-fin').value = '';
     document.getElementById('modal').style.display = 'flex';
   }
   function cerrarModal() { document.getElementById('modal').style.display = 'none'; }
@@ -327,7 +333,7 @@
     const categoria = document.getElementById('f-categoria').value;
     const monto     = parseFloat(document.getElementById('f-monto').value);
     const fecha     = document.getElementById('f-fecha').value;
-    const fechaFin  = document.getElementById('f-fecha-fin').value || null;
+    const fechaFin  = document.getElementById('fijo-fecha-fin').value || null;
     if (!nombre || isNaN(monto) || !fecha) { alert('Completa todos los campos'); return; }
     const dia = new Date(fecha).getDate();
     const { data, error } = await dbClient.from('gastos_fijos').insert([{ nombre, categoria, monto, dia_del_mes: dia, activo: true, fecha_inicio: fecha, fecha_fin: fechaFin, usuario_id: window.currentUserId }]).select();
