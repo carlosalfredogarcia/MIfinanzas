@@ -61,7 +61,7 @@
   .meta-detail strong { color: var(--text); }
   .fijos-card { margin: 0 24px 14px; background: var(--card); border-radius: 20px; padding: 18px 20px; border: 1px solid var(--border); animation: fadeUp 0.5s 0.4s ease both; opacity: 0; cursor: pointer; }
   .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
-  .section-title { font-size: 11px; color: var(--subtext); text-transform: uppercase; letter-spacing: 0.1em; }
+  .section-title { font-size: 11px; color: var(--subtext); text-transform: uppercase; letter-spacing: 0.1em; cursor: pointer; }
   .section-total { font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 700; color: var(--danger); }
   .fijo-item { display: flex; justify-content: space-between; align-items: center; padding: 9px 0; border-bottom: 1px solid var(--border); }
   .fijo-item:last-child { border-bottom: none; }
@@ -172,7 +172,7 @@
   </div>
   <div class="fijos-card" onclick="location.href='mifinanza-fijos.html'">
     <div class="section-header">
-      <span class="section-title">Gastos fijos</span>
+      <span class="section-title" onclick="location.href='mifinanza-fijos.html'">Gastos fijos</span>
       <span class="section-total" id="fijos-total">$0/mes</span>
     </div>
     <div id="fijos-lista"><div style="color:var(--subtext);font-size:13px;text-align:center;padding:10px">Cargando...</div></div>
