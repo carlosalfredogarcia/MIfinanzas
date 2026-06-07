@@ -1,4 +1,4 @@
-const CACHE = 'mifinanza-v6';
+const CACHE = 'mifinanza-v7';
 const ASSETS = ['/icon-192.png', '/icon-512.png'];
 
 self.addEventListener('install', e => {
