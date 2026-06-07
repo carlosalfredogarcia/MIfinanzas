@@ -51,7 +51,7 @@
   .loading { text-align: center; color: var(--subtext); font-size: 14px; padding: 40px 0; }
   .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(6px); z-index: 200; display: none; align-items: flex-end; justify-content: center; }
   .modal-overlay.visible { display: flex; }
-  .modal { width: 390px; background: var(--card); border-radius: 28px 28px 0 0; padding: 24px 24px 40px; border-top: 1px solid var(--border); animation: slideUp 0.3s ease; }
+  .modal { width: 390px; background: var(--card); border-radius: 28px 28px 0 0; padding: 24px 24px 40px; border-top: 1px solid var(--border); animation: slideUp 0.3s ease; max-height: 90vh; overflow-y: auto; }
   @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
   .modal-handle { width: 40px; height: 4px; background: var(--border); border-radius: 100px; margin: 0 auto 20px; }
   .modal-title { font-family: 'Syne', sans-serif; font-size: 18px; font-weight: 700; color: var(--text); margin-bottom: 20px; }
