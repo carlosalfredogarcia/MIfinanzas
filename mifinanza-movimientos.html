@@ -37,14 +37,9 @@
   .res-value { font-family: 'Roboto', sans-serif; font-size: 18px; font-weight: 700; }
   .val-green { color: var(--success); }
   .val-red { color: var(--danger); }
-  .filtro-wrap { margin: 0 24px 16px; animation: fadeUp 0.4s 0.2s ease both; opacity: 0; }
-  .filtro-scroll { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; }
-  .filtro-scroll::-webkit-scrollbar { display: none; }
-  .filtro-chip { background: var(--card); border: 1px solid var(--border); border-radius: 100px; padding: 6px 14px; font-size: 12px; color: var(--subtext); cursor: pointer; white-space: nowrap; transition: all 0.2s; flex-shrink: 0; }
-  .filtro-chip.active { background: rgba(167,139,250,0.15); border-color: rgba(167,139,250,0.4); color: var(--accent); font-weight: 600; }
   .lista-wrap { padding: 0 24px; animation: fadeUp 0.4s 0.25s ease both; opacity: 0; }
   .dia-grupo { margin-bottom: 20px; }
-  .dia-label { font-size: 11px; color: var(--subtext); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 8px; padding-left: 2px; }
+  .dia-label { font-size: 13px; font-weight: 500; color: #ffffff; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 8px; padding-left: 2px; }
   .movimiento { background: var(--card); border-radius: 14px; padding: 13px 14px; display: flex; align-items: center; gap: 12px; margin-bottom: 8px; border: 1px solid var(--border); border-left-width: 3px; cursor: pointer; transition: opacity 0.15s; }
   .movimiento:active { opacity: 0.65; }
   .mov-bar-fijo    { border-left-color: var(--accent); }
@@ -110,20 +105,6 @@
     <div class="res-item">
       <div class="res-label"><span class="dot dot-red"></span>Gastos</div>
       <div class="res-value val-red" id="total-gastos">$0</div>
-    </div>
-  </div>
-
-  <div class="filtro-wrap">
-    <div class="filtro-scroll" id="filtros">
-      <div class="filtro-chip active" onclick="filtrar(this, 'todas')">Todas</div>
-      <div class="filtro-chip" onclick="filtrar(this, 'ingresos')">💰 Ingresos</div>
-      <div class="filtro-chip" onclick="filtrar(this, '🍔 Comida')">🍔 Comida</div>
-      <div class="filtro-chip" onclick="filtrar(this, '🏠 Alquiler')">🏠 Alquiler</div>
-      <div class="filtro-chip" onclick="filtrar(this, '🌍 Remesas')">🌍 Remesas</div>
-      <div class="filtro-chip" onclick="filtrar(this, '💻 Tecnología')">💻 Tecnología</div>
-      <div class="filtro-chip" onclick="filtrar(this, '🏋️ Gym')">🏋️ Gym</div>
-      <div class="filtro-chip" onclick="filtrar(this, '❤️ Salud')">❤️ Salud</div>
-      <div class="filtro-chip" onclick="filtrar(this, '📦 Otros')">📦 Otros</div>
     </div>
   </div>
 
