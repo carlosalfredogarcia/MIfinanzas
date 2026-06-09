@@ -263,6 +263,14 @@
         <option>💼 Nómina</option><option>💵 Efectivo</option><option>⭐ Extra</option><option>📦 Otro</option>
       </select>
     </div>
+    <div class="fld" id="fld-nombre"><label class="lbl">Nombre</label><input type="text" id="e-nombre" class="inp"></div>
+    <div class="fld" id="fld-cat-fijo"><label class="lbl">Categoría</label>
+      <select id="e-cat-fijo" class="inp">
+        <option>🏠 Alquiler</option><option>📱 Línea</option><option>🌍 Remesas</option>
+        <option>💻 Tecnología</option><option>🏋️ Gym</option><option>❤️ Salud</option>
+        <option>💳 Crédito</option><option>📦 Otros</option>
+      </select>
+    </div>
     <div class="fld" style="margin-bottom:18px"><label class="lbl">Monto</label><input type="number" id="e-monto" class="inp" placeholder="$0.00"></div>
     <button onclick="guardarEdicion()" class="btn-ok" id="edit-btn-ok" style="background:#b8f564;color:#0f0f13">Guardar cambios</button>
     <button onclick="eliminarMovimiento()" class="btn-del">Eliminar</button>
@@ -279,6 +287,7 @@
   let anioActual = new Date().getFullYear();
   let categoriaActiva = 'todas';
   let todosMovimientos = [];
+  let filtradosActuales = [];
 
   function actualizarMesLabel() {
     document.getElementById('mes-label').textContent = meses[mesActual] + ' ' + anioActual;
@@ -361,14 +370,15 @@
       lista.innerHTML = '<div class="loading">Sin movimientos este mes</div>';
       return;
     }
+    filtradosActuales = filtrados;
     const grupos = {};
-    filtrados.forEach(m => {
+    filtrados.forEach((m, idx) => {
       if (!grupos[m.fecha]) grupos[m.fecha] = [];
-      grupos[m.fecha].push(m);
+      grupos[m.fecha].push({ m, idx });
     });
     const hoy  = new Date().toISOString().split('T')[0];
     const ayer = new Date(Date.now() - 86400000).toISOString().split('T')[0];
-    Object.entries(grupos).forEach(([fecha, items]) => {
+    Object.entries(grupos).forEach(([fecha, entries]) => {
       const grupo = document.createElement('div');
       grupo.className = 'dia-grupo';
       const label = document.createElement('div');
@@ -378,11 +388,13 @@
       const mesesAbr = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
       label.textContent = fecha === hoy ? 'Hoy' : fecha === ayer ? 'Ayer' : dias[fechaObj.getDay()] + ', ' + fechaObj.getDate() + ' ' + mesesAbr[fechaObj.getMonth()];
       grupo.appendChild(label);
-      items.forEach(m => {
+      entries.forEach(({ m, idx }) => {
         const div = document.createElement('div');
         const esFijo    = m.tipo === 'fijo';
         const esIngreso = m.tipo === 'ingreso';
         div.className = 'movimiento';
+        div.setAttribute('onclick', `abrirEditarIdx(${idx})`);
+        div.dataset.idx = idx;
         const icon     = esIngreso ? '💰' : esFijo ? '📌' : getIcon(m.categoria);
         const catLabel = esFijo ? 'Gasto fijo' : (m.categoria || '');
         div.innerHTML = `
@@ -398,10 +410,6 @@
             <div class="mov-hora">${fecha}</div>
           </div>
         `;
-        if (!esFijo) {
-          div.dataset.id   = m.id;
-          div.dataset.tipo = m.tipo;
-        }
         grupo.appendChild(div);
       });
       lista.appendChild(grupo);
@@ -457,16 +465,23 @@
 
   function abrirEditar(m) {
     editando = m;
+    const esFijo    = m.tipo === 'fijo';
     const esIngreso = m.tipo === 'ingreso';
-    document.getElementById('edit-title').textContent = esIngreso ? 'Editar ingreso' : 'Editar gasto';
+    document.getElementById('edit-title').textContent = esFijo ? 'Editar gasto fijo' : esIngreso ? 'Editar ingreso' : 'Editar gasto';
     document.getElementById('edit-btn-ok').style.background = esIngreso ? '#4fd1c5' : '#b8f564';
-    document.getElementById('e-fecha').value  = m.fecha;
-    document.getElementById('e-monto').value  = m.monto;
-    document.getElementById('fld-descripcion').style.display = esIngreso ? 'none' : '';
+    document.getElementById('e-fecha').value = esFijo ? (m.fecha_inicio || m.fecha) : m.fecha;
+    document.getElementById('e-monto').value = m.monto;
+    document.getElementById('fld-descripcion').style.display = (!esFijo && !esIngreso) ? '' : 'none';
     document.getElementById('fld-concepto').style.display    = esIngreso ? '' : 'none';
-    document.getElementById('fld-categoria').style.display   = esIngreso ? 'none' : '';
+    document.getElementById('fld-categoria').style.display   = (!esFijo && !esIngreso) ? '' : 'none';
     document.getElementById('fld-tipo').style.display        = esIngreso ? '' : 'none';
-    if (esIngreso) {
+    document.getElementById('fld-nombre').style.display      = esFijo ? '' : 'none';
+    document.getElementById('fld-cat-fijo').style.display    = esFijo ? '' : 'none';
+    if (esFijo) {
+      document.getElementById('e-nombre').value = m.nombre || '';
+      const catFijoSel = document.getElementById('e-cat-fijo');
+      [...catFijoSel.options].forEach(o => { if (o.value === m.categoria) catFijoSel.value = m.categoria; });
+    } else if (esIngreso) {
       document.getElementById('e-concepto').value = m.concepto || m.descripcion || '';
       const tipoSel = document.getElementById('e-tipo');
       [...tipoSel.options].forEach(o => { if (o.value === m.categoria) tipoSel.value = m.categoria; });
@@ -489,7 +504,13 @@
     const monto = parseFloat(document.getElementById('e-monto').value);
     if (!fecha || isNaN(monto)) { alert('Completa todos los campos'); return; }
     let error;
-    if (editando.tipo === 'ingreso') {
+    if (editando.tipo === 'fijo') {
+      const nombre    = document.getElementById('e-nombre').value.trim();
+      const categoria = document.getElementById('e-cat-fijo').value;
+      if (!nombre) { alert('Completa el nombre'); return; }
+      const dia = new Date(fecha + 'T00:00:00').getDate();
+      ({ error } = await dbClient.from('gastos_fijos').update({ nombre, categoria, monto, fecha_inicio: fecha, dia_del_mes: dia }).eq('id', editando.id).eq('usuario_id', window.currentUserId));
+    } else if (editando.tipo === 'ingreso') {
       const concepto = document.getElementById('e-concepto').value.trim();
       const tipo     = document.getElementById('e-tipo').value;
       if (!concepto) { alert('Completa el concepto'); return; }
@@ -507,20 +528,19 @@
 
   async function eliminarMovimiento() {
     if (!editando) return;
-    if (!confirm('¿Eliminar este movimiento?')) return;
-    const tabla = editando.tipo === 'ingreso' ? 'ingresos' : 'gastos';
+    const msg = editando.tipo === 'fijo' ? '¿Eliminar este gasto fijo? El historial quedará guardado.' : '¿Eliminar este movimiento?';
+    if (!confirm(msg)) return;
+    const tabla = editando.tipo === 'ingreso' ? 'ingresos' : editando.tipo === 'fijo' ? 'gastos_fijos' : 'gastos';
     const { error } = await dbClient.from(tabla).delete().eq('id', editando.id).eq('usuario_id', window.currentUserId);
     if (error) { alert('Error: ' + error.message); return; }
     cerrarEditar();
     cargarMovimientos();
   }
 
-  document.getElementById('lista').addEventListener('click', function(e) {
-    const el = e.target.closest('.movimiento');
-    if (!el || !el.dataset.id) return;
-    const found = todosMovimientos.find(m => String(m.id) === el.dataset.id && m.tipo === el.dataset.tipo);
-    if (found) abrirEditar(found);
-  });
+  function abrirEditarIdx(idx) {
+    const m = filtradosActuales[idx];
+    if (m) abrirEditar(m);
+  }
 
   actualizarMesLabel();
   cargarMovimientos();
