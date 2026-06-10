@@ -48,11 +48,14 @@
   .mes-chip.sin-datos { opacity: 0.3; cursor: default; }
 
   .periodo-wrap { margin: 0 24px 16px; animation: fadeUp 0.4s 0.12s ease both; opacity: 0; }
-  .periodo-scroll { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; }
-  .periodo-scroll::-webkit-scrollbar { display: none; }
-
-  .periodo-chip { background: var(--card); border: 1px solid var(--border); border-radius: 100px; padding: 7px 16px; font-size: 12px; color: var(--subtext); cursor: pointer; white-space: nowrap; flex-shrink: 0; transition: all 0.2s; }
-  .periodo-chip.active { background: rgba(184,245,100,0.12); border-color: rgba(184,245,100,0.3); color: var(--accent); font-weight: 600; }
+  .periodo-label { font-size: 11px; color: var(--subtext); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 10px; }
+  .meses-sel-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-bottom: 10px; }
+  .mes-sel-chip { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 9px 4px; text-align: center; font-size: 12px; font-weight: 500; color: var(--subtext); cursor: pointer; transition: all 0.18s; }
+  .mes-sel-chip:active { opacity: 0.7; }
+  .mes-sel-chip.seleccionado { background: rgba(88,166,255,0.15); border-color: rgba(88,166,255,0.4); color: #58a6ff; font-weight: 700; }
+  .mes-sel-chip.sin-datos { opacity: 0.25; pointer-events: none; }
+  .meses-sel-count { font-size: 12px; color: var(--subtext); text-align: center; padding: 2px 0; min-height: 20px; }
+  .meses-sel-count span { color: #58a6ff; font-weight: 700; }
 
   .resumen-row { margin: 0 24px 16px; display: flex; gap: 10px; animation: fadeUp 0.4s 0.18s ease both; opacity: 0; }
 
@@ -141,12 +144,9 @@
 
   <div id="vista-periodo">
     <div class="periodo-wrap">
-      <div class="periodo-scroll">
-        <div class="periodo-chip active" onclick="setPeriodo(2, this)">2 meses</div>
-        <div class="periodo-chip" onclick="setPeriodo(3, this)">3 meses</div>
-        <div class="periodo-chip" onclick="setPeriodo(4, this)">4 meses</div>
-        <div class="periodo-chip" onclick="setPeriodo(5, this)">5 meses</div>
-      </div>
+      <div class="periodo-label">Selecciona meses a comparar</div>
+      <div class="meses-sel-grid" id="meses-sel-grid"></div>
+      <div class="meses-sel-count" id="meses-sel-count"></div>
     </div>
   </div>
 
@@ -243,6 +243,7 @@
   let modoActual      = 'mes'
   let periodoActual   = 2
   let mesSeleccionado = null
+  let mesesPeriodo    = new Set()
 
   async function cargarDatos() {
     let uid = window.currentUserId
@@ -326,24 +327,49 @@
     document.getElementById('vista-mes').style.display     = modo === 'mes'     ? '' : 'none'
     document.getElementById('analisis-card').style.display = modo === 'mes'     ? 'none' : ''
 
-    if (modo === 'periodo') renderPeriodo(periodoActual)
+    if (modo === 'periodo') renderPeriodo()
     if (modo === 'mes')     renderGridMeses()
     if (modo === 'anio')    renderAnio()
   }
 
-  function setPeriodo(n, el) {
-    periodoActual = n
-    document.querySelectorAll('.periodo-chip').forEach(c => c.classList.remove('active'))
-    el.classList.add('active')
-    renderPeriodo(n)
+  function toggleMesPeriodo(key) {
+    if (mesesPeriodo.has(key)) mesesPeriodo.delete(key)
+    else mesesPeriodo.add(key)
+    renderPeriodo()
   }
 
-  function renderPeriodo(n) {
-    const slice = datos.slice(0, Math.min(n, datos.length)).reverse()
+  function renderPeriodo() {
+    const grid     = document.getElementById('meses-sel-grid')
+    const contador = document.getElementById('meses-sel-count')
+    grid.innerHTML = ''
+
+    const multiAnio = new Set(datos.map(d => d.anio)).size > 1
+    const ordenados = [...datos].sort((a, b) => a.key.localeCompare(b.key))
+
+    ordenados.forEach(d => {
+      const chip = document.createElement('div')
+      chip.className = 'mes-sel-chip' + (mesesPeriodo.has(d.key) ? ' seleccionado' : '')
+      chip.textContent = multiAnio ? d.mes + ' \'' + String(d.anio).slice(2) : d.mes
+      chip.setAttribute('onclick', `toggleMesPeriodo('${d.key}')`)
+      grid.appendChild(chip)
+    })
+
+    const n = mesesPeriodo.size
+    if (n === 0) {
+      contador.textContent = 'Toca los meses que quieres comparar'
+      setResumen('Prom. ingresos','—','','Prom. gastos','—','','Prom. ahorro','—','', 0)
+      document.getElementById('cats-wrap').innerHTML    = ''
+      document.getElementById('alertas-wrap').innerHTML = ''
+      return
+    }
+
+    contador.innerHTML = `<span>${n}</span> ${n === 1 ? 'mes seleccionado' : 'meses seleccionados'}`
+
+    const slice = datos.filter(d => mesesPeriodo.has(d.key)).sort((a, b) => a.key.localeCompare(b.key))
     const tIng  = slice.reduce((s, d) => s + d.ingresos, 0)
     const tGas  = slice.reduce((s, d) => s + d.gastos,   0)
-    const pIng  = Math.round(tIng / slice.length)
-    const pGas  = Math.round(tGas / slice.length)
+    const pIng  = Math.round(tIng / n)
+    const pGas  = Math.round(tGas / n)
     const pAho  = pIng - pGas
 
     setResumen(
@@ -354,7 +380,7 @@
 
     dibujarCats(slice, false)
     renderAnalisis()
-    renderAlertas(slice)
+    renderAlertas([...slice])
   }
 
   function renderGridMeses() {
@@ -494,8 +520,10 @@
 
   function renderAnalisis() {
     const cat   = document.getElementById('cat-select').value
-    const n     = modoActual === 'anio' ? datos.length : periodoActual
-    const slice = datos.slice(0, Math.min(n, datos.length)).reverse()
+    const slice = modoActual === 'anio'
+      ? [...datos].reverse()
+      : datos.filter(d => mesesPeriodo.has(d.key)).sort((a, b) => a.key.localeCompare(b.key))
+    if (!slice.length) return
     const vals  = slice.map(d => d.cats[cat] || 0)
     const maxV  = Math.max(...vals) || 1
     const prom  = Math.round(vals.reduce((s, v) => s + v, 0) / vals.length)
