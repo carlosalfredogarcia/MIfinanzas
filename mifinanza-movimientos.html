@@ -274,7 +274,8 @@
     }
     if (!uid) return;
     const inicio = anioActual + '-' + String(mesActual + 1).padStart(2,'0') + '-01';
-    const fin = new Date(anioActual, mesActual + 1, 0).toISOString().split('T')[0];
+    const ultimoDia = new Date(anioActual, mesActual + 1, 0).getDate();
+    const fin = anioActual + '-' + String(mesActual + 1).padStart(2,'0') + '-' + String(ultimoDia).padStart(2,'0');
     const [{ data: gastos }, { data: ingresos }, { data: fijos }] = await Promise.all([
       dbClient.from('gastos').select('*').eq('usuario_id', uid).gte('fecha', inicio).lte('fecha', fin).order('fecha', { ascending: false }),
       dbClient.from('ingresos').select('*').eq('usuario_id', uid).gte('fecha', inicio).lte('fecha', fin).order('fecha', { ascending: false }),
