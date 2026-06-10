@@ -193,6 +193,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="auth.js"></script>
 <script>
+  window.moneda = localStorage.getItem('moneda') || '$'
   let fijos = [];
 
   async function cargarFijos() {
@@ -236,7 +237,7 @@
             <div class="fijo-fecha">Desde ${f.fecha_inicio || '—'}</div>
           </div>
           <div class="fijo-right">
-            <div class="fijo-monto">$${f.monto}</div>
+            <div class="fijo-monto">${window.moneda}${f.monto}</div>
             <div class="switch ${f.activo ? 'on' : ''}" onclick="toggleActivo('${f.id}')"></div>
           </div>
         </div>
@@ -250,7 +251,7 @@
 
     const activos = fijos.filter(f => f.activo);
     const total = activos.reduce((s, f) => s + parseFloat(f.monto), 0);
-    document.getElementById('total-mensual').textContent = '$' + total.toLocaleString();
+    document.getElementById('total-mensual').textContent = window.moneda + total.toLocaleString();
     document.getElementById('total-activos').textContent = activos.length;
   }
 

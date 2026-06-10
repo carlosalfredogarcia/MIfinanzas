@@ -225,6 +225,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="auth.js"></script>
 <script>
+  window.moneda = localStorage.getItem('moneda') || '$'
 
   const iconsCat = {
     'Comida':'🍔','Alquiler':'🏠','Remesas':'🌍','Línea':'📱',
@@ -468,7 +469,7 @@
   }
 
   function fmt(n) {
-    return '$' + parseFloat(n || 0).toLocaleString('es-MX', { minimumFractionDigits: 0, maximumFractionDigits: 0 })
+    return window.moneda + parseFloat(n || 0).toLocaleString('es-MX', { minimumFractionDigits: 0, maximumFractionDigits: 0 })
   }
 
   function setResumen(lIng, vIng, sIng, lGas, vGas, sGas, lAho, vAho, sAho, aho) {

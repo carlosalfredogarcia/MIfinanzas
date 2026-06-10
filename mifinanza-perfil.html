@@ -184,12 +184,9 @@
   <div class="seccion" style="animation-delay:0.1s">
     <div class="seccion-titulo">Moneda</div>
     <div class="moneda-opts">
-      <div class="moneda-chip" data-cod="USD" data-label="Dólar estadounidense · USD" onclick="setMoneda(this)">🇺🇸 USD</div>
-      <div class="moneda-chip" data-cod="EUR" data-label="Euro · EUR"                 onclick="setMoneda(this)">🇪🇺 EUR</div>
-      <div class="moneda-chip" data-cod="COP" data-label="Peso colombiano · COP"      onclick="setMoneda(this)">🇨🇴 COP</div>
-      <div class="moneda-chip" data-cod="MXN" data-label="Peso mexicano · MXN"        onclick="setMoneda(this)">🇲🇽 MXN</div>
-      <div class="moneda-chip" data-cod="VES" data-label="Bolívar · VES"              onclick="setMoneda(this)">🇻🇪 VES</div>
-      <div class="moneda-chip" data-cod="DOP" data-label="Peso dominicano · DOP"      onclick="setMoneda(this)">🇩🇴 DOP</div>
+      <div class="moneda-chip" data-cod="$"  data-label="$ — Dólar"  onclick="setMoneda(this)">$ — Dólar</div>
+      <div class="moneda-chip" data-cod="€"  data-label="€ — Euro"   onclick="setMoneda(this)">€ — Euro</div>
+      <div class="moneda-chip" data-cod="Bs" data-label="Bs — Bolívar" onclick="setMoneda(this)">Bs — Bolívar</div>
     </div>
   </div>
 
@@ -377,11 +374,13 @@
     if (data.frase) document.getElementById('frase-display').textContent = data.frase
 
     if (data.moneda) {
+      const simbolo = { USD:'$', EUR:'€', VES:'Bs', COP:'$', MXN:'$', DOP:'$', '$':'$', '€':'€', Bs:'Bs' }[data.moneda] || '$'
       document.querySelectorAll('.moneda-chip').forEach(c => {
-        c.classList.toggle('active', c.dataset.cod === data.moneda)
+        c.classList.toggle('active', c.dataset.cod === simbolo)
       })
-      const chip = document.querySelector(`.moneda-chip[data-cod="${data.moneda}"]`)
+      const chip = document.querySelector(`.moneda-chip[data-cod="${simbolo}"]`)
       if (chip) document.getElementById('hero-moneda').textContent = chip.dataset.label
+      localStorage.setItem('moneda', simbolo)
     }
 
     if (data.tono) {
@@ -513,6 +512,7 @@
     btn.textContent = 'Guardar cambios'
 
     if (error) { toast('Error al guardar', 'err'); return }
+    localStorage.setItem('moneda', moneda)
     toast('Perfil guardado ✓')
   }
 

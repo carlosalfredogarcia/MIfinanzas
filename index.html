@@ -286,6 +286,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="auth.js"></script>
 <script>
+  window.moneda = localStorage.getItem('moneda') || '$'
   const meses = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre']
   const hoy = new Date().toISOString().split('T')[0]
   let mesVer  = new Date().getMonth()
@@ -345,10 +346,10 @@
     const totalFij = (fijos    || []).reduce((s, f) => s + parseFloat(f.monto), 0)
     const saldo    = totalIng - totalGas - totalFij
 
-    document.getElementById('total-ingresos').textContent = '$' + totalIng.toLocaleString()
-    document.getElementById('total-gastos').textContent   = '$' + totalGas.toLocaleString()
-    document.getElementById('total-fijos').textContent    = '$' + totalFij.toLocaleString()
-    document.getElementById('fijos-total').textContent    = '-$' + totalFij.toLocaleString() + '/mes'
+    document.getElementById('total-ingresos').textContent = window.moneda + totalIng.toLocaleString()
+    document.getElementById('total-gastos').textContent   = window.moneda + totalGas.toLocaleString()
+    document.getElementById('total-fijos').textContent    = window.moneda + totalFij.toLocaleString()
+    document.getElementById('fijos-total').textContent    = '-' + window.moneda + totalFij.toLocaleString() + '/mes'
 
     const card   = document.getElementById('saldo-card')
     const amount = document.getElementById('saldo-amount')
@@ -356,11 +357,11 @@
 
     if (saldo < 0) {
       card.classList.add('negativo')
-      amount.textContent = '-$' + Math.abs(saldo).toLocaleString()
+      amount.textContent = '-' + window.moneda + Math.abs(saldo).toLocaleString()
       icon.textContent = '⚠️'
     } else {
       card.classList.remove('negativo')
-      amount.textContent = '$' + saldo.toLocaleString()
+      amount.textContent = window.moneda + saldo.toLocaleString()
       icon.textContent = '✓'
     }
 
@@ -376,8 +377,8 @@
       const faltan = Math.max(0, metas.monto_objetivo - metas.monto_actual)
       document.getElementById('meta-name').textContent    = `${metas.icono || '🎯'} ${metas.nombre}`
       document.getElementById('meta-percent').textContent = pct.toFixed(1) + '%'
-      document.getElementById('meta-llevado').textContent = '$' + metas.monto_actual.toLocaleString()
-      document.getElementById('meta-faltan').textContent  = '$' + faltan.toLocaleString()
+      document.getElementById('meta-llevado').textContent = window.moneda + metas.monto_actual.toLocaleString()
+      document.getElementById('meta-faltan').textContent  = window.moneda + faltan.toLocaleString()
       setTimeout(() => { document.getElementById('meta-barra').style.width = pct + '%' }, 300)
     }
 
@@ -394,7 +395,7 @@
           <div class="fijo-icon">${icon}</div>
           <div><div class="fijo-name">${f.nombre}</div><div class="fijo-date">Desde ${f.fecha_inicio}</div></div>
         </div>
-        <div class="fijo-amount">$${f.monto}</div>
+        <div class="fijo-amount">${window.moneda}${f.monto}</div>
       `
       listaFijos.appendChild(div)
     })
@@ -404,7 +405,7 @@
       const u = ultimo[0]
       document.getElementById('ultimo-desc').textContent  = u.descripcion
       document.getElementById('ultimo-date').textContent  = u.fecha + ' · ' + u.categoria
-      document.getElementById('ultimo-monto').textContent = '-$' + parseFloat(u.monto).toLocaleString()
+      document.getElementById('ultimo-monto').textContent = '-' + window.moneda + parseFloat(u.monto).toLocaleString()
     }
   }
 

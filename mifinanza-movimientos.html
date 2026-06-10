@@ -237,6 +237,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="auth.js"></script>
 <script>
+  window.moneda = localStorage.getItem('moneda') || '$'
 
   const meses = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
   let mesActual = new Date().getMonth();
@@ -291,8 +292,8 @@
     todosMovimientos = [...movGastos, ...movIngresos, ...movFijos].sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
     const totalIng = movIngresos.reduce((s, i) => s + parseFloat(i.monto), 0);
     const totalGas = [...movGastos, ...movFijos].reduce((s, g) => s + parseFloat(g.monto), 0);
-    document.getElementById('total-ingresos').textContent = '$' + totalIng.toLocaleString();
-    document.getElementById('total-gastos').textContent   = '$' + totalGas.toLocaleString();
+    document.getElementById('total-ingresos').textContent = window.moneda + totalIng.toLocaleString();
+    document.getElementById('total-gastos').textContent   = window.moneda + totalGas.toLocaleString();
     renderLista();
   }
 
@@ -360,7 +361,7 @@
           </div>
           <div class="mov-right">
             <div class="mov-amount ${esIngreso ? 'amount-ingreso' : 'amount-gasto'}">
-              ${esIngreso ? '+' : '-'}$${parseFloat(m.monto).toLocaleString()}
+              ${esIngreso ? '+' : '-'}${window.moneda}${parseFloat(m.monto).toLocaleString()}
             </div>
           </div>
         `;
