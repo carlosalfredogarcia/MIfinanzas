@@ -501,15 +501,15 @@
     Object.entries(totales).sort((a, b) => b[1] - a[1]).forEach(([cat, total]) => {
       const pct  = Math.round((total / maxC) * 100)
       const prom = soloMes ? null : Math.round(total / n)
-      const icon = iconsCat[cat] || '📦'
       const row  = document.createElement('div')
       row.className = 'cat-row'
       row.innerHTML = `
         <div class="cat-top">
-          <div class="cat-left">${icon} ${cat}</div>
+          <div class="cat-left">${cat}</div>
           <div class="cat-right">
-            <div class="cat-total">${fmt(total)}</div>
-            ${!soloMes ? `<div class="cat-prom">Prom: ${fmt(prom)}/mes</div>` : ''}
+            ${!soloMes
+              ? `<div class="cat-total">${fmt(prom)}/mes</div><div class="cat-prom">Total: ${fmt(total)}</div>`
+              : `<div class="cat-total">${fmt(total)}</div>`}
           </div>
         </div>
         <div class="cat-bar-track"><div class="cat-bar-fill" style="width:${pct}%"></div></div>
