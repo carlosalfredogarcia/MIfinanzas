@@ -134,8 +134,8 @@
   </div>
 
   <div class="modo-tabs">
-    <div class="modo-tab active" id="tab-periodo" onclick="setModo('periodo')">Por período</div>
-    <div class="modo-tab" id="tab-mes"    onclick="setModo('mes')">Por mes</div>
+    <div class="modo-tab" id="tab-periodo" onclick="setModo('periodo')">Por período</div>
+    <div class="modo-tab active" id="tab-mes"    onclick="setModo('mes')">Por mes</div>
     <div class="modo-tab" id="tab-anio"   onclick="setModo('anio')">Año completo</div>
   </div>
 
@@ -240,7 +240,7 @@
   const MESES_NOMBRES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre']
 
   let datos           = []
-  let modoActual      = 'periodo'
+  let modoActual      = 'mes'
   let periodoActual   = 2
   let mesSeleccionado = null
 
@@ -312,7 +312,9 @@
     document.getElementById('loading-wrap').style.display = 'none'
     document.getElementById('contenido').style.display    = ''
 
-    renderPeriodo(periodoActual)
+    setModo('mes')
+    const savedScroll = sessionStorage.getItem('stats-scroll')
+    if (savedScroll) setTimeout(() => window.scrollTo(0, parseInt(savedScroll, 10)), 0)
   }
 
   function setModo(modo) {
@@ -561,6 +563,10 @@
       wrap.appendChild(div)
     })
   }
+
+  window.addEventListener('pagehide', () => {
+    sessionStorage.setItem('stats-scroll', window.scrollY)
+  })
 
   cargarDatos()
 </script>
