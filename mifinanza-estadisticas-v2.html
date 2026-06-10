@@ -226,6 +226,7 @@
 <script src="auth.js"></script>
 <script>
   window.moneda = localStorage.getItem('moneda') || '$'
+  const _color = localStorage.getItem('color'); if (_color) document.documentElement.style.setProperty('--accent', _color)
 
   const iconsCat = {
     'Comida':'🍔','Alquiler':'🏠','Remesas':'🌍','Línea':'📱',

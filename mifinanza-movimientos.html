@@ -238,6 +238,7 @@
 <script src="auth.js"></script>
 <script>
   window.moneda = localStorage.getItem('moneda') || '$'
+  const _color = localStorage.getItem('color'); if (_color) document.documentElement.style.setProperty('--accent', _color)
 
   const meses = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
   let mesActual = new Date().getMonth();

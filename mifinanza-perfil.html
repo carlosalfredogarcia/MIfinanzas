@@ -44,21 +44,6 @@
 
   .seccion-titulo { font-size: 11px; color: var(--subtext); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 14px; }
 
-  .tono-opciones { display: flex; flex-direction: column; gap: 8px; }
-
-  .tono-item { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 14px; border: 1px solid var(--border); cursor: pointer; transition: all 0.2s; background: var(--card2); }
-
-  .tono-item.active { background: rgba(184,245,100,0.08); border-color: rgba(184,245,100,0.25); }
-
-  .tono-icon { font-size: 20px; flex-shrink: 0; }
-  .tono-info { flex: 1; }
-  .tono-nombre  { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 2px; }
-  .tono-ejemplo { font-size: 11px; color: var(--subtext); }
-
-  .tono-check { width: 20px; height: 20px; border-radius: 50%; border: 2px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 11px; flex-shrink: 0; transition: all 0.2s; }
-
-  .tono-item.active .tono-check { background: var(--accent); border-color: var(--accent); color: #0f0f13; }
-
   .colores-wrap { display: flex; gap: 10px; justify-content: space-around; }
 
   .color-item { display: flex; flex-direction: column; align-items: center; gap: 6px; cursor: pointer; }
@@ -191,36 +176,6 @@
   </div>
 
   <div class="seccion" style="animation-delay:0.2s">
-    <div class="seccion-titulo">¿Cómo quieres que te hable la app?</div>
-    <div class="tono-opciones">
-      <div class="tono-item" data-tono="Directo" onclick="setTono(this)">
-        <div class="tono-icon">⚡</div>
-        <div class="tono-info">
-          <div class="tono-nombre">Directo</div>
-          <div class="tono-ejemplo">"Este mes gastaste de más en comida."</div>
-        </div>
-        <div class="tono-check">✓</div>
-      </div>
-      <div class="tono-item" data-tono="Motivacional" onclick="setTono(this)">
-        <div class="tono-icon">🔥</div>
-        <div class="tono-info">
-          <div class="tono-nombre">Motivacional</div>
-          <div class="tono-ejemplo">"¡Vas bien! Puedes recortar un poco en comida."</div>
-        </div>
-        <div class="tono-check">✓</div>
-      </div>
-      <div class="tono-item" data-tono="Suave" onclick="setTono(this)">
-        <div class="tono-icon">🌿</div>
-        <div class="tono-info">
-          <div class="tono-nombre">Suave</div>
-          <div class="tono-ejemplo">"Quizás podrías revisar el gasto en comida."</div>
-        </div>
-        <div class="tono-check">✓</div>
-      </div>
-    </div>
-  </div>
-
-  <div class="seccion" style="animation-delay:0.3s">
     <div class="seccion-titulo">Color principal</div>
     <div class="colores-wrap">
       <div class="color-item" data-color="#b8f564" onclick="setColor(this)">
@@ -383,18 +338,13 @@
       localStorage.setItem('moneda', simbolo)
     }
 
-    if (data.tono) {
-      document.querySelectorAll('.tono-item').forEach(t => {
-        t.classList.toggle('active', t.dataset.tono === data.tono)
-      })
-    }
-
     if (data.color) {
       colorActual = data.color
       document.documentElement.style.setProperty('--accent', data.color)
       document.querySelectorAll('.color-item').forEach(c => {
         c.classList.toggle('active', c.dataset.color === data.color)
       })
+      localStorage.setItem('color', data.color)
     }
 
     if (data.categorias) {
@@ -454,11 +404,6 @@
     cerrarNombre()
   }
 
-  function setTono(el) {
-    document.querySelectorAll('.tono-item').forEach(t => t.classList.remove('active'))
-    el.classList.add('active')
-  }
-
   function setColor(el) {
     document.querySelectorAll('.color-item').forEach(c => c.classList.remove('active'))
     el.classList.add('active')
@@ -495,7 +440,6 @@
     const nombre  = document.getElementById('hero-nombre').textContent.trim()
     const frase   = document.getElementById('frase-display').textContent.trim()
     const moneda  = document.querySelector('.moneda-chip.active')?.dataset.cod  || '$'
-    const tono    = document.querySelector('.tono-item.active')?.dataset.tono   || 'Directo'
     const color   = colorActual
     const cats    = getCats().join(',')
 
@@ -505,7 +449,7 @@
 
     const { error } = await dbClient.from('perfil').upsert({
       usuario_id: window.currentUserId,
-      nombre, frase, moneda, tono, color, categorias: cats
+      nombre, frase, moneda, color, categorias: cats
     }, { onConflict: 'usuario_id' })
 
     btn.disabled = false
@@ -513,6 +457,7 @@
 
     if (error) { toast('Error al guardar', 'err'); return }
     localStorage.setItem('moneda', moneda)
+    localStorage.setItem('color', color)
     toast('Perfil guardado ✓')
   }
 
