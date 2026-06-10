@@ -494,7 +494,7 @@
   async function guardar() {
     const nombre  = document.getElementById('hero-nombre').textContent.trim()
     const frase   = document.getElementById('frase-display').textContent.trim()
-    const moneda  = document.querySelector('.moneda-chip.active')?.dataset.cod  || 'USD'
+    const moneda  = document.querySelector('.moneda-chip.active')?.dataset.cod  || '$'
     const tono    = document.querySelector('.tono-item.active')?.dataset.tono   || 'Directo'
     const color   = colorActual
     const cats    = getCats().join(',')
