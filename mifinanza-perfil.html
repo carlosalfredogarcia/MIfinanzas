@@ -320,16 +320,22 @@
       })
     }
     if (!window.currentUserId) return
-    const { data, error } = await dbClient.from('perfil').select('*').eq('usuario_id', window.currentUserId).single()
-    if (error || !data) return
+    let { data: perfil } = await dbClient.from('perfil').select('*').eq('usuario_id', window.currentUserId).single()
+    if (!perfil) {
+      const { data: nuevo } = await dbClient.from('perfil')
+        .insert({ usuario_id: window.currentUserId, nombre: '', moneda: '$', color: '#b8f564', categorias: '' })
+        .select()
+        .single()
+      perfil = nuevo || { nombre: '', moneda: '$', color: '#b8f564', categorias: '' }
+    }
 
-    document.getElementById('hero-nombre').textContent  = data.nombre || 'Carlos'
-    document.getElementById('avatar-letra').textContent = (data.nombre || 'C')[0].toUpperCase()
+    document.getElementById('hero-nombre').textContent  = perfil.nombre || ''
+    document.getElementById('avatar-letra').textContent = (perfil.nombre || '?')[0].toUpperCase()
 
-    if (data.frase) document.getElementById('frase-display').textContent = data.frase
+    if (perfil.frase) document.getElementById('frase-display').textContent = perfil.frase
 
-    if (data.moneda) {
-      const simbolo = { USD:'$', EUR:'€', VES:'Bs', COP:'$', MXN:'$', DOP:'$', '$':'$', '€':'€', Bs:'Bs' }[data.moneda] || '$'
+    if (perfil.moneda) {
+      const simbolo = { USD:'$', EUR:'€', VES:'Bs', COP:'$', MXN:'$', DOP:'$', '$':'$', '€':'€', Bs:'Bs' }[perfil.moneda] || '$'
       document.querySelectorAll('.moneda-chip').forEach(c => {
         c.classList.toggle('active', c.dataset.cod === simbolo)
       })
@@ -338,17 +344,17 @@
       localStorage.setItem('moneda', simbolo)
     }
 
-    if (data.color) {
-      colorActual = data.color
-      document.documentElement.style.setProperty('--accent', data.color)
+    if (perfil.color) {
+      colorActual = perfil.color
+      document.documentElement.style.setProperty('--accent', perfil.color)
       document.querySelectorAll('.color-item').forEach(c => {
-        c.classList.toggle('active', c.dataset.color === data.color)
+        c.classList.toggle('active', c.dataset.color === perfil.color)
       })
-      localStorage.setItem('color', data.color)
+      localStorage.setItem('color', perfil.color)
     }
 
-    if (data.categorias) {
-      renderCats(data.categorias.split(',').map(c => c.trim()).filter(Boolean))
+    if (perfil.categorias) {
+      renderCats(perfil.categorias.split(',').map(c => c.trim()).filter(Boolean))
     }
   }
 

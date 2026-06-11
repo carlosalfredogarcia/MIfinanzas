@@ -298,7 +298,10 @@
     }
 
     mostrarCarga('Configurando tu cuenta...', 'Vinculando tus datos...')
-    await migrarDatosExistentes(data.user.id)
+    await dbClient.from('perfil').upsert(
+      { usuario_id: data.user.id, nombre: '', moneda: '$', color: '#b8f564', categorias: '' },
+      { onConflict: 'usuario_id', ignoreDuplicates: true }
+    )
     window.location.replace('inicio.html')
   }
 
