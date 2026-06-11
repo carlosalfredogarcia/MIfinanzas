@@ -136,7 +136,7 @@
 
 <!-- NAVBAR: 5 ítems, todos con onclick -->
 <nav class="navbar">
-  <div class="nav-item" onclick="location.href='index.html'">
+  <div class="nav-item" onclick="location.href='inicio.html'">
     <span class="nav-icon">🏠</span>
     <span class="nav-label">Inicio</span>
   </div>
@@ -269,7 +269,7 @@
     } else {
       const { error } = await dbClient.from('gastos_fijos')
         .update({ activo: true, fecha_fin: null })
-        .eq('id', id);
+        .eq('id', id).eq('usuario_id', window.currentUserId);
       if (error) { alert('Error: ' + error.message); return; }
       f.activo = true;
       f.fecha_fin = null;
@@ -284,7 +284,7 @@
     if (!fecha) { alert('Selecciona una fecha'); return; }
     const { error } = await dbClient.from('gastos_fijos')
       .update({ activo: false, fecha_fin: fecha })
-      .eq('id', idFijoDesactivar);
+      .eq('id', idFijoDesactivar).eq('usuario_id', window.currentUserId);
     if (error) { alert('Error: ' + error.message); return; }
     const f = fijos.find(f => f.id === idFijoDesactivar);
     if (f) { f.activo = false; f.fecha_fin = fecha; }
@@ -299,7 +299,7 @@
   async function editarMonto(id, montoActual) {
     const nuevo = prompt('Nuevo monto:', montoActual);
     if (!nuevo || isNaN(nuevo)) return;
-    const { error } = await dbClient.from('gastos_fijos').update({ monto: parseFloat(nuevo) }).eq('id', id);
+    const { error } = await dbClient.from('gastos_fijos').update({ monto: parseFloat(nuevo) }).eq('id', id).eq('usuario_id', window.currentUserId);
     if (error) { alert('Error: ' + error.message); return; }
     const f = fijos.find(f => f.id === id);
     if (f) f.monto = parseFloat(nuevo);
@@ -308,7 +308,7 @@
 
   async function eliminarFijo(id) {
     if (!confirm('¿Eliminar este gasto fijo? El historial quedará guardado.')) return;
-    const { error } = await dbClient.from('gastos_fijos').delete().eq('id', id);
+    const { error } = await dbClient.from('gastos_fijos').delete().eq('id', id).eq('usuario_id', window.currentUserId);
     if (error) { alert('Error: ' + error.message); return; }
     fijos = fijos.filter(f => f.id !== id);
     renderFijos();

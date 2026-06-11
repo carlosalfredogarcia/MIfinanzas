@@ -28,14 +28,14 @@ window.dbClient.auth.onAuthStateChange((event, session) => {
     // Cualquier evento con sesión válida (INITIAL_SESSION, SIGNED_IN, TOKEN_REFRESHED)
     _onSession(session.user.id)
   } else if (event === 'SIGNED_OUT') {
-    window.location.replace('login.html')
+    window.location.replace('index.html')
   } else if (event === 'INITIAL_SESSION') {
     // Sin sesión en la carga inicial: puede ser token refresh en curso.
     // Esperar 2s antes de redirigir por si llega TOKEN_REFRESHED.
     setTimeout(() => {
       if (!_authFired) {
         console.warn('[auth] Sin sesión tras espera → redirigiendo a login')
-        window.location.replace('login.html')
+        window.location.replace('index.html')
       }
     }, 2000)
   }
