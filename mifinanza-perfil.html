@@ -452,14 +452,19 @@
     btn.textContent = 'Guardando...'
 
     const payload = { nombre, frase, moneda, color, categorias: cats }
-    const { data: existente } = await dbClient.from('perfil')
-      .select('id')
-      .eq('usuario_id', window.currentUserId)
-      .maybeSingle()
 
-    const { error } = existente
-      ? await dbClient.from('perfil').update(payload).eq('usuario_id', window.currentUserId)
-      : await dbClient.from('perfil').insert({ usuario_id: window.currentUserId, ...payload })
+    // UPDATE primero: seguro aunque no exista fila (actualiza 0 filas sin error)
+    const { data: actualizados, error: errUpdate } = await dbClient.from('perfil')
+      .update(payload)
+      .eq('usuario_id', window.currentUserId)
+      .select('id')
+
+    let error = errUpdate
+    if (!errUpdate && (!actualizados || actualizados.length === 0)) {
+      // No había fila — INSERT
+      ;({ error } = await dbClient.from('perfil')
+        .insert({ usuario_id: window.currentUserId, ...payload }))
+    }
 
     btn.disabled = false
     btn.textContent = 'Guardar cambios'
