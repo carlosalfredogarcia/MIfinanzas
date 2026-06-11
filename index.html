@@ -149,10 +149,37 @@
   const SUPABASE_KEY = 'sb_publishable_u7ug3SBOsuz2zb56gqBLjw_aLJ0Vvp8'
   const dbClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY)
 
-  // ?code en la URL indica un callback de Supabase (recovery, magic link).
-  // Bloqueamos el redirect automático hasta que PASSWORD_RECOVERY confirme el tipo.
-  const esCallback = new URLSearchParams(window.location.search).has('code')
   let modoRecuperacion = false
+  let authListo = false
+
+  // Detecta ambos flujos: PKCE (?code) e implícito (#access_token&type=recovery)
+  const _sp = new URLSearchParams(window.location.search)
+  const _hp = new URLSearchParams(window.location.hash.replace(/^#/, ''))
+  const pkceCode = _sp.get('code')
+  const hashRecovery = _hp.get('type') === 'recovery' && _hp.has('access_token')
+
+  async function inicializar() {
+    if (pkceCode) {
+      // Flujo PKCE: intercambia el código explícitamente
+      mostrarCarga('Verificando enlace...', '')
+      const { error } = await dbClient.auth.exchangeCodeForSession(pkceCode)
+      document.getElementById('loading').classList.remove('visible')
+      if (error) {
+        mostrarError('El enlace expiró o ya fue usado. Solicita uno nuevo.')
+        return
+      }
+      // PASSWORD_RECOVERY se dispara vía onAuthStateChange tras el exchange
+    } else if (hashRecovery) {
+      // Flujo implícito: el SDK ya procesó el token del hash
+      modoRecuperacion = true
+      setTab('nueva-clave')
+    } else {
+      // Carga normal: verificar sesión existente
+      const { data: { session } } = await dbClient.auth.getSession()
+      if (session) window.location.replace('inicio.html')
+    }
+    authListo = true
+  }
 
   dbClient.auth.onAuthStateChange((event, session) => {
     if (event === 'PASSWORD_RECOVERY') {
@@ -160,10 +187,13 @@
       setTab('nueva-clave')
       return
     }
-    if (!esCallback && !modoRecuperacion && session) {
+    // Solo redirige si no estamos en un flujo de callback
+    if (authListo && !pkceCode && !hashRecovery && !modoRecuperacion && session) {
       window.location.replace('inicio.html')
     }
   })
+
+  inicializar()
 
   function setTab(tab) {
     const enTabs = tab === 'entrar' || tab === 'crear'
