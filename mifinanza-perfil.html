@@ -320,22 +320,20 @@
       })
     }
     if (!window.currentUserId) return
-    let { data: perfil } = await dbClient.from('perfil').select('*').eq('usuario_id', window.currentUserId).single()
+    const { data: perfil } = await dbClient.from('perfil').select('*').eq('usuario_id', window.currentUserId).maybeSingle()
+    const datos = perfil || { nombre: '', moneda: '$', color: '#b8f564', categorias: '' }
     if (!perfil) {
-      const { data: nuevo } = await dbClient.from('perfil')
+      await dbClient.from('perfil')
         .insert({ usuario_id: window.currentUserId, nombre: '', moneda: '$', color: '#b8f564', categorias: '' })
-        .select()
-        .single()
-      perfil = nuevo || { nombre: '', moneda: '$', color: '#b8f564', categorias: '' }
     }
 
-    document.getElementById('hero-nombre').textContent  = perfil.nombre || ''
-    document.getElementById('avatar-letra').textContent = (perfil.nombre || '?')[0].toUpperCase()
+    document.getElementById('hero-nombre').textContent  = datos.nombre || ''
+    document.getElementById('avatar-letra').textContent = (datos.nombre || '?')[0].toUpperCase()
 
-    if (perfil.frase) document.getElementById('frase-display').textContent = perfil.frase
+    if (datos.frase) document.getElementById('frase-display').textContent = datos.frase
 
-    if (perfil.moneda) {
-      const simbolo = { USD:'$', EUR:'€', VES:'Bs', COP:'$', MXN:'$', DOP:'$', '$':'$', '€':'€', Bs:'Bs' }[perfil.moneda] || '$'
+    if (datos.moneda) {
+      const simbolo = { USD:'$', EUR:'€', VES:'Bs', COP:'$', MXN:'$', DOP:'$', '$':'$', '€':'€', Bs:'Bs' }[datos.moneda] || '$'
       document.querySelectorAll('.moneda-chip').forEach(c => {
         c.classList.toggle('active', c.dataset.cod === simbolo)
       })
@@ -344,17 +342,17 @@
       localStorage.setItem('moneda', simbolo)
     }
 
-    if (perfil.color) {
-      colorActual = perfil.color
-      document.documentElement.style.setProperty('--accent', perfil.color)
+    if (datos.color) {
+      colorActual = datos.color
+      document.documentElement.style.setProperty('--accent', datos.color)
       document.querySelectorAll('.color-item').forEach(c => {
-        c.classList.toggle('active', c.dataset.color === perfil.color)
+        c.classList.toggle('active', c.dataset.color === datos.color)
       })
-      localStorage.setItem('color', perfil.color)
+      localStorage.setItem('color', datos.color)
     }
 
-    if (perfil.categorias) {
-      renderCats(perfil.categorias.split(',').map(c => c.trim()).filter(Boolean))
+    if (datos.categorias) {
+      renderCats(datos.categorias.split(',').map(c => c.trim()).filter(Boolean))
     }
   }
 
@@ -453,10 +451,15 @@
     btn.disabled = true
     btn.textContent = 'Guardando...'
 
-    const { error } = await dbClient.from('perfil').upsert({
-      usuario_id: window.currentUserId,
-      nombre, frase, moneda, color, categorias: cats
-    }, { onConflict: 'usuario_id' })
+    const payload = { nombre, frase, moneda, color, categorias: cats }
+    const { data: existente } = await dbClient.from('perfil')
+      .select('id')
+      .eq('usuario_id', window.currentUserId)
+      .maybeSingle()
+
+    const { error } = existente
+      ? await dbClient.from('perfil').update(payload).eq('usuario_id', window.currentUserId)
+      : await dbClient.from('perfil').insert({ usuario_id: window.currentUserId, ...payload })
 
     btn.disabled = false
     btn.textContent = 'Guardar cambios'
