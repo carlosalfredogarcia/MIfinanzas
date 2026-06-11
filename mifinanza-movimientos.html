@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<script>try{console.log('[auth-guard] localStorage.length='+localStorage.length);var _k,_h=false;for(var _i=0;_i<localStorage.length;_i++){_k=localStorage.key(_i);console.log('[auth-guard] key:'+_k);if(_k.indexOf('sb-')===0&&_k.indexOf('-auth-token')>0){_h=true;break;}}console.log('[auth-guard] hasToken='+_h);if(!_h){console.log('[auth-guard] → redirect a index.html');location.replace('index.html');}}catch(e){console.log('[auth-guard] ERROR:',e);}</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>MiFinanza – Movimientos</title>
@@ -85,6 +84,8 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="MiFinanza">
 <meta name="theme-color" content="#58a6ff">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="auth.js"></script>
 </head>
 <body>
 <div class="phone">
@@ -235,9 +236,6 @@
     <button onclick="cerrarEditar()" class="btn-no">Cancelar</button>
   </div>
 </div>
-
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="auth.js"></script>
 <script>
   window.moneda = localStorage.getItem('moneda') || '$'
   const _color = localStorage.getItem('color'); if (_color) document.documentElement.style.setProperty('--accent', _color)

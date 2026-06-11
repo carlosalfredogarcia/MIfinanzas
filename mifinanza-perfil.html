@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<script>try{var _k,_h=false;for(var _i=0;_i<localStorage.length;_i++){_k=localStorage.key(_i);if(_k.indexOf('sb-')===0&&_k.indexOf('-auth-token')>0){_h=true;break;}}if(!_h)location.replace('index.html');}catch(e){}</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>MiFinanza – Perfil</title>
@@ -145,6 +144,8 @@
 
   @keyframes fadeUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
 </style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="auth.js"></script>
 </head>
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="/icon-192.png">
@@ -298,9 +299,6 @@
 </div>
 
 <div class="toast" id="toast"></div>
-
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="auth.js"></script>
 <script>
 
   let colorActual = '#b8f564'
