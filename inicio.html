@@ -337,7 +337,7 @@
     const saldo    = totalIng - totalGas - totalFij
 
     document.getElementById('total-ingresos').textContent = window.moneda + totalIng.toLocaleString()
-    document.getElementById('total-gastos').textContent   = window.moneda + totalGas.toLocaleString()
+    document.getElementById('total-gastos').textContent   = window.moneda + (totalGas + totalFij).toLocaleString()
     document.getElementById('fijos-total').textContent    = window.moneda + totalFij.toLocaleString()
 
     const card   = document.getElementById('saldo-card')
