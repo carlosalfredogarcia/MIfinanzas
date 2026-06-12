@@ -40,12 +40,12 @@
   .dot-green { background: var(--accent); } .dot-red { background: var(--danger); } .dot-blue { background: var(--accent2); }
   .balance-item-value { font-family: 'Syne', sans-serif; font-size: 28px; font-weight: 700; }
   .val-green { color: var(--accent); } .val-red { color: var(--danger); } .val-blue { color: var(--accent2); }
-  .saldo-stripe { background: #1a2e1a; border-radius: 12px; padding: 14px 16px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; transition: background 0.4s; }
-  .saldo-stripe.negativo { background: #2e1a1a; }
+  .saldo-stripe { background: #0d1117; border: 1px solid #21262d; border-radius: 12px; padding: 14px 16px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+  .saldo-stripe.negativo { background: #0d1117; }
   .saldo-stripe-label { font-size: 10px; color: #7eb87e; text-transform: uppercase; letter-spacing: 0.1em; display: block; margin-bottom: 3px; font-weight: 600; }
   .saldo-stripe.negativo .saldo-stripe-label { color: var(--danger); }
-  .saldo-stripe-amount { font-family: 'Syne', sans-serif; font-size: 32px; font-weight: 800; color: #7eb87e; }
-  .saldo-stripe.negativo .saldo-stripe-amount { color: var(--danger); }
+  .saldo-stripe-amount { font-family: 'Syne', sans-serif; font-size: 32px; font-weight: 800; color: #3fb950; }
+  .saldo-stripe.negativo .saldo-stripe-amount { color: #e3b341; }
   .saldo-stripe-icon { font-size: 26px; font-weight: 700; color: #7eb87e; opacity: 0.85; }
   .saldo-stripe.negativo .saldo-stripe-icon { color: var(--danger); }
   .frase { margin: 0 24px 14px; background: linear-gradient(135deg, rgba(184,245,100,0.07), rgba(79,209,197,0.04)); border: 1px solid rgba(184,245,100,0.14); border-radius: 14px; padding: 13px 16px; display: flex; align-items: center; gap: 10px; animation: fadeUp 0.5s 0.25s ease both; opacity: 0; }
@@ -62,8 +62,8 @@
   .meta-detail strong { color: var(--text); }
   .fijos-card { margin: 0 24px 14px; background: var(--card); border-radius: 20px; padding: 18px 20px; border: 1px solid var(--border); animation: fadeUp 0.5s 0.4s ease both; opacity: 0; cursor: pointer; }
   .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
-  .section-title { font-size: 11px; color: var(--subtext); text-transform: uppercase; letter-spacing: 0.1em; cursor: pointer; }
-  .section-total { font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 700; color: var(--danger); }
+  .section-title { font-size: 11px; color: #8b949e; text-transform: uppercase; letter-spacing: 0.1em; cursor: pointer; }
+  .section-total { font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 700; color: #8b949e; }
   .fijo-item { display: flex; justify-content: space-between; align-items: center; padding: 9px 0; border-bottom: 1px solid var(--border); }
   .fijo-item:last-child { border-bottom: none; }
   .fijo-left { display: flex; align-items: center; gap: 10px; }
@@ -160,10 +160,6 @@
         <div class="balance-item-label"><span class="dot dot-red"></span>Gastos</div>
         <div class="balance-item-value val-red" id="total-gastos">$0</div>
       </div>
-      <div class="balance-item">
-        <div class="balance-item-label"><span class="dot dot-blue"></span>Fijos</div>
-        <div class="balance-item-value val-blue" id="total-fijos">$0</div>
-      </div>
     </div>
   </div>
   <a href="mifinanza-fijos.html" style="display:block;text-decoration:none;color:inherit;position:relative;z-index:2;">
@@ -171,7 +167,7 @@
     <div class="section-header">
       <span class="section-title">Gastos fijos</span>
       <div style="display:flex;align-items:center;gap:10px;">
-        <span class="section-total" id="fijos-total">$0/mes</span>
+        <span class="section-total" id="fijos-total">$0</span>
         <span style="font-size:11px;color:var(--accent);text-transform:uppercase;letter-spacing:0.08em;font-family:'DM Sans',sans-serif;">Ver todos →</span>
       </div>
     </div>
@@ -342,8 +338,7 @@
 
     document.getElementById('total-ingresos').textContent = window.moneda + totalIng.toLocaleString()
     document.getElementById('total-gastos').textContent   = window.moneda + totalGas.toLocaleString()
-    document.getElementById('total-fijos').textContent    = window.moneda + totalFij.toLocaleString()
-    document.getElementById('fijos-total').textContent    = '-' + window.moneda + totalFij.toLocaleString() + '/mes'
+    document.getElementById('fijos-total').textContent    = window.moneda + totalFij.toLocaleString()
 
     const card   = document.getElementById('saldo-card')
     const amount = document.getElementById('saldo-amount')
