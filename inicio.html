@@ -166,13 +166,6 @@
       </div>
     </div>
   </div>
-  <div class="frase"><span class="frase-icon">🎯</span><span class="frase-text" id="frase-text">Cargando...</span></div>
-  <div class="meta-card">
-    <div class="meta-header"><span class="meta-title">Meta del año</span><span class="meta-percent" id="meta-percent">0%</span></div>
-    <div class="meta-name" id="meta-name">💰 Cargando...</div>
-    <div class="progress-track"><div class="progress-fill" id="meta-barra" style="width:0%"></div></div>
-    <div class="meta-detail"><span>Llevas <strong id="meta-llevado">$0</strong></span><span>Faltan <strong id="meta-faltan">$0</strong></span></div>
-  </div>
   <a href="mifinanza-fijos.html" style="display:block;text-decoration:none;color:inherit;position:relative;z-index:2;">
   <div class="fijos-card">
     <div class="section-header">
@@ -364,23 +357,6 @@
       card.classList.remove('negativo')
       amount.textContent = window.moneda + saldo.toLocaleString()
       icon.textContent = '✓'
-    }
-
-    const frases = {
-      bien: ['Vas bien este mes. Sigues en camino. 💚', 'Tu esfuerzo se nota. Sigue así. 🎯', 'Este mes está bajo control. Bien hecho. ✅'],
-      mal:  ['Este mes fue difícil. El próximo será mejor. 💪', 'Revisa tus gastos — todavía puedes ajustar. 🔍', 'No pasa nada. Analiza y corrige. Tú puedes. 🌱']
-    }
-    const lista = saldo >= 0 ? frases.bien : frases.mal
-    document.getElementById('frase-text').textContent = lista[Math.floor(Math.random() * lista.length)]
-
-    if (metas) {
-      const pct    = metas.monto_objetivo > 0 ? Math.min(100, (metas.monto_actual / metas.monto_objetivo) * 100) : 0
-      const faltan = Math.max(0, metas.monto_objetivo - metas.monto_actual)
-      document.getElementById('meta-name').textContent    = `${metas.icono || '🎯'} ${metas.nombre}`
-      document.getElementById('meta-percent').textContent = pct.toFixed(1) + '%'
-      document.getElementById('meta-llevado').textContent = window.moneda + metas.monto_actual.toLocaleString()
-      document.getElementById('meta-faltan').textContent  = window.moneda + faltan.toLocaleString()
-      setTimeout(() => { document.getElementById('meta-barra').style.width = pct + '%' }, 300)
     }
 
     const listaFijos = document.getElementById('fijos-lista')
