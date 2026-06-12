@@ -192,6 +192,25 @@
     <button class="btn-no" onclick="cancelarDesactivar()">Cancelar</button>
   </div>
 </div>
+<!-- Modal editar gasto fijo -->
+<div class="modal-overlay" id="modal-editar">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Editar gasto fijo</div>
+    <div class="fld"><label class="lbl">Nombre</label><input type="text" id="e-nombre" class="inp"></div>
+    <div class="fld"><label class="lbl">Categoría</label>
+      <select id="e-categoria" class="inp">
+        <option>🏠 Alquiler</option><option>📱 Línea</option><option>🌍 Remesas</option>
+        <option>💻 Tecnología</option><option>🏋️ Gym</option><option>❤️ Salud</option>
+        <option>💳 Crédito</option><option>📦 Otros</option>
+      </select>
+    </div>
+    <div class="fld"><label class="lbl">Monto</label><input type="number" id="e-monto" class="inp"></div>
+    <div class="fld"><label class="lbl">Fecha de inicio</label><input type="date" id="e-fecha" class="inp"></div>
+    <button class="btn-ok" onclick="guardarEdicion()">Guardar cambios</button>
+    <button class="btn-no" onclick="cerrarEditar()">Cancelar</button>
+  </div>
+</div>
 <script>
   window.moneda = localStorage.getItem('moneda') || '$'
   const _color = localStorage.getItem('color'); if (_color) document.documentElement.style.setProperty('--accent', _color)
@@ -243,7 +262,7 @@
           </div>
         </div>
         <div class="fijo-acciones">
-          <button class="btn-accion" onclick="editarMonto('${f.id}', ${f.monto})">✏️ Editar monto</button>
+          <button class="btn-accion" onclick="editarFijo('${f.id}')">✏️ Editar</button>
           <button class="btn-accion danger" onclick="eliminarFijo('${f.id}')">🗑 Eliminar</button>
         </div>
       `;
@@ -296,13 +315,37 @@
     document.getElementById('modal-desactivar').style.display = 'none';
   }
 
-  async function editarMonto(id, montoActual) {
-    const nuevo = prompt('Nuevo monto:', montoActual);
-    if (!nuevo || isNaN(nuevo)) return;
-    const { error } = await dbClient.from('gastos_fijos').update({ monto: parseFloat(nuevo) }).eq('id', id).eq('usuario_id', window.currentUserId);
-    if (error) { alert('Error: ' + error.message); return; }
+  let idFijoEditar = null;
+
+  function editarFijo(id) {
     const f = fijos.find(f => f.id === id);
-    if (f) f.monto = parseFloat(nuevo);
+    if (!f) return;
+    idFijoEditar = id;
+    document.getElementById('e-nombre').value    = f.nombre;
+    document.getElementById('e-categoria').value = f.categoria;
+    document.getElementById('e-monto').value     = f.monto;
+    document.getElementById('e-fecha').value     = f.fecha_inicio || '';
+    document.getElementById('modal-editar').style.display = 'flex';
+  }
+
+  function cerrarEditar() {
+    document.getElementById('modal-editar').style.display = 'none';
+  }
+
+  async function guardarEdicion() {
+    const nombre    = document.getElementById('e-nombre').value.trim();
+    const categoria = document.getElementById('e-categoria').value;
+    const monto     = parseFloat(document.getElementById('e-monto').value);
+    const fecha     = document.getElementById('e-fecha').value;
+    if (!nombre || isNaN(monto) || !fecha) { alert('Completa todos los campos'); return; }
+    const dia = new Date(fecha).getDate();
+    const { error } = await dbClient.from('gastos_fijos')
+      .update({ nombre, categoria, monto, fecha_inicio: fecha, dia_del_mes: dia })
+      .eq('id', idFijoEditar).eq('usuario_id', window.currentUserId);
+    if (error) { alert('Error: ' + error.message); return; }
+    const f = fijos.find(f => f.id === idFijoEditar);
+    if (f) { f.nombre = nombre; f.categoria = categoria; f.monto = monto; f.fecha_inicio = fecha; f.dia_del_mes = dia; }
+    cerrarEditar();
     renderFijos();
   }
 
@@ -343,6 +386,9 @@
   });
   document.getElementById('modal-desactivar').addEventListener('click', function(e) {
     if (e.target === this) cancelarDesactivar();
+  });
+  document.getElementById('modal-editar').addEventListener('click', function(e) {
+    if (e.target === this) cerrarEditar();
   });
 
   cargarFijos();
