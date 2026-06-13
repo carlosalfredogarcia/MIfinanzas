@@ -453,23 +453,28 @@
 
     const payload = { nombre, frase, moneda, color, categorias: cats }
 
-    // UPDATE primero: seguro aunque no exista fila (actualiza 0 filas sin error)
+    console.log('[guardar] currentUserId:', window.currentUserId)
+    console.log('[guardar] payload:', payload)
+
     const { data: actualizados, error: errUpdate } = await dbClient.from('perfil')
       .update(payload)
       .eq('usuario_id', window.currentUserId)
       .select('id')
 
+    console.log('[guardar] UPDATE result — actualizados:', actualizados, 'errUpdate:', errUpdate)
+
     let error = errUpdate
     if (!errUpdate && (!actualizados || actualizados.length === 0)) {
-      // No había fila — INSERT
+      console.log('[guardar] UPDATE afectó 0 filas — intentando INSERT')
       ;({ error } = await dbClient.from('perfil')
         .insert({ usuario_id: window.currentUserId, ...payload }))
+      console.log('[guardar] INSERT error:', error)
     }
 
     btn.disabled = false
     btn.textContent = 'Guardar cambios'
 
-    if (error) { toast('Error al guardar', 'err'); return }
+    if (error) { toast('Error al guardar: ' + error.message, 'err'); return }
     localStorage.setItem('moneda', moneda)
     localStorage.setItem('color', color)
     toast('Perfil guardado ✓')
