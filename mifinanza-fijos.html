@@ -321,6 +321,7 @@
     const f = fijos.find(f => f.id === id);
     if (!f) return;
     idFijoEditar = id;
+    cargarCategoriasPerfil();
     document.getElementById('e-nombre').value    = f.nombre;
     document.getElementById('e-categoria').value = f.categoria;
     document.getElementById('e-monto').value     = f.monto;
@@ -362,6 +363,7 @@
     document.getElementById('f-monto').value = '';
     document.getElementById('f-fecha').value = '';
     document.getElementById('fijo-fecha-fin').value = '';
+    cargarCategoriasPerfil();
     document.getElementById('modal').style.display = 'flex';
   }
   function cerrarModal() { document.getElementById('modal').style.display = 'none'; }
@@ -391,12 +393,9 @@
     if (e.target === this) cerrarEditar();
   });
 
-  (async function cargarCategoriasPerfil() {
-    let uid = window.currentUserId;
-    if (!uid) uid = await new Promise(resolve => {
-      const iv = setInterval(() => { if (window.currentUserId) { clearInterval(iv); resolve(window.currentUserId); } }, 50);
-      setTimeout(() => { clearInterval(iv); resolve(null); }, 5000);
-    });
+  async function cargarCategoriasPerfil() {
+    const { data: { session } } = await dbClient.auth.getSession();
+    const uid = session?.user?.id;
     if (!uid) return;
     const { data: perfil } = await dbClient.from('perfil').select('categorias').eq('usuario_id', uid).maybeSingle();
     if (!perfil?.categorias) return;
@@ -405,7 +404,7 @@
       const sel = document.getElementById(id);
       if (sel) sel.innerHTML = cats.map(c => `<option>${c}</option>`).join('');
     });
-  })();
+  }
 
   cargarFijos();
 </script>

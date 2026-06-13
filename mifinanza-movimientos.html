@@ -376,11 +376,11 @@
 
   function abrirMenu()       { document.getElementById('menu-fab').style.display = 'flex'; }
   function cerrarMenu()      { document.getElementById('menu-fab').style.display = 'none'; }
-  function abrirGasto()      { cerrarMenu(); document.getElementById('g-fecha').value = hoy; document.getElementById('modal-gasto').style.display = 'flex'; }
+  function abrirGasto()      { cerrarMenu(); document.getElementById('g-fecha').value = hoy; cargarCategoriasPerfil(); document.getElementById('modal-gasto').style.display = 'flex'; }
   function cerrarGasto()     { document.getElementById('modal-gasto').style.display = 'none'; }
   function abrirIngreso()    { cerrarMenu(); document.getElementById('i-fecha').value = hoy; document.getElementById('modal-ingreso').style.display = 'flex'; }
   function cerrarIngreso()   { document.getElementById('modal-ingreso').style.display = 'none'; }
-  function abrirGastoFijo()  { cerrarMenu(); document.getElementById('modal-fijo').style.display = 'flex'; }
+  function abrirGastoFijo()  { cerrarMenu(); cargarCategoriasPerfil(); document.getElementById('modal-fijo').style.display = 'flex'; }
   function cerrarGastoFijo() { document.getElementById('modal-fijo').style.display = 'none'; }
 
   async function guardarGasto() {
@@ -421,6 +421,7 @@
 
   function abrirEditar(m) {
     editando = m;
+    cargarCategoriasPerfil();
     const esFijo    = m.tipo === 'fijo';
     const esIngreso = m.tipo === 'ingreso';
     document.getElementById('edit-title').textContent = esFijo ? 'Editar gasto fijo' : esIngreso ? 'Editar ingreso' : 'Editar gasto';
@@ -501,12 +502,9 @@
 
   actualizarMesLabel();
 
-  (async function cargarCategoriasPerfil() {
-    let uid = window.currentUserId;
-    if (!uid) uid = await new Promise(resolve => {
-      const iv = setInterval(() => { if (window.currentUserId) { clearInterval(iv); resolve(window.currentUserId); } }, 50);
-      setTimeout(() => { clearInterval(iv); resolve(null); }, 5000);
-    });
+  async function cargarCategoriasPerfil() {
+    const { data: { session } } = await dbClient.auth.getSession();
+    const uid = session?.user?.id;
     if (!uid) return;
     const { data: perfil } = await dbClient.from('perfil').select('categorias').eq('usuario_id', uid).maybeSingle();
     if (!perfil?.categorias) return;
@@ -515,7 +513,7 @@
       const sel = document.getElementById(id);
       if (sel) sel.innerHTML = cats.map(c => `<option>${c}</option>`).join('');
     });
-  })();
+  }
 
   cargarMovimientos();
 </script>
