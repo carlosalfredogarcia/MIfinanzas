@@ -310,15 +310,17 @@
     setTimeout(() => { t.className = 'toast' }, 2500)
   }
 
+  const CATS_DEFAULT = '🍔 Comida,🏠 Alquiler,💳 Crédito,📱 Línea,🏋️ Gym,⛽ Gasolina,💻 Tecnología,❤️ Salud,👕 Ropa,🎉 Salidas,🌍 Remesas,⚠️ Gastos Imprevistos,📋 Trámite,🚗 Vehículo,📦 Otros'
+
   async function cargarPerfil() {
     const { data: { session } } = await dbClient.auth.getSession()
     const uid = session?.user?.id
     if (!uid) return
     const { data: perfil } = await dbClient.from('perfil').select('*').eq('usuario_id', uid).maybeSingle()
-    const datos = perfil || { nombre: '', moneda: '$', color: '#b8f564', categorias: '' }
+    const datos = perfil || { nombre: '', moneda: '$', color: '#b8f564', categorias: CATS_DEFAULT }
     if (!perfil) {
       await dbClient.from('perfil')
-        .insert({ usuario_id: uid, nombre: '', moneda: '$', color: '#b8f564', categorias: '' })
+        .insert({ usuario_id: uid, nombre: '', moneda: '$', color: '#b8f564', categorias: CATS_DEFAULT })
     }
 
     document.getElementById('hero-nombre').textContent  = datos.nombre || ''

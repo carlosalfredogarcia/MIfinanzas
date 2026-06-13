@@ -393,13 +393,15 @@
     if (e.target === this) cerrarEditar();
   });
 
+  const CATS_DEFAULT = '🍔 Comida,🏠 Alquiler,💳 Crédito,📱 Línea,🏋️ Gym,⛽ Gasolina,💻 Tecnología,❤️ Salud,👕 Ropa,🎉 Salidas,🌍 Remesas,⚠️ Gastos Imprevistos,📋 Trámite,🚗 Vehículo,📦 Otros'
+
   async function cargarCategoriasPerfil() {
     const { data: { session } } = await dbClient.auth.getSession();
     const uid = session?.user?.id;
     if (!uid) return;
     const { data: perfil } = await dbClient.from('perfil').select('categorias').eq('usuario_id', uid).maybeSingle();
-    if (!perfil?.categorias) return;
-    const cats = perfil.categorias.split(',').map(c => c.trim()).filter(Boolean);
+    const catsStr = perfil?.categorias || CATS_DEFAULT;
+    const cats = catsStr.split(',').map(c => c.trim()).filter(Boolean);
     ['f-categoria', 'e-categoria'].forEach(id => {
       const sel = document.getElementById(id);
       if (sel) sel.innerHTML = cats.map(c => `<option>${c}</option>`).join('');

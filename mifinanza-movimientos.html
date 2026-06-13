@@ -376,7 +376,7 @@
 
   function abrirMenu()       { document.getElementById('menu-fab').style.display = 'flex'; }
   function cerrarMenu()      { document.getElementById('menu-fab').style.display = 'none'; }
-  function abrirGasto()      { cerrarMenu(); console.log('[cats] abrirGasto llamado'); document.getElementById('g-fecha').value = hoy; cargarCategoriasPerfil(); document.getElementById('modal-gasto').style.display = 'flex'; }
+  function abrirGasto()      { cerrarMenu(); document.getElementById('g-fecha').value = hoy; cargarCategoriasPerfil(); document.getElementById('modal-gasto').style.display = 'flex'; }
   function cerrarGasto()     { document.getElementById('modal-gasto').style.display = 'none'; }
   function abrirIngreso()    { cerrarMenu(); document.getElementById('i-fecha').value = hoy; document.getElementById('modal-ingreso').style.display = 'flex'; }
   function cerrarIngreso()   { document.getElementById('modal-ingreso').style.display = 'none'; }
@@ -502,25 +502,19 @@
 
   actualizarMesLabel();
 
+  const CATS_DEFAULT = '🍔 Comida,🏠 Alquiler,💳 Crédito,📱 Línea,🏋️ Gym,⛽ Gasolina,💻 Tecnología,❤️ Salud,👕 Ropa,🎉 Salidas,🌍 Remesas,⚠️ Gastos Imprevistos,📋 Trámite,🚗 Vehículo,📦 Otros'
+
   async function cargarCategoriasPerfil() {
-    try {
-      console.log('[cats] inicio');
-      const { data: { session } } = await dbClient.auth.getSession();
-      const uid = session?.user?.id;
-      console.log('[cats] uid:', uid);
-      if (!uid) { console.log('[cats] sin uid, saliendo'); return; }
-      const { data: perfil, error } = await dbClient.from('perfil').select('categorias').eq('usuario_id', uid).maybeSingle();
-      console.log('[cats] perfil:', perfil, 'error:', error);
-      if (!perfil?.categorias) { console.log('[cats] sin categorias en perfil'); return; }
-      const cats = perfil.categorias.split(',').map(c => c.trim()).filter(Boolean);
-      console.log('[cats] lista:', cats);
-      ['g-categoria', 'f-categoria', 'e-categoria', 'e-cat-fijo'].forEach(id => {
-        const sel = document.getElementById(id);
-        if (sel) sel.innerHTML = cats.map(c => `<option>${c}</option>`).join('');
-      });
-    } catch(e) {
-      console.error('[cats] excepción:', e);
-    }
+    const { data: { session } } = await dbClient.auth.getSession();
+    const uid = session?.user?.id;
+    if (!uid) return;
+    const { data: perfil } = await dbClient.from('perfil').select('categorias').eq('usuario_id', uid).maybeSingle();
+    const catsStr = perfil?.categorias || CATS_DEFAULT;
+    const cats = catsStr.split(',').map(c => c.trim()).filter(Boolean);
+    ['g-categoria', 'f-categoria', 'e-categoria', 'e-cat-fijo'].forEach(id => {
+      const sel = document.getElementById(id);
+      if (sel) sel.innerHTML = cats.map(c => `<option>${c}</option>`).join('');
+    });
   }
 
   cargarMovimientos();
