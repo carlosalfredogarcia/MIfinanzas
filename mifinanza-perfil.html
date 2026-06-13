@@ -311,20 +311,14 @@
   }
 
   async function cargarPerfil() {
-    if (!window.currentUserId) {
-      await new Promise(resolve => {
-        const iv = setInterval(() => {
-          if (window.currentUserId) { clearInterval(iv); resolve() }
-        }, 50)
-        setTimeout(() => { clearInterval(iv); resolve() }, 5000)
-      })
-    }
-    if (!window.currentUserId) return
-    const { data: perfil } = await dbClient.from('perfil').select('*').eq('usuario_id', window.currentUserId).maybeSingle()
+    const { data: { session } } = await dbClient.auth.getSession()
+    const uid = session?.user?.id
+    if (!uid) return
+    const { data: perfil } = await dbClient.from('perfil').select('*').eq('usuario_id', uid).maybeSingle()
     const datos = perfil || { nombre: '', moneda: '$', color: '#b8f564', categorias: '' }
     if (!perfil) {
       await dbClient.from('perfil')
-        .insert({ usuario_id: window.currentUserId, nombre: '', moneda: '$', color: '#b8f564', categorias: '' })
+        .insert({ usuario_id: uid, nombre: '', moneda: '$', color: '#b8f564', categorias: '' })
     }
 
     document.getElementById('hero-nombre').textContent  = datos.nombre || ''
@@ -366,10 +360,9 @@
     const wrap = document.getElementById('cats-wrap')
     wrap.innerHTML = ''
     lista.forEach(cat => {
-      const icon = iconsCat[cat] || '📦'
-      const tag  = document.createElement('div')
+      const tag = document.createElement('div')
       tag.className = 'cat-tag'
-      tag.innerHTML = `${icon} ${cat} <span class="remove" onclick="removeCat(this)">×</span>`
+      tag.innerHTML = `${cat} <span class="remove" onclick="removeCat(this)">×</span>`
       wrap.appendChild(tag)
     })
   }
@@ -451,24 +444,21 @@
     btn.disabled = true
     btn.textContent = 'Guardando...'
 
-    const payload = { nombre, frase, moneda, color, categorias: cats }
+    const { data: { session } } = await dbClient.auth.getSession()
+    const uid = session?.user?.id
+    if (!uid) { btn.disabled = false; btn.textContent = 'Guardar cambios'; toast('Sesión no válida', 'err'); return }
 
-    console.log('[guardar] currentUserId:', window.currentUserId)
-    console.log('[guardar] payload:', payload)
+    const payload = { nombre, frase, moneda, color, categorias: cats }
 
     const { data: actualizados, error: errUpdate } = await dbClient.from('perfil')
       .update(payload)
-      .eq('usuario_id', window.currentUserId)
+      .eq('usuario_id', uid)
       .select('id')
-
-    console.log('[guardar] UPDATE result — actualizados:', actualizados, 'errUpdate:', errUpdate)
 
     let error = errUpdate
     if (!errUpdate && (!actualizados || actualizados.length === 0)) {
-      console.log('[guardar] UPDATE afectó 0 filas — intentando INSERT')
       ;({ error } = await dbClient.from('perfil')
-        .insert({ usuario_id: window.currentUserId, ...payload }))
-      console.log('[guardar] INSERT error:', error)
+        .insert({ usuario_id: uid, ...payload }))
     }
 
     btn.disabled = false
