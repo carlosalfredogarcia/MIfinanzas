@@ -254,12 +254,17 @@
       })
     }
     if (!uid) return
-    const [{ data: gastos, error: errG }, { data: ingresos, error: errI }] = await Promise.all([
+    const [
+      { data: gastos,  error: errG },
+      { data: ingresos, error: errI },
+      { data: fijos,   error: errF }
+    ] = await Promise.all([
       dbClient.from('gastos').select('fecha, monto, categoria').eq('usuario_id', uid).order('fecha', { ascending: true }),
-      dbClient.from('ingresos').select('fecha, monto').eq('usuario_id', uid).order('fecha', { ascending: true })
+      dbClient.from('ingresos').select('fecha, monto').eq('usuario_id', uid).order('fecha', { ascending: true }),
+      dbClient.from('gastos_fijos').select('monto, categoria, fecha_inicio, fecha_fin').eq('usuario_id', uid)
     ])
 
-    if (errG || errI) {
+    if (errG || errI || errF) {
       document.getElementById('loading-wrap').textContent = 'Error al cargar datos.'
       return
     }
@@ -278,6 +283,21 @@
       mapa[key].gastos += parseFloat(r.monto || 0)
       const cat = r.categoria || 'Otros'
       mapa[key].cats[cat] = (mapa[key].cats[cat] || 0) + parseFloat(r.monto || 0)
+    })
+
+    const mesFin = new Date().toISOString().substring(0, 7)
+    ;(fijos || []).forEach(f => {
+      const desde = f.fecha_inicio ? f.fecha_inicio.substring(0, 7) : null
+      if (!desde) return
+      const hasta = f.fecha_fin ? f.fecha_fin.substring(0, 7) : mesFin
+      const cat   = f.categoria || 'Otros'
+      const monto = parseFloat(f.monto || 0)
+      Object.keys(mapa).forEach(key => {
+        if (key >= desde && key <= hasta) {
+          mapa[key].gastos += monto
+          mapa[key].cats[cat] = (mapa[key].cats[cat] || 0) + monto
+        }
+      })
     })
 
     datos = Object.entries(mapa)
