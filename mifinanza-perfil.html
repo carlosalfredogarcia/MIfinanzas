@@ -25,24 +25,22 @@
   .phone { width: 390px; min-height: 100vh; background: var(--bg); }
 
   /* HERO */
-  .hero { padding: 52px 24px 28px; display: flex; flex-direction: column; align-items: center; text-align: center; animation: fadeUp 0.4s ease both; }
-  .avatar { width: 72px; height: 72px; border-radius: 50%; background: var(--card2); border: 2px solid var(--accent); display: flex; align-items: center; justify-content: center; font-family: 'Roboto', sans-serif; font-size: 28px; font-weight: 700; color: var(--text); cursor: pointer; transition: border-color 0.2s, transform 0.2s; margin-bottom: 14px; }
-  .avatar:hover { border-color: #79baff; transform: scale(1.04); }
-  .hero-nombre { font-family: 'DM Sans', sans-serif; font-size: 20px; font-weight: 700; color: var(--text); margin-bottom: 4px; cursor: pointer; transition: color 0.2s; }
-  .hero-nombre:hover { color: var(--accent); }
+  .hero { padding: 52px 24px 24px; display: flex; flex-direction: column; align-items: center; text-align: center; }
+  .avatar { width: 72px; height: 72px; border-radius: 50%; background: var(--card2); border: 2px solid var(--accent); display: flex; align-items: center; justify-content: center; font-family: 'Roboto', sans-serif; font-size: 28px; font-weight: 700; color: var(--text); margin-bottom: 12px; }
+  .hero-nombre { font-family: 'DM Sans', sans-serif; font-size: 20px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
   .hero-moneda { font-size: 13px; color: var(--subtext); }
 
   /* SECCIONES */
-  .seccion { margin: 0 24px 12px; background: var(--card); border-radius: 16px; padding: 18px 20px; border: 1px solid var(--border); animation: fadeUp 0.4s ease both; opacity: 0; }
+  .seccion { margin: 0 24px 12px; background: var(--card); border-radius: 14px; padding: 18px 20px; border: 1px solid var(--border); }
   .seccion-titulo { font-size: 10px; color: var(--subtext); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 14px; font-weight: 600; }
 
-  /* INFORMACIÓN PERSONAL — filas de edición */
-  .info-row { display: flex; justify-content: space-between; align-items: center; padding: 4px 0; cursor: pointer; }
-  .info-row + .info-row { margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border2); }
-  .info-left { flex: 1; }
-  .info-key  { font-size: 14px; color: var(--subtext); display: block; }
-  .info-val  { font-size: 13px; color: var(--text); display: block; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 240px; }
-  .info-arrow { font-size: 18px; color: var(--subtext); flex-shrink: 0; margin-left: 8px; }
+  /* INPUTS DIRECTOS */
+  .fld { margin-bottom: 14px; }
+  .fld:last-child { margin-bottom: 0; }
+  .lbl { font-size: 11px; color: var(--subtext); text-transform: uppercase; letter-spacing: 0.08em; display: block; margin-bottom: 6px; }
+  .inp { width: 100%; background: var(--bg); border: 1px solid var(--border2); border-radius: 12px; padding: 12px 14px; color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 15px; outline: none; transition: border-color 0.15s; display: block; }
+  .inp:focus { border-color: var(--accent); }
+  textarea.inp { resize: none; height: 80px; line-height: 1.5; }
 
   /* MONEDA */
   .moneda-opts { display: flex; gap: 8px; flex-wrap: wrap; }
@@ -63,39 +61,24 @@
   .cat-tag:hover { border-color: rgba(248,81,73,0.35); }
   .cat-tag .remove { color: var(--subtext); font-size: 14px; line-height: 1; cursor: pointer; background: none; border: none; padding: 0; font-family: inherit; transition: color 0.2s; }
   .cat-tag:hover .remove { color: var(--danger); }
-  .btn-add-cat { background: none; border: 1px dashed var(--subtext); border-radius: 100px; padding: 6px 14px; font-size: 12px; color: var(--subtext); cursor: pointer; font-family: 'DM Sans', sans-serif; transition: all 0.2s; }
+  .btn-add-cat { background: none; border: 1px dashed var(--border2); border-radius: 100px; padding: 6px 14px; font-size: 12px; color: var(--subtext); cursor: pointer; font-family: 'DM Sans', sans-serif; transition: all 0.2s; }
   .btn-add-cat:hover { border-color: var(--accent); color: var(--accent); }
 
-  /* SWITCH */
-  .switch { width: 40px; height: 22px; background: var(--card2); border-radius: 100px; border: 1px solid var(--border2); position: relative; cursor: pointer; transition: background 0.3s, border-color 0.3s; flex-shrink: 0; }
-  .switch.on { background: rgba(88,166,255,0.2); border-color: rgba(88,166,255,0.4); }
-  .switch::after { content: ''; position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; border-radius: 50%; background: var(--subtext); transition: transform 0.3s, background 0.3s; }
-  .switch.on::after { transform: translateX(18px); background: var(--accent); }
-
   /* BOTONES PRINCIPALES */
-  .btn-guardar { display: block; margin: 4px 24px 10px; width: calc(100% - 48px); background: var(--accent); color: #0d1117; border: none; border-radius: 14px; padding: 15px; font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 700; cursor: pointer; transition: opacity 0.2s; animation: fadeUp 0.4s 0.5s ease both; opacity: 0; }
-  .btn-guardar:hover { opacity: 0.9; }
-  .btn-logout { display: block; margin: 0 24px 24px; width: calc(100% - 48px); background: none; border: 1px solid rgba(248,81,73,0.3); border-radius: 14px; padding: 14px; font-family: 'DM Sans', sans-serif; font-size: 14px; color: var(--danger); cursor: pointer; transition: background 0.2s, border-color 0.2s; }
-  .btn-logout:hover { background: rgba(248,81,73,0.07); border-color: rgba(248,81,73,0.5); }
+  .btn-guardar { display: block; margin: 4px 24px 10px; width: calc(100% - 48px); background: var(--accent); color: #0d1117; border: none; border-radius: 14px; padding: 15px; font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 700; cursor: pointer; transition: opacity 0.2s; }
+  .btn-guardar:hover { opacity: 0.88; }
+  .btn-guardar:disabled { opacity: 0.6; cursor: default; }
+  .btn-logout { display: block; margin: 0 24px 24px; width: calc(100% - 48px); background: none; border: 1px solid var(--danger); border-radius: 14px; padding: 14px; font-family: 'DM Sans', sans-serif; font-size: 14px; color: var(--danger); cursor: pointer; transition: background 0.2s; }
+  .btn-logout:hover { background: rgba(248,81,73,0.08); }
 
-  /* MODALS */
+  /* MODAL confirmar eliminar cat */
   .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.75); backdrop-filter: blur(8px); z-index: 200; display: none; align-items: flex-end; justify-content: center; }
-  .modal-overlay.visible { display: flex; }
   .modal { width: 390px; background: var(--card); border-radius: 28px 28px 0 0; padding: 24px 24px 40px; border-top: 1px solid var(--border2); }
   .modal-handle { width: 40px; height: 4px; background: rgba(255,255,255,0.08); border-radius: 100px; margin: 0 auto 20px; }
   .modal-title { font-family: 'DM Sans', sans-serif; font-size: 18px; font-weight: 700; color: var(--text); margin-bottom: 8px; }
-  .modal-sub { font-size: 12px; color: var(--subtext); margin-bottom: 16px; }
-  .modal input[type="text"] { width:100%; background:#0d1117; border:1px solid var(--border2); border-radius:12px; padding:14px; color:var(--text); font-family:'DM Sans',sans-serif; font-size:15px; outline:none; margin-bottom:16px; display:block; transition: border-color 0.15s; }
-  .modal input[type="text"]:focus { border-color: var(--accent); }
-  .modal textarea { width:100%; background:#0d1117; border:1px solid var(--border2); border-radius:12px; padding:14px; color:var(--text); font-family:'DM Sans',sans-serif; font-size:14px; outline:none; resize:none; height:90px; line-height:1.5; margin-bottom:14px; transition: border-color 0.15s; }
-  .modal textarea:focus { border-color: var(--accent); }
-  .frases-ejemplo { margin-bottom: 16px; }
-  .frases-ejemplo p { font-size: 11px; color: var(--subtext); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.08em; }
-  .frase-sugerida { background: var(--card2); border: 1px solid var(--border2); border-radius: 10px; padding: 9px 12px; font-size: 12px; color: var(--subtext); cursor: pointer; margin-bottom: 6px; transition: all 0.2s; font-style: italic; }
-  .frase-sugerida:hover { border-color: rgba(88,166,255,0.3); color: var(--accent); }
-  .btn-ok { width:100%; border:none; border-radius:14px; padding:14px; font-family:'DM Sans',sans-serif; font-size:15px; font-weight:700; cursor:pointer; margin-bottom:8px; transition: opacity 0.2s; }
+  .btn-ok { width: 100%; border: none; border-radius: 14px; padding: 14px; font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 700; cursor: pointer; margin-bottom: 8px; transition: opacity 0.2s; }
   .btn-ok:hover { opacity: 0.9; }
-  .btn-cancelar { width:100%; background:none; border:none; color:var(--subtext); font-size:13px; cursor:pointer; padding:10px; font-family:'DM Sans',sans-serif; }
+  .btn-cancelar { width: 100%; background: none; border: none; color: var(--subtext); font-size: 13px; cursor: pointer; padding: 10px; font-family: 'DM Sans', sans-serif; }
 
   /* NAVBAR */
   .navbar { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 390px; background: rgba(13,17,23,0.97); backdrop-filter: blur(20px); border-top: 1px solid var(--border2); padding: 12px 0 24px; display: flex; justify-content: space-around; align-items: center; z-index: 99; }
@@ -111,7 +94,6 @@
   .toast.err { border-color: rgba(248,81,73,0.4);  color: var(--danger); }
 
   .spacer { height: 110px; }
-  @keyframes fadeUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
 </style>
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="/icon-192.png">
@@ -127,41 +109,37 @@
 
   <!-- HERO -->
   <div class="hero">
-    <div class="avatar" id="avatar-letra" onclick="editarNombre()">C</div>
-    <div class="hero-nombre" id="hero-nombre" onclick="editarNombre()">Carlos</div>
+    <div class="avatar" id="avatar-letra">C</div>
+    <div class="hero-nombre" id="hero-nombre">—</div>
     <div class="hero-moneda" id="hero-moneda">$ — Dólar</div>
   </div>
 
   <!-- Información personal -->
-  <div class="seccion" style="animation-delay:0.08s">
+  <div class="seccion">
     <div class="seccion-titulo">Información personal</div>
-    <div class="info-row" onclick="editarNombre()">
-      <div class="info-left">
-        <span class="info-key">Nombre</span>
-      </div>
-      <span class="info-arrow">›</span>
+    <div class="fld">
+      <label class="lbl" for="inp-nombre">Nombre</label>
+      <input type="text" id="inp-nombre" class="inp" placeholder="Tu nombre"
+             oninput="syncHero(this.value)">
     </div>
-    <div class="info-row" onclick="abrirFrase()">
-      <div class="info-left">
-        <span class="info-key">Frase personal</span>
-        <span class="info-val" id="frase-display">Toca para añadir una frase</span>
-      </div>
-      <span class="info-arrow">›</span>
+    <div class="fld">
+      <label class="lbl" for="inp-frase">Frase personal</label>
+      <textarea id="inp-frase" class="inp" placeholder="Escribe algo que te motive..."></textarea>
     </div>
   </div>
 
   <!-- Moneda -->
-  <div class="seccion" style="animation-delay:0.16s">
+  <div class="seccion">
     <div class="seccion-titulo">Moneda</div>
     <div class="moneda-opts">
-      <div class="moneda-chip" data-cod="$"  data-label="$ — Dólar"   onclick="setMoneda(this)">$ — Dólar</div>
-      <div class="moneda-chip" data-cod="€"  data-label="€ — Euro"    onclick="setMoneda(this)">€ — Euro</div>
-      <div class="moneda-chip" data-cod="Bs" data-label="Bs — Bolívar" onclick="setMoneda(this)">Bs — Bolívar</div>
+      <div class="moneda-chip" data-cod="$"  data-label="$ — Dólar"    onclick="setMoneda(this)">$ — Dólar</div>
+      <div class="moneda-chip" data-cod="€"  data-label="€ — Euro"     onclick="setMoneda(this)">€ — Euro</div>
+      <div class="moneda-chip" data-cod="Bs" data-label="Bs — Bolívar"  onclick="setMoneda(this)">Bs — Bolívar</div>
     </div>
   </div>
 
   <!-- Color principal -->
-  <div class="seccion" style="animation-delay:0.24s">
+  <div class="seccion">
     <div class="seccion-titulo">Color principal</div>
     <div class="colores-wrap">
       <div class="color-item" data-color="#58a6ff" onclick="setColor(this)">
@@ -188,7 +166,7 @@
   </div>
 
   <!-- Categorías -->
-  <div class="seccion" style="animation-delay:0.32s">
+  <div class="seccion">
     <div class="seccion-titulo">Mis categorías</div>
     <div class="cats-wrap" id="cats-wrap"></div>
     <button class="btn-add-cat" onclick="agregarCat()">+ Agregar categoría</button>
@@ -216,36 +194,6 @@
   </div>
 </nav>
 
-<!-- Modal nombre -->
-<div class="modal-overlay" id="modal-nombre">
-  <div class="modal">
-    <div class="modal-handle"></div>
-    <div class="modal-title">Tu nombre</div>
-    <input type="text" id="nombre-input" placeholder="¿Cómo te llamas?">
-    <button class="btn-ok" style="background:var(--accent);color:#0d1117" onclick="confirmarNombre()">Guardar</button>
-    <button class="btn-cancelar" onclick="cerrarNombre()">Cancelar</button>
-  </div>
-</div>
-
-<!-- Modal frase -->
-<div class="modal-overlay" id="modal-frase">
-  <div class="modal">
-    <div class="modal-handle"></div>
-    <div class="modal-title">Tu frase personal</div>
-    <div class="modal-sub">Aparece en tu perfil cada vez que abres la app</div>
-    <textarea id="frase-input" placeholder="Escribe algo que te motive..."></textarea>
-    <div class="frases-ejemplo">
-      <p>O elige una:</p>
-      <div class="frase-sugerida" onclick="usarFrase(this)">"El dinero es una herramienta. Yo decido cómo usarla."</div>
-      <div class="frase-sugerida" onclick="usarFrase(this)">"Cada dólar que ahorro hoy es libertad mañana."</div>
-      <div class="frase-sugerida" onclick="usarFrase(this)">"Ahorrar y disfrutar no son opuestos."</div>
-      <div class="frase-sugerida" onclick="usarFrase(this)">"Pequeños pasos, grandes resultados."</div>
-    </div>
-    <button class="btn-ok" style="background:var(--accent);color:#0d1117" onclick="guardarFrase()">Guardar frase</button>
-    <button class="btn-cancelar" onclick="cerrarFrase()">Cancelar</button>
-  </div>
-</div>
-
 <!-- Modal confirmar eliminar categoría -->
 <div class="modal-overlay" id="modal-confirm-eliminar" style="display:none">
   <div class="modal">
@@ -269,6 +217,11 @@
     setTimeout(() => { t.className = 'toast' }, 2500)
   }
 
+  function syncHero(val) {
+    document.getElementById('hero-nombre').textContent  = val || '—'
+    document.getElementById('avatar-letra').textContent = val ? val[0].toUpperCase() : '?'
+  }
+
   const CATS_DEFAULT = '🍔 Comida,🏠 Alquiler,💳 Crédito,📱 Línea,🏋️ Gym,⛽ Gasolina,💻 Tecnología,❤️ Salud,👕 Ropa,🎉 Salidas,🌍 Remesas,⚠️ Gastos Imprevistos,📋 Trámite,🚗 Vehículo,📦 Otros'
 
   async function cargarPerfil() {
@@ -282,10 +235,12 @@
         .insert({ usuario_id: uid, nombre: '', moneda: '$', color: '#58a6ff', categorias: CATS_DEFAULT })
     }
 
-    document.getElementById('hero-nombre').textContent  = datos.nombre || ''
-    document.getElementById('avatar-letra').textContent = (datos.nombre || '?')[0].toUpperCase()
+    const nombre = datos.nombre || ''
+    document.getElementById('inp-nombre').value         = nombre
+    document.getElementById('hero-nombre').textContent  = nombre || '—'
+    document.getElementById('avatar-letra').textContent = nombre ? nombre[0].toUpperCase() : '?'
 
-    if (datos.frase) document.getElementById('frase-display').textContent = datos.frase
+    document.getElementById('inp-frase').value = datos.frase || ''
 
     if (datos.moneda) {
       const simbolo = { USD:'$', EUR:'€', VES:'Bs', COP:'$', MXN:'$', DOP:'$', '$':'$', '€':'€', Bs:'Bs' }[datos.moneda] || '$'
@@ -360,23 +315,6 @@
     wrap.appendChild(tag)
   }
 
-  function editarNombre() {
-    const modalEl = document.getElementById('modal-nombre')
-    const inputEl = document.getElementById('nombre-input')
-    if (!modalEl || !inputEl) return
-    inputEl.value = document.getElementById('hero-nombre').textContent.trim()
-    modalEl.style.display = 'flex'
-    setTimeout(() => inputEl.focus(), 100)
-  }
-  function cerrarNombre() { document.getElementById('modal-nombre').style.display = 'none' }
-  function confirmarNombre() {
-    const val = document.getElementById('nombre-input').value.trim()
-    if (!val) return
-    document.getElementById('hero-nombre').textContent = val
-    document.getElementById('avatar-letra').textContent = val[0].toUpperCase()
-    cerrarNombre()
-  }
-
   function setColor(el) {
     document.querySelectorAll('.color-item').forEach(c => c.classList.remove('active'))
     el.classList.add('active')
@@ -390,27 +328,9 @@
     document.getElementById('hero-moneda').textContent = el.dataset.label
   }
 
-  function abrirFrase()  { document.getElementById('modal-frase').classList.add('visible') }
-  function cerrarFrase() { document.getElementById('modal-frase').classList.remove('visible') }
-
-  function usarFrase(el) { document.getElementById('frase-input').value = el.textContent }
-
-  function guardarFrase() {
-    const f = document.getElementById('frase-input').value.trim()
-    if (f) document.getElementById('frase-display').textContent = f
-    cerrarFrase()
-  }
-
-  document.getElementById('modal-nombre').addEventListener('click', function(e) {
-    if (e.target === this) cerrarNombre()
-  })
-  document.getElementById('modal-frase').addEventListener('click', function(e) {
-    if (e.target === this) cerrarFrase()
-  })
-
   async function guardar() {
-    const nombre  = document.getElementById('hero-nombre').textContent.trim()
-    const frase   = document.getElementById('frase-display').textContent.trim()
+    const nombre  = document.getElementById('inp-nombre').value.trim()
+    const frase   = document.getElementById('inp-frase').value.trim()
     const moneda  = document.querySelector('.moneda-chip.active')?.dataset.cod || '$'
     const color   = colorActual
     const cats    = getCats().join(',')
@@ -442,6 +362,7 @@
     if (error) { toast('Error al guardar: ' + error.message, 'err'); return }
     localStorage.setItem('moneda', moneda)
     localStorage.setItem('color', color)
+    syncHero(nombre)
     toast('Perfil guardado ✓')
   }
 
