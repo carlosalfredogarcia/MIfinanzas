@@ -62,16 +62,13 @@
 
   .cat-tag:hover { border-color: rgba(255,107,107,0.3); }
 
-  .cat-tag .remove { color: var(--subtext); font-size: 14px; line-height: 1; transition: color 0.2s; }
+  .btn-eliminar-cat { background: none; border: none; color: var(--danger); font-size: 11px; font-family: 'DM Sans', sans-serif; cursor: pointer; padding: 0; opacity: 0.7; transition: opacity 0.2s; }
 
-  .cat-tag:hover .remove { color: var(--danger); }
+  .btn-eliminar-cat:hover { opacity: 1; }
 
   .btn-add-cat { background: none; border: 1px dashed var(--subtext); border-radius: 100px; padding: 6px 14px; font-size: 12px; color: var(--subtext); cursor: pointer; font-family: 'DM Sans', sans-serif; transition: all 0.2s; }
 
   .btn-add-cat:hover { border-color: var(--accent); color: var(--accent); }
-
-  .cat-text { cursor: text; }
-  .cat-tag:hover .cat-text { text-decoration: underline dotted var(--subtext); }
 
   .notif-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--border); }
 
@@ -301,13 +298,13 @@
   </div>
 </div>
 
-<div class="modal-overlay" id="modal-editar-cat" style="display:none">
+<div class="modal-overlay" id="modal-confirm-eliminar" style="display:none">
   <div class="modal">
     <div class="modal-handle"></div>
-    <div class="modal-title">Editar categoría</div>
-    <input type="text" id="edit-cat-input" placeholder="Ej: 🍔 Comida" style="width:100%;background:#1e1e27;border:1px solid rgba(255,255,255,0.06);border-radius:14px;padding:14px;color:#f0f0f5;font-family:'DM Sans',sans-serif;font-size:15px;outline:none;margin-bottom:16px;display:block;" onkeydown="if(event.key==='Enter')guardarEditCat()">
-    <button class="btn-ok" onclick="guardarEditCat()">Guardar</button>
-    <button class="btn-cancelar" onclick="cerrarEditCat()">Cancelar</button>
+    <div class="modal-title">¿Eliminar categoría?</div>
+    <p style="color:var(--subtext);font-size:14px;line-height:1.6;margin-bottom:20px;">Si eliminas esta categoría, los gastos ya registrados con ella no aparecerán correctamente en tus estadísticas. ¿Estás seguro?</p>
+    <button class="btn-ok" style="background:var(--danger);margin-bottom:10px;" onclick="confirmarEliminarCatOk()">Sí, eliminar</button>
+    <button class="btn-cancelar" onclick="cancelarEliminarCat()">Cancelar</button>
   </div>
 </div>
 
@@ -377,7 +374,7 @@
     lista.forEach(cat => {
       const tag = document.createElement('div')
       tag.className = 'cat-tag'
-      tag.innerHTML = `<span class="cat-text" onclick="editarCat(this.closest('.cat-tag'))">${cat}</span><span class="remove" onclick="removeCat(this)">×</span>`
+      tag.innerHTML = `<span class="cat-text">${cat}</span><button class="btn-eliminar-cat" onclick="confirmarEliminarCat(this.closest('.cat-tag'))">Eliminar</button>`
       wrap.appendChild(tag)
     })
   }
@@ -386,35 +383,21 @@
     return [...document.querySelectorAll('.cat-tag .cat-text')].map(t => t.textContent.trim())
   }
 
-  function removeCat(el) { el.closest('.cat-tag').remove() }
+  let _catTagEliminar = null
 
-  let _catTagEditando = null
-
-  function editarCat(tagEl) {
-    _catTagEditando = tagEl
-    document.getElementById('edit-cat-input').value = tagEl.querySelector('.cat-text').textContent.trim()
-    document.getElementById('modal-editar-cat').style.display = 'flex'
-    setTimeout(() => document.getElementById('edit-cat-input').select(), 80)
+  function confirmarEliminarCat(tagEl) {
+    _catTagEliminar = tagEl
+    document.getElementById('modal-confirm-eliminar').style.display = 'flex'
   }
 
-  function cerrarEditCat() {
-    document.getElementById('modal-editar-cat').style.display = 'none'
-    _catTagEditando = null
+  function cancelarEliminarCat() {
+    document.getElementById('modal-confirm-eliminar').style.display = 'none'
+    _catTagEliminar = null
   }
 
-  async function guardarEditCat() {
-    const nuevo = document.getElementById('edit-cat-input').value.trim()
-    if (!nuevo) return
-    if (_catTagEditando) {
-      _catTagEditando.querySelector('.cat-text').textContent = nuevo
-    }
-    cerrarEditCat()
-    const cats = getCats().join(',')
-    const { data: { session } } = await dbClient.auth.getSession()
-    const uid = session?.user?.id
-    if (!uid) return
-    await dbClient.from('perfil').update({ categorias: cats }).eq('usuario_id', uid)
-    renderCats(cats.split(',').map(c => c.trim()).filter(Boolean))
+  function confirmarEliminarCatOk() {
+    if (_catTagEliminar) _catTagEliminar.remove()
+    cancelarEliminarCat()
   }
 
   function agregarCat() {
@@ -424,7 +407,7 @@
     const wrap = document.getElementById('cats-wrap')
     const tag  = document.createElement('div')
     tag.className = 'cat-tag'
-    tag.innerHTML = `<span class="cat-text" onclick="editarCat(this.closest('.cat-tag'))">${emoji} ${nombre}</span><span class="remove" onclick="removeCat(this)">×</span>`
+    tag.innerHTML = `<span class="cat-text">${emoji} ${nombre}</span><button class="btn-eliminar-cat" onclick="confirmarEliminarCat(this.closest('.cat-tag'))">Eliminar</button>`
     wrap.appendChild(tag)
   }
 
