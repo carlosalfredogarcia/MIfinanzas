@@ -4,125 +4,117 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>MiFinanza – Gastos Fijos</title>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #0f0f13;
-    --card: #17171d;
-    --card2: #1e1e27;
-    --accent: #b8f564;
-    --accent2: #4fd1c5;
-    --danger: #ff6b6b;
-    --text: #f0f0f5;
-    --subtext: #8888a0;
-    --border: rgba(255,255,255,0.06);
+    --bg: #0d1117;
+    --card: #161b22;
+    --card2: #21262d;
+    --accent: #58a6ff;
+    --danger: #f85149;
+    --success: #3fb950;
+    --text: #e6edf3;
+    --subtext: #8b949e;
+    --border: #21262d;
+    --border2: #30363d;
   }
   html { visibility: hidden }
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; min-height: 100vh; display: flex; justify-content: center; }
   .phone { width: 390px; min-height: 100vh; background: var(--bg); }
-  .header { padding: 52px 24px 20px; animation: fadeUp 0.4s ease both; }
-  .header-title { font-family: 'Syne', sans-serif; font-size: 24px; font-weight: 800; background: linear-gradient(90deg, #fff 30%, var(--accent)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+
+  .header { padding: 52px 24px 16px; animation: fadeUp 0.4s ease both; }
+  .header-title { font-family: 'DM Sans', sans-serif; font-size: 26px; font-weight: 700; color: var(--text); }
   .header-sub { font-size: 13px; color: var(--subtext); margin-top: 2px; }
-  .resumen { margin: 0 24px 20px; background: var(--card); border-radius: 20px; padding: 16px 20px; border: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; animation: fadeUp 0.4s 0.1s ease both; opacity: 0; }
-  .resumen-left label { font-size: 11px; color: var(--subtext); text-transform: uppercase; letter-spacing: 0.1em; display: block; margin-bottom: 4px; }
-  .resumen-total { font-family: 'Syne', sans-serif; font-size: 26px; font-weight: 800; color: var(--danger); }
-  .resumen-right { text-align: right; }
-  .resumen-right label { font-size: 11px; color: var(--subtext); text-transform: uppercase; letter-spacing: 0.1em; display: block; margin-bottom: 4px; }
-  .resumen-count { font-family: 'Syne', sans-serif; font-size: 26px; font-weight: 800; color: var(--accent2); }
+
+  .resumen-row { margin: 0 24px 16px; display: flex; gap: 10px; animation: fadeUp 0.4s 0.1s ease both; opacity: 0; }
+  .res-item { flex: 1; background: var(--card); border-radius: 14px; padding: 12px 14px; border: 1px solid var(--border); }
+  .res-label { font-size: 10px; color: var(--subtext); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 4px; display: flex; align-items: center; gap: 5px; }
+  .dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+  .dot-red  { background: var(--danger); }
+  .dot-blue { background: var(--accent); }
+  .res-value { font-family: 'Roboto', sans-serif; font-size: 18px; font-weight: 700; }
+  .val-red  { color: var(--danger); }
+  .val-blue { color: var(--accent); }
+
   .lista-wrap { padding: 0 24px; animation: fadeUp 0.4s 0.2s ease both; opacity: 0; }
   .seccion-label { font-size: 11px; color: var(--subtext); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 10px; padding-left: 2px; }
-  .fijo-card { background: var(--card); border-radius: 18px; padding: 14px 16px; margin-bottom: 10px; border: 1px solid var(--border); transition: opacity 0.3s, border-color 0.3s; }
-  .fijo-card.inactivo { opacity: 0.45; border-color: transparent; }
+
+  .fijo-card { background: var(--card); border-radius: 14px; padding: 13px 14px; margin-bottom: 8px; border: 1px solid var(--border); border-left: 3px solid var(--danger); transition: opacity 0.2s; }
+  .fijo-card.inactivo { opacity: 0.4; border-left-color: var(--border2); }
   .fijo-top { display: flex; align-items: center; gap: 12px; }
-  .fijo-icon { width: 42px; height: 42px; border-radius: 13px; background: var(--card2); display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
-  .fijo-info { flex: 1; }
-  .fijo-nombre { font-size: 15px; font-weight: 600; color: var(--text); }
-  .fijo-fecha { font-size: 12px; color: var(--subtext); margin-top: 2px; }
-  .fijo-right { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; }
-  .fijo-monto { font-family: 'Syne', sans-serif; font-size: 16px; font-weight: 700; color: var(--danger); }
-  .switch { width: 40px; height: 22px; background: var(--card2); border-radius: 100px; border: 1px solid var(--border); position: relative; cursor: pointer; transition: background 0.3s, border-color 0.3s; flex-shrink: 0; }
-  .switch.on { background: rgba(184,245,100,0.25); border-color: rgba(184,245,100,0.4); }
+  .fijo-icon { width: 38px; height: 38px; border-radius: 12px; background: var(--card2); display: flex; align-items: center; justify-content: center; font-size: 17px; flex-shrink: 0; }
+  .fijo-info { flex: 1; min-width: 0; }
+  .fijo-nombre { font-size: 14px; font-weight: 600; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .fijo-fecha  { font-size: 12px; color: var(--subtext); margin-top: 2px; }
+  .fijo-right  { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; flex-shrink: 0; }
+  .fijo-monto  { font-family: 'Roboto', sans-serif; font-size: 15px; font-weight: 700; color: var(--danger); }
+
+  .switch { width: 40px; height: 22px; background: var(--card2); border-radius: 100px; border: 1px solid var(--border2); position: relative; cursor: pointer; transition: background 0.3s, border-color 0.3s; flex-shrink: 0; }
+  .switch.on { background: rgba(88,166,255,0.2); border-color: rgba(88,166,255,0.4); }
   .switch::after { content: ''; position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; border-radius: 50%; background: var(--subtext); transition: transform 0.3s, background 0.3s; }
   .switch.on::after { transform: translateX(18px); background: var(--accent); }
-  .fijo-acciones { display: flex; gap: 8px; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border); }
-  .btn-accion { flex: 1; background: var(--card2); border: none; border-radius: 10px; padding: 8px; font-size: 12px; color: var(--subtext); cursor: pointer; font-family: 'DM Sans', sans-serif; transition: background 0.2s, color 0.2s; }
-  .btn-accion:hover { background: rgba(255,255,255,0.08); color: var(--text); }
-  .btn-accion.danger:hover { background: rgba(255,107,107,0.1); color: var(--danger); }
+
+  .fijo-acciones { display: flex; align-items: center; margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border2); }
+  .btn-accion { flex: 1; background: none; border: none; padding: 6px 0; font-size: 13px; cursor: pointer; font-family: 'DM Sans', sans-serif; font-weight: 500; transition: color 0.15s; text-align: center; }
+  .btn-editar  { color: var(--accent); }
+  .btn-editar:hover  { color: #79baff; }
+  .btn-eliminar { color: var(--danger); }
+  .btn-eliminar:hover { color: #ff7a77; }
+  .sep-v { width: 1px; height: 18px; background: var(--border2); }
+
   .loading { text-align: center; color: var(--subtext); font-size: 14px; padding: 40px 0; }
-  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(6px); z-index: 200; display: none; align-items: flex-end; justify-content: center; }
-  .modal { width: 390px; background: var(--card); border-radius: 28px 28px 0 0; padding: 14px 18px 20px; border-top: 1px solid var(--border); animation: slideUp 0.3s ease; }
-  @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
-  .modal-handle { width: 40px; height: 4px; background: var(--border); border-radius: 100px; margin: 0 auto 8px; }
-  .modal-title { font-family: 'Syne', sans-serif; font-size: 16px; font-weight: 700; color: var(--text); margin-bottom: 10px; }
-  .inp { width:100%;background:#1e1e27;border:1px solid rgba(255,255,255,0.06);border-radius:10px;padding:8px 12px;color:#f0f0f5;font-family:'DM Sans',sans-serif;font-size:14px;outline:none; }
-  .lbl { font-size:11px;color:#8888a0;text-transform:uppercase;letter-spacing:0.08em;display:block;margin-bottom:3px; }
-  .fld { margin-bottom:8px; }
-  .btn-ok { width:100%;background:var(--accent);color:#0f0f13;border:none;border-radius:12px;padding:12px;font-family:'Syne',sans-serif;font-size:14px;font-weight:700;cursor:pointer;margin-top:6px; }
-  .btn-no { width:100%;background:none;border:none;color:var(--subtext);font-size:13px;cursor:pointer;padding:8px;font-family:'DM Sans',sans-serif; }
 
-  /* FAB: centro, flotando sobre la navbar */
-  .fab {
-    position: fixed;
-   bottom: 90px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: var(--accent);
-    color: #0f0f13;
-    width: 58px;
-    height: 58px;
-    border-radius: 50%;
-    border: none;
-    font-size: 28px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 8px 32px rgba(184,245,100,0.4);
-    transition: transform 0.2s, box-shadow 0.2s;
-    z-index: 100;
-  }
-  .fab:hover { transform: translateX(-50%) scale(1.08); box-shadow: 0 12px 40px rgba(184,245,100,0.55); }
+  .fab { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%); background: var(--accent); color: #0d1117; width: 56px; height: 56px; border-radius: 50%; border: none; font-size: 28px; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 32px rgba(88,166,255,0.35); transition: transform 0.2s, box-shadow 0.2s; z-index: 100; }
+  .fab:hover { transform: translateX(-50%) scale(1.08); box-shadow: 0 12px 40px rgba(88,166,255,0.5); }
 
-  /* NAVBAR */
-  .navbar { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 390px; background: rgba(15,15,19,0.96); backdrop-filter: blur(20px); border-top: 1px solid var(--border); padding: 10px 0 22px; display: flex; justify-content: space-around; align-items: center; z-index: 99; }
-  .nav-item { display: flex; flex-direction: column; align-items: center; gap: 3px; cursor: pointer; opacity: 0.4; transition: opacity 0.2s; flex: 1; }
+  .navbar { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 390px; background: rgba(13,17,23,0.97); backdrop-filter: blur(20px); border-top: 1px solid var(--border2); padding: 12px 0 24px; display: flex; justify-content: space-around; align-items: center; z-index: 99; }
+  .nav-item { display: flex; flex-direction: column; align-items: center; gap: 5px; cursor: pointer; opacity: 0.35; transition: opacity 0.2s; flex: 1; }
   .nav-item.active { opacity: 1; }
-  .nav-icon { font-size: 20px; }
-  .nav-label { font-size: 10px; color: var(--subtext); letter-spacing: 0.04em; }
-  .nav-item.active .nav-label { color: var(--accent); }
-  .nav-dot { width: 4px; height: 4px; border-radius: 50%; background: var(--accent); }
+  .nav-icon { font-size: 22px; }
+  .nav-dot  { width: 4px; height: 4px; border-radius: 50%; background: var(--accent); }
 
-  .spacer { height: 130px; }
+  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.75); backdrop-filter: blur(8px); z-index: 200; display: none; align-items: flex-end; justify-content: center; }
+  .modal { width: 390px; background: var(--card); border-radius: 28px 28px 0 0; padding: 24px 24px 40px; border-top: 1px solid var(--border2); }
+  .modal-handle { width: 40px; height: 4px; background: rgba(255,255,255,0.08); border-radius: 100px; margin: 0 auto 20px; }
+  .modal-title  { font-family: 'DM Sans', sans-serif; font-size: 18px; font-weight: 700; color: var(--text); margin-bottom: 18px; }
+  .modal-sub    { font-size: 13px; color: var(--subtext); margin-bottom: 14px; line-height: 1.5; }
+  .inp { width:100%; background:#0d1117; border:1px solid var(--border2); border-radius:12px; padding:12px 14px; color:var(--text); font-family:'DM Sans',sans-serif; font-size:15px; outline:none; transition: border-color 0.15s; }
+  .inp:focus { border-color: var(--accent); }
+  .lbl { font-size:11px; color:var(--subtext); text-transform:uppercase; letter-spacing:0.08em; display:block; margin-bottom:6px; }
+  .fld { margin-bottom:12px; }
+  .btn-ok { width:100%; border:none; border-radius:14px; padding:15px; font-family:'DM Sans',sans-serif; font-size:15px; font-weight:700; cursor:pointer; margin-bottom:8px; transition:opacity 0.2s; }
+  .btn-ok:hover { opacity: 0.9; }
+  .btn-no { width:100%; background:none; border:none; color:var(--subtext); font-size:14px; cursor:pointer; padding:10px; font-family:'DM Sans',sans-serif; }
+
+  .spacer { height: 120px; }
   @keyframes fadeUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
-  .form-group { margin-bottom: 10px; }
-  .form-label { font-size:11px;color:#8888a0;text-transform:uppercase;letter-spacing:0.08em;display:block;margin-bottom:5px; }
-  .form-input { width:100%;background:#1e1e27;border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:10px 14px;color:#f0f0f5;font-family:'DM Sans',sans-serif;font-size:15px;outline:none;display:block; }
 </style>
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="/icon-192.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="MiFinanza">
-<meta name="theme-color" content="#b8f564">
+<meta name="theme-color" content="#58a6ff">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="auth.js"></script>
 </head>
 <body>
 <div class="phone">
+
   <div class="header">
     <div class="header-title">Gastos Fijos</div>
     <div class="header-sub">Lo que sale cada mes automáticamente</div>
   </div>
 
-  <div class="resumen">
-    <div class="resumen-left">
-      <label>Total mensual</label>
-      <div class="resumen-total" id="total-mensual">$0</div>
+  <div class="resumen-row">
+    <div class="res-item">
+      <div class="res-label"><span class="dot dot-red"></span>Total mensual</div>
+      <div class="res-value val-red" id="total-mensual">$0</div>
     </div>
-    <div class="resumen-right">
-      <label>Activos</label>
-      <div class="resumen-count" id="total-activos">0</div>
+    <div class="res-item">
+      <div class="res-label"><span class="dot dot-blue"></span>Activos</div>
+      <div class="res-value val-blue" id="total-activos">0</div>
     </div>
   </div>
 
@@ -134,26 +126,21 @@
   <div class="spacer"></div>
 </div>
 
-<!-- FAB flotante en el centro -->
 <button class="fab" onclick="abrirModal()">+</button>
 
-<!-- NAVBAR: 5 ítems, todos con onclick -->
 <nav class="navbar">
   <div class="nav-item" onclick="location.href='inicio.html'">
     <span class="nav-icon">🏠</span>
-    <span class="nav-label">Inicio</span>
   </div>
-  <div class="nav-item" onclick="location.href='mifinanza-movimientos.html'">
+  <div class="nav-item active" onclick="location.href='mifinanza-movimientos.html'">
     <span class="nav-icon">📋</span>
-    <span class="nav-label">Movimientos</span>
+    <div class="nav-dot"></div>
   </div>
   <div class="nav-item" onclick="location.href='mifinanza-estadisticas-v2.html'">
     <span class="nav-icon">📊</span>
-    <span class="nav-label">Estadísticas</span>
   </div>
   <div class="nav-item" onclick="location.href='mifinanza-perfil.html'">
     <span class="nav-icon">👤</span>
-    <span class="nav-label">Perfil</span>
   </div>
 </nav>
 
@@ -170,8 +157,8 @@
     </div>
     <div class="fld"><label class="lbl">Monto</label><input type="number" id="f-monto" class="inp" placeholder="$0.00"></div>
     <div class="fld"><label class="lbl">Fecha de inicio</label><input type="date" id="f-fecha" class="inp"></div>
-    <div class="fld"><label class="lbl">Fecha fin (opcional)</label><input type="date" id="fijo-fecha-fin" class="inp"></div>
-    <button class="btn-ok" onclick="guardarFijo()">Guardar</button>
+    <div class="fld" style="margin-bottom:18px"><label class="lbl">Fecha fin (opcional)</label><input type="date" id="fijo-fecha-fin" class="inp"></div>
+    <button class="btn-ok" style="background:var(--accent);color:#0d1117" onclick="guardarFijo()">Guardar gasto fijo</button>
     <button class="btn-no" onclick="cerrarModal()">Cancelar</button>
   </div>
 </div>
@@ -181,15 +168,16 @@
   <div class="modal">
     <div class="modal-handle"></div>
     <div class="modal-title">¿Desactivar gasto fijo?</div>
-    <p style="font-size:14px;color:var(--subtext);margin-bottom:18px;">Vas a desactivar <strong id="nombre-fijo-confirm" style="color:var(--text)"></strong>. El historial anterior quedará guardado.</p>
-    <div class="fld">
+    <p class="modal-sub">Vas a desactivar <strong id="nombre-fijo-confirm" style="color:var(--text)"></strong>. El historial anterior quedará guardado.</p>
+    <div class="fld" style="margin-bottom:18px">
       <label class="lbl">¿Hasta qué fecha estuvo activo?</label>
       <input type="date" id="fecha-fin-input" class="inp">
     </div>
-    <button class="btn-ok" onclick="confirmarDesactivar()">Confirmar</button>
+    <button class="btn-ok" style="background:var(--accent);color:#0d1117" onclick="confirmarDesactivar()">Confirmar</button>
     <button class="btn-no" onclick="cancelarDesactivar()">Cancelar</button>
   </div>
 </div>
+
 <!-- Modal editar gasto fijo -->
 <div class="modal-overlay" id="modal-editar">
   <div class="modal">
@@ -202,11 +190,12 @@
       </select>
     </div>
     <div class="fld"><label class="lbl">Monto</label><input type="number" id="e-monto" class="inp"></div>
-    <div class="fld"><label class="lbl">Fecha de inicio</label><input type="date" id="e-fecha" class="inp"></div>
-    <button class="btn-ok" onclick="guardarEdicion()">Guardar cambios</button>
+    <div class="fld" style="margin-bottom:18px"><label class="lbl">Fecha de inicio</label><input type="date" id="e-fecha" class="inp"></div>
+    <button class="btn-ok" style="background:var(--accent);color:#0d1117" onclick="guardarEdicion()">Guardar cambios</button>
     <button class="btn-no" onclick="cerrarEditar()">Cancelar</button>
   </div>
 </div>
+
 <script>
   window.moneda = localStorage.getItem('moneda') || '$'
   const _color = localStorage.getItem('color'); if (_color) document.documentElement.style.setProperty('--accent', _color)
@@ -258,8 +247,9 @@
           </div>
         </div>
         <div class="fijo-acciones">
-          <button class="btn-accion" onclick="editarFijo('${f.id}')">✏️ Editar</button>
-          <button class="btn-accion danger" onclick="eliminarFijo('${f.id}')">🗑 Eliminar</button>
+          <button class="btn-accion btn-editar"   onclick="editarFijo('${f.id}')">Editar</button>
+          <div class="sep-v"></div>
+          <button class="btn-accion btn-eliminar" onclick="eliminarFijo('${f.id}')">Eliminar</button>
         </div>
       `;
       lista.appendChild(div);
