@@ -298,14 +298,10 @@
     renderLista();
   }
 
-  const iconsCat = { 'Comida':'🍔','Alquiler':'🏠','Remesas':'🌍','Tecnología':'💻','Gym':'🏋️','Salud':'❤️','Línea':'📱','Antojos':'🍩','Gasolina':'⛽','Ropa':'👕','Crédito':'💳','Otros':'📦' };
-
   function getIcon(categoria) {
     if (!categoria) return '📦';
-    for (const [key, icon] of Object.entries(iconsCat)) {
-      if (categoria.includes(key)) return icon;
-    }
-    return '📦';
+    const first = [...categoria.trim()][0];
+    return first && first.codePointAt(0) > 127 ? first : '📦';
   }
 
   function renderLista() {
