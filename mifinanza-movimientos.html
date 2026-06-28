@@ -220,6 +220,7 @@
         <option>🍔 Comida</option><option>🏠 Alquiler</option><option>💳 Crédito</option><option>📱 Línea</option><option>🏋️ Gym</option><option>⛽ Gasolina</option><option>💻 Tecnología</option><option>❤️ Salud</option><option>👕 Ropa</option><option>🎉 Salidas</option><option>🌍 Remesas</option><option>⚠️ Gastos Imprevistos</option><option>📋 Trámite</option><option>🚗 Vehículo</option><option>📦 Otros</option>
       </select>
     </div>
+    <div class="fld" id="fld-fecha-fin"><label class="lbl">Fecha fin (opcional)</label><input type="date" id="e-fecha-fin" class="inp"></div>
     <div class="fld" style="margin-bottom:18px"><label class="lbl">Monto</label><input type="number" id="e-monto" class="inp" placeholder="$0.00"></div>
     <button onclick="guardarEdicion()" class="btn-ok" id="edit-btn-ok" style="background:#58a6ff;color:#0d1117">Guardar cambios</button>
     <button onclick="eliminarMovimiento()" class="btn-del">Eliminar</button>
@@ -409,15 +410,15 @@
 
   let editando = null;
 
-  function abrirEditar(m) {
+  async function abrirEditar(m) {
     editando = m;
-    cargarCategoriasPerfil();
     const esFijo    = m.tipo === 'fijo';
     const esIngreso = m.tipo === 'ingreso';
+    await cargarCategoriasPerfil();
     document.getElementById('edit-title').textContent = esFijo ? 'Editar gasto fijo' : esIngreso ? 'Editar ingreso' : 'Editar gasto';
     document.getElementById('edit-btn-ok').style.background = esFijo ? '#58a6ff' : esIngreso ? '#3fb950' : '#f85149';
     document.getElementById('edit-btn-ok').style.color = '#0d1117';
-    document.getElementById('e-fecha').value = esFijo ? (m.fecha_inicio || m.fecha) : m.fecha;
+    document.getElementById('e-fecha').value = esFijo ? (m.fecha_inicio || m.fecha || '').slice(0, 10) : (m.fecha || '').slice(0, 10);
     document.getElementById('e-monto').value = m.monto;
     document.getElementById('fld-descripcion').style.display = (!esFijo && !esIngreso) ? '' : 'none';
     document.getElementById('fld-concepto').style.display    = esIngreso ? '' : 'none';
@@ -425,10 +426,11 @@
     document.getElementById('fld-tipo').style.display        = esIngreso ? '' : 'none';
     document.getElementById('fld-nombre').style.display      = esFijo ? '' : 'none';
     document.getElementById('fld-cat-fijo').style.display    = esFijo ? '' : 'none';
+    document.getElementById('fld-fecha-fin').style.display   = esFijo ? '' : 'none';
     if (esFijo) {
-      document.getElementById('e-nombre').value = m.nombre || '';
-      const catFijoSel = document.getElementById('e-cat-fijo');
-      [...catFijoSel.options].forEach(o => { if (o.value === m.categoria) catFijoSel.value = m.categoria; });
+      document.getElementById('e-nombre').value    = m.nombre || '';
+      document.getElementById('e-cat-fijo').value  = m.categoria;
+      document.getElementById('e-fecha-fin').value = (m.fecha_fin || '').slice(0, 10);
     } else if (esIngreso) {
       document.getElementById('e-concepto').value = m.concepto || m.descripcion || '';
       const tipoSel = document.getElementById('e-tipo');
@@ -456,8 +458,9 @@
       const nombre    = document.getElementById('e-nombre').value.trim();
       const categoria = document.getElementById('e-cat-fijo').value;
       if (!nombre) { alert('Completa el nombre'); return; }
+      const fechaFin  = document.getElementById('e-fecha-fin').value || null;
       const dia = new Date(fecha + 'T00:00:00').getDate();
-      ({ error } = await dbClient.from('gastos_fijos').update({ nombre, categoria, monto, fecha_inicio: fecha, dia_del_mes: dia }).eq('id', editando.id).eq('usuario_id', window.currentUserId));
+      ({ error } = await dbClient.from('gastos_fijos').update({ nombre, categoria, monto, fecha_inicio: fecha, fecha_fin: fechaFin, dia_del_mes: dia }).eq('id', editando.id).eq('usuario_id', window.currentUserId));
     } else if (editando.tipo === 'ingreso') {
       const concepto = document.getElementById('e-concepto').value.trim();
       const tipo     = document.getElementById('e-tipo').value;
