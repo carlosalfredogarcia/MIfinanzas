@@ -303,11 +303,11 @@
 
   let idFijoEditar = null;
 
-  function editarFijo(id) {
+  async function editarFijo(id) {
     const f = fijos.find(f => f.id === id);
     if (!f) return;
     idFijoEditar = id;
-    cargarCategoriasPerfil();
+    await cargarCategoriasPerfil();
     document.getElementById('e-nombre').value    = f.nombre;
     document.getElementById('e-categoria').value = f.categoria;
     document.getElementById('e-monto').value     = f.monto;
