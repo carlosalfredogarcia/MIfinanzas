@@ -351,12 +351,12 @@
     renderFijos();
   }
 
-  function abrirModal() {
+  async function abrirModal() {
     document.getElementById('f-nombre').value = '';
     document.getElementById('f-monto').value = '';
     document.getElementById('f-fecha').value = '';
     document.getElementById('fijo-fecha-fin').value = '';
-    cargarCategoriasPerfil();
+    await cargarCategoriasPerfil();
     document.getElementById('modal').style.display = 'flex';
   }
   function cerrarModal() { document.getElementById('modal').style.display = 'none'; }
