@@ -318,19 +318,20 @@
     }
 
     const inicio = anioVer + '-' + String(mesVer + 1).padStart(2,'0') + '-01'
-    const fin    = new Date(anioVer, mesVer + 1, 0).toISOString().split('T')[0]
+    const ultimoDia = new Date(anioVer, mesVer + 1, 0).getDate()
+    const fin    = anioVer + '-' + String(mesVer + 1).padStart(2,'0') + '-' + String(ultimoDia).padStart(2,'0')
     console.log('[dashboard] uid al cargar:', uid)
-    const [{ data: gastos, error: eGas }, { data: ingresos, error: eIng }, { data: fijos, error: eFij }, { data: metas, error: eMet }] = await Promise.all([
+    const [{ data: gastos, error: eGas }, { data: ingresos, error: eIng }, { data: fijos, error: eFij }] = await Promise.all([
       dbClient.from('gastos').select('monto').eq('usuario_id', uid).gte('fecha', inicio).lte('fecha', fin),
       dbClient.from('ingresos').select('monto').eq('usuario_id', uid).gte('fecha', inicio).lte('fecha', fin),
-      dbClient.from('gastos_fijos').select('*').eq('usuario_id', uid).lte('fecha_inicio', fin).or(`fecha_fin.gte.${inicio},fecha_fin.is.null`),
-      dbClient.from('metas').select('*').eq('usuario_id', uid).eq('es_principal', true).single()
+      dbClient.from('gastos_fijos').select('*').eq('usuario_id', uid).lte('fecha_inicio', fin).or(`fecha_fin.gte.${inicio},fecha_fin.is.null`)
     ])
+    const { data: metas } = await dbClient.from('metas').select('*').eq('usuario_id', uid).eq('es_principal', true).maybeSingle()
 
     console.log('[dashboard] gastos:', gastos, 'error:', eGas)
     console.log('[dashboard] ingresos:', ingresos, 'error:', eIng)
     console.log('[dashboard] fijos:', fijos, 'error:', eFij)
-    console.log('[dashboard] metas:', metas, 'error:', eMet)
+    console.log('[dashboard] metas:', metas)
     const totalGas = (gastos   || []).reduce((s, g) => s + parseFloat(g.monto), 0)
     const totalIng = (ingresos || []).reduce((s, i) => s + parseFloat(i.monto), 0)
     const totalFij = (fijos    || []).reduce((s, f) => s + parseFloat(f.monto), 0)
