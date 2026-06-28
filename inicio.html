@@ -356,10 +356,14 @@
 
     const listaFijos = document.getElementById('fijos-lista')
     listaFijos.innerHTML = ''
-    const iconsCat = { 'Alquiler':'🏠','Línea':'📱','Remesas':'🌍','Tecnología':'💻','Gym':'🏋️','Salud':'❤️','Crédito':'💳','Otros':'📦' }
+    const iconMap = [
+      ['Comida','🍔'],['Alquiler','🏠'],['dito','💳'],['nea','📱'],['Gym','🏋️'],
+      ['Gasolina','⛽'],['Tecnolog','💻'],['Salud','❤️'],['Ropa','👕'],
+      ['Salidas','🎉'],['Remesas','🌍'],['Imprevisto','⚠️'],['mite','📋'],['Veh','🚗']
+    ]
     ;(fijos || []).forEach(f => {
-      const catNombre = f.categoria ? f.categoria.replace(/[^\w\s]/g,'').trim() : 'Otros'
-      const icon = iconsCat[catNombre] || '📦'
+      const cat  = f.categoria || ''
+      const icon = (iconMap.find(([k]) => cat.includes(k)) || [null,'📦'])[1]
       const div = document.createElement('div')
       div.className = 'fijo-item'
       div.innerHTML = `
