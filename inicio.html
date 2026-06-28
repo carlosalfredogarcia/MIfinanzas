@@ -321,6 +321,8 @@
     const ultimoDia = new Date(anioVer, mesVer + 1, 0).getDate()
     const fin    = anioVer + '-' + String(mesVer + 1).padStart(2,'0') + '-' + String(ultimoDia).padStart(2,'0')
     console.log('[dashboard] uid:', uid, 'inicio:', inicio, 'fin:', fin)
+    const { data: todosIngresos } = await dbClient.from('ingresos').select('fecha,monto').eq('usuario_id', uid).order('fecha', { ascending: false }).limit(10)
+    console.log('[dashboard] TODOS los ingresos del usuario (sin filtro de fecha):', todosIngresos)
     const [{ data: gastos, error: eGas }, { data: ingresos, error: eIng }, { data: fijos, error: eFij }] = await Promise.all([
       dbClient.from('gastos').select('*').eq('usuario_id', uid).gte('fecha', inicio).lte('fecha', fin),
       dbClient.from('ingresos').select('*').eq('usuario_id', uid).gte('fecha', inicio).lte('fecha', fin),
@@ -328,8 +330,8 @@
     ])
     const { data: metas } = await dbClient.from('metas').select('*').eq('usuario_id', uid).eq('es_principal', true).maybeSingle()
 
-    console.log('[dashboard] gastos:', gastos?.length, eGas?.message)
-    console.log('[dashboard] ingresos:', ingresos, 'error:', eIng?.message)
+    console.log('[dashboard] gastos mes:', gastos?.length, eGas?.message)
+    console.log('[dashboard] ingresos mes:', ingresos, 'error:', eIng?.message)
     console.log('[dashboard] fijos:', fijos?.length, eFij?.message)
     const totalGas = (gastos   || []).reduce((s, g) => s + parseFloat(g.monto), 0)
     const totalIng = (ingresos || []).reduce((s, i) => s + parseFloat(i.monto), 0)
