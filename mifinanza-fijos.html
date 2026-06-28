@@ -311,7 +311,7 @@
     document.getElementById('e-nombre').value    = f.nombre;
     document.getElementById('e-categoria').value = f.categoria;
     document.getElementById('e-monto').value     = f.monto;
-    document.getElementById('e-fecha').value     = f.fecha_inicio || '';
+    document.getElementById('e-fecha').value     = (f.fecha_inicio || '').slice(0, 10);
     document.getElementById('modal-editar').style.display = 'flex';
   }
 
