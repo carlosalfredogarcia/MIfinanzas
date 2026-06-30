@@ -4,126 +4,93 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>MiFinanza – Dashboard</title>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #0f0f13;
-    --card: #17171d;
-    --card2: #1e1e27;
-    --accent: #b8f564;
-    --accent2: #4fd1c5;
-    --danger: #ff6b6b;
-    --text: #f0f0f5;
-    --subtext: #8888a0;
-    --border: rgba(255,255,255,0.06);
+    --bg: #0d1117;
+    --card: #161b22;
+    --card2: #21262d;
+    --accent: #58a6ff;
+    --danger: #f85149;
+    --success: #3fb950;
+    --text: #e6edf3;
+    --subtext: #8b949e;
+    --border: #21262d;
+    --border2: #30363d;
   }
   html { visibility: hidden }
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; min-height: 100vh; display: flex; justify-content: center; }
-  .phone { width: 390px; min-height: 100vh; background: var(--bg); position: relative; overflow-x: hidden; }
-  .phone::before { content: ''; position: absolute; top: -80px; left: -60px; width: 300px; height: 300px; background: radial-gradient(circle, rgba(184,245,100,0.08) 0%, transparent 70%); pointer-events: none; z-index: 0; }
-  .header { padding: 52px 24px 18px; display: flex; justify-content: space-between; align-items: flex-start; position: relative; z-index: 1; animation: fadeUp 0.5s ease both; }
-  .mes-arrow { background: none; border: none; color: #7eb87e; font-size: 26px; font-weight: 700; cursor: pointer; padding: 0 6px; line-height: 1; }
+  .phone { width: 390px; min-height: 100vh; background: var(--bg); }
+  .header { padding: 52px 24px 18px; display: flex; justify-content: space-between; align-items: flex-start; animation: fadeUp 0.4s ease both; }
   .mes-nav-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
   .mes-center { flex: 1; text-align: center; }
   .mes-label-small { font-size: 10px; color: var(--subtext); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 3px; }
-  #mes-badge { font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 700; background: linear-gradient(90deg, #ffffff, #7eb87e); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; letter-spacing: 0.06em; }
-  .greeting .nombre { font-family: 'Syne', sans-serif; font-size: 24px; font-weight: 800; background: linear-gradient(90deg, #ffffff 30%, #7eb87e); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
-  .avatar { width: 42px; height: 42px; border-radius: 50%; background: linear-gradient(135deg, var(--accent), var(--accent2)); display: flex; align-items: center; justify-content: center; font-family: 'Syne', sans-serif; font-weight: 800; font-size: 16px; color: #0f0f13; flex-shrink: 0; }
-  .balance-card { margin: 0 24px 14px; background: var(--card); border-radius: 24px; padding: 20px; border: 1px solid var(--border); animation: fadeUp 0.5s 0.1s ease both; opacity: 0; }
+  .mes-arrow { background: none; border: none; color: var(--subtext); font-size: 22px; cursor: pointer; padding: 4px 8px; border-radius: 8px; transition: background 0.2s, color 0.2s; }
+  .mes-arrow:hover { background: var(--card2); color: var(--text); }
+  #mes-badge { font-family: 'Roboto', sans-serif; font-size: 18px; font-weight: 700; color: var(--accent); letter-spacing: 0.04em; }
+  .greeting .nombre { font-family: 'DM Sans', sans-serif; font-size: 22px; font-weight: 700; color: var(--text); }
+  .avatar { width: 42px; height: 42px; border-radius: 50%; background: var(--accent); display: flex; align-items: center; justify-content: center; font-family: 'DM Sans', sans-serif; font-weight: 700; font-size: 16px; color: #0d1117; flex-shrink: 0; }
+  .balance-card { margin: 0 24px 14px; background: var(--card); border-radius: 20px; padding: 18px; border: 1px solid var(--border); animation: fadeUp 0.4s 0.1s ease both; opacity: 0; }
   .balance-label { font-size: 11px; color: var(--subtext); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
-  .month-badge { background: rgba(184,245,100,0.1); color: var(--accent); font-size: 10px; padding: 2px 8px; border-radius: 20px; letter-spacing: 0.06em; }
+  .month-badge { background: rgba(88,166,255,0.1); color: var(--accent); font-size: 10px; padding: 2px 8px; border-radius: 20px; letter-spacing: 0.06em; }
   .balance-row { display: flex; gap: 10px; }
-  .balance-item { flex: 1; background: var(--card2); border-radius: 14px; padding: 16px 12px; }
-  .balance-item-label { font-size: 11px; color: var(--subtext); text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 8px; display: flex; align-items: center; gap: 5px; }
+  .balance-item { flex: 1; background: var(--card2); border-radius: 14px; padding: 14px 12px; }
+  .balance-item-label { font-size: 10px; color: var(--subtext); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 6px; display: flex; align-items: center; gap: 5px; }
   .dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
-  .dot-green { background: var(--accent); } .dot-red { background: var(--danger); } .dot-blue { background: var(--accent2); }
-  .balance-item-value { font-family: 'Syne', sans-serif; font-size: 28px; font-weight: 700; }
-  .val-green { color: var(--accent); } .val-red { color: var(--danger); } .val-blue { color: var(--accent2); }
-  .saldo-stripe { background: #0d1117; border: 1px solid #21262d; border-radius: 12px; padding: 14px 16px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
-  .saldo-stripe.negativo { background: #0d1117; }
-  .saldo-stripe-label { font-size: 10px; color: #7eb87e; text-transform: uppercase; letter-spacing: 0.1em; display: block; margin-bottom: 3px; font-weight: 600; }
+  .dot-green { background: var(--success); } .dot-red { background: var(--danger); }
+  .balance-item-value { font-family: 'Roboto', sans-serif; font-size: 22px; font-weight: 700; }
+  .val-green { color: var(--success); } .val-red { color: var(--danger); }
+  .saldo-stripe { background: var(--card2); border: 1px solid var(--border2); border-radius: 14px; padding: 14px 16px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+  .saldo-stripe-label { font-size: 10px; color: var(--subtext); text-transform: uppercase; letter-spacing: 0.1em; display: block; margin-bottom: 3px; font-weight: 600; }
   .saldo-stripe.negativo .saldo-stripe-label { color: var(--danger); }
-  .saldo-stripe-amount { font-family: 'Syne', sans-serif; font-size: 32px; font-weight: 800; color: #3fb950; }
+  .saldo-stripe-amount { font-family: 'Roboto', sans-serif; font-size: 30px; font-weight: 700; color: var(--success); }
   .saldo-stripe.negativo .saldo-stripe-amount { color: #e3b341; }
-  .saldo-stripe-icon { font-size: 26px; font-weight: 700; color: #7eb87e; opacity: 0.85; }
-  .saldo-stripe.negativo .saldo-stripe-icon { color: var(--danger); }
-  .frase { margin: 0 24px 14px; background: linear-gradient(135deg, rgba(184,245,100,0.07), rgba(79,209,197,0.04)); border: 1px solid rgba(184,245,100,0.14); border-radius: 14px; padding: 13px 16px; display: flex; align-items: center; gap: 10px; animation: fadeUp 0.5s 0.25s ease both; opacity: 0; }
-  .frase-icon { font-size: 18px; }
-  .frase-text { font-size: 13px; color: var(--accent); font-weight: 500; line-height: 1.45; }
-  .meta-card { margin: 0 24px 14px; background: var(--card); border-radius: 20px; padding: 18px 20px; border: 1px solid var(--border); animation: fadeUp 0.5s 0.3s ease both; opacity: 0; }
-  .meta-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
-  .meta-title { font-size: 11px; color: var(--subtext); text-transform: uppercase; letter-spacing: 0.1em; }
-  .meta-percent { font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700; color: var(--accent); }
-  .meta-name { font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 700; color: var(--text); margin-bottom: 12px; }
-  .progress-track { background: var(--card2); border-radius: 100px; height: 8px; overflow: hidden; margin-bottom: 8px; }
-  .progress-fill { height: 100%; border-radius: 100px; background: linear-gradient(90deg, var(--accent2), var(--accent)); transition: width 1.2s ease; }
-  .meta-detail { display: flex; justify-content: space-between; font-size: 12px; color: var(--subtext); }
-  .meta-detail strong { color: var(--text); }
-  .fijos-card { margin: 0 24px 14px; background: var(--card); border-radius: 20px; padding: 18px 20px; border: 1px solid var(--border); animation: fadeUp 0.5s 0.4s ease both; opacity: 0; cursor: pointer; }
+  .saldo-stripe-icon { font-size: 24px; color: var(--success); opacity: 0.85; }
+  .saldo-stripe.negativo .saldo-stripe-icon { color: #e3b341; }
+  .fijos-card { margin: 0 24px 14px; background: var(--card); border-radius: 20px; padding: 18px 20px; border: 1px solid var(--border); animation: fadeUp 0.4s 0.35s ease both; opacity: 0; cursor: pointer; }
   .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
-  .section-title { font-size: 11px; color: #8b949e; text-transform: uppercase; letter-spacing: 0.1em; cursor: pointer; }
-  .section-total { font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 700; color: #8b949e; }
+  .section-title { font-size: 11px; color: var(--subtext); text-transform: uppercase; letter-spacing: 0.1em; }
+  .section-total { font-family: 'Roboto', sans-serif; font-size: 14px; font-weight: 700; color: var(--subtext); }
   .fijo-item { display: flex; justify-content: space-between; align-items: center; padding: 9px 0; border-bottom: 1px solid var(--border); }
   .fijo-item:last-child { border-bottom: none; }
   .fijo-left { display: flex; align-items: center; gap: 10px; }
-  .fijo-icon { width: 32px; height: 32px; border-radius: 10px; background: var(--card2); display: flex; align-items: center; justify-content: center; font-size: 15px; }
+  .fijo-icon { width: 34px; height: 34px; border-radius: 10px; background: var(--card2); display: flex; align-items: center; justify-content: center; font-size: 15px; }
   .fijo-name { font-size: 14px; color: var(--text); font-weight: 500; }
   .fijo-date { font-size: 11px; color: var(--subtext); }
-  .fijo-amount { font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 700; color: var(--danger); }
-  .ultimo-card { margin: 0 24px 14px; background: var(--card); border-radius: 20px; padding: 14px 18px; border: 1px solid var(--border); display: flex; align-items: center; gap: 12px; animation: fadeUp 0.5s 0.5s ease both; opacity: 0; }
+  .fijo-amount { font-family: 'Roboto', sans-serif; font-size: 14px; font-weight: 700; color: var(--danger); }
+  .ultimo-card { margin: 0 24px 14px; background: var(--card); border-radius: 20px; padding: 14px 18px; border: 1px solid var(--border); display: flex; align-items: center; gap: 12px; animation: fadeUp 0.4s 0.45s ease both; opacity: 0; }
   .ultimo-icon { width: 38px; height: 38px; border-radius: 12px; background: var(--card2); display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
   .ultimo-info { flex: 1; }
   .ultimo-label { font-size: 10px; color: var(--subtext); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 2px; }
   .ultimo-desc { font-size: 14px; color: var(--text); font-weight: 500; }
   .ultimo-date { font-size: 11px; color: var(--subtext); margin-top: 1px; }
-  .ultimo-amount { font-family: 'Syne', sans-serif; font-size: 16px; font-weight: 700; color: var(--danger); }
-  .fab {
-    position: fixed;
-    bottom: 90px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: #7eb87e;
-    color: #0f0f13;
-    width: 58px;
-    height: 58px;
-    border-radius: 50%;
-    border: none;
-    font-size: 28px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 8px 32px rgba(126,184,126,0.4);
-    transition: transform 0.2s, box-shadow 0.2s;
-    z-index: 100;
-  }
-  .fab:hover { transform: translateX(-50%) scale(1.08); box-shadow: 0 12px 40px rgba(126,184,126,0.55); }
-  .navbar { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 390px; background: rgba(15,15,19,0.96); backdrop-filter: blur(20px); border-top: 1px solid var(--border); padding: 10px 0 22px; display: flex; justify-content: space-around; align-items: center; z-index: 99; }
-  .nav-item { display: flex; flex-direction: column; align-items: center; gap: 3px; cursor: pointer; opacity: 0.4; transition: opacity 0.2s; flex: 1; }
+  .ultimo-amount { font-family: 'Roboto', sans-serif; font-size: 16px; font-weight: 700; color: var(--danger); }
+  .fab { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%); background: var(--success); color: #0d1117; width: 56px; height: 56px; border-radius: 50%; border: none; font-size: 28px; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 32px rgba(63,185,80,0.4); transition: transform 0.2s, box-shadow 0.2s; z-index: 100; }
+  .fab:hover { transform: translateX(-50%) scale(1.08); box-shadow: 0 12px 40px rgba(63,185,80,0.55); }
+  .navbar { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 390px; background: rgba(13,17,23,0.97); backdrop-filter: blur(20px); border-top: 1px solid var(--border2); padding: 12px 0 24px; display: flex; justify-content: space-around; align-items: center; z-index: 99; }
+  .nav-item { display: flex; flex-direction: column; align-items: center; gap: 5px; cursor: pointer; opacity: 0.35; transition: opacity 0.2s; flex: 1; }
   .nav-item.active { opacity: 1; }
-  .nav-icon { font-size: 20px; }
-  .nav-label { font-size: 10px; color: var(--subtext); letter-spacing: 0.04em; }
-  .nav-item.active .nav-label { color: var(--accent); }
+  .nav-icon { font-size: 22px; }
   .nav-dot { width: 4px; height: 4px; border-radius: 50%; background: var(--accent); }
-  .spacer { height: 130px; }
-  @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
-  .inp { width:100%;background:#1e1e27;border:1px solid rgba(255,255,255,0.06);border-radius:10px;padding:8px 12px;color:#f0f0f5;font-family:'DM Sans',sans-serif;font-size:14px;outline:none; }
-  .lbl { font-size:11px;color:#8888a0;text-transform:uppercase;letter-spacing:0.08em;display:block;margin-bottom:3px; }
-  .fld { margin-bottom:8px; }
-  .modal-base { position:fixed;inset:0;background:rgba(0,0,0,0.7);backdrop-filter:blur(6px);z-index:200;display:none;align-items:flex-end;justify-content:center; }
-  .modal-box { width:390px;background:#17171d;border-radius:28px 28px 0 0;padding:16px 20px 24px;border-top:1px solid rgba(255,255,255,0.06); }
-  .modal-handle { width:40px;height:4px;background:rgba(255,255,255,0.06);border-radius:100px;margin:0 auto 10px; }
-  .modal-title { font-family:'Syne',sans-serif;font-size:16px;font-weight:700;color:#f0f0f5;margin-bottom:12px; }
-  .btn-ok { width:100%;border:none;border-radius:12px;padding:12px;font-family:'Syne',sans-serif;font-size:14px;font-weight:700;cursor:pointer;margin-bottom:6px; }
-  .btn-no { width:100%;background:none;border:none;color:#8888a0;font-size:13px;cursor:pointer;padding:8px;font-family:'DM Sans',sans-serif; }
+  .spacer { height: 120px; }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+  .inp { width:100%;background:var(--card2);border:1px solid var(--border);border-radius:12px;padding:12px 14px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:15px;outline:none; }
+  .lbl { font-size:11px;color:var(--subtext);text-transform:uppercase;letter-spacing:0.08em;display:block;margin-bottom:6px; }
+  .fld { margin-bottom:12px; }
+  .modal-base { position:fixed;inset:0;background:rgba(0,0,0,0.75);backdrop-filter:blur(8px);z-index:200;display:none;align-items:flex-end;justify-content:center; }
+  .modal-box { width:390px;background:var(--card);border-radius:28px 28px 0 0;padding:24px 24px 40px;border-top:1px solid var(--border); }
+  .modal-handle { width:40px;height:4px;background:rgba(255,255,255,0.08);border-radius:100px;margin:0 auto 20px; }
+  .modal-title { font-family:'DM Sans',sans-serif;font-size:18px;font-weight:700;color:var(--text);margin-bottom:18px; }
+  .btn-ok { width:100%;border:none;border-radius:14px;padding:15px;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:700;cursor:pointer;margin-bottom:8px; }
+  .btn-no { width:100%;background:none;border:none;color:var(--subtext);font-size:14px;cursor:pointer;padding:10px;font-family:'DM Sans',sans-serif; }
 </style>
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="/icon-192.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="MiFinanza">
-    <meta name="theme-color" content="#b8f564">
+<meta name="theme-color" content="#58a6ff">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="auth.js"></script>
 </head>
@@ -137,19 +104,19 @@
   </div>
   <div class="balance-card">
     <div class="mes-nav-header">
-      <button class="mes-arrow" onclick="mesAnterior()">‹</button>
+      <button class="mes-arrow" onclick="mesAnterior()">&#8249;</button>
       <div class="mes-center">
         <div class="mes-label-small">Resumen del mes</div>
-        <div id="mes-badge">—</div>
+        <div id="mes-badge">&#8212;</div>
       </div>
-      <button class="mes-arrow" onclick="mesSiguiente()">›</button>
+      <button class="mes-arrow" onclick="mesSiguiente()">&#8250;</button>
     </div>
     <div class="saldo-stripe" id="saldo-card">
       <div>
         <span class="saldo-stripe-label">Saldo actual</span>
         <div class="saldo-stripe-amount" id="saldo-amount">$0</div>
       </div>
-      <div class="saldo-stripe-icon" id="saldo-icon">✓</div>
+      <div class="saldo-stripe-icon" id="saldo-icon">&#10003;</div>
     </div>
     <div class="balance-row">
       <div class="balance-item">
@@ -168,20 +135,20 @@
       <span class="section-title">Gastos fijos</span>
       <div style="display:flex;align-items:center;gap:10px;">
         <span class="section-total" id="fijos-total">$0</span>
-        <span style="font-size:11px;color:var(--accent);text-transform:uppercase;letter-spacing:0.08em;font-family:'DM Sans',sans-serif;">Ver todos →</span>
+        <span style="font-size:11px;color:var(--accent);text-transform:uppercase;letter-spacing:0.08em;font-family:'DM Sans',sans-serif;">Ver todos &#8594;</span>
       </div>
     </div>
     <div id="fijos-lista"><div style="color:var(--subtext);font-size:13px;text-align:center;padding:10px">Cargando...</div></div>
   </div>
   </a>
   <div class="ultimo-card">
-    <div class="ultimo-icon">📋</div>
+    <div class="ultimo-icon">&#128203;</div>
     <div class="ultimo-info">
-      <div class="ultimo-label">Último movimiento</div>
-      <div class="ultimo-desc" id="ultimo-desc">—</div>
-      <div class="ultimo-date" id="ultimo-date">—</div>
+      <div class="ultimo-label">&#218;ltimo movimiento</div>
+      <div class="ultimo-desc" id="ultimo-desc">&#8212;</div>
+      <div class="ultimo-date" id="ultimo-date">&#8212;</div>
     </div>
-    <div class="ultimo-amount" id="ultimo-monto">—</div>
+    <div class="ultimo-amount" id="ultimo-monto">&#8212;</div>
   </div>
   <div class="spacer"></div>
 </div>
@@ -190,30 +157,26 @@
 
 <nav class="navbar">
   <div class="nav-item active" onclick="location.href='inicio.html'">
-    <span class="nav-icon">🏠</span>
-    <span class="nav-label">Inicio</span>
+    <span class="nav-icon">&#127968;</span>
     <div class="nav-dot"></div>
   </div>
   <div class="nav-item" onclick="location.href='mifinanza-movimientos.html'">
-    <span class="nav-icon">📋</span>
-    <span class="nav-label">Movimientos</span>
+    <span class="nav-icon">&#128203;</span>
   </div>
   <div class="nav-item" onclick="location.href='mifinanza-estadisticas-v2.html'">
-    <span class="nav-icon">📊</span>
-    <span class="nav-label">Estadísticas</span>
+    <span class="nav-icon">&#128202;</span>
   </div>
   <div class="nav-item" onclick="location.href='mifinanza-perfil.html'">
-    <span class="nav-icon">👤</span>
-    <span class="nav-label">Perfil</span>
+    <span class="nav-icon">&#128100;</span>
   </div>
 </nav>
 
 <div class="modal-base" id="menu-fab">
   <div class="modal-box">
     <div class="modal-handle"></div>
-    <button onclick="abrirGasto()" style="width:100%;background:#1e1e27;border:1px solid rgba(255,255,255,0.06);border-radius:14px;padding:16px;color:#f0f0f5;font-family:'DM Sans',sans-serif;font-size:15px;cursor:pointer;margin-bottom:10px;text-align:left;">💸 Registrar gasto</button>
-    <button onclick="abrirIngreso()" style="width:100%;background:#1e1e27;border:1px solid rgba(255,255,255,0.06);border-radius:14px;padding:16px;color:#f0f0f5;font-family:'DM Sans',sans-serif;font-size:15px;cursor:pointer;margin-bottom:10px;text-align:left;">💰 Registrar ingreso</button>
-    <button onclick="abrirGastoFijo()" style="width:100%;background:#1e1e27;border:1px solid rgba(255,255,255,0.06);border-radius:14px;padding:16px;color:#f0f0f5;font-family:'DM Sans',sans-serif;font-size:15px;cursor:pointer;margin-bottom:10px;text-align:left;">📌 Gasto fijo</button>
+    <button onclick="abrirGasto()" style="width:100%;background:#21262d;border:1px solid #30363d;border-radius:14px;padding:16px;color:#e6edf3;font-family:'DM Sans',sans-serif;font-size:15px;cursor:pointer;margin-bottom:10px;text-align:left;">&#128184; Registrar gasto</button>
+    <button onclick="abrirIngreso()" style="width:100%;background:#21262d;border:1px solid #30363d;border-radius:14px;padding:16px;color:#e6edf3;font-family:'DM Sans',sans-serif;font-size:15px;cursor:pointer;margin-bottom:10px;text-align:left;">&#128176; Registrar ingreso</button>
+    <button onclick="abrirGastoFijo()" style="width:100%;background:#21262d;border:1px solid #30363d;border-radius:14px;padding:16px;color:#e6edf3;font-family:'DM Sans',sans-serif;font-size:15px;cursor:pointer;margin-bottom:10px;text-align:left;">&#128204; Gasto fijo</button>
     <button onclick="cerrarMenu()" class="btn-no">Cancelar</button>
   </div>
 </div>
@@ -223,17 +186,17 @@
     <div class="modal-handle"></div>
     <div class="modal-title">Nuevo gasto</div>
     <div class="fld"><label class="lbl">Fecha</label><input type="date" id="g-fecha" class="inp"></div>
-    <div class="fld"><label class="lbl">Descripción</label><input type="text" id="g-descripcion" class="inp" placeholder="Ej: Almuerzo, Gasolina..."></div>
-    <div class="fld"><label class="lbl">Categoría</label>
+    <div class="fld"><label class="lbl">Descripci&#243;n</label><input type="text" id="g-descripcion" class="inp" placeholder="Ej: Almuerzo, Gasolina..."></div>
+    <div class="fld"><label class="lbl">Categor&#237;a</label>
       <select id="g-categoria" class="inp">
-        <option>🍔 Comida</option><option>🏠 Alquiler</option><option>🌍 Remesas</option>
-        <option>💻 Tecnología</option><option>🏋️ Gym</option><option>📱 Línea</option>
-        <option>❤️ Salud</option><option>🍩 Antojos</option><option>⛽ Gasolina</option>
-        <option>👕 Ropa</option><option>📦 Otros</option>
+        <option>&#127828; Comida</option><option>&#127968; Alquiler</option><option>&#127757; Remesas</option>
+        <option>&#128187; Tecnolog&#237;a</option><option>&#127947; Gym</option><option>&#128241; L&#237;nea</option>
+        <option>&#10084;&#65039; Salud</option><option>&#127849; Antojos</option><option>&#9981; Gasolina</option>
+        <option>&#128085; Ropa</option><option>&#128230; Otros</option>
       </select>
     </div>
     <div class="fld" style="margin-bottom:18px"><label class="lbl">Monto</label><input type="number" id="g-monto" class="inp" placeholder="$0.00"></div>
-    <button onclick="guardarGasto()" class="btn-ok" style="background:#b8f564;color:#0f0f13">Guardar gasto</button>
+    <button onclick="guardarGasto()" class="btn-ok" style="background:#f85149;color:#0d1117">Guardar gasto</button>
     <button onclick="cerrarGasto()" class="btn-no">Cancelar</button>
   </div>
 </div>
@@ -243,14 +206,14 @@
     <div class="modal-handle"></div>
     <div class="modal-title">Nuevo ingreso</div>
     <div class="fld"><label class="lbl">Fecha</label><input type="date" id="i-fecha" class="inp"></div>
-    <div class="fld"><label class="lbl">Concepto</label><input type="text" id="i-concepto" class="inp" placeholder="Ej: Nómina, Freelance..."></div>
+    <div class="fld"><label class="lbl">Concepto</label><input type="text" id="i-concepto" class="inp" placeholder="Ej: N&#243;mina, Freelance..."></div>
     <div class="fld"><label class="lbl">Tipo</label>
       <select id="i-tipo" class="inp">
-        <option>💼 Nómina</option><option>💵 Efectivo</option><option>⭐ Extra</option><option>📦 Otro</option>
+        <option>&#128188; N&#243;mina</option><option>&#128181; Efectivo</option><option>&#11088; Extra</option><option>&#128230; Otro</option>
       </select>
     </div>
     <div class="fld" style="margin-bottom:18px"><label class="lbl">Monto</label><input type="number" id="i-monto" class="inp" placeholder="$0.00"></div>
-    <button onclick="guardarIngreso()" class="btn-ok" style="background:#4fd1c5;color:#0f0f13">Guardar ingreso</button>
+    <button onclick="guardarIngreso()" class="btn-ok" style="background:#3fb950;color:#0d1117">Guardar ingreso</button>
     <button onclick="cerrarIngreso()" class="btn-no">Cancelar</button>
   </div>
 </div>
@@ -260,17 +223,17 @@
     <div class="modal-handle"></div>
     <div class="modal-title">Nuevo gasto fijo</div>
     <div class="fld"><label class="lbl">Nombre</label><input type="text" id="f-nombre" class="inp" placeholder="Ej: Alquiler, Netflix..."></div>
-    <div class="fld"><label class="lbl">Categoría</label>
+    <div class="fld"><label class="lbl">Categor&#237;a</label>
       <select id="f-categoria" class="inp">
-        <option>🏠 Alquiler</option><option>📱 Línea</option><option>🌍 Remesas</option>
-        <option>💻 Tecnología</option><option>🏋️ Gym</option><option>❤️ Salud</option>
-        <option>💳 Crédito</option><option>📦 Otros</option>
+        <option>&#127968; Alquiler</option><option>&#128241; L&#237;nea</option><option>&#127757; Remesas</option>
+        <option>&#128187; Tecnolog&#237;a</option><option>&#127947; Gym</option><option>&#10084;&#65039; Salud</option>
+        <option>&#128179; Cr&#233;dito</option><option>&#128230; Otros</option>
       </select>
     </div>
     <div class="fld"><label class="lbl">Monto</label><input type="number" id="f-monto" class="inp" placeholder="$0.00"></div>
     <div class="fld"><label class="lbl">Fecha de inicio</label><input type="date" id="f-fecha" class="inp"></div>
-    <div class="fld"><label class="lbl">Fecha fin (opcional)</label><input type="date" id="f-fecha-fin" class="inp"></div>
-    <button onclick="guardarFijo()" class="btn-ok" style="background:#b8f564;color:#0f0f13">Guardar gasto fijo</button>
+    <div class="fld" style="margin-bottom:18px"><label class="lbl">Fecha fin (opcional)</label><input type="date" id="f-fecha-fin" class="inp"></div>
+    <button onclick="guardarFijo()" class="btn-ok" style="background:#58a6ff;color:#0d1117">Guardar gasto fijo</button>
     <button onclick="cerrarGastoFijo()" class="btn-no">Cancelar</button>
   </div>
 </div>
@@ -297,7 +260,7 @@
   }
 
   async function cargarDashboard() {
-    // Esperar a que window.currentUserId esté disponible sin depender
+    // Esperar a que window.currentUserId este disponible sin depender
     // del timing del evento auth-ready (que puede llegar antes del listener)
     let uid = window.currentUserId
     if (!uid) {
@@ -305,7 +268,7 @@
         const iv = setInterval(() => {
           if (window.currentUserId) { clearInterval(iv); resolve(window.currentUserId) }
         }, 50)
-        // Si en 5s no llega, auth.js ya habrá redirigido a login
+        // Si en 5s no llega, auth.js ya habra redirigido a login
         setTimeout(() => { clearInterval(iv); resolve(null) }, 5000)
       })
     }
