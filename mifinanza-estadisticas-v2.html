@@ -69,13 +69,42 @@
   .cats-title { font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 14px; }
 
   .cat-row { margin-bottom: 12px; }
-  .cat-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
+  .cat-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; cursor: pointer; }
+  .cat-top:active { opacity: 0.7; }
   .cat-left  { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--text); }
+  .cat-chevron { font-size: 9px; color: var(--subtext); transition: transform 0.2s ease; }
+  .cat-row.abierta .cat-chevron { transform: rotate(90deg); }
   .cat-right { text-align: right; }
   .cat-total { font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700; color: var(--danger); }
   .cat-prom  { font-size: 10px; color: var(--subtext); }
   .cat-bar-track { background: var(--card2); border-radius: 100px; height: 5px; overflow: hidden; }
   .cat-bar-fill  { height: 100%; border-radius: 100px; background: linear-gradient(90deg, var(--accent2), var(--accent)); transition: width 0.7s ease; }
+
+  .cat-movs { margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border); animation: fadeUp 0.25s ease both; }
+  .cat-mov-item { display: flex; align-items: center; gap: 10px; padding: 8px 0; cursor: pointer; transition: opacity 0.15s; }
+  .cat-mov-item:active { opacity: 0.6; }
+  .cm-icon { width: 32px; height: 32px; border-radius: 10px; background: var(--card2); display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; }
+  .cm-info { flex: 1; min-width: 0; }
+  .cm-nombre { font-size: 13px; color: var(--text); font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .cm-fecha  { font-size: 11px; color: var(--subtext); margin-top: 1px; }
+  .cm-monto  { font-size: 13px; font-weight: 700; color: var(--danger); flex-shrink: 0; }
+  .cm-edit   { font-size: 12px; color: #58a6ff; flex-shrink: 0; opacity: 0.8; }
+  .cat-movs-footer { font-size: 11px; color: var(--subtext); text-align: center; padding-top: 8px; margin-top: 4px; border-top: 1px dashed var(--border); }
+  .cat-movs-footer span { color: #58a6ff; font-weight: 700; }
+  .cat-movs-empty { font-size: 12px; color: var(--subtext); text-align: center; padding: 10px 0; }
+
+  /* MODAL EDICIÓN (estilo azul premium) */
+  .modal-base { position: fixed; inset: 0; background: rgba(0,0,0,0.75); backdrop-filter: blur(8px); z-index: 200; display: none; align-items: flex-end; justify-content: center; }
+  .modal-box { width: 390px; background: var(--card); border-radius: 28px 28px 0 0; padding: 24px 24px 40px; border-top: 1px solid var(--border); }
+  .modal-handle { width: 40px; height: 4px; background: rgba(255,255,255,0.08); border-radius: 100px; margin: 0 auto 20px; }
+  .modal-title { font-family: 'Syne', sans-serif; font-size: 17px; font-weight: 700; color: var(--text); margin-bottom: 18px; }
+  .fld { margin-bottom: 12px; }
+  .lbl { font-size: 11px; color: var(--subtext); text-transform: uppercase; letter-spacing: 0.08em; display: block; margin-bottom: 6px; }
+  .inp { width: 100%; background: var(--card2); border: 1px solid var(--border); border-radius: 12px; padding: 12px 14px; color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 15px; outline: none; }
+  .inp:focus { border-color: #58a6ff; }
+  .inp option { background: #1e1e27; }
+  .btn-ok { width: 100%; border: none; border-radius: 14px; padding: 15px; font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 700; cursor: pointer; margin-bottom: 8px; background: #58a6ff; color: #0d1117; }
+  .btn-no { width: 100%; background: none; border: none; color: var(--subtext); font-size: 14px; cursor: pointer; padding: 10px; font-family: 'DM Sans', sans-serif; }
 
   .analisis-card { margin: 0 24px 16px; background: var(--card); border-radius: 20px; padding: 18px; border: 1px solid var(--border); animation: fadeUp 0.4s 0.26s ease both; opacity: 0; }
   .analisis-title { font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 12px; }
@@ -204,6 +233,25 @@
   <div class="spacer"></div>
 </div>
 
+<div class="modal-base" id="modal-editar-item">
+  <div class="modal-box">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="edit-title">Editar movimiento</div>
+    <div class="fld" id="fld-em-descripcion"><label class="lbl">Descripción</label><input type="text" id="em-descripcion" class="inp"></div>
+    <div class="fld" id="fld-em-nombre"><label class="lbl">Nombre</label><input type="text" id="em-nombre" class="inp"></div>
+    <div class="fld" id="fld-em-categoria"><label class="lbl">Categoría</label>
+      <select id="em-categoria" class="inp"></select>
+    </div>
+    <div class="fld" id="fld-em-cat-fijo"><label class="lbl">Categoría</label>
+      <select id="em-cat-fijo" class="inp"></select>
+    </div>
+    <div class="fld"><label class="lbl">Monto</label><input type="number" id="em-monto" class="inp" placeholder="$0.00"></div>
+    <div class="fld" style="margin-bottom:18px" id="fld-em-fecha"><label class="lbl" id="lbl-em-fecha">Fecha</label><input type="date" id="em-fecha" class="inp"></div>
+    <button onclick="guardarEdicionItem()" class="btn-ok">Guardar cambios</button>
+    <button onclick="cerrarEdicionItem()" class="btn-no">Cancelar</button>
+  </div>
+</div>
+
 <!-- NAVBAR: 5 ítems, todos con onclick, Estadísticas activo -->
 <nav class="navbar">
   <div class="nav-item" onclick="location.href='inicio.html'">
@@ -237,13 +285,43 @@
   const MESES_LABELS  = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic']
   const MESES_NOMBRES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre']
 
+  const CATS_DEFAULT = '🍔 Comida,🏠 Alquiler,💳 Crédito,📱 Línea,🏋️ Gym,⛽ Gasolina,💻 Tecnología,❤️ Salud,👕 Ropa,🎉 Salidas,🌍 Remesas,⚠️ Gastos Imprevistos,📋 Trámite,🚗 Vehículo,📦 Otros'
+
   let datos           = []
   let modoActual      = 'mes'
   let periodoActual   = 2
   let mesSeleccionado = null
   let mesesPeriodo    = new Set()
 
+  let catsSliceActual   = []
+  let catsSoloMesActual = false
+  let categoriaAbierta  = null
+  let editandoItem      = null
+
   async function cargarDatos() {
+    const ok = await fetchDatos()
+    if (!ok) return
+    setModo('mes')
+    const savedScroll = sessionStorage.getItem('stats-scroll')
+    if (savedScroll) setTimeout(() => window.scrollTo(0, parseInt(savedScroll, 10)), 0)
+  }
+
+  async function recargarDatos() {
+    const catAbiertaAntes = categoriaAbierta
+    const mesSelKey = (mesSeleccionado !== null && datos[mesSeleccionado]) ? datos[mesSeleccionado].key : null
+    const ok = await fetchDatos()
+    if (!ok) return
+    if (mesSelKey) {
+      const idx = datos.findIndex(d => d.key === mesSelKey)
+      mesSeleccionado = idx >= 0 ? idx : null
+    }
+    if (modoActual === 'periodo') renderPeriodo()
+    else if (modoActual === 'mes') renderGridMeses()
+    else renderAnio()
+    if (catAbiertaAntes) { categoriaAbierta = catAbiertaAntes; renderCatsUI() }
+  }
+
+  async function fetchDatos() {
     let uid = window.currentUserId
     if (!uid) {
       uid = await new Promise(resolve => {
@@ -259,30 +337,32 @@
       { data: ingresos, error: errI },
       { data: fijos,   error: errF }
     ] = await Promise.all([
-      dbClient.from('gastos').select('fecha, monto, categoria').eq('usuario_id', uid).order('fecha', { ascending: true }),
+      dbClient.from('gastos').select('id, fecha, monto, categoria, descripcion').eq('usuario_id', uid).order('fecha', { ascending: true }),
       dbClient.from('ingresos').select('fecha, monto').eq('usuario_id', uid).order('fecha', { ascending: true }),
-      dbClient.from('gastos_fijos').select('monto, categoria, fecha_inicio, fecha_fin').eq('usuario_id', uid)
+      dbClient.from('gastos_fijos').select('id, monto, categoria, nombre, fecha_inicio, fecha_fin, dia_del_mes').eq('usuario_id', uid)
     ])
 
     if (errG || errI || errF) {
       document.getElementById('loading-wrap').textContent = 'Error al cargar datos.'
-      return
+      return false
     }
 
     const mapa = {}
 
     ingresos.forEach(r => {
       const key = r.fecha.substring(0, 7)
-      if (!mapa[key]) mapa[key] = { ingresos: 0, gastos: 0, cats: {} }
+      if (!mapa[key]) mapa[key] = { ingresos: 0, gastos: 0, cats: {}, movs: {} }
       mapa[key].ingresos += parseFloat(r.monto || 0)
     })
 
     gastos.forEach(r => {
       const key = r.fecha.substring(0, 7)
-      if (!mapa[key]) mapa[key] = { ingresos: 0, gastos: 0, cats: {} }
+      if (!mapa[key]) mapa[key] = { ingresos: 0, gastos: 0, cats: {}, movs: {} }
       mapa[key].gastos += parseFloat(r.monto || 0)
       const cat = r.categoria || 'Otros'
       mapa[key].cats[cat] = (mapa[key].cats[cat] || 0) + parseFloat(r.monto || 0)
+      if (!mapa[key].movs[cat]) mapa[key].movs[cat] = []
+      mapa[key].movs[cat].push({ id: r.id, tipo: 'gasto', label: r.descripcion || cat, fecha: r.fecha, monto: parseFloat(r.monto || 0), categoria: cat })
     })
 
     const mesFin = new Date().toISOString().substring(0, 7)
@@ -296,6 +376,12 @@
         if (key >= desde && key <= hasta) {
           mapa[key].gastos += monto
           mapa[key].cats[cat] = (mapa[key].cats[cat] || 0) + monto
+          const [kAnio, kMes] = key.split('-').map(Number)
+          const ultimoDia = new Date(kAnio, kMes, 0).getDate()
+          const dia = Math.min(f.dia_del_mes || 1, ultimoDia)
+          const fechaFijo = `${key}-${String(dia).padStart(2, '0')}`
+          if (!mapa[key].movs[cat]) mapa[key].movs[cat] = []
+          mapa[key].movs[cat].push({ id: f.id, tipo: 'fijo', label: f.nombre || cat, fecha: fechaFijo, monto, categoria: cat })
         }
       })
     })
@@ -311,13 +397,14 @@
           mesNum, anio,
           ingresos: Math.round(val.ingresos * 100) / 100,
           gastos:   Math.round(val.gastos   * 100) / 100,
-          cats:     val.cats
+          cats:     val.cats,
+          movs:     val.movs
         }
       })
 
     if (datos.length === 0) {
       document.getElementById('loading-wrap').textContent = 'No hay datos aún.'
-      return
+      return false
     }
 
     const todasCats = new Set()
@@ -331,9 +418,7 @@
     document.getElementById('loading-wrap').style.display = 'none'
     document.getElementById('contenido').style.display    = ''
 
-    setModo('mes')
-    const savedScroll = sessionStorage.getItem('stats-scroll')
-    if (savedScroll) setTimeout(() => window.scrollTo(0, parseInt(savedScroll, 10)), 0)
+    return true
   }
 
   function setModo(modo) {
@@ -507,6 +592,32 @@
   }
 
   function dibujarCats(slice, soloMes) {
+    catsSliceActual   = slice
+    catsSoloMesActual = soloMes
+    categoriaAbierta  = null
+    renderCatsUI()
+  }
+
+  function toggleCategoria(cat) {
+    categoriaAbierta = categoriaAbierta === cat ? null : cat
+    renderCatsUI()
+  }
+
+  function iconMov(esFijo, cat) {
+    if (esFijo) return '📌'
+    if (!cat) return '📦'
+    const first = [...cat.trim()][0]
+    return first && first.codePointAt(0) > 127 ? first : (iconsCat[cat] || '📦')
+  }
+
+  function diaMes(fecha) {
+    const [, mesNum, dia] = fecha.split('-').map(Number)
+    return `${dia} ${MESES_LABELS[mesNum - 1]}`
+  }
+
+  function renderCatsUI() {
+    const slice   = catsSliceActual
+    const soloMes = catsSoloMesActual
     const totales = {}
     slice.forEach(d => Object.entries(d.cats).forEach(([cat, val]) => { totales[cat] = (totales[cat] || 0) + val }))
     const maxC = Math.max(...Object.values(totales))
@@ -517,13 +628,14 @@
     wrap.innerHTML = ''
 
     Object.entries(totales).sort((a, b) => b[1] - a[1]).forEach(([cat, total]) => {
-      const pct  = Math.round((total / maxC) * 100)
-      const prom = soloMes ? null : Math.round(total / n)
-      const row  = document.createElement('div')
-      row.className = 'cat-row'
+      const pct    = Math.round((total / maxC) * 100)
+      const prom   = soloMes ? total : Math.round(total / n)
+      const abierta = categoriaAbierta === cat
+      const row    = document.createElement('div')
+      row.className = 'cat-row' + (abierta ? ' abierta' : '')
       row.innerHTML = `
         <div class="cat-top">
-          <div class="cat-left">${cat}</div>
+          <div class="cat-left"><span class="cat-chevron">▶</span>${cat}</div>
           <div class="cat-right">
             ${!soloMes
               ? `<div class="cat-total">${fmt(prom)}/mes</div><div class="cat-prom">Total: ${fmt(total)}</div>`
@@ -532,6 +644,43 @@
         </div>
         <div class="cat-bar-track"><div class="cat-bar-fill" style="width:${pct}%"></div></div>
       `
+      row.querySelector('.cat-top').addEventListener('click', () => toggleCategoria(cat))
+
+      if (abierta) {
+        const movs = slice.flatMap(d => d.movs[cat] || []).sort((a, b) => b.fecha.localeCompare(a.fecha))
+        const mesesIncluidos = soloMes ? 1 : n
+        const promMes = soloMes ? total : Math.round(total / mesesIncluidos)
+
+        const movsWrap = document.createElement('div')
+        movsWrap.className = 'cat-movs'
+
+        if (!movs.length) {
+          movsWrap.innerHTML = '<div class="cat-movs-empty">Sin movimientos en este período.</div>'
+        } else {
+          movs.forEach(m => {
+            const item = document.createElement('div')
+            item.className = 'cat-mov-item'
+            item.innerHTML = `
+              <div class="cm-icon">${iconMov(m.tipo === 'fijo', m.categoria)}</div>
+              <div class="cm-info">
+                <div class="cm-nombre">${m.label}</div>
+                <div class="cm-fecha">${diaMes(m.fecha)}</div>
+              </div>
+              <div class="cm-monto">${fmt(m.monto)}</div>
+              <div class="cm-edit">✏️</div>
+            `
+            item.addEventListener('click', () => abrirEdicionItem(m))
+            movsWrap.appendChild(item)
+          })
+          const footer = document.createElement('div')
+          footer.className = 'cat-movs-footer'
+          footer.innerHTML = `<span>${movs.length}</span> movimiento${movs.length === 1 ? '' : 's'} · <span>${mesesIncluidos}</span> ${mesesIncluidos === 1 ? 'mes' : 'meses'} · <span>${fmt(promMes)}</span>/mes promedio`
+          movsWrap.appendChild(footer)
+        }
+
+        row.appendChild(movsWrap)
+      }
+
       wrap.appendChild(row)
     })
   }
@@ -608,6 +757,83 @@
       div.innerHTML = `<div class="alerta-icon">${a.icon}</div><div><div class="alerta-titulo">${a.titulo}</div><div class="alerta-desc">${a.desc}</div></div>`
       wrap.appendChild(div)
     })
+  }
+
+  async function cargarCategoriasPerfil() {
+    let uid = window.currentUserId
+    if (!uid) {
+      const { data: { session } } = await dbClient.auth.getSession()
+      uid = session?.user?.id
+    }
+    if (!uid) return
+    const { data: perfil } = await dbClient.from('perfil').select('categorias').eq('usuario_id', uid).maybeSingle()
+    const catsStr = perfil?.categorias || CATS_DEFAULT
+    const cats = catsStr.split(',').map(c => c.trim()).filter(Boolean)
+    ;['em-categoria', 'em-cat-fijo'].forEach(id => {
+      const sel = document.getElementById(id)
+      if (sel) sel.innerHTML = cats.map(c => `<option>${c}</option>`).join('')
+    })
+  }
+
+  function setSelectValue(id, val) {
+    const sel = document.getElementById(id)
+    ;[...sel.options].forEach(o => { if (o.value === val) sel.value = val })
+  }
+
+  async function abrirEdicionItem(m) {
+    editandoItem = m
+    const esFijo = m.tipo === 'fijo'
+    await cargarCategoriasPerfil()
+    document.getElementById('edit-title').textContent = esFijo ? 'Editar gasto fijo' : 'Editar gasto'
+    document.getElementById('lbl-em-fecha').textContent = esFijo ? 'Fecha de inicio' : 'Fecha'
+    document.getElementById('fld-em-descripcion').style.display = esFijo ? 'none' : ''
+    document.getElementById('fld-em-nombre').style.display      = esFijo ? '' : 'none'
+    document.getElementById('fld-em-categoria').style.display   = esFijo ? 'none' : ''
+    document.getElementById('fld-em-cat-fijo').style.display    = esFijo ? '' : 'none'
+    document.getElementById('em-fecha').value = m.fecha
+    document.getElementById('em-monto').value = m.monto
+    if (esFijo) {
+      document.getElementById('em-nombre').value = m.label
+      setSelectValue('em-cat-fijo', m.categoria)
+    } else {
+      document.getElementById('em-descripcion').value = m.label
+      setSelectValue('em-categoria', m.categoria)
+    }
+    document.getElementById('modal-editar-item').style.display = 'flex'
+  }
+
+  function cerrarEdicionItem() {
+    document.getElementById('modal-editar-item').style.display = 'none'
+    editandoItem = null
+  }
+
+  async function guardarEdicionItem() {
+    if (!editandoItem) return
+    const fecha = document.getElementById('em-fecha').value
+    const monto = parseFloat(document.getElementById('em-monto').value)
+    if (!fecha || isNaN(monto)) { alert('Completa todos los campos'); return }
+
+    let error
+    if (editandoItem.tipo === 'fijo') {
+      const nombre    = document.getElementById('em-nombre').value.trim()
+      const categoria = document.getElementById('em-cat-fijo').value
+      if (!nombre) { alert('Completa el nombre'); return }
+      const dia = new Date(fecha + 'T00:00:00').getDate()
+      ;({ error } = await dbClient.from('gastos_fijos')
+        .update({ nombre, categoria, monto, fecha_inicio: fecha, dia_del_mes: dia })
+        .eq('id', editandoItem.id).eq('usuario_id', window.currentUserId))
+    } else {
+      const descripcion = document.getElementById('em-descripcion').value.trim()
+      const categoria    = document.getElementById('em-categoria').value
+      if (!descripcion) { alert('Completa la descripción'); return }
+      ;({ error } = await dbClient.from('gastos')
+        .update({ fecha, descripcion, categoria, monto })
+        .eq('id', editandoItem.id).eq('usuario_id', window.currentUserId))
+    }
+
+    if (error) { alert('Error: ' + error.message); return }
+    cerrarEdicionItem()
+    await recargarDatos()
   }
 
   window.addEventListener('pagehide', () => {
