@@ -83,6 +83,8 @@
   .inp:focus { border-color: var(--accent); }
   .lbl { font-size:11px; color:var(--subtext); text-transform:uppercase; letter-spacing:0.08em; display:block; margin-bottom:6px; }
   .fld { margin-bottom:12px; }
+  .inp.inp-error { border-color: var(--danger); }
+  .fld-error { display:none; font-size:11px; color:var(--danger); margin-top:6px; }
   .btn-ok { width:100%; border:none; border-radius:14px; padding:15px; font-family:'DM Sans',sans-serif; font-size:15px; font-weight:700; cursor:pointer; margin-bottom:8px; transition:opacity 0.2s; }
   .btn-ok:hover { opacity: 0.9; }
   .btn-no { width:100%; background:none; border:none; color:var(--subtext); font-size:14px; cursor:pointer; padding:10px; font-family:'DM Sans',sans-serif; }
@@ -156,7 +158,11 @@
       </select>
     </div>
     <div class="fld"><label class="lbl">Monto</label><input type="number" id="f-monto" class="inp" placeholder="$0.00"></div>
-    <div class="fld"><label class="lbl">Fecha de inicio</label><input type="date" id="f-fecha" class="inp"></div>
+    <div class="fld">
+      <label class="lbl">Fecha de inicio</label>
+      <input type="date" id="f-fecha" class="inp">
+      <div class="fld-error" id="err-f-fecha">La fecha de inicio es obligatoria</div>
+    </div>
     <div class="fld" style="margin-bottom:18px"><label class="lbl">Fecha fin (opcional)</label><input type="date" id="fijo-fecha-fin" class="inp"></div>
     <button class="btn-ok" style="background:var(--accent);color:#0d1117" onclick="guardarFijo()">Guardar gasto fijo</button>
     <button class="btn-no" onclick="cerrarModal()">Cancelar</button>
@@ -190,7 +196,11 @@
       </select>
     </div>
     <div class="fld"><label class="lbl">Monto</label><input type="number" id="e-monto" class="inp"></div>
-    <div class="fld"><label class="lbl">Fecha de inicio</label><input type="date" id="e-fecha" class="inp"></div>
+    <div class="fld">
+      <label class="lbl">Fecha de inicio</label>
+      <input type="date" id="e-fecha" class="inp">
+      <div class="fld-error" id="err-e-fecha">La fecha de inicio es obligatoria</div>
+    </div>
     <div class="fld" style="margin-bottom:18px"><label class="lbl">Fecha fin (opcional)</label><input type="date" id="e-fecha-fin" class="inp"></div>
     <button class="btn-ok" style="background:var(--accent);color:#0d1117" onclick="guardarEdicion()">Guardar cambios</button>
     <button class="btn-no" onclick="cerrarEditar()">Cancelar</button>
@@ -306,6 +316,16 @@
     document.getElementById('modal-desactivar').style.display = 'none';
   }
 
+  function mostrarErrorFecha(prefix) {
+    document.getElementById(prefix + '-fecha').classList.add('inp-error');
+    document.getElementById('err-' + prefix + '-fecha').style.display = 'block';
+  }
+
+  function ocultarErrorFecha(prefix) {
+    document.getElementById(prefix + '-fecha').classList.remove('inp-error');
+    document.getElementById('err-' + prefix + '-fecha').style.display = 'none';
+  }
+
   let idFijoEditar = null;
 
   async function editarFijo(id) {
@@ -313,6 +333,7 @@
     if (!f) return;
     idFijoEditar = id;
     await cargarCategoriasPerfil();
+    ocultarErrorFecha('e');
     document.getElementById('e-nombre').value    = f.nombre;
     document.getElementById('e-categoria').value = f.categoria;
     document.getElementById('e-monto').value     = f.monto;
@@ -331,7 +352,9 @@
     const monto     = parseFloat(document.getElementById('e-monto').value);
     const fecha     = document.getElementById('e-fecha').value;
     const fechaFin  = document.getElementById('e-fecha-fin').value || null;
-    if (!nombre || isNaN(monto) || !fecha) { alert('Completa todos los campos'); return; }
+    ocultarErrorFecha('e');
+    if (!fecha) { mostrarErrorFecha('e'); return; }
+    if (!nombre || isNaN(monto)) { alert('Completa todos los campos'); return; }
     const dia = new Date(fecha).getDate();
     const { error } = await dbClient.from('gastos_fijos')
       .update({ nombre, categoria, monto, fecha_inicio: fecha, fecha_fin: fechaFin, dia_del_mes: dia })
@@ -356,6 +379,7 @@
     document.getElementById('f-monto').value = '';
     document.getElementById('f-fecha').value = '';
     document.getElementById('fijo-fecha-fin').value = '';
+    ocultarErrorFecha('f');
     await cargarCategoriasPerfil();
     document.getElementById('modal').style.display = 'flex';
   }
@@ -367,7 +391,9 @@
     const monto     = parseFloat(document.getElementById('f-monto').value);
     const fecha     = document.getElementById('f-fecha').value;
     const fechaFin  = document.getElementById('fijo-fecha-fin').value || null;
-    if (!nombre || isNaN(monto) || !fecha) { alert('Completa todos los campos'); return; }
+    ocultarErrorFecha('f');
+    if (!fecha) { mostrarErrorFecha('f'); return; }
+    if (!nombre || isNaN(monto)) { alert('Completa todos los campos'); return; }
     const dia = new Date(fecha).getDate();
     const { data, error } = await dbClient.from('gastos_fijos').insert([{ nombre, categoria, monto, dia_del_mes: dia, activo: true, fecha_inicio: fecha, fecha_fin: fechaFin, usuario_id: window.currentUserId }]).select();
     if (error) { alert('Error: ' + error.message); return; }
@@ -385,6 +411,8 @@
   document.getElementById('modal-editar').addEventListener('click', function(e) {
     if (e.target === this) cerrarEditar();
   });
+  document.getElementById('f-fecha').addEventListener('input', () => ocultarErrorFecha('f'));
+  document.getElementById('e-fecha').addEventListener('input', () => ocultarErrorFecha('e'));
 
   const CATS_DEFAULT = '🍔 Comida,🏠 Alquiler,💳 Crédito,📱 Línea,🏋️ Gym,⛽ Gasolina,💻 Tecnología,❤️ Salud,👕 Ropa,🎉 Salidas,🌍 Remesas,⚠️ Gastos Imprevistos,📋 Trámite,🚗 Vehículo,📦 Otros'
 

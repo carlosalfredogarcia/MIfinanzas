@@ -71,6 +71,8 @@
   .inp { width:100%;background:var(--card2);border:1px solid var(--border);border-radius:12px;padding:12px 14px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:15px;outline:none; }
   .lbl { font-size:11px;color:var(--subtext);text-transform:uppercase;letter-spacing:0.08em;display:block;margin-bottom:6px; }
   .fld { margin-bottom:12px; }
+  .inp.inp-error { border-color: var(--danger); }
+  .fld-error { display:none; font-size:11px; color:var(--danger); margin-top:6px; }
   .modal-base { position:fixed;inset:0;background:rgba(0,0,0,0.75);backdrop-filter:blur(8px);z-index:200;display:none;align-items:flex-end;justify-content:center; }
   .modal-box { width:390px;background:var(--card);border-radius:28px 28px 0 0;padding:24px 24px 40px;border-top:1px solid var(--border); }
   .modal-handle { width:40px;height:4px;background:rgba(255,255,255,0.08);border-radius:100px;margin:0 auto 20px; }
@@ -192,7 +194,11 @@
       </select>
     </div>
     <div class="fld"><label class="lbl">Monto</label><input type="number" id="f-monto" class="inp" placeholder="$0.00"></div>
-    <div class="fld"><label class="lbl">Fecha de inicio</label><input type="date" id="f-fecha" class="inp"></div>
+    <div class="fld">
+      <label class="lbl">Fecha de inicio</label>
+      <input type="date" id="f-fecha" class="inp">
+      <div class="fld-error" id="err-f-fecha">La fecha de inicio es obligatoria</div>
+    </div>
     <div class="fld" style="margin-bottom:18px"><label class="lbl">Fecha fin (opcional)</label><input type="date" id="f-fecha-fin" class="inp"></div>
     <button onclick="guardarFijo()" class="btn-ok" style="background:#58a6ff;color:#0d1117">Guardar gasto fijo</button>
     <button onclick="cerrarGastoFijo()" class="btn-no">Cancelar</button>
@@ -203,7 +209,11 @@
   <div class="modal-box">
     <div class="modal-handle"></div>
     <div class="modal-title" id="edit-title">Editar movimiento</div>
-    <div class="fld"><label class="lbl">Fecha</label><input type="date" id="e-fecha" class="inp"></div>
+    <div class="fld">
+      <label class="lbl" id="lbl-e-fecha">Fecha</label>
+      <input type="date" id="e-fecha" class="inp">
+      <div class="fld-error" id="err-e-fecha">La fecha es obligatoria</div>
+    </div>
     <div class="fld" id="fld-descripcion"><label class="lbl">Descripción</label><input type="text" id="e-descripcion" class="inp"></div>
     <div class="fld" id="fld-concepto"><label class="lbl">Concepto</label><input type="text" id="e-concepto" class="inp"></div>
     <div class="fld" id="fld-categoria"><label class="lbl">Categoría</label>
@@ -370,7 +380,7 @@
   function cerrarGasto()     { document.getElementById('modal-gasto').style.display = 'none'; }
   function abrirIngreso()    { cerrarMenu(); document.getElementById('i-fecha').value = hoy; document.getElementById('modal-ingreso').style.display = 'flex'; }
   function cerrarIngreso()   { document.getElementById('modal-ingreso').style.display = 'none'; }
-  async function abrirGastoFijo() { cerrarMenu(); await cargarCategoriasPerfil(); document.getElementById('modal-fijo').style.display = 'flex'; }
+  async function abrirGastoFijo() { cerrarMenu(); ocultarErrorFecha('f'); await cargarCategoriasPerfil(); document.getElementById('modal-fijo').style.display = 'flex'; }
   function cerrarGastoFijo() { document.getElementById('modal-fijo').style.display = 'none'; }
 
   async function guardarGasto() {
@@ -395,13 +405,25 @@
     else { alert('✅ Ingreso guardado'); cerrarIngreso(); cargarMovimientos(); }
   }
 
+  function mostrarErrorFecha(prefix) {
+    document.getElementById(prefix + '-fecha').classList.add('inp-error');
+    document.getElementById('err-' + prefix + '-fecha').style.display = 'block';
+  }
+
+  function ocultarErrorFecha(prefix) {
+    document.getElementById(prefix + '-fecha').classList.remove('inp-error');
+    document.getElementById('err-' + prefix + '-fecha').style.display = 'none';
+  }
+
   async function guardarFijo() {
     const nombre    = document.getElementById('f-nombre').value.trim();
     const categoria = document.getElementById('f-categoria').value;
     const monto     = parseFloat(document.getElementById('f-monto').value);
     const fecha     = document.getElementById('f-fecha').value;
     const fechaFin  = document.getElementById('f-fecha-fin').value || null;
-    if (!nombre || isNaN(monto) || !fecha) { alert('Completa todos los campos'); return; }
+    ocultarErrorFecha('f');
+    if (!fecha) { mostrarErrorFecha('f'); return; }
+    if (!nombre || isNaN(monto)) { alert('Completa todos los campos'); return; }
     const dia = new Date(fecha).getDate();
     const { error } = await dbClient.from('gastos_fijos').insert([{ nombre, categoria, monto, dia_del_mes: dia, activo: true, fecha_inicio: fecha, fecha_fin: fechaFin, usuario_id: window.currentUserId }]);
     if (error) { alert('Error: ' + error.message); }
@@ -418,6 +440,9 @@
     document.getElementById('edit-title').textContent = esFijo ? 'Editar gasto fijo' : esIngreso ? 'Editar ingreso' : 'Editar gasto';
     document.getElementById('edit-btn-ok').style.background = esFijo ? '#58a6ff' : esIngreso ? '#3fb950' : '#f85149';
     document.getElementById('edit-btn-ok').style.color = '#0d1117';
+    document.getElementById('lbl-e-fecha').textContent = esFijo ? 'Fecha de inicio' : 'Fecha';
+    document.getElementById('err-e-fecha').textContent = esFijo ? 'La fecha de inicio es obligatoria' : 'La fecha es obligatoria';
+    ocultarErrorFecha('e');
     document.getElementById('e-fecha').value = esFijo ? (m.fecha_inicio || m.fecha || '').slice(0, 10) : (m.fecha || '').slice(0, 10);
     document.getElementById('e-monto').value = m.monto;
     document.getElementById('fld-descripcion').style.display = (!esFijo && !esIngreso) ? '' : 'none';
@@ -452,7 +477,9 @@
     if (!editando) return;
     const fecha = document.getElementById('e-fecha').value;
     const monto = parseFloat(document.getElementById('e-monto').value);
-    if (!fecha || isNaN(monto)) { alert('Completa todos los campos'); return; }
+    ocultarErrorFecha('e');
+    if (!fecha) { mostrarErrorFecha('e'); return; }
+    if (isNaN(monto)) { alert('Completa todos los campos'); return; }
     let error;
     if (editando.tipo === 'fijo') {
       const nombre    = document.getElementById('e-nombre').value.trim();
@@ -494,6 +521,9 @@
   }
 
   actualizarMesLabel();
+
+  document.getElementById('f-fecha').addEventListener('input', () => ocultarErrorFecha('f'));
+  document.getElementById('e-fecha').addEventListener('input', () => ocultarErrorFecha('e'));
 
   const CATS_DEFAULT = '🍔 Comida,🏠 Alquiler,💳 Crédito,📱 Línea,🏋️ Gym,⛽ Gasolina,💻 Tecnología,❤️ Salud,👕 Ropa,🎉 Salidas,🌍 Remesas,⚠️ Gastos Imprevistos,📋 Trámite,🚗 Vehículo,📦 Otros'
 
