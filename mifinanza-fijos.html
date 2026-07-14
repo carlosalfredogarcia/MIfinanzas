@@ -393,6 +393,8 @@
   function cerrarModal() { document.getElementById('modal').style.display = 'none'; }
 
   async function guardarFijo() {
+    console.log('fecha valor:', document.getElementById('f-fecha').value);
+    console.log('fecha largo:', document.getElementById('f-fecha').value.length);
     const fechaVal = document.getElementById('f-fecha').value.trim();
     if (!fechaVal) {
       document.getElementById('f-fecha-error').textContent = 'La fecha de inicio es obligatoria';
