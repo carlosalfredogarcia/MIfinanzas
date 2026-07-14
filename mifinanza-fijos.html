@@ -161,9 +161,9 @@
     <div class="fld">
       <label class="lbl">Fecha de inicio</label>
       <input type="date" id="f-fecha" class="inp">
-      <div class="fld-error" id="err-f-fecha">La fecha de inicio es obligatoria</div>
+      <span class="fld-error" id="f-fecha-error">La fecha de inicio es obligatoria</span>
     </div>
-    <div class="fld" style="margin-bottom:18px"><label class="lbl">Fecha fin (opcional)</label><input type="date" id="fijo-fecha-fin" class="inp"></div>
+    <div class="fld" style="margin-bottom:18px"><label class="lbl">Fecha fin</label><input type="date" id="fijo-fecha-fin" class="inp"></div>
     <button class="btn-ok" style="background:var(--accent);color:#0d1117" onclick="guardarFijo()">Guardar gasto fijo</button>
     <button class="btn-no" onclick="cerrarModal()">Cancelar</button>
   </div>
@@ -199,9 +199,9 @@
     <div class="fld">
       <label class="lbl">Fecha de inicio</label>
       <input type="date" id="e-fecha" class="inp">
-      <div class="fld-error" id="err-e-fecha">La fecha de inicio es obligatoria</div>
+      <span class="fld-error" id="e-fecha-error">La fecha de inicio es obligatoria</span>
     </div>
-    <div class="fld" style="margin-bottom:18px"><label class="lbl">Fecha fin (opcional)</label><input type="date" id="e-fecha-fin" class="inp"></div>
+    <div class="fld" style="margin-bottom:18px"><label class="lbl">Fecha fin</label><input type="date" id="e-fecha-fin" class="inp"></div>
     <button class="btn-ok" style="background:var(--accent);color:#0d1117" onclick="guardarEdicion()">Guardar cambios</button>
     <button class="btn-no" onclick="cerrarEditar()">Cancelar</button>
   </div>
@@ -318,12 +318,13 @@
 
   function mostrarErrorFecha(prefix) {
     document.getElementById(prefix + '-fecha').classList.add('inp-error');
-    document.getElementById('err-' + prefix + '-fecha').style.display = 'block';
+    document.getElementById(prefix + '-fecha-error').textContent = 'La fecha de inicio es obligatoria';
+    document.getElementById(prefix + '-fecha-error').style.display = 'block';
   }
 
   function ocultarErrorFecha(prefix) {
     document.getElementById(prefix + '-fecha').classList.remove('inp-error');
-    document.getElementById('err-' + prefix + '-fecha').style.display = 'none';
+    document.getElementById(prefix + '-fecha-error').style.display = 'none';
   }
 
   let idFijoEditar = null;
@@ -347,13 +348,19 @@
   }
 
   async function guardarEdicion() {
+    const fechaVal = document.getElementById('e-fecha').value.trim();
+    if (!fechaVal) {
+      document.getElementById('e-fecha-error').textContent = 'La fecha de inicio es obligatoria';
+      document.getElementById('e-fecha-error').style.display = 'block';
+      return;
+    }
+    ocultarErrorFecha('e');
+
     const nombre    = document.getElementById('e-nombre').value.trim();
     const categoria = document.getElementById('e-categoria').value;
     const monto     = parseFloat(document.getElementById('e-monto').value);
-    const fecha     = document.getElementById('e-fecha').value;
+    const fecha     = fechaVal;
     const fechaFin  = document.getElementById('e-fecha-fin').value || null;
-    ocultarErrorFecha('e');
-    if (!fecha) { mostrarErrorFecha('e'); return; }
     if (!nombre || isNaN(monto)) { alert('Completa todos los campos'); return; }
     const dia = new Date(fecha).getDate();
     const { error } = await dbClient.from('gastos_fijos')
@@ -386,13 +393,19 @@
   function cerrarModal() { document.getElementById('modal').style.display = 'none'; }
 
   async function guardarFijo() {
+    const fechaVal = document.getElementById('f-fecha').value.trim();
+    if (!fechaVal) {
+      document.getElementById('f-fecha-error').textContent = 'La fecha de inicio es obligatoria';
+      document.getElementById('f-fecha-error').style.display = 'block';
+      return;
+    }
+    ocultarErrorFecha('f');
+
     const nombre    = document.getElementById('f-nombre').value.trim();
     const categoria = document.getElementById('f-categoria').value;
     const monto     = parseFloat(document.getElementById('f-monto').value);
-    const fecha     = document.getElementById('f-fecha').value;
+    const fecha     = fechaVal;
     const fechaFin  = document.getElementById('fijo-fecha-fin').value || null;
-    ocultarErrorFecha('f');
-    if (!fecha) { mostrarErrorFecha('f'); return; }
     if (!nombre || isNaN(monto)) { alert('Completa todos los campos'); return; }
     const dia = new Date(fecha).getDate();
     const { data, error } = await dbClient.from('gastos_fijos').insert([{ nombre, categoria, monto, dia_del_mes: dia, activo: true, fecha_inicio: fecha, fecha_fin: fechaFin, usuario_id: window.currentUserId }]).select();

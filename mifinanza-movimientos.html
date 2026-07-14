@@ -197,9 +197,9 @@
     <div class="fld">
       <label class="lbl">Fecha de inicio</label>
       <input type="date" id="f-fecha" class="inp">
-      <div class="fld-error" id="err-f-fecha">La fecha de inicio es obligatoria</div>
+      <span class="fld-error" id="f-fecha-error">La fecha de inicio es obligatoria</span>
     </div>
-    <div class="fld" style="margin-bottom:18px"><label class="lbl">Fecha fin (opcional)</label><input type="date" id="f-fecha-fin" class="inp"></div>
+    <div class="fld" style="margin-bottom:18px"><label class="lbl">Fecha fin</label><input type="date" id="f-fecha-fin" class="inp"></div>
     <button onclick="guardarFijo()" class="btn-ok" style="background:#58a6ff;color:#0d1117">Guardar gasto fijo</button>
     <button onclick="cerrarGastoFijo()" class="btn-no">Cancelar</button>
   </div>
@@ -212,7 +212,7 @@
     <div class="fld">
       <label class="lbl" id="lbl-e-fecha">Fecha</label>
       <input type="date" id="e-fecha" class="inp">
-      <div class="fld-error" id="err-e-fecha">La fecha es obligatoria</div>
+      <span class="fld-error" id="e-fecha-error">La fecha es obligatoria</span>
     </div>
     <div class="fld" id="fld-descripcion"><label class="lbl">Descripción</label><input type="text" id="e-descripcion" class="inp"></div>
     <div class="fld" id="fld-concepto"><label class="lbl">Concepto</label><input type="text" id="e-concepto" class="inp"></div>
@@ -232,7 +232,7 @@
         <option>🍔 Comida</option><option>🏠 Alquiler</option><option>💳 Crédito</option><option>📱 Línea</option><option>🏋️ Gym</option><option>⛽ Gasolina</option><option>💻 Tecnología</option><option>❤️ Salud</option><option>👕 Ropa</option><option>🎉 Salidas</option><option>🌍 Remesas</option><option>⚠️ Gastos Imprevistos</option><option>📋 Trámite</option><option>🚗 Vehículo</option><option>📦 Otros</option>
       </select>
     </div>
-    <div class="fld" id="fld-fecha-fin"><label class="lbl">Fecha fin (opcional)</label><input type="date" id="e-fecha-fin" class="inp"></div>
+    <div class="fld" id="fld-fecha-fin"><label class="lbl">Fecha fin</label><input type="date" id="e-fecha-fin" class="inp"></div>
     <div class="fld" style="margin-bottom:18px"><label class="lbl">Monto</label><input type="number" id="e-monto" class="inp" placeholder="$0.00"></div>
     <button onclick="guardarEdicion()" class="btn-ok" id="edit-btn-ok" style="background:#58a6ff;color:#0d1117">Guardar cambios</button>
     <button onclick="eliminarMovimiento()" class="btn-del">Eliminar</button>
@@ -407,22 +407,28 @@
 
   function mostrarErrorFecha(prefix) {
     document.getElementById(prefix + '-fecha').classList.add('inp-error');
-    document.getElementById('err-' + prefix + '-fecha').style.display = 'block';
+    document.getElementById(prefix + '-fecha-error').style.display = 'block';
   }
 
   function ocultarErrorFecha(prefix) {
     document.getElementById(prefix + '-fecha').classList.remove('inp-error');
-    document.getElementById('err-' + prefix + '-fecha').style.display = 'none';
+    document.getElementById(prefix + '-fecha-error').style.display = 'none';
   }
 
   async function guardarFijo() {
+    const fechaVal = document.getElementById('f-fecha').value.trim();
+    if (!fechaVal) {
+      document.getElementById('f-fecha-error').textContent = 'La fecha de inicio es obligatoria';
+      document.getElementById('f-fecha-error').style.display = 'block';
+      return;
+    }
+    ocultarErrorFecha('f');
+
     const nombre    = document.getElementById('f-nombre').value.trim();
     const categoria = document.getElementById('f-categoria').value;
     const monto     = parseFloat(document.getElementById('f-monto').value);
-    const fecha     = document.getElementById('f-fecha').value;
+    const fecha     = fechaVal;
     const fechaFin  = document.getElementById('f-fecha-fin').value || null;
-    ocultarErrorFecha('f');
-    if (!fecha) { mostrarErrorFecha('f'); return; }
     if (!nombre || isNaN(monto)) { alert('Completa todos los campos'); return; }
     const dia = new Date(fecha).getDate();
     const { error } = await dbClient.from('gastos_fijos').insert([{ nombre, categoria, monto, dia_del_mes: dia, activo: true, fecha_inicio: fecha, fecha_fin: fechaFin, usuario_id: window.currentUserId }]);
@@ -441,7 +447,7 @@
     document.getElementById('edit-btn-ok').style.background = esFijo ? '#58a6ff' : esIngreso ? '#3fb950' : '#f85149';
     document.getElementById('edit-btn-ok').style.color = '#0d1117';
     document.getElementById('lbl-e-fecha').textContent = esFijo ? 'Fecha de inicio' : 'Fecha';
-    document.getElementById('err-e-fecha').textContent = esFijo ? 'La fecha de inicio es obligatoria' : 'La fecha es obligatoria';
+    document.getElementById('e-fecha-error').textContent = esFijo ? 'La fecha de inicio es obligatoria' : 'La fecha es obligatoria';
     ocultarErrorFecha('e');
     document.getElementById('e-fecha').value = esFijo ? (m.fecha_inicio || m.fecha || '').slice(0, 10) : (m.fecha || '').slice(0, 10);
     document.getElementById('e-monto').value = m.monto;
@@ -475,10 +481,12 @@
 
   async function guardarEdicion() {
     if (!editando) return;
-    const fecha = document.getElementById('e-fecha').value;
-    const monto = parseFloat(document.getElementById('e-monto').value);
+    const fechaVal = document.getElementById('e-fecha').value.trim();
+    if (!fechaVal) { mostrarErrorFecha('e'); return; }
     ocultarErrorFecha('e');
-    if (!fecha) { mostrarErrorFecha('e'); return; }
+
+    const fecha = fechaVal;
+    const monto = parseFloat(document.getElementById('e-monto').value);
     if (isNaN(monto)) { alert('Completa todos los campos'); return; }
     let error;
     if (editando.tipo === 'fijo') {
