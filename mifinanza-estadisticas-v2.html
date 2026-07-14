@@ -460,7 +460,7 @@
     const n = mesesPeriodo.size
     if (n === 0) {
       contador.textContent = 'Toca los meses que quieres comparar'
-      setResumen('Prom. ingresos','—','','Prom. gastos','—','','Prom. ahorro','—','', 0)
+      setResumen('Prom. ingresos','—','','Prom. gastos','—','','Saldo real','—','', 0)
       document.getElementById('cats-wrap').innerHTML    = ''
       document.getElementById('alertas-wrap').innerHTML = ''
       return
@@ -473,12 +473,17 @@
     const tGas  = slice.reduce((s, d) => s + d.gastos,   0)
     const pIng  = Math.round(tIng / n)
     const pGas  = Math.round(tGas / n)
-    const pAho  = pIng - pGas
+
+    // Saldo real acumulado: suma de (ingresos - gastos) de cada mes seleccionado.
+    // d.gastos ya incluye los gastos fijos, así que no se restan aparte.
+    const saldoTotal = Math.round(tIng - tGas)
+    const esPositivo = saldoTotal >= 0
+    const vSaldo = (esPositivo ? '✅ +' : '⚠️ -') + fmt(Math.abs(saldoTotal))
 
     setResumen(
       'Prom. ingresos', fmt(pIng), 'por mes',
       'Prom. gastos',   fmt(pGas), 'por mes',
-      'Prom. ahorro',   (pAho >= 0 ? '+' : '') + fmt(pAho), 'por mes', pAho
+      esPositivo ? 'Total ahorrado' : 'Total perdido', vSaldo, 'en el período', saldoTotal
     )
 
     dibujarCats(slice, false)
