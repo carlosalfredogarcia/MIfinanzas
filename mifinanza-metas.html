@@ -462,6 +462,13 @@
   .nav-item.active .nav-label { color: var(--accent); }
   .nav-dot   { width: 4px; height: 4px; border-radius: 50%; background: var(--accent); }
 
+  .mas-item { display: flex; align-items: center; gap: 14px; padding: 14px 2px; cursor: pointer; border-bottom: 1px solid var(--border); transition: opacity 0.15s; }
+  .mas-item:last-of-type { border-bottom: none; margin-bottom: 16px; }
+  .mas-item:active { opacity: 0.6; }
+  .mas-icon { width: 42px; height: 42px; border-radius: 13px; background: rgba(88,166,255,0.12); display: flex; align-items: center; justify-content: center; font-size: 19px; flex-shrink: 0; }
+  .mas-label { flex: 1; font-size: 15px; font-weight: 600; color: var(--text); }
+  .mas-arrow { color: #58a6ff; font-size: 18px; }
+
   .spacer { height: 130px; }
 
   @keyframes fadeUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
@@ -596,9 +603,9 @@
 <!-- FAB flotante en el centro -->
 <button class="fab" onclick="abrirModal()">+</button>
 
-<!-- NAVBAR: 5 ítems, todos con onclick -->
+<!-- NAVBAR: 4 ítems, Más activo -->
 <nav class="navbar">
-  <div class="nav-item" onclick="location.href='index.html'">
+  <div class="nav-item" onclick="location.href='inicio.html'">
     <span class="nav-icon">🏠</span>
     <span class="nav-label">Inicio</span>
   </div>
@@ -610,11 +617,35 @@
     <span class="nav-icon">📊</span>
     <span class="nav-label">Estadísticas</span>
   </div>
-  <div class="nav-item" onclick="location.href='mifinanza-perfil.html'">
-    <span class="nav-icon">👤</span>
-    <span class="nav-label">Perfil</span>
+  <div class="nav-item active" onclick="abrirPanelMas()">
+    <span class="nav-icon">···</span>
+    <span class="nav-label">Más</span>
+    <div class="nav-dot"></div>
   </div>
 </nav>
+
+<div class="modal-overlay" id="panel-mas">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Más opciones</div>
+    <div class="mas-item" onclick="location.href='mifinanza-metas.html'">
+      <div class="mas-icon">🎯</div>
+      <div class="mas-label">Metas</div>
+      <div class="mas-arrow">›</div>
+    </div>
+    <div class="mas-item" onclick="location.href='mifinanza-fijos.html'">
+      <div class="mas-icon">📌</div>
+      <div class="mas-label">Gastos Fijos</div>
+      <div class="mas-arrow">›</div>
+    </div>
+    <div class="mas-item" onclick="location.href='mifinanza-perfil.html'">
+      <div class="mas-icon">👤</div>
+      <div class="mas-label">Perfil</div>
+      <div class="mas-arrow">›</div>
+    </div>
+    <button class="btn-cancelar" onclick="cerrarPanelMas()">Cancelar</button>
+  </div>
+</div>
 
 <!-- Modal nueva meta -->
 <div class="modal-overlay" id="modal">
@@ -990,6 +1021,10 @@
 
   document.getElementById('modal').addEventListener('click', function(e) { if (e.target === this) cerrarModal() })
   document.getElementById('modal-abonar').addEventListener('click', function(e) { if (e.target === this) cerrarModalAbonar() })
+
+  function abrirPanelMas()  { document.getElementById('panel-mas').classList.add('visible') }
+  function cerrarPanelMas() { document.getElementById('panel-mas').classList.remove('visible') }
+  document.getElementById('panel-mas').addEventListener('click', function(e) { if (e.target === this) cerrarPanelMas() })
 
   function actualizarSlider() {
     const val = parseInt(document.getElementById('slider-ahorro').value)

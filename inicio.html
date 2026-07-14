@@ -73,6 +73,12 @@
   .nav-item.active { opacity: 1; }
   .nav-icon { font-size: 22px; }
   .nav-dot { width: 4px; height: 4px; border-radius: 50%; background: var(--accent); }
+  .mas-item { display: flex; align-items: center; gap: 14px; padding: 14px 2px; cursor: pointer; border-bottom: 1px solid var(--border); transition: opacity 0.15s; }
+  .mas-item:last-of-type { border-bottom: none; margin-bottom: 16px; }
+  .mas-item:active { opacity: 0.6; }
+  .mas-icon { width: 42px; height: 42px; border-radius: 13px; background: rgba(88,166,255,0.12); display: flex; align-items: center; justify-content: center; font-size: 19px; flex-shrink: 0; }
+  .mas-label { flex: 1; font-size: 15px; font-weight: 600; color: var(--text); }
+  .mas-arrow { color: #58a6ff; font-size: 18px; }
   .spacer { height: 120px; }
   @keyframes fadeUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
   .inp { width:100%;background:var(--card2);border:1px solid var(--border);border-radius:12px;padding:12px 14px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:15px;outline:none; }
@@ -166,10 +172,33 @@
   <div class="nav-item" onclick="location.href='mifinanza-estadisticas-v2.html'">
     <span class="nav-icon">&#128202;</span>
   </div>
-  <div class="nav-item" onclick="location.href='mifinanza-perfil.html'">
-    <span class="nav-icon">&#128100;</span>
+  <div class="nav-item" onclick="abrirPanelMas()">
+    <span class="nav-icon">···</span>
   </div>
 </nav>
+
+<div class="modal-base" id="panel-mas">
+  <div class="modal-box">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Más opciones</div>
+    <div class="mas-item" onclick="location.href='mifinanza-metas.html'">
+      <div class="mas-icon">🎯</div>
+      <div class="mas-label">Metas</div>
+      <div class="mas-arrow">›</div>
+    </div>
+    <div class="mas-item" onclick="location.href='mifinanza-fijos.html'">
+      <div class="mas-icon">📌</div>
+      <div class="mas-label">Gastos Fijos</div>
+      <div class="mas-arrow">›</div>
+    </div>
+    <div class="mas-item" onclick="location.href='mifinanza-perfil.html'">
+      <div class="mas-icon">👤</div>
+      <div class="mas-label">Perfil</div>
+      <div class="mas-arrow">›</div>
+    </div>
+    <button class="btn-no" onclick="cerrarPanelMas()">Cancelar</button>
+  </div>
+</div>
 
 <div class="modal-base" id="menu-fab">
   <div class="modal-box">
@@ -351,6 +380,10 @@
   }
 
   cargarDashboard()
+
+  function abrirPanelMas() { document.getElementById('panel-mas').style.display = 'flex' }
+  function cerrarPanelMas() { document.getElementById('panel-mas').style.display = 'none' }
+  document.getElementById('panel-mas').addEventListener('click', function(e) { if (e.target === this) cerrarPanelMas() })
 
   const CATS_DEFAULT = '🍔 Comida,🏠 Alquiler,💳 Crédito,📱 Línea,🏋️ Gym,⛽ Gasolina,💻 Tecnología,❤️ Salud,👕 Ropa,🎉 Salidas,🌍 Remesas,⚠️ Gastos Imprevistos,📋 Trámite,🚗 Vehículo,📦 Otros'
 

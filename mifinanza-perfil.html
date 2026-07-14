@@ -79,6 +79,12 @@
   .btn-ok { width: 100%; border: none; border-radius: 14px; padding: 14px; font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 700; cursor: pointer; margin-bottom: 8px; transition: opacity 0.2s; }
   .btn-ok:hover { opacity: 0.9; }
   .btn-cancelar { width: 100%; background: none; border: none; color: var(--subtext); font-size: 13px; cursor: pointer; padding: 10px; font-family: 'DM Sans', sans-serif; }
+  .mas-item { display: flex; align-items: center; gap: 14px; padding: 14px 2px; cursor: pointer; border-bottom: 1px solid var(--border2); transition: opacity 0.15s; }
+  .mas-item:last-of-type { border-bottom: none; margin-bottom: 16px; }
+  .mas-item:active { opacity: 0.6; }
+  .mas-icon { width: 42px; height: 42px; border-radius: 13px; background: rgba(88,166,255,0.12); display: flex; align-items: center; justify-content: center; font-size: 19px; flex-shrink: 0; }
+  .mas-label { flex: 1; font-size: 15px; font-weight: 600; color: var(--text); }
+  .mas-arrow { color: #58a6ff; font-size: 18px; }
 
   /* NAVBAR */
   .navbar { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 390px; background: rgba(13,17,23,0.97); backdrop-filter: blur(20px); border-top: 1px solid var(--border2); padding: 12px 0 24px; display: flex; justify-content: space-around; align-items: center; z-index: 99; }
@@ -188,11 +194,34 @@
   <div class="nav-item" onclick="location.href='mifinanza-estadisticas-v2.html'">
     <span class="nav-icon">📊</span>
   </div>
-  <div class="nav-item active">
-    <span class="nav-icon">👤</span>
+  <div class="nav-item active" onclick="abrirPanelMas()">
+    <span class="nav-icon">···</span>
     <div class="nav-dot"></div>
   </div>
 </nav>
+
+<div class="modal-overlay" id="panel-mas">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Más opciones</div>
+    <div class="mas-item" onclick="location.href='mifinanza-metas.html'">
+      <div class="mas-icon">🎯</div>
+      <div class="mas-label">Metas</div>
+      <div class="mas-arrow">›</div>
+    </div>
+    <div class="mas-item" onclick="location.href='mifinanza-fijos.html'">
+      <div class="mas-icon">📌</div>
+      <div class="mas-label">Gastos Fijos</div>
+      <div class="mas-arrow">›</div>
+    </div>
+    <div class="mas-item" onclick="location.href='mifinanza-perfil.html'">
+      <div class="mas-icon">👤</div>
+      <div class="mas-label">Perfil</div>
+      <div class="mas-arrow">›</div>
+    </div>
+    <button class="btn-cancelar" onclick="cerrarPanelMas()">Cancelar</button>
+  </div>
+</div>
 
 <!-- Modal confirmar eliminar categoría -->
 <div class="modal-overlay" id="modal-confirm-eliminar" style="display:none">
@@ -370,6 +399,10 @@
     await dbClient.auth.signOut()
     window.location.replace('index.html')
   }
+
+  function abrirPanelMas() { document.getElementById('panel-mas').style.display = 'flex' }
+  function cerrarPanelMas() { document.getElementById('panel-mas').style.display = 'none' }
+  document.getElementById('panel-mas').addEventListener('click', function(e) { if (e.target === this) cerrarPanelMas() })
 
   cargarPerfil()
 </script>

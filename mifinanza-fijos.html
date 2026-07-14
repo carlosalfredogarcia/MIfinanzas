@@ -73,6 +73,12 @@
   .nav-item.active { opacity: 1; }
   .nav-icon { font-size: 22px; }
   .nav-dot  { width: 4px; height: 4px; border-radius: 50%; background: var(--accent); }
+  .mas-item { display: flex; align-items: center; gap: 14px; padding: 14px 2px; cursor: pointer; border-bottom: 1px solid var(--border2); transition: opacity 0.15s; }
+  .mas-item:last-of-type { border-bottom: none; margin-bottom: 16px; }
+  .mas-item:active { opacity: 0.6; }
+  .mas-icon { width: 42px; height: 42px; border-radius: 13px; background: rgba(88,166,255,0.12); display: flex; align-items: center; justify-content: center; font-size: 19px; flex-shrink: 0; }
+  .mas-label { flex: 1; font-size: 15px; font-weight: 600; color: var(--text); }
+  .mas-arrow { color: #58a6ff; font-size: 18px; }
 
   .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.75); backdrop-filter: blur(8px); z-index: 200; display: none; align-items: flex-end; justify-content: center; }
   .modal { width: 390px; background: var(--card); border-radius: 28px 28px 0 0; padding: 24px 24px 40px; border-top: 1px solid var(--border2); }
@@ -134,17 +140,40 @@
   <div class="nav-item" onclick="location.href='inicio.html'">
     <span class="nav-icon">🏠</span>
   </div>
-  <div class="nav-item active" onclick="location.href='mifinanza-movimientos.html'">
+  <div class="nav-item" onclick="location.href='mifinanza-movimientos.html'">
     <span class="nav-icon">📋</span>
-    <div class="nav-dot"></div>
   </div>
   <div class="nav-item" onclick="location.href='mifinanza-estadisticas-v2.html'">
     <span class="nav-icon">📊</span>
   </div>
-  <div class="nav-item" onclick="location.href='mifinanza-perfil.html'">
-    <span class="nav-icon">👤</span>
+  <div class="nav-item active" onclick="abrirPanelMas()">
+    <span class="nav-icon">···</span>
+    <div class="nav-dot"></div>
   </div>
 </nav>
+
+<div class="modal-overlay" id="panel-mas">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Más opciones</div>
+    <div class="mas-item" onclick="location.href='mifinanza-metas.html'">
+      <div class="mas-icon">🎯</div>
+      <div class="mas-label">Metas</div>
+      <div class="mas-arrow">›</div>
+    </div>
+    <div class="mas-item" onclick="location.href='mifinanza-fijos.html'">
+      <div class="mas-icon">📌</div>
+      <div class="mas-label">Gastos Fijos</div>
+      <div class="mas-arrow">›</div>
+    </div>
+    <div class="mas-item" onclick="location.href='mifinanza-perfil.html'">
+      <div class="mas-icon">👤</div>
+      <div class="mas-label">Perfil</div>
+      <div class="mas-arrow">›</div>
+    </div>
+    <button class="btn-no" onclick="cerrarPanelMas()">Cancelar</button>
+  </div>
+</div>
 
 <!-- Modal nuevo gasto fijo -->
 <div class="modal-overlay" id="modal">
@@ -446,6 +475,10 @@
       if (sel) sel.innerHTML = cats.map(c => `<option>${c}</option>`).join('');
     });
   }
+
+  function abrirPanelMas() { document.getElementById('panel-mas').style.display = 'flex'; }
+  function cerrarPanelMas() { document.getElementById('panel-mas').style.display = 'none'; }
+  document.getElementById('panel-mas').addEventListener('click', function(e) { if (e.target === this) cerrarPanelMas(); });
 
   cargarFijos();
 </script>

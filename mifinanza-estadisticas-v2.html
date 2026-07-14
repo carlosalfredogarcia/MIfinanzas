@@ -147,6 +147,19 @@
   .nav-item.active .nav-label { color: var(--accent); }
   .nav-dot { width: 4px; height: 4px; border-radius: 50%; background: var(--accent); }
 
+  /* PANEL "MÁS" */
+  .panelmas-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.75); backdrop-filter: blur(8px); z-index: 200; display: none; align-items: flex-end; justify-content: center; }
+  .panelmas-box { width: 390px; background: var(--card); border-radius: 28px 28px 0 0; padding: 24px 24px 40px; border-top: 1px solid var(--border); }
+  .panelmas-handle { width: 40px; height: 4px; background: rgba(255,255,255,0.08); border-radius: 100px; margin: 0 auto 20px; }
+  .panelmas-title { font-family: 'Syne', sans-serif; font-size: 17px; font-weight: 700; color: var(--text); margin-bottom: 14px; }
+  .mas-item { display: flex; align-items: center; gap: 14px; padding: 14px 2px; cursor: pointer; border-bottom: 1px solid var(--border); transition: opacity 0.15s; }
+  .mas-item:last-of-type { border-bottom: none; margin-bottom: 16px; }
+  .mas-item:active { opacity: 0.6; }
+  .mas-icon { width: 42px; height: 42px; border-radius: 13px; background: rgba(88,166,255,0.12); display: flex; align-items: center; justify-content: center; font-size: 19px; flex-shrink: 0; }
+  .mas-label { flex: 1; font-size: 15px; font-weight: 600; color: var(--text); }
+  .mas-arrow { color: #58a6ff; font-size: 18px; }
+  .panelmas-cancelar { width: 100%; background: none; border: none; color: var(--subtext); font-size: 14px; cursor: pointer; padding: 10px; font-family: 'DM Sans', sans-serif; }
+
   .spacer { height: 100px; }
 
   @keyframes fadeUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
@@ -252,7 +265,7 @@
   </div>
 </div>
 
-<!-- NAVBAR: 5 ítems, todos con onclick, Estadísticas activo -->
+<!-- NAVBAR: 4 ítems, Estadísticas activo -->
 <nav class="navbar">
   <div class="nav-item" onclick="location.href='inicio.html'">
     <span class="nav-icon">🏠</span>
@@ -267,11 +280,34 @@
     <span class="nav-label">Estadísticas</span>
     <div class="nav-dot"></div>
   </div>
-  <div class="nav-item" onclick="location.href='mifinanza-perfil.html'">
-    <span class="nav-icon">👤</span>
-    <span class="nav-label">Perfil</span>
+  <div class="nav-item" onclick="abrirPanelMas()">
+    <span class="nav-icon">···</span>
+    <span class="nav-label">Más</span>
   </div>
 </nav>
+
+<div class="panelmas-overlay" id="panel-mas">
+  <div class="panelmas-box">
+    <div class="panelmas-handle"></div>
+    <div class="panelmas-title">Más opciones</div>
+    <div class="mas-item" onclick="location.href='mifinanza-metas.html'">
+      <div class="mas-icon">🎯</div>
+      <div class="mas-label">Metas</div>
+      <div class="mas-arrow">›</div>
+    </div>
+    <div class="mas-item" onclick="location.href='mifinanza-fijos.html'">
+      <div class="mas-icon">📌</div>
+      <div class="mas-label">Gastos Fijos</div>
+      <div class="mas-arrow">›</div>
+    </div>
+    <div class="mas-item" onclick="location.href='mifinanza-perfil.html'">
+      <div class="mas-icon">👤</div>
+      <div class="mas-label">Perfil</div>
+      <div class="mas-arrow">›</div>
+    </div>
+    <button class="panelmas-cancelar" onclick="cerrarPanelMas()">Cancelar</button>
+  </div>
+</div>
 <script>
   window.moneda = localStorage.getItem('moneda') || '$'
   const _color = localStorage.getItem('color'); if (_color) document.documentElement.style.setProperty('--accent', _color)
@@ -844,6 +880,10 @@
   window.addEventListener('pagehide', () => {
     sessionStorage.setItem('stats-scroll', window.scrollY)
   })
+
+  function abrirPanelMas() { document.getElementById('panel-mas').style.display = 'flex' }
+  function cerrarPanelMas() { document.getElementById('panel-mas').style.display = 'none' }
+  document.getElementById('panel-mas').addEventListener('click', function(e) { if (e.target === this) cerrarPanelMas() })
 
   cargarDatos()
 </script>
