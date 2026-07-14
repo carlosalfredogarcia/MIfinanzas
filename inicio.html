@@ -102,11 +102,11 @@
 </head>
 <body>
 <div class="phone">
-  <div class="header">
+  <div class="header" id="header-saludo" style="visibility:hidden">
     <div class="greeting">
-      <div class="nombre" id="saludo-nombre">Hola, Carlos 👋</div>
+      <div class="nombre" id="saludo-nombre">Hola, Usuario 👋</div>
     </div>
-    <div class="avatar" id="avatar-header">C</div>
+    <div class="avatar" id="avatar-header">?</div>
   </div>
   <div class="balance-card">
     <div class="mes-nav-header">
@@ -308,6 +308,7 @@
       document.getElementById('saludo-nombre').textContent = 'Hola, ' + perfil.nombre + ' 👋'
       document.getElementById('avatar-header').textContent = perfil.nombre[0].toUpperCase()
     }
+    document.getElementById('header-saludo').style.visibility = 'visible'
 
     const inicio = anioVer + '-' + String(mesVer + 1).padStart(2,'0') + '-01'
     const ultimoDia = new Date(anioVer, mesVer + 1, 0).getDate()
