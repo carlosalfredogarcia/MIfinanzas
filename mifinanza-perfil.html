@@ -128,10 +128,6 @@
       <input type="text" id="inp-nombre" class="inp" placeholder="Tu nombre"
              oninput="syncHero(this.value)">
     </div>
-    <div class="fld">
-      <label class="lbl" for="inp-frase">Frase personal</label>
-      <textarea id="inp-frase" class="inp" placeholder="Escribe algo que te motive..."></textarea>
-    </div>
   </div>
 
   <!-- Moneda -->
@@ -269,8 +265,6 @@
     document.getElementById('hero-nombre').textContent  = nombre || '—'
     document.getElementById('avatar-letra').textContent = nombre ? nombre[0].toUpperCase() : '?'
 
-    document.getElementById('inp-frase').value = datos.frase || ''
-
     if (datos.moneda) {
       const simbolo = { USD:'$', EUR:'€', VES:'Bs', COP:'$', MXN:'$', DOP:'$', '$':'$', '€':'€', Bs:'Bs' }[datos.moneda] || '$'
       document.querySelectorAll('.moneda-chip').forEach(c => {
@@ -359,7 +353,6 @@
 
   async function guardar() {
     const nombre  = document.getElementById('inp-nombre').value.trim()
-    const frase   = document.getElementById('inp-frase').value.trim()
     const moneda  = document.querySelector('.moneda-chip.active')?.dataset.cod || '$'
     const color   = colorActual
     const cats    = getCats().join(',')
@@ -372,7 +365,7 @@
     const uid = session?.user?.id
     if (!uid) { btn.disabled = false; btn.textContent = 'Guardar cambios'; toast('Sesión no válida', 'err'); return }
 
-    const payload = { nombre, frase, moneda, color, categorias: cats }
+    const payload = { nombre, moneda, color, categorias: cats }
 
     const { data: actualizados, error: errUpdate } = await dbClient.from('perfil')
       .update(payload)
