@@ -396,11 +396,14 @@
     console.log('fecha valor:', document.getElementById('f-fecha').value);
     console.log('fecha largo:', document.getElementById('f-fecha').value.length);
     const fechaVal = document.getElementById('f-fecha').value.trim();
+    console.log('pasa validacion:', !!fechaVal);
     if (!fechaVal) {
+      console.log('bloqueando guardado');
       document.getElementById('f-fecha-error').textContent = 'La fecha de inicio es obligatoria';
       document.getElementById('f-fecha-error').style.display = 'block';
       return;
     }
+    console.log('continua guardando');
     ocultarErrorFecha('f');
 
     const nombre    = document.getElementById('f-nombre').value.trim();
