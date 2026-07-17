@@ -114,53 +114,6 @@
 
   .principal-fecha { font-size: 12px; color: var(--subtext); margin-bottom: 12px; }
 
-  .rango-wrap {
-    display: flex;
-    gap: 8px;
-    margin-bottom: 16px;
-    align-items: center;
-  }
-
-  .rango-wrap label {
-    font-size: 10px;
-    color: var(--subtext);
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    white-space: nowrap;
-  }
-
-  .rango-select {
-    flex: 1;
-    background: rgba(255,255,255,0.06);
-    border: 1px solid rgba(255,255,255,0.1);
-    border-radius: 10px;
-    padding: 7px 10px;
-    color: var(--text);
-    font-family: 'DM Sans', sans-serif;
-    font-size: 12px;
-    outline: none;
-    cursor: pointer;
-  }
-
-  .rango-select option { background: #1e1e27; }
-
-  .btn-recalcular {
-    background: rgba(184,245,100,0.15);
-    border: 1px solid rgba(184,245,100,0.3);
-    border-radius: 10px;
-    padding: 7px 14px;
-    color: var(--accent);
-    font-size: 13px;
-    font-family: 'Syne', sans-serif;
-    font-weight: 700;
-    cursor: pointer;
-    white-space: nowrap;
-    transition: background 0.2s;
-  }
-
-  .btn-recalcular:hover { background: rgba(184,245,100,0.25); }
-  .btn-recalcular:disabled { opacity: 0.4; cursor: not-allowed; }
-
   .principal-percent {
     font-family: 'Syne', sans-serif;
     font-size: 28px;
@@ -509,14 +462,6 @@
     </div>
     <div class="principal-fecha" id="p-fecha"></div>
 
-    <div class="rango-wrap" id="rango-wrap" style="display:none">
-      <label>Desde</label>
-      <select class="rango-select" id="rango-desde"></select>
-      <label>hasta</label>
-      <select class="rango-select" id="rango-hasta"></select>
-      <button class="btn-recalcular" id="btn-recalcular">↻</button>
-    </div>
-
     <div class="principal-percent" id="p-percent">—</div>
     <div class="progress-track">
       <div class="progress-fill" id="p-barra" style="width:0%"></div>
@@ -668,8 +613,12 @@
       <input type="number" id="m-monto" placeholder="$0.00">
     </div>
     <div class="input-group">
-      <label>Fecha límite</label>
-      <input type="month" id="m-fecha">
+      <label>Fecha inicio</label>
+      <input type="month" id="m-fecha-inicio">
+    </div>
+    <div class="input-group">
+      <label>Fecha fin</label>
+      <input type="month" id="m-fecha-fin">
     </div>
     <div class="input-group">
       <label>Emoji / Icono</label>
@@ -729,31 +678,6 @@
     return Math.max(1, diff)
   }
 
-  function poblarSelectores() {
-    const meses = [
-      {val:'2026-01',label:'Enero 2026'},{val:'2026-02',label:'Febrero 2026'},
-      {val:'2026-03',label:'Marzo 2026'},{val:'2026-04',label:'Abril 2026'},
-      {val:'2026-05',label:'Mayo 2026'},{val:'2026-06',label:'Junio 2026'},
-      {val:'2026-07',label:'Julio 2026'},{val:'2026-08',label:'Agosto 2026'},
-      {val:'2026-09',label:'Septiembre 2026'},{val:'2026-10',label:'Octubre 2026'},
-      {val:'2026-11',label:'Noviembre 2026'},{val:'2026-12',label:'Diciembre 2026'},
-    ]
-    const desde = document.getElementById('rango-desde')
-    const hasta = document.getElementById('rango-hasta')
-    desde.innerHTML = ''
-    hasta.innerHTML = ''
-    meses.forEach(m => {
-      desde.innerHTML += `<option value="${m.val}">${m.label}</option>`
-      hasta.innerHTML += `<option value="${m.val}">${m.label}</option>`
-    })
-    desde.value = '2026-01'
-    hasta.value = '2026-05'
-
-    document.getElementById('btn-recalcular').addEventListener('click', calcularAhorroReal)
-    document.getElementById('rango-desde').addEventListener('change', calcularAhorroReal)
-    document.getElementById('rango-hasta').addEventListener('change', calcularAhorroReal)
-  }
-
   async function cargarMetas() {
     if (!window.currentUserId) {
       await new Promise(resolve => {
@@ -799,7 +723,6 @@
       document.getElementById('p-barra').style.width   = '0%'
       document.getElementById('p-llevado').textContent = '$0'
       document.getElementById('p-faltan').textContent  = '$0'
-      document.getElementById('rango-wrap').style.display     = 'none'
       document.getElementById('ahorro-detalle').style.display = 'none'
       document.getElementById('promedio-wrap').style.display  = 'none'
       btnEliminar.style.display = 'none'
@@ -811,7 +734,6 @@
     btnEliminar.style.display = 'block'
 
     const esAhorro = meta.icono === '💰'
-    document.getElementById('rango-wrap').style.display     = esAhorro ? 'flex' : 'none'
     document.getElementById('ahorro-detalle').style.display = esAhorro ? 'flex' : 'none'
 
     if (!esAhorro) {
@@ -849,36 +771,47 @@
 
   async function calcularAhorroReal() {
     if (!metaPrincipalData) return
+    if (!metaPrincipalData.fecha_inicio) {
+      toast('Esta meta no tiene fecha de inicio', 'err')
+      return
+    }
 
-    const desde = document.getElementById('rango-desde').value
-    const hasta = document.getElementById('rango-hasta').value
+    const desde = metaPrincipalData.fecha_inicio.substring(0, 10)
+    const hoy   = new Date().toISOString().split('T')[0]
+    const uid   = window.currentUserId
 
-    if (desde > hasta) { toast('El mes inicio no puede ser mayor al final', 'err'); return }
-
-    const btn = document.getElementById('btn-recalcular')
-    btn.disabled = true
-    btn.textContent = '...'
-
-    const fechaDesde = desde + '-01'
-    const fechaHasta = hasta + '-31'
-
-    const uid = window.currentUserId
-    const [{ data: ingData, error: errI }, { data: gasData, error: errG }] = await Promise.all([
-      dbClient.from('ingresos').select('monto').eq('usuario_id', uid).gte('fecha', fechaDesde).lte('fecha', fechaHasta),
-      dbClient.from('gastos').select('monto').eq('usuario_id', uid).gte('fecha', fechaDesde).lte('fecha', fechaHasta)
+    const [{ data: ingData, error: errI }, { data: gasData, error: errG }, { data: fijData, error: errF }] = await Promise.all([
+      dbClient.from('ingresos').select('monto').eq('usuario_id', uid).gte('fecha', desde).lte('fecha', hoy),
+      dbClient.from('gastos').select('monto').eq('usuario_id', uid).gte('fecha', desde).lte('fecha', hoy),
+      dbClient.from('gastos_fijos').select('monto, fecha_inicio, fecha_fin').eq('usuario_id', uid)
     ])
 
-    btn.disabled = false
-    btn.textContent = '↻'
-
-    if (errI || errG) { toast('Error al leer datos', 'err'); return }
+    if (errI || errG || errF) { toast('Error al leer datos', 'err'); return }
 
     const totalIngresos = ingData.reduce((s, r) => s + parseFloat(r.monto || 0), 0)
     const totalGastos   = gasData.reduce((s, r) => s + parseFloat(r.monto || 0), 0)
-    const ahorroReal    = totalIngresos - totalGastos
+
+    // Gastos fijos: sumar el monto completo por cada mes del rango [desde, hoy]
+    // en el que el gasto fijo estuvo activo (mismo criterio que Estadísticas).
+    const mesDesde = desde.substring(0, 7)
+    const mesHoy   = hoy.substring(0, 7)
+    let totalFijos = 0
+    ;(fijData || []).forEach(f => {
+      const fDesde = f.fecha_inicio ? f.fecha_inicio.substring(0, 7) : null
+      if (!fDesde) return
+      const fHasta = f.fecha_fin ? f.fecha_fin.substring(0, 7) : mesHoy
+      let mes = mesDesde
+      while (mes <= mesHoy) {
+        if (mes >= fDesde && mes <= fHasta) totalFijos += parseFloat(f.monto || 0)
+        const [y, m] = mes.split('-').map(Number)
+        mes = m === 12 ? `${y + 1}-01` : `${y}-${String(m + 1).padStart(2, '0')}`
+      }
+    })
+
+    const ahorroReal = totalIngresos - totalGastos - totalFijos
 
     document.getElementById('d-ingresos').textContent = fmt(totalIngresos)
-    document.getElementById('d-gastos').textContent   = fmt(totalGastos)
+    document.getElementById('d-gastos').textContent   = fmt(totalGastos + totalFijos)
     document.getElementById('d-ahorro').textContent   = fmt(ahorroReal)
 
     const actualPositivo = Math.max(0, ahorroReal)
@@ -937,13 +870,16 @@
   }
 
   async function guardarMeta() {
-    const tipo   = document.getElementById('m-tipo').value
-    const nombre = document.getElementById('m-nombre').value.trim()
-    const monto  = parseFloat(document.getElementById('m-monto').value)
-    const fecha  = document.getElementById('m-fecha').value || null
-    let   icon   = document.getElementById('m-icon').value.trim()
+    const tipo        = document.getElementById('m-tipo').value
+    const nombre       = document.getElementById('m-nombre').value.trim()
+    const monto        = parseFloat(document.getElementById('m-monto').value)
+    const fechaInicio  = document.getElementById('m-fecha-inicio').value
+    const fechaFin     = document.getElementById('m-fecha-fin').value
+    let   icon         = document.getElementById('m-icon').value.trim()
 
     if (!nombre || !monto || monto <= 0) { toast('Completa nombre y monto', 'err'); return }
+    if (!fechaInicio || !fechaFin) { toast('Completa fecha inicio y fecha fin', 'err'); return }
+    if (fechaInicio > fechaFin) { toast('La fecha inicio no puede ser mayor a la fecha fin', 'err'); return }
     if (tipo === 'ahorro' && !icon) icon = '💰'
     if (!icon) icon = '🎯'
 
@@ -954,7 +890,8 @@
     const { error } = await dbClient.from('metas').insert({
       nombre, icono: icon,
       monto_objetivo: monto, monto_actual: 0,
-      fecha_limite: fecha ? fecha + '-01' : null,
+      fecha_inicio: fechaInicio + '-01',
+      fecha_limite: fechaFin + '-01',
       es_principal: false,
       usuario_id: window.currentUserId
     })
@@ -966,7 +903,8 @@
 
     document.getElementById('m-nombre').value = ''
     document.getElementById('m-monto').value  = ''
-    document.getElementById('m-fecha').value  = ''
+    document.getElementById('m-fecha-inicio').value = ''
+    document.getElementById('m-fecha-fin').value  = ''
     document.getElementById('m-icon').value   = ''
 
     cerrarModal()
@@ -1059,7 +997,6 @@
     document.getElementById('resultado').style.display = 'block'
   }
 
-  poblarSelectores()
   cargarMetas()
 </script>
 <script>
