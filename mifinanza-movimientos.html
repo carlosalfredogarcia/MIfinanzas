@@ -80,6 +80,15 @@
   .fld { margin-bottom:12px; }
   .inp.inp-error { border-color: var(--danger); }
   .fld-error { display:none; font-size:11px; color:var(--danger); margin-top:6px; }
+  .cat-lbl-row { display:flex; justify-content:space-between; align-items:center; }
+  .cat-add-btn { color:#58a6ff; cursor:pointer; font-weight:600; font-size:11px; text-transform:uppercase; letter-spacing:0.08em; }
+  .cat-nueva-panel { margin-top:8px; }
+  .cat-nueva-row { display:flex; gap:8px; }
+  .btn-cat-add { flex:1; background:#58a6ff; color:#0d1117; border:none; border-radius:10px; padding:10px; font-family:'DM Sans',sans-serif; font-size:13px; font-weight:700; cursor:pointer; }
+  .btn-cat-cancel { flex:1; background:none; border:1px solid var(--border2); border-radius:10px; padding:10px; color:var(--subtext); font-family:'DM Sans',sans-serif; font-size:13px; cursor:pointer; }
+  .toast { position: fixed; top: 24px; left: 50%; transform: translateX(-50%) translateY(-80px); background: var(--card); border: 1px solid var(--border2); border-radius: 14px; padding: 12px 20px; font-size: 13px; color: var(--text); z-index: 300; transition: transform 0.3s ease; white-space: nowrap; }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+  .toast.ok { border-color: rgba(88,166,255,0.4); color: #58a6ff; }
   .modal-base { position:fixed;inset:0;background:rgba(0,0,0,0.75);backdrop-filter:blur(8px);z-index:200;display:none;align-items:flex-end;justify-content:center; }
   .modal-box { width:390px;background:var(--card);border-radius:28px 28px 0 0;padding:24px 24px 40px;border-top:1px solid var(--border); }
   .modal-handle { width:40px;height:4px;background:rgba(255,255,255,0.08);border-radius:100px;margin:0 auto 20px; }
@@ -185,10 +194,18 @@
     <div class="modal-title">Nuevo gasto</div>
     <div class="fld"><label class="lbl">Fecha</label><input type="date" id="g-fecha" class="inp"></div>
     <div class="fld"><label class="lbl">Descripción</label><input type="text" id="g-descripcion" class="inp" placeholder="Ej: Almuerzo, Gasolina..."></div>
-    <div class="fld"><label class="lbl">Categoría</label>
+    <div class="fld">
+      <label class="lbl cat-lbl-row"><span>Categoría</span><span class="cat-add-btn" onclick="toggleNuevaCat('g-categoria')">+ Nueva</span></label>
       <select id="g-categoria" class="inp">
         <option>🍔 Comida</option><option>🏠 Alquiler</option><option>💳 Crédito</option><option>📱 Línea</option><option>🏋️ Gym</option><option>⛽ Gasolina</option><option>💻 Tecnología</option><option>❤️ Salud</option><option>👕 Ropa</option><option>🎉 Salidas</option><option>🌍 Remesas</option><option>⚠️ Gastos Imprevistos</option><option>📋 Trámite</option><option>🚗 Vehículo</option><option>📦 Otros</option>
       </select>
+      <div class="cat-nueva-panel" id="panel-nueva-cat" style="display:none">
+        <input type="text" id="nueva-cat-input" class="inp" placeholder="Ej: 🚗 Vehículo" style="margin-bottom:8px">
+        <div class="cat-nueva-row">
+          <button type="button" class="btn-cat-add" onclick="guardarNuevaCategoria()">Añadir</button>
+          <button type="button" class="btn-cat-cancel" onclick="cerrarNuevaCat()">Cancelar</button>
+        </div>
+      </div>
     </div>
     <div class="fld" style="margin-bottom:18px"><label class="lbl">Monto</label><input type="number" id="g-monto" class="inp" placeholder="$0.00"></div>
     <button onclick="guardarGasto()" class="btn-ok" style="background:#f85149;color:#0d1117">Guardar gasto</button>
@@ -269,6 +286,8 @@
     <button onclick="cerrarEditar()" class="btn-no">Cancelar</button>
   </div>
 </div>
+
+<div class="toast" id="toast"></div>
 <script>
   window.moneda = localStorage.getItem('moneda') || '$'
   const _color = localStorage.getItem('color'); if (_color) document.documentElement.style.setProperty('--accent', _color)
@@ -580,6 +599,59 @@
       const sel = document.getElementById(id);
       if (sel) sel.innerHTML = cats.map(c => `<option>${c}</option>`).join('');
     });
+  }
+
+  function toast(msg, tipo = 'ok') {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.className = `toast ${tipo} show`;
+    setTimeout(() => { t.className = 'toast'; }, 2500);
+  }
+
+  let nuevaCatTarget = null;
+
+  function toggleNuevaCat(targetId) {
+    nuevaCatTarget = targetId;
+    const panel = document.getElementById('panel-nueva-cat');
+    panel.style.display = 'block';
+    document.getElementById('nueva-cat-input').value = '';
+    document.getElementById('nueva-cat-input').focus();
+  }
+
+  function cerrarNuevaCat() {
+    document.getElementById('panel-nueva-cat').style.display = 'none';
+    document.getElementById('nueva-cat-input').value = '';
+  }
+
+  async function guardarNuevaCategoria() {
+    const nueva = document.getElementById('nueva-cat-input').value.trim();
+    if (!nueva) { alert('Escribe una categoría'); return; }
+    const uid = window.currentUserId;
+    if (!uid) return;
+
+    const { data: perfil } = await dbClient.from('perfil').select('categorias').eq('usuario_id', uid).maybeSingle();
+    const catsStr = perfil?.categorias || CATS_DEFAULT;
+    const cats = catsStr.split(',').map(c => c.trim()).filter(Boolean);
+    if (cats.includes(nueva)) { alert('Esa categoría ya existe'); return; }
+    cats.push(nueva);
+    const nuevaLista = cats.join(',');
+
+    const { data: actualizados, error: errUpdate } = await dbClient.from('perfil')
+      .update({ categorias: nuevaLista }).eq('usuario_id', uid).select('id');
+    let error = errUpdate;
+    if (!errUpdate && (!actualizados || actualizados.length === 0)) {
+      ({ error } = await dbClient.from('perfil').insert({ usuario_id: uid, categorias: nuevaLista }));
+    }
+    if (error) { alert('Error: ' + error.message); return; }
+
+    ['g-categoria', 'f-categoria', 'e-categoria', 'e-cat-fijo'].forEach(id => {
+      const sel = document.getElementById(id);
+      if (sel) sel.innerHTML += `<option>${nueva}</option>`;
+    });
+    if (nuevaCatTarget) document.getElementById(nuevaCatTarget).value = nueva;
+
+    cerrarNuevaCat();
+    toast('✅ Categoría añadida');
   }
 
   cargarMovimientos();
