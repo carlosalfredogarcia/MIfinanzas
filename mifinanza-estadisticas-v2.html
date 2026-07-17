@@ -448,7 +448,7 @@
     const sel = document.getElementById('cat-select')
     sel.innerHTML = ''
     todasCats.forEach(cat => {
-      sel.innerHTML += `<option value="${cat}">${iconsCat[cat] || '📦'} ${cat}</option>`
+      sel.innerHTML += `<option value="${cat}">${cat}</option>`
     })
 
     document.getElementById('loading-wrap').style.display = 'none'
