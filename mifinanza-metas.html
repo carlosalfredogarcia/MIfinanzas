@@ -4,19 +4,21 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>MiFinanza – Metas</title>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #0f0f13;
-    --card: #17171d;
-    --card2: #1e1e27;
-    --accent: #b8f564;
+    --bg: #0d1117;
+    --card: #161b22;
+    --card2: #21262d;
+    --accent: #58a6ff;
     --accent2: #4fd1c5;
-    --danger: #ff6b6b;
+    --danger: #f85149;
+    --success: #3fb950;
     --gold: #f5c842;
-    --text: #f0f0f5;
-    --subtext: #8888a0;
-    --border: rgba(255,255,255,0.06);
+    --text: #e6edf3;
+    --subtext: #8b949e;
+    --border: #21262d;
+    --border2: #30363d;
   }
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -35,23 +37,20 @@
   .header { padding: 52px 24px 20px; animation: fadeUp 0.4s ease both; }
 
   .header-title {
-    font-family: 'Syne', sans-serif;
-    font-size: 24px;
-    font-weight: 800;
-    background: linear-gradient(90deg, #ffffff 30%, var(--accent));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--text);
   }
 
   .header-sub { font-size: 13px; color: var(--subtext); margin-top: 2px; }
 
   .meta-principal {
     margin: 0 24px 16px;
-    background: linear-gradient(135deg, #1a2a14, #0f1a1f);
+    background: #0d2818;
     border-radius: 24px;
     padding: 22px;
-    border: 1px solid rgba(184,245,100,0.2);
+    border: 1px solid #1a4a2a;
     position: relative;
     overflow: hidden;
     animation: fadeUp 0.4s 0.1s ease both;
@@ -63,7 +62,7 @@
     position: absolute;
     top: -40px; right: -40px;
     width: 160px; height: 160px;
-    background: radial-gradient(circle, rgba(184,245,100,0.1) 0%, transparent 70%);
+    background: radial-gradient(circle, rgba(88,166,255,0.08) 0%, transparent 70%);
     pointer-events: none;
   }
 
@@ -71,8 +70,8 @@
     display: inline-flex;
     align-items: center;
     gap: 5px;
-    background: rgba(184,245,100,0.12);
-    border: 1px solid rgba(184,245,100,0.2);
+    background: rgba(88,166,255,0.12);
+    border: 1px solid rgba(88,166,255,0.2);
     border-radius: 100px;
     padding: 4px 10px;
     font-size: 10px;
@@ -90,15 +89,15 @@
   }
 
   .principal-nombre {
-    font-family: 'Syne', sans-serif;
-    font-size: 20px;
-    font-weight: 800;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 18px;
+    font-weight: 700;
     color: var(--text);
   }
 
   .btn-eliminar-principal {
-    background: rgba(255,107,107,0.1);
-    border: 1px solid rgba(255,107,107,0.2);
+    background: rgba(248,81,73,0.1);
+    border: 1px solid rgba(248,81,73,0.2);
     border-radius: 8px;
     padding: 5px 10px;
     font-size: 11px;
@@ -110,42 +109,43 @@
     margin-left: 8px;
   }
 
-  .btn-eliminar-principal:hover { background: rgba(255,107,107,0.2); }
+  .btn-eliminar-principal:hover { background: rgba(248,81,73,0.2); }
 
-  .principal-fecha { font-size: 12px; color: var(--subtext); margin-bottom: 12px; }
+  .principal-fecha { font-size: 12px; color: var(--subtext); margin-bottom: 16px; }
 
-  .principal-percent {
-    font-family: 'Syne', sans-serif;
-    font-size: 28px;
-    font-weight: 800;
-    color: var(--accent);
-    margin-top: 10px;
-  }
+  .llevas-faltan-grid { display: flex; gap: 10px; margin-bottom: 16px; }
+
+  .lf-card { flex: 1; background: rgba(255,255,255,0.04); border-radius: 14px; padding: 14px; }
+  .lf-label { font-size: 10px; color: var(--subtext); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 6px; font-family: 'DM Sans', sans-serif; }
+  .lf-valor { font-family: 'Roboto', sans-serif; font-size: 24px; font-weight: 700; line-height: 1.1; }
+  .lf-llevas .lf-valor { color: #3fb950; }
+  .lf-faltan .lf-valor { color: #c0c0c0; }
+  .lf-sub { font-size: 10px; color: var(--subtext); margin-top: 4px; font-family: 'DM Sans', sans-serif; }
+
+  .principal-progress-row { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; }
 
   .progress-track {
+    flex: 1;
     background: rgba(255,255,255,0.06);
     border-radius: 100px;
-    height: 10px;
+    height: 8px;
     overflow: hidden;
-    margin-bottom: 10px;
   }
 
   .progress-fill {
     height: 100%;
     border-radius: 100px;
-    background: linear-gradient(90deg, var(--accent2), var(--accent));
+    background: var(--accent);
     transition: width 1.2s ease;
   }
 
-  .principal-nums {
-    display: flex;
-    justify-content: space-between;
-    font-size: 12px;
-    color: var(--subtext);
-    margin-bottom: 12px;
+  .principal-percent {
+    font-family: 'Roboto', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--accent);
+    flex-shrink: 0;
   }
-
-  .principal-nums strong { color: var(--text); }
 
   .ahorro-detalle {
     background: rgba(255,255,255,0.04);
@@ -158,24 +158,24 @@
   }
 
   .detalle-item { display: flex; flex-direction: column; gap: 2px; }
-  .detalle-label { color: var(--subtext); font-size: 10px; text-transform: uppercase; letter-spacing: 0.06em; }
-  .detalle-val-green { color: var(--accent);  font-family: 'Syne', sans-serif; font-weight: 700; font-size: 13px; }
-  .detalle-val-red   { color: var(--danger);  font-family: 'Syne', sans-serif; font-weight: 700; font-size: 13px; }
-  .detalle-val-blue  { color: var(--accent2); font-family: 'Syne', sans-serif; font-weight: 700; font-size: 13px; }
+  .detalle-label { color: var(--subtext); font-size: 10px; text-transform: uppercase; letter-spacing: 0.06em; font-family: 'DM Sans', sans-serif; }
+  .detalle-val-green { color: #3fb950;      font-family: 'Roboto', sans-serif; font-weight: 700; font-size: 13px; }
+  .detalle-val-red   { color: #f85149;      font-family: 'Roboto', sans-serif; font-weight: 700; font-size: 13px; }
+  .detalle-val-blue  { color: var(--accent); font-family: 'Roboto', sans-serif; font-weight: 700; font-size: 13px; }
 
-  .promedio-wrap {
-    background: rgba(184,245,100,0.06);
-    border: 1px solid rgba(184,245,100,0.15);
-    border-radius: 12px;
-    padding: 10px 14px;
+  .promedio-banner {
     display: flex;
-    justify-content: space-between;
     align-items: center;
+    gap: 10px;
+    background: rgba(88,166,255,0.1);
+    border: 1px solid rgba(88,166,255,0.25);
+    border-radius: 12px;
+    padding: 12px 14px;
   }
 
-  .promedio-label { font-size: 12px; color: var(--subtext); }
-  .promedio-val   { font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 700; color: var(--accent); }
-  .promedio-sub   { font-size: 10px; color: var(--subtext); text-align: right; margin-top: 2px; }
+  .promedio-icon { font-size: 18px; flex-shrink: 0; }
+  .promedio-text { font-size: 13px; color: var(--text); font-family: 'DM Sans', sans-serif; line-height: 1.4; }
+  .promedio-text strong { color: var(--accent); font-family: 'Roboto', sans-serif; font-weight: 700; }
 
   .seccion-label {
     font-size: 11px;
@@ -212,7 +212,7 @@
   .meta-monto  { text-align: right; }
 
   .meta-monto .llevado {
-    font-family: 'Syne', sans-serif;
+    font-family: 'Roboto', sans-serif;
     font-size: 15px; font-weight: 700; color: var(--accent2);
   }
 
@@ -241,7 +241,7 @@
   }
 
   .btn-accion:hover { background: rgba(255,255,255,0.08); color: var(--text); }
-  .btn-accion.principal-btn:hover { background: rgba(184,245,100,0.1); color: var(--accent); }
+  .btn-accion.principal-btn:hover { background: rgba(88,166,255,0.1); color: var(--accent); }
   .btn-accion.danger-btn:hover { background: rgba(255,107,107,0.1); color: var(--danger); }
   .btn-accion:disabled { opacity: 0.4; cursor: not-allowed; }
 
@@ -257,11 +257,11 @@
 
   .plan-icon {
     width: 38px; height: 38px; border-radius: 12px;
-    background: rgba(184,245,100,0.1);
+    background: rgba(88,166,255,0.1);
     display: flex; align-items: center; justify-content: center; font-size: 18px;
   }
 
-  .plan-title { font-family: 'Syne', sans-serif; font-size: 16px; font-weight: 700; color: var(--text); }
+  .plan-title { font-family: 'DM Sans', sans-serif; font-size: 16px; font-weight: 700; color: var(--text); }
   .plan-sub   { font-size: 12px; color: var(--subtext); }
   .plan-row   { margin-bottom: 14px; }
 
@@ -279,7 +279,7 @@
     transition: border-color 0.2s;
   }
 
-  .plan-input:focus { border-color: rgba(184,245,100,0.3); }
+  .plan-input:focus { border-color: rgba(88,166,255,0.3); }
 
   .slider-wrap { margin-bottom: 14px; }
 
@@ -292,7 +292,7 @@
   .slider-labels { display: flex; justify-content: space-between; margin-bottom: 6px; }
 
   .slider-pill { font-size: 12px; font-weight: 600; padding: 3px 10px; border-radius: 100px; }
-  .pill-ahorro   { background: rgba(184,245,100,0.15); color: var(--accent); }
+  .pill-ahorro   { background: rgba(88,166,255,0.15); color: var(--accent); }
   .pill-disfrute { background: rgba(245,200,66,0.15);  color: var(--gold); }
 
   input[type=range] { width: 100%; accent-color: var(--accent); height: 6px; cursor: pointer; }
@@ -310,15 +310,15 @@
   .resultado-row:last-of-type { border-bottom: none; }
   .resultado-row span   { color: var(--subtext); }
   .resultado-row strong { color: var(--text); font-weight: 600; }
-  .resultado-row .val-green { color: var(--accent); font-family: 'Syne', sans-serif; font-weight: 700; }
-  .resultado-row .val-gold  { color: var(--gold);   font-family: 'Syne', sans-serif; font-weight: 700; }
+  .resultado-row .val-green { color: var(--accent); font-family: 'Roboto', sans-serif; font-weight: 700; }
+  .resultado-row .val-gold  { color: var(--gold);   font-family: 'Roboto', sans-serif; font-weight: 700; }
 
   .plan-mensaje { margin-top: 14px; font-size: 13px; color: var(--accent); line-height: 1.5; text-align: center; font-style: italic; }
 
   .btn-calcular {
-    width: 100%; background: var(--accent); color: #0f0f13;
+    width: 100%; background: var(--accent); color: #0d1117;
     border: none; border-radius: 14px; padding: 13px;
-    font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 700;
+    font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 700;
     cursor: pointer; margin-top: 14px; transition: opacity 0.2s;
   }
   .btn-calcular:hover { opacity: 0.9; }
@@ -342,7 +342,7 @@
   @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
 
   .modal-handle { width: 40px; height: 4px; background: var(--border); border-radius: 100px; margin: 0 auto 20px; }
-  .modal-title  { font-family: 'Syne', sans-serif; font-size: 18px; font-weight: 700; color: var(--text); margin-bottom: 18px; }
+  .modal-title  { font-family: 'DM Sans', sans-serif; font-size: 18px; font-weight: 700; color: var(--text); margin-bottom: 18px; }
 
   .input-group { margin-bottom: 12px; }
 
@@ -359,13 +359,13 @@
     font-family: 'DM Sans', sans-serif; font-size: 15px; outline: none;
   }
 
-  .input-group select option { background: #1e1e27; }
-  .input-group input:focus, .input-group select:focus { border-color: rgba(184,245,100,0.3); }
+  .input-group select option { background: #21262d; }
+  .input-group input:focus, .input-group select:focus { border-color: rgba(88,166,255,0.3); }
 
   .btn-guardar {
-    width: 100%; background: var(--accent); color: #0f0f13;
+    width: 100%; background: var(--accent); color: #0d1117;
     border: none; border-radius: 14px; padding: 14px;
-    font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 700;
+    font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 700;
     cursor: pointer; margin-top: 6px;
   }
   .btn-guardar:disabled { opacity: 0.5; cursor: not-allowed; }
@@ -383,7 +383,7 @@
     left: 50%;
     transform: translateX(-50%);
     background: var(--accent);
-    color: #0f0f13;
+    color: #0d1117;
     width: 58px;
     height: 58px;
     border-radius: 50%;
@@ -393,16 +393,16 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 8px 32px rgba(184,245,100,0.4);
+    box-shadow: 0 8px 32px rgba(88,166,255,0.4);
     transition: transform 0.2s, box-shadow 0.2s;
     z-index: 100;
   }
-  .fab:hover { transform: translateX(-50%) scale(1.08); box-shadow: 0 12px 40px rgba(184,245,100,0.55); }
+  .fab:hover { transform: translateX(-50%) scale(1.08); box-shadow: 0 12px 40px rgba(88,166,255,0.55); }
 
   /* NAVBAR */
   .navbar {
     position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
-    width: 390px; background: rgba(15,15,19,0.96);
+    width: 390px; background: rgba(13,17,23,0.97);
     backdrop-filter: blur(20px); border-top: 1px solid var(--border);
     padding: 10px 0 22px; display: flex; justify-content: space-around;
     align-items: center; z-index: 99;
@@ -434,7 +434,7 @@
     color: var(--text); z-index: 300; transition: transform 0.3s ease; white-space: nowrap;
   }
   .toast.show { transform: translateX(-50%) translateY(0); }
-  .toast.ok   { border-color: rgba(184,245,100,0.3); color: var(--accent); }
+  .toast.ok   { border-color: rgba(88,166,255,0.3); color: var(--accent); }
   .toast.err  { border-color: rgba(255,107,107,0.3); color: var(--danger); }
 
   .loading-metas { text-align: center; color: var(--subtext); font-size: 13px; padding: 20px 0; }
@@ -444,7 +444,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="MiFinanza">
-<meta name="theme-color" content="#b8f564">
+<meta name="theme-color" content="#58a6ff">
 </head>
 <body>
 <div class="phone">
@@ -462,13 +462,23 @@
     </div>
     <div class="principal-fecha" id="p-fecha"></div>
 
-    <div class="principal-percent" id="p-percent">—</div>
-    <div class="progress-track">
-      <div class="progress-fill" id="p-barra" style="width:0%"></div>
+    <div class="llevas-faltan-grid">
+      <div class="lf-card lf-llevas">
+        <div class="lf-label">Llevas</div>
+        <div class="lf-valor" id="p-llevado">$0</div>
+      </div>
+      <div class="lf-card lf-faltan">
+        <div class="lf-label">Faltan</div>
+        <div class="lf-valor" id="p-faltan">$0</div>
+        <div class="lf-sub" id="p-faltan-de"></div>
+      </div>
     </div>
-    <div class="principal-nums">
-      <span>Llevas <strong id="p-llevado">$0</strong></span>
-      <span>Faltan <strong id="p-faltan">$0</strong></span>
+
+    <div class="principal-progress-row">
+      <div class="progress-track">
+        <div class="progress-fill" id="p-barra" style="width:0%"></div>
+      </div>
+      <div class="principal-percent" id="p-percent">—</div>
     </div>
 
     <div class="ahorro-detalle" id="ahorro-detalle" style="display:none">
@@ -486,15 +496,9 @@
       </div>
     </div>
 
-    <div class="promedio-wrap" id="promedio-wrap" style="display:none">
-      <div>
-        <div class="promedio-label">📅 Necesitas ahorrar</div>
-        <div style="font-size:10px; color:var(--subtext); margin-top:2px" id="promedio-meses"></div>
-      </div>
-      <div style="text-align:right">
-        <div class="promedio-val" id="promedio-val">$0/mes</div>
-        <div class="promedio-sub" id="promedio-sub"></div>
-      </div>
+    <div class="promedio-banner" id="promedio-wrap" style="display:none">
+      <div class="promedio-icon">📅</div>
+      <div class="promedio-text" id="promedio-texto"></div>
     </div>
   </div>
 
@@ -723,6 +727,7 @@
       document.getElementById('p-barra').style.width   = '0%'
       document.getElementById('p-llevado').textContent = '$0'
       document.getElementById('p-faltan').textContent  = '$0'
+      document.getElementById('p-faltan-de').textContent = ''
       document.getElementById('ahorro-detalle').style.display = 'none'
       document.getElementById('promedio-wrap').style.display  = 'none'
       btnEliminar.style.display = 'none'
@@ -730,7 +735,7 @@
     }
 
     document.getElementById('p-nombre').textContent = `${meta.icono || '🎯'} ${meta.nombre}`
-    document.getElementById('p-fecha').textContent  = `Meta: ${fmt(meta.monto_objetivo)} · Hasta ${fmtFecha(meta.fecha_limite)}`
+    document.getElementById('p-fecha').textContent  = `${fmtFecha(meta.fecha_inicio)} → ${fmtFecha(meta.fecha_limite)}`
     btnEliminar.style.display = 'block'
 
     const esAhorro = meta.icono === '💰'
@@ -748,21 +753,19 @@
     document.getElementById('p-percent').textContent = `${pct.toFixed(1)}%`
     document.getElementById('p-llevado').textContent = fmt(actual)
     document.getElementById('p-faltan').textContent  = fmt(faltan)
+    document.getElementById('p-faltan-de').textContent = `de ${fmt(objetivo)}`
     setTimeout(() => { document.getElementById('p-barra').style.width = pct + '%' }, 100)
 
     const meses = mesesRestantes(fechaLimite)
     const promedio = document.getElementById('promedio-wrap')
+    const texto = document.getElementById('promedio-texto')
 
     if (meses && faltan > 0) {
       const mensual = faltan / meses
-      document.getElementById('promedio-val').textContent   = fmt(mensual) + '/mes'
-      document.getElementById('promedio-meses').textContent = `Para completar tu meta en ${meses} mes${meses === 1 ? '' : 'es'}`
-      document.getElementById('promedio-sub').textContent   = `Faltan ${fmt(faltan)}`
+      texto.innerHTML = `Necesitas ahorrar <strong>${fmt(mensual)}/mes</strong> para cumplir en ${meses} mes${meses === 1 ? '' : 'es'}`
       promedio.style.display = 'flex'
     } else if (faltan <= 0) {
-      document.getElementById('promedio-val').textContent   = '¡Meta cumplida! 🎉'
-      document.getElementById('promedio-meses').textContent = ''
-      document.getElementById('promedio-sub').textContent   = ''
+      texto.textContent = '¡Meta cumplida! 🎉'
       promedio.style.display = 'flex'
     } else {
       promedio.style.display = 'none'
