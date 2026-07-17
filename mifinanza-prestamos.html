@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MiFinanza – Préstamos</title>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d1117;
+    --card: #161b22;
+    --card2: #21262d;
+    --accent: #58a6ff;
+    --danger: #f85149;
+    --success: #3fb950;
+    --text: #e6edf3;
+    --subtext: #8b949e;
+    --border: #21262d;
+    --border2: #30363d;
+  }
+  html { visibility: hidden }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; min-height: 100vh; display: flex; justify-content: center; }
+  .phone { width: 390px; min-height: 100vh; background: var(--bg); }
+
+  .header { padding: 52px 24px 16px; animation: fadeUp 0.4s ease both; }
+  .header-title { font-family: 'DM Sans', sans-serif; font-size: 26px; font-weight: 700; color: var(--text); }
+  .header-sub { font-size: 13px; color: var(--subtext); margin-top: 2px; }
+
+  .banner-pendiente {
+    margin: 0 24px 16px; background: var(--card); border: 1px solid var(--border);
+    border-radius: 16px; padding: 16px 18px; display: flex; justify-content: space-between; align-items: center;
+    animation: fadeUp 0.4s 0.05s ease both; opacity: 0;
+  }
+  .banner-label { font-size: 11px; color: var(--subtext); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 5px; }
+  .banner-valor { font-family: 'Roboto', sans-serif; font-size: 22px; font-weight: 700; color: var(--accent); }
+  .banner-icon { font-size: 26px; opacity: 0.85; }
+
+  .tabs {
+    margin: 0 24px 16px; display: flex; background: var(--card); border-radius: 14px; padding: 4px; gap: 4px;
+    border: 1px solid var(--border); animation: fadeUp 0.4s 0.1s ease both; opacity: 0;
+  }
+  .tab { flex: 1; text-align: center; padding: 10px 6px; border-radius: 10px; font-size: 13px; font-weight: 600; color: var(--subtext); cursor: pointer; transition: all 0.2s; }
+  .tab.active { background: rgba(88,166,255,0.15); color: var(--accent); }
+
+  .lista-wrap { padding: 0 24px; animation: fadeUp 0.4s 0.15s ease both; opacity: 0; }
+
+  .prestamo-card { background: var(--card); border-radius: 16px; padding: 16px; margin-bottom: 10px; border: 1px solid var(--border); border-left: 3px solid var(--accent); transition: opacity 0.2s; }
+  .prestamo-card.pagado { opacity: 0.45; border-left-color: var(--border2); }
+
+  .prestamo-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; gap: 10px; }
+  .prestamo-nombre { font-size: 15px; font-weight: 600; color: var(--text); }
+  .prestamo-fecha { font-size: 12px; color: var(--subtext); margin-top: 2px; }
+
+  .switch { width: 40px; height: 22px; background: var(--card2); border-radius: 100px; border: 1px solid var(--border2); position: relative; cursor: pointer; transition: background 0.3s, border-color 0.3s; flex-shrink: 0; }
+  .switch.on { background: rgba(88,166,255,0.2); border-color: rgba(88,166,255,0.4); }
+  .switch::after { content: ''; position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; border-radius: 50%; background: var(--subtext); transition: transform 0.3s, background 0.3s; }
+  .switch.on::after { transform: translateX(18px); background: var(--accent); }
+
+  .prestamo-montos { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 12px; color: var(--subtext); }
+  .prestamo-montos strong { font-family: 'Roboto', sans-serif; font-weight: 700; color: var(--text); font-size: 13px; }
+
+  .progress-track { background: var(--card2); border-radius: 100px; height: 8px; overflow: hidden; margin-bottom: 6px; }
+  .progress-fill { height: 100%; border-radius: 100px; background: var(--accent); transition: width 1s ease; }
+  .prestamo-percent { font-family: 'Roboto', sans-serif; font-size: 11px; font-weight: 700; color: var(--accent); text-align: right; margin-bottom: 12px; }
+
+  .prestamo-acciones { display: flex; gap: 8px; padding-top: 10px; border-top: 1px solid var(--border2); }
+  .btn-accion { flex: 1; background: var(--card2); border: none; border-radius: 10px; padding: 8px 4px; font-size: 11px; color: var(--subtext); cursor: pointer; font-family: 'DM Sans', sans-serif; transition: background 0.2s, color 0.2s; }
+  .btn-accion:hover { background: rgba(255,255,255,0.08); color: var(--text); }
+  .btn-accion.danger-btn:hover { background: rgba(248,81,73,0.1); color: var(--danger); }
+
+  .historial-wrap { margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border2); display: none; }
+  .historial-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  .historial-table th { text-align: left; color: var(--subtext); font-size: 10px; text-transform: uppercase; letter-spacing: 0.06em; padding-bottom: 8px; font-family: 'DM Sans', sans-serif; font-weight: 500; }
+  .historial-table td { padding: 7px 0; border-top: 1px solid var(--border2); color: var(--text); vertical-align: top; }
+  .historial-table td.monto { font-family: 'Roboto', sans-serif; font-weight: 700; text-align: right; white-space: nowrap; }
+  .historial-empty { color: var(--subtext); font-size: 12px; text-align: center; padding: 10px 0; }
+
+  .fab { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%); background: var(--accent); color: #0d1117; width: 56px; height: 56px; border-radius: 50%; border: none; font-size: 28px; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 32px rgba(88,166,255,0.35); transition: transform 0.2s, box-shadow 0.2s; z-index: 100; }
+  .fab:hover { transform: translateX(-50%) scale(1.08); box-shadow: 0 12px 40px rgba(88,166,255,0.5); }
+
+  .navbar { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 390px; background: rgba(13,17,23,0.97); backdrop-filter: blur(20px); border-top: 1px solid var(--border2); padding: 12px 0 24px; display: flex; justify-content: space-around; align-items: center; z-index: 99; }
+  .nav-item { display: flex; flex-direction: column; align-items: center; gap: 5px; cursor: pointer; opacity: 0.35; transition: opacity 0.2s; flex: 1; }
+  .nav-item.active { opacity: 1; }
+  .nav-icon { font-size: 22px; }
+  .nav-dot { width: 4px; height: 4px; border-radius: 50%; background: var(--accent); }
+
+  .mas-item { display: flex; align-items: center; gap: 14px; padding: 14px 2px; cursor: pointer; border-bottom: 1px solid var(--border2); transition: opacity 0.15s; }
+  .mas-item:last-of-type { border-bottom: none; margin-bottom: 16px; }
+  .mas-item:active { opacity: 0.6; }
+  .mas-icon { width: 42px; height: 42px; border-radius: 13px; background: rgba(88,166,255,0.12); display: flex; align-items: center; justify-content: center; font-size: 19px; flex-shrink: 0; }
+  .mas-label { flex: 1; font-size: 15px; font-weight: 600; color: var(--text); }
+  .mas-arrow { color: #58a6ff; font-size: 18px; }
+
+  .spacer { height: 120px; }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+
+  .inp { width: 100%; background: var(--card2); border: 1px solid var(--border2); border-radius: 12px; padding: 12px 14px; color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 15px; outline: none; transition: border-color 0.15s; }
+  .inp:focus { border-color: var(--accent); }
+  .inp option { background: #21262d; }
+  .lbl { font-size: 11px; color: var(--subtext); text-transform: uppercase; letter-spacing: 0.08em; display: block; margin-bottom: 6px; }
+  .fld { margin-bottom: 12px; }
+  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.75); backdrop-filter: blur(8px); z-index: 200; display: none; align-items: flex-end; justify-content: center; }
+  .modal { width: 390px; background: var(--card); border-radius: 28px 28px 0 0; padding: 24px 24px 40px; border-top: 1px solid var(--border2); }
+  .modal-handle { width: 40px; height: 4px; background: rgba(255,255,255,0.08); border-radius: 100px; margin: 0 auto 20px; }
+  .modal-title { font-family: 'DM Sans', sans-serif; font-size: 18px; font-weight: 700; color: var(--text); margin-bottom: 18px; }
+  .btn-ok { width: 100%; background: var(--accent); color: #0d1117; border: none; border-radius: 14px; padding: 15px; font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 700; cursor: pointer; margin-bottom: 8px; transition: opacity 0.2s; }
+  .btn-ok:hover { opacity: 0.9; }
+  .btn-no { width: 100%; background: none; border: none; color: var(--subtext); font-size: 14px; cursor: pointer; padding: 10px; font-family: 'DM Sans', sans-serif; }
+
+  .loading { text-align: center; color: var(--subtext); font-size: 13px; padding: 20px 0; }
+
+  .toast { position: fixed; top: 24px; left: 50%; transform: translateX(-50%) translateY(-80px); background: var(--card); border: 1px solid var(--border2); border-radius: 14px; padding: 12px 20px; font-size: 13px; color: var(--text); z-index: 300; transition: transform 0.3s ease; white-space: nowrap; }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+  .toast.ok  { border-color: rgba(88,166,255,0.4); color: var(--accent); }
+  .toast.err { border-color: rgba(248,81,73,0.4);  color: var(--danger); }
+</style>
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="/icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="MiFinanza">
+<meta name="theme-color" content="#58a6ff">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="auth.js"></script>
+</head>
+<body>
+<div class="phone">
+
+  <div class="header">
+    <div class="header-title">Préstamos</div>
+    <div class="header-sub">Lo que prestas y lo que debes</div>
+  </div>
+
+  <div class="banner-pendiente">
+    <div>
+      <div class="banner-label" id="banner-label">Total que te deben</div>
+      <div class="banner-valor" id="banner-valor">$0</div>
+    </div>
+    <div class="banner-icon" id="banner-icon">📥</div>
+  </div>
+
+  <div class="tabs">
+    <div class="tab active" id="tab-preste" onclick="setTab('preste')">Me deben</div>
+    <div class="tab" id="tab-debo" onclick="setTab('debo')">Debo</div>
+  </div>
+
+  <div class="lista-wrap">
+    <div id="lista-prestamos"><div class="loading">Cargando...</div></div>
+  </div>
+
+  <div class="spacer"></div>
+</div>
+
+<button class="fab" onclick="abrirModalNuevo()">+</button>
+
+<nav class="navbar">
+  <div class="nav-item" onclick="location.href='inicio.html'">
+    <span class="nav-icon">🏠</span>
+  </div>
+  <div class="nav-item" onclick="location.href='mifinanza-movimientos.html'">
+    <span class="nav-icon">📋</span>
+  </div>
+  <div class="nav-item" onclick="location.href='mifinanza-estadisticas-v2.html'">
+    <span class="nav-icon">📊</span>
+  </div>
+  <div class="nav-item active" onclick="abrirPanelMas()">
+    <span class="nav-icon">···</span>
+    <div class="nav-dot"></div>
+  </div>
+</nav>
+
+<div class="modal-overlay" id="panel-mas">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Más opciones</div>
+    <div class="mas-item" onclick="location.href='mifinanza-metas.html'">
+      <div class="mas-icon">🎯</div>
+      <div class="mas-label">Metas</div>
+      <div class="mas-arrow">›</div>
+    </div>
+    <div class="mas-item" onclick="location.href='mifinanza-fijos.html'">
+      <div class="mas-icon">📌</div>
+      <div class="mas-label">Gastos Fijos</div>
+      <div class="mas-arrow">›</div>
+    </div>
+    <div class="mas-item" onclick="location.href='mifinanza-prestamos.html'">
+      <div class="mas-icon">🤝</div>
+      <div class="mas-label">Préstamos</div>
+      <div class="mas-arrow">›</div>
+    </div>
+    <div class="mas-item" onclick="location.href='mifinanza-perfil.html'">
+      <div class="mas-icon">👤</div>
+      <div class="mas-label">Perfil</div>
+      <div class="mas-arrow">›</div>
+    </div>
+    <button class="btn-no" onclick="cerrarPanelMas()">Cancelar</button>
+  </div>
+</div>
+
+<!-- Modal nuevo préstamo -->
+<div class="modal-overlay" id="modal-nuevo">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Nuevo préstamo</div>
+    <div class="fld"><label class="lbl">Nombre</label><input type="text" id="np-nombre" class="inp" placeholder="Ej: Juan, María..."></div>
+    <div class="fld"><label class="lbl">Tipo</label>
+      <select id="np-tipo" class="inp">
+        <option value="preste">📥 Me deben</option>
+        <option value="debo">📤 Debo</option>
+      </select>
+    </div>
+    <div class="fld"><label class="lbl">Monto total</label><input type="number" id="np-monto" class="inp" placeholder="$0.00"></div>
+    <div class="fld"><label class="lbl">Fecha de inicio</label><input type="date" id="np-fecha" class="inp"></div>
+    <div class="fld" style="margin-bottom:18px"><label class="lbl">Moneda</label>
+      <select id="np-moneda" class="inp">
+        <option value="$">$ — Dólar</option>
+        <option value="€">€ — Euro</option>
+        <option value="Bs">Bs — Bolívar</option>
+      </select>
+    </div>
+    <button class="btn-ok" onclick="guardarPrestamo()">Guardar préstamo</button>
+    <button class="btn-no" onclick="cerrarModalNuevo()">Cancelar</button>
+  </div>
+</div>
+
+<!-- Modal añadir pago -->
+<div class="modal-overlay" id="modal-pago">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Añadir pago</div>
+    <div class="fld"><label class="lbl">Fecha</label><input type="date" id="pago-fecha" class="inp"></div>
+    <div class="fld"><label class="lbl">Descripción</label><input type="text" id="pago-descripcion" class="inp" placeholder="Ej: Abono, Transferencia..."></div>
+    <div class="fld" style="margin-bottom:18px"><label class="lbl">Monto</label><input type="number" id="pago-monto" class="inp" placeholder="$0.00"></div>
+    <button class="btn-ok" onclick="guardarPago()">Guardar pago</button>
+    <button class="btn-no" onclick="cerrarModalPago()">Cancelar</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  window.moneda = localStorage.getItem('moneda') || '$'
+  const _color = localStorage.getItem('color'); if (_color) document.documentElement.style.setProperty('--accent', _color)
+
+  const MESES_ABR = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic']
+
+  let todosPrestamos = []
+  let todosPagos = {}
+  let tabActiva = 'preste'
+  let historialAbierto = null
+  let pagoTargetId = null
+
+  function toast(msg, tipo = 'ok') {
+    const t = document.getElementById('toast')
+    t.textContent = msg
+    t.className = `toast ${tipo} show`
+    setTimeout(() => { t.className = 'toast' }, 2500)
+  }
+
+  function fmtNum(n) {
+    return parseFloat(n || 0).toLocaleString('es-MX', { minimumFractionDigits: 0, maximumFractionDigits: 0 })
+  }
+
+  function fmtFecha(f) {
+    if (!f) return '—'
+    const [anio, mes] = f.substring(0, 7).split('-')
+    return `${MESES_ABR[parseInt(mes, 10) - 1]} ${anio}`
+  }
+
+  function fmtFechaCorta(f) {
+    if (!f) return '—'
+    const [, mes, dia] = f.substring(0, 10).split('-')
+    return `${parseInt(dia, 10)} ${MESES_ABR[parseInt(mes, 10) - 1]}`
+  }
+
+  function pagadoTotal(id) {
+    return (todosPagos[id] || []).reduce((s, p) => s + parseFloat(p.monto || 0), 0)
+  }
+
+  async function cargarPrestamos() {
+    if (!window.currentUserId) {
+      await new Promise(resolve => {
+        const iv = setInterval(() => { if (window.currentUserId) { clearInterval(iv); resolve() } }, 50)
+        setTimeout(() => { clearInterval(iv); resolve() }, 5000)
+      })
+    }
+    if (!window.currentUserId) return
+    const uid = window.currentUserId
+
+    const [{ data: prestamos, error: errP }, { data: pagos, error: errPg }] = await Promise.all([
+      dbClient.from('prestamos').select('*').eq('usuario_id', uid).order('created_at', { ascending: false }),
+      dbClient.from('prestamos_pagos').select('*').eq('usuario_id', uid).order('fecha', { ascending: false })
+    ])
+
+    if (errP || errPg) {
+      document.getElementById('lista-prestamos').innerHTML = '<div class="loading">No se pudieron cargar los préstamos.</div>'
+      return
+    }
+
+    todosPrestamos = prestamos || []
+    todosPagos = {}
+    ;(pagos || []).forEach(p => {
+      if (!todosPagos[p.prestamo_id]) todosPagos[p.prestamo_id] = []
+      todosPagos[p.prestamo_id].push(p)
+    })
+
+    renderPrestamos()
+  }
+
+  function setTab(tab) {
+    tabActiva = tab
+    document.getElementById('tab-preste').classList.toggle('active', tab === 'preste')
+    document.getElementById('tab-debo').classList.toggle('active', tab === 'debo')
+    renderPrestamos()
+  }
+
+  function renderPrestamos() {
+    const lista = todosPrestamos.filter(p => p.tipo === tabActiva)
+    const activos = lista.filter(p => p.activo)
+    const pagados = lista.filter(p => !p.activo)
+    const ordenados = [...activos, ...pagados]
+
+    const totalPendiente = activos.reduce((s, p) => s + Math.max(0, p.monto_total - pagadoTotal(p.id)), 0)
+    document.getElementById('banner-label').textContent = tabActiva === 'preste' ? 'Total que te deben' : 'Total que debes'
+    document.getElementById('banner-valor').textContent = window.moneda + fmtNum(totalPendiente)
+    document.getElementById('banner-icon').textContent  = tabActiva === 'preste' ? '📥' : '📤'
+
+    const wrap = document.getElementById('lista-prestamos')
+    wrap.innerHTML = ''
+
+    if (ordenados.length === 0) {
+      wrap.innerHTML = `<div class="loading">${tabActiva === 'preste' ? 'Nadie te debe nada todavía.' : 'No debes nada todavía.'}</div>`
+      return
+    }
+
+    ordenados.forEach(p => {
+      const pagado    = pagadoTotal(p.id)
+      const pendiente = Math.max(0, p.monto_total - pagado)
+      const pct       = p.monto_total > 0 ? Math.min(100, (pagado / p.monto_total) * 100) : 0
+      const moneda    = p.moneda || '$'
+
+      const card = document.createElement('div')
+      card.className = 'prestamo-card' + (p.activo ? '' : ' pagado')
+      card.innerHTML = `
+        <div class="prestamo-top">
+          <div>
+            <div class="prestamo-nombre">${p.nombre}</div>
+            <div class="prestamo-fecha">Desde ${fmtFecha(p.fecha_inicio)}</div>
+          </div>
+          <div class="switch ${p.activo ? 'on' : ''}" onclick="toggleActivo('${p.id}')"></div>
+        </div>
+        <div class="prestamo-montos">
+          <span>Total: <strong>${moneda}${fmtNum(p.monto_total)}</strong></span>
+          <span>Pendiente: <strong>${moneda}${fmtNum(pendiente)}</strong></span>
+        </div>
+        <div class="progress-track"><div class="progress-fill" style="width:${pct}%"></div></div>
+        <div class="prestamo-percent">${pct.toFixed(0)}%</div>
+        <div class="prestamo-acciones">
+          <button class="btn-accion" onclick="toggleHistorial('${p.id}')">📄 Ver historial</button>
+          <button class="btn-accion" onclick="abrirModalPago('${p.id}')">➕ Añadir pago</button>
+          <button class="btn-accion danger-btn" onclick="eliminarPrestamo('${p.id}')">🗑</button>
+        </div>
+        <div class="historial-wrap" id="historial-${p.id}"></div>
+      `
+      wrap.appendChild(card)
+      if (historialAbierto === p.id) renderHistorial(p.id)
+    })
+  }
+
+  function renderHistorial(id) {
+    const cont = document.getElementById('historial-' + id)
+    if (!cont) return
+    const pagos = (todosPagos[id] || []).slice().sort((a, b) => b.fecha.localeCompare(a.fecha))
+    if (pagos.length === 0) {
+      cont.innerHTML = '<div class="historial-empty">Sin pagos registrados aún.</div>'
+    } else {
+      const prestamo = todosPrestamos.find(pr => pr.id === id)
+      const moneda = prestamo?.moneda || '$'
+      cont.innerHTML = `
+        <table class="historial-table">
+          <thead><tr><th>Fecha</th><th>Descripción</th><th style="text-align:right">Monto</th></tr></thead>
+          <tbody>
+            ${pagos.map(pg => `<tr><td>${fmtFechaCorta(pg.fecha)}</td><td>${pg.descripcion || '—'}</td><td class="monto">${moneda}${fmtNum(pg.monto)}</td></tr>`).join('')}
+          </tbody>
+        </table>
+      `
+    }
+    cont.style.display = 'block'
+  }
+
+  function toggleHistorial(id) {
+    historialAbierto = historialAbierto === id ? null : id
+    renderPrestamos()
+  }
+
+  async function toggleActivo(id) {
+    const p = todosPrestamos.find(pr => pr.id === id)
+    if (!p) return
+    const { error } = await dbClient.from('prestamos').update({ activo: !p.activo }).eq('id', id).eq('usuario_id', window.currentUserId)
+    if (error) { toast('Error al actualizar', 'err'); return }
+    p.activo = !p.activo
+    renderPrestamos()
+  }
+
+  async function eliminarPrestamo(id) {
+    if (!confirm('¿Eliminar este préstamo y todo su historial de pagos?')) return
+    const { error: errPagos } = await dbClient.from('prestamos_pagos').delete().eq('prestamo_id', id).eq('usuario_id', window.currentUserId)
+    if (errPagos) { toast('Error al eliminar pagos', 'err'); return }
+    const { error } = await dbClient.from('prestamos').delete().eq('id', id).eq('usuario_id', window.currentUserId)
+    if (error) { toast('Error al eliminar', 'err'); return }
+    todosPrestamos = todosPrestamos.filter(p => p.id !== id)
+    delete todosPagos[id]
+    if (historialAbierto === id) historialAbierto = null
+    toast('Préstamo eliminado')
+    renderPrestamos()
+  }
+
+  function abrirModalPago(id) {
+    pagoTargetId = id
+    document.getElementById('pago-fecha').value = new Date().toISOString().split('T')[0]
+    document.getElementById('pago-descripcion').value = ''
+    document.getElementById('pago-monto').value = ''
+    document.getElementById('modal-pago').style.display = 'flex'
+  }
+
+  function cerrarModalPago() {
+    document.getElementById('modal-pago').style.display = 'none'
+    pagoTargetId = null
+  }
+
+  async function guardarPago() {
+    if (!pagoTargetId) return
+    const fecha       = document.getElementById('pago-fecha').value
+    const descripcion = document.getElementById('pago-descripcion').value.trim()
+    const monto       = parseFloat(document.getElementById('pago-monto').value)
+
+    if (!fecha || isNaN(monto) || monto <= 0) { alert('Completa fecha y monto'); return }
+
+    const { data, error } = await dbClient.from('prestamos_pagos')
+      .insert([{ prestamo_id: pagoTargetId, usuario_id: window.currentUserId, fecha, descripcion, monto }])
+      .select()
+    if (error) { alert('Error: ' + error.message); return }
+
+    if (!todosPagos[pagoTargetId]) todosPagos[pagoTargetId] = []
+    todosPagos[pagoTargetId].push(data[0])
+    historialAbierto = pagoTargetId
+
+    cerrarModalPago()
+    toast('Pago registrado ✓')
+    renderPrestamos()
+  }
+
+  function abrirModalNuevo() {
+    document.getElementById('np-nombre').value  = ''
+    document.getElementById('np-tipo').value    = tabActiva
+    document.getElementById('np-monto').value   = ''
+    document.getElementById('np-fecha').value   = new Date().toISOString().split('T')[0]
+    document.getElementById('np-moneda').value  = window.moneda
+    document.getElementById('modal-nuevo').style.display = 'flex'
+  }
+
+  function cerrarModalNuevo() {
+    document.getElementById('modal-nuevo').style.display = 'none'
+  }
+
+  async function guardarPrestamo() {
+    const nombre = document.getElementById('np-nombre').value.trim()
+    const tipo   = document.getElementById('np-tipo').value
+    const monto  = parseFloat(document.getElementById('np-monto').value)
+    const fecha  = document.getElementById('np-fecha').value
+    const moneda = document.getElementById('np-moneda').value
+
+    if (!nombre || isNaN(monto) || monto <= 0 || !fecha) { alert('Completa todos los campos'); return }
+
+    const { data, error } = await dbClient.from('prestamos').insert([{
+      nombre, tipo, monto_total: monto, fecha_inicio: fecha, moneda, activo: true, usuario_id: window.currentUserId
+    }]).select()
+    if (error) { alert('Error: ' + error.message); return }
+
+    todosPrestamos.unshift(data[0])
+    todosPagos[data[0].id] = []
+
+    cerrarModalNuevo()
+    toast('Préstamo creado ✓')
+    setTab(tipo)
+  }
+
+  function abrirPanelMas()  { document.getElementById('panel-mas').style.display = 'flex' }
+  function cerrarPanelMas() { document.getElementById('panel-mas').style.display = 'none' }
+  document.getElementById('panel-mas').addEventListener('click', function(e) { if (e.target === this) cerrarPanelMas() })
+  document.getElementById('modal-nuevo').addEventListener('click', function(e) { if (e.target === this) cerrarModalNuevo() })
+  document.getElementById('modal-pago').addEventListener('click', function(e) { if (e.target === this) cerrarModalPago() })
+
+  cargarPrestamos()
+</script>
+<script>
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/sw.js');
+  }
+</script>
+</body>
+</html>
