@@ -219,17 +219,6 @@
   </div>
 </div>
 
-<!-- Modal confirmar eliminar categoría -->
-<div class="modal-overlay" id="modal-confirm-eliminar" style="display:none">
-  <div class="modal">
-    <div class="modal-handle"></div>
-    <div class="modal-title">¿Eliminar categoría?</div>
-    <p style="color:var(--subtext);font-size:14px;line-height:1.6;margin-bottom:20px;">Si eliminas esta categoría, se perderán datos en estadísticas. ¿Deseas continuar?</p>
-    <button class="btn-ok" style="background:var(--danger);color:#fff;margin-bottom:10px;" onclick="confirmarEliminarCatOk()">Sí, eliminar</button>
-    <button class="btn-cancelar" onclick="cancelarEliminarCat()">Cancelar</button>
-  </div>
-</div>
-
 <div class="toast" id="toast"></div>
 <script>
 
@@ -301,7 +290,7 @@
     lista.forEach(cat => {
       const tag = document.createElement('div')
       tag.className = 'cat-tag'
-      tag.innerHTML = `<span class="cat-text">${cat}</span><button class="remove" onclick="confirmarEliminarCat(this.closest('.cat-tag'))">×</button>`
+      tag.innerHTML = `<span class="cat-text">${cat}</span><button class="remove" onclick="eliminarCat(this.closest('.cat-tag'))">×</button>`
       wrap.appendChild(tag)
     })
   }
@@ -310,21 +299,10 @@
     return [...document.querySelectorAll('.cat-tag .cat-text')].map(t => t.textContent.trim())
   }
 
-  let _catTagEliminar = null
-
-  function confirmarEliminarCat(tagEl) {
-    _catTagEliminar = tagEl
-    document.getElementById('modal-confirm-eliminar').style.display = 'flex'
-  }
-
-  function cancelarEliminarCat() {
-    document.getElementById('modal-confirm-eliminar').style.display = 'none'
-    _catTagEliminar = null
-  }
-
-  function confirmarEliminarCatOk() {
-    if (_catTagEliminar) _catTagEliminar.remove()
-    cancelarEliminarCat()
+  function eliminarCat(tagEl) {
+    if (confirm('¿Eliminar esta categoría? Los datos de estadísticas se perderán.')) {
+      tagEl.remove()
+    }
   }
 
   function agregarCat() {
@@ -334,7 +312,7 @@
     const wrap = document.getElementById('cats-wrap')
     const tag  = document.createElement('div')
     tag.className = 'cat-tag'
-    tag.innerHTML = `<span class="cat-text">${emoji} ${nombre}</span><button class="remove" onclick="confirmarEliminarCat(this.closest('.cat-tag'))">×</button>`
+    tag.innerHTML = `<span class="cat-text">${emoji} ${nombre}</span><button class="remove" onclick="eliminarCat(this.closest('.cat-tag'))">×</button>`
     wrap.appendChild(tag)
   }
 
