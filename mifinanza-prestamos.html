@@ -393,7 +393,7 @@
       }))
       .sort((a, b) => {
         if (a.tipo !== b.tipo) return a.tipo === 'prestado' ? -1 : 1
-        return (a.fecha || '').localeCompare(b.fecha || '')
+        return new Date(b.fecha) - new Date(a.fecha)
       })
 
     const totalDevuelto = movimientos.filter(m => m.tipo === 'abono').reduce((s, m) => s + m.monto, 0)
