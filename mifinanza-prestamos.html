@@ -371,7 +371,7 @@
         <div class="historial-wrap" id="historial-${p.id}"></div>
       `
       wrap.appendChild(card)
-      if (historialAbierto === p.id) {
+      if (String(historialAbierto) === String(p.id)) {
         console.log('[historial] renderPrestamos: coincide historialAbierto con card', p.id, '-> llamando renderHistorial')
         renderHistorial(p.id)
       }
@@ -386,7 +386,7 @@
     if (pagos.length === 0) {
       cont.innerHTML = '<div class="historial-empty">Sin pagos registrados aún.</div>'
     } else {
-      const prestamo = todosPrestamos.find(pr => pr.id === id)
+      const prestamo = todosPrestamos.find(pr => String(pr.id) === String(id))
       const moneda = prestamo?.moneda || '$'
       cont.innerHTML = `
         <table class="historial-table">
@@ -401,14 +401,13 @@
   }
 
   function toggleHistorial(id) {
-    console.log('[historial] toggleHistorial clicado con id:', id, '(tipo:', typeof id, ')')
-    historialAbierto = historialAbierto === id ? null : id
-    console.log('[historial] historialAbierto ahora:', historialAbierto)
+    historialAbierto = String(historialAbierto) === String(id) ? null : id
+    console.log('[historial] pagos para id ' + id + ':', todosPagos[id])
     renderPrestamos()
   }
 
   async function toggleActivo(id) {
-    const p = todosPrestamos.find(pr => pr.id === id)
+    const p = todosPrestamos.find(pr => String(pr.id) === String(id))
     if (!p) return
     const { error } = await dbClient.from('prestamos').update({ activo: !p.activo }).eq('id', id).eq('usuario_id', window.currentUserId)
     if (error) { toast('Error al actualizar', 'err'); return }
@@ -422,9 +421,9 @@
     if (errPagos) { toast('Error al eliminar pagos', 'err'); return }
     const { error } = await dbClient.from('prestamos').delete().eq('id', id).eq('usuario_id', window.currentUserId)
     if (error) { toast('Error al eliminar', 'err'); return }
-    todosPrestamos = todosPrestamos.filter(p => p.id !== id)
+    todosPrestamos = todosPrestamos.filter(p => String(p.id) !== String(id))
     delete todosPagos[id]
-    if (historialAbierto === id) historialAbierto = null
+    if (String(historialAbierto) === String(id)) historialAbierto = null
     toast('Préstamo eliminado')
     renderPrestamos()
   }
