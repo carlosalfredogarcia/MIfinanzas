@@ -517,16 +517,7 @@
     todosPagos[pagoTargetId].push(data[0])
 
     if (tipo === 'prestado') {
-      const prestamo = todosPrestamos.find(p => String(p.id) === String(pagoTargetId))
-      if (prestamo) {
-        const nuevoTotal = parseFloat(prestamo.monto_total || 0) + monto
-        const { error: errTotal } = await dbClient.from('prestamos')
-          .update({ monto_total: nuevoTotal })
-          .eq('id', pagoTargetId)
-          .eq('usuario_id', window.currentUserId)
-        if (errTotal) { alert('El movimiento se guardó, pero no se pudo actualizar el total: ' + errTotal.message) }
-        else prestamo.monto_total = nuevoTotal
-      }
+      await ajustarMontoTotal(pagoTargetId, monto)
     }
 
     historialAbierto = pagoTargetId
@@ -552,6 +543,19 @@
     pagoEditando = null
   }
 
+  async function ajustarMontoTotal(prestamoId, diferencia) {
+    if (!diferencia) return
+    const prestamo = todosPrestamos.find(p => String(p.id) === String(prestamoId))
+    if (!prestamo) return
+    const nuevoTotal = Math.max(0, parseFloat(prestamo.monto_total || 0) + diferencia)
+    const { error } = await dbClient.from('prestamos')
+      .update({ monto_total: nuevoTotal })
+      .eq('id', prestamoId)
+      .eq('usuario_id', window.currentUserId)
+    if (error) { toast('El movimiento se guardó, pero no se pudo actualizar el total', 'err'); return }
+    prestamo.monto_total = nuevoTotal
+  }
+
   async function guardarEdicionPago() {
     if (!pagoEditando) return
     const fecha       = document.getElementById('ep-fecha').value
@@ -560,15 +564,23 @@
 
     if (!fecha || isNaN(monto) || monto <= 0) { alert('Completa fecha y monto'); return }
 
+    const lista = todosPagos[pagoEditando.prestamoId] || []
+    const idx = lista.findIndex(p => String(p.id) === String(pagoEditando.id))
+    const pagoAnterior  = idx !== -1 ? lista[idx] : null
+    const montoAnterior = pagoAnterior ? parseFloat(pagoAnterior.monto || 0) : 0
+    const tipoPago      = pagoAnterior ? (pagoAnterior.tipo || 'abono') : 'abono'
+
     const { error } = await dbClient.from('prestamos_pagos')
       .update({ fecha, descripcion, monto })
       .eq('id', pagoEditando.id)
       .eq('usuario_id', window.currentUserId)
     if (error) { alert('Error: ' + error.message); return }
 
-    const lista = todosPagos[pagoEditando.prestamoId] || []
-    const idx = lista.findIndex(p => String(p.id) === String(pagoEditando.id))
     if (idx !== -1) { lista[idx].fecha = fecha; lista[idx].descripcion = descripcion; lista[idx].monto = monto }
+
+    if (tipoPago === 'prestado') {
+      await ajustarMontoTotal(pagoEditando.prestamoId, monto - montoAnterior)
+    }
 
     historialAbierto = pagoEditando.prestamoId
     cerrarModalEditarPago()
@@ -578,11 +590,18 @@
 
   async function eliminarPago(pagoId, prestamoId) {
     if (!confirm('¿Eliminar este movimiento?')) return
+
+    const pagoActual = (todosPagos[prestamoId] || []).find(p => String(p.id) === String(pagoId))
+
     const { error } = await dbClient.from('prestamos_pagos')
       .delete()
       .eq('id', pagoId)
       .eq('usuario_id', window.currentUserId)
     if (error) { toast('Error al eliminar', 'err'); return }
+
+    if (pagoActual && (pagoActual.tipo || 'abono') === 'prestado') {
+      await ajustarMontoTotal(prestamoId, -parseFloat(pagoActual.monto || 0))
+    }
 
     todosPagos[prestamoId] = (todosPagos[prestamoId] || []).filter(p => String(p.id) !== String(pagoId))
     historialAbierto = prestamoId
