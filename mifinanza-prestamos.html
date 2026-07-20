@@ -294,9 +294,13 @@
     ])
 
     if (errP || errPg) {
+      console.log('[prestamos] error al cargar:', errP, errPg)
       document.getElementById('lista-prestamos').innerHTML = '<div class="loading">No se pudieron cargar los préstamos.</div>'
       return
     }
+
+    console.log('[prestamos] prestamos crudos de Supabase:', prestamos)
+    console.log('[prestamos] pagos crudos de Supabase:', pagos)
 
     todosPrestamos = prestamos || []
     todosPagos = {}
@@ -304,6 +308,9 @@
       if (!todosPagos[p.prestamo_id]) todosPagos[p.prestamo_id] = []
       todosPagos[p.prestamo_id].push(p)
     })
+
+    console.log('[prestamos] IDs de prestamos:', todosPrestamos.map(p => p.id))
+    console.log('[prestamos] todosPagos agrupado por prestamo_id:', todosPagos)
 
     renderPrestamos()
   }
@@ -364,12 +371,16 @@
         <div class="historial-wrap" id="historial-${p.id}"></div>
       `
       wrap.appendChild(card)
-      if (historialAbierto === p.id) renderHistorial(p.id)
+      if (historialAbierto === p.id) {
+        console.log('[historial] renderPrestamos: coincide historialAbierto con card', p.id, '-> llamando renderHistorial')
+        renderHistorial(p.id)
+      }
     })
   }
 
   function renderHistorial(id) {
     const cont = document.getElementById('historial-' + id)
+    console.log('[historial] renderHistorial id:', id, '| elemento encontrado:', !!cont, '| todosPagos[id]:', todosPagos[id])
     if (!cont) return
     const pagos = (todosPagos[id] || []).slice().sort((a, b) => b.fecha.localeCompare(a.fecha))
     if (pagos.length === 0) {
@@ -390,7 +401,9 @@
   }
 
   function toggleHistorial(id) {
+    console.log('[historial] toggleHistorial clicado con id:', id, '(tipo:', typeof id, ')')
     historialAbierto = historialAbierto === id ? null : id
+    console.log('[historial] historialAbierto ahora:', historialAbierto)
     renderPrestamos()
   }
 
