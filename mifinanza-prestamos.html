@@ -238,6 +238,12 @@
   <div class="modal">
     <div class="modal-handle"></div>
     <div class="modal-title">Añadir pago</div>
+    <div class="fld"><label class="lbl">Tipo</label>
+      <select id="pago-tipo" class="inp">
+        <option value="abono">↓ Abono</option>
+        <option value="prestado">↑ Préstamo adicional</option>
+      </select>
+    </div>
     <div class="fld"><label class="lbl">Fecha</label><input type="date" id="pago-fecha" class="inp"></div>
     <div class="fld"><label class="lbl">Descripción</label><input type="text" id="pago-descripcion" class="inp" placeholder="Ej: Abono, Transferencia..."></div>
     <div class="fld" style="margin-bottom:18px"><label class="lbl">Monto</label><input type="number" id="pago-monto" class="inp" placeholder="$0.00"></div>
@@ -481,6 +487,7 @@
 
   function abrirModalPago(id) {
     pagoTargetId = id
+    document.getElementById('pago-tipo').value = 'abono'
     document.getElementById('pago-fecha').value = new Date().toISOString().split('T')[0]
     document.getElementById('pago-descripcion').value = ''
     document.getElementById('pago-monto').value = ''
@@ -494,6 +501,7 @@
 
   async function guardarPago() {
     if (!pagoTargetId) return
+    const tipo        = document.getElementById('pago-tipo').value
     const fecha       = document.getElementById('pago-fecha').value
     const descripcion = document.getElementById('pago-descripcion').value.trim()
     const monto       = parseFloat(document.getElementById('pago-monto').value)
@@ -501,16 +509,29 @@
     if (!fecha || isNaN(monto) || monto <= 0) { alert('Completa fecha y monto'); return }
 
     const { data, error } = await dbClient.from('prestamos_pagos')
-      .insert([{ prestamo_id: pagoTargetId, usuario_id: window.currentUserId, fecha, descripcion, monto, tipo: 'abono' }])
+      .insert([{ prestamo_id: pagoTargetId, usuario_id: window.currentUserId, fecha, descripcion, monto, tipo }])
       .select()
     if (error) { alert('Error: ' + error.message); return }
 
     if (!todosPagos[pagoTargetId]) todosPagos[pagoTargetId] = []
     todosPagos[pagoTargetId].push(data[0])
-    historialAbierto = pagoTargetId
 
+    if (tipo === 'prestado') {
+      const prestamo = todosPrestamos.find(p => String(p.id) === String(pagoTargetId))
+      if (prestamo) {
+        const nuevoTotal = parseFloat(prestamo.monto_total || 0) + monto
+        const { error: errTotal } = await dbClient.from('prestamos')
+          .update({ monto_total: nuevoTotal })
+          .eq('id', pagoTargetId)
+          .eq('usuario_id', window.currentUserId)
+        if (errTotal) { alert('El movimiento se guardó, pero no se pudo actualizar el total: ' + errTotal.message) }
+        else prestamo.monto_total = nuevoTotal
+      }
+    }
+
+    historialAbierto = pagoTargetId
     cerrarModalPago()
-    toast('Pago registrado ✓')
+    toast(tipo === 'prestado' ? 'Préstamo adicional registrado ✓' : 'Pago registrado ✓')
     renderPrestamos()
   }
 
