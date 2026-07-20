@@ -281,7 +281,9 @@
   }
 
   function pagadoTotal(id) {
-    return (todosPagos[id] || []).reduce((s, p) => s + parseFloat(p.monto || 0), 0)
+    return (todosPagos[id] || [])
+      .filter(p => (p.tipo || 'abono') === 'abono')
+      .reduce((s, p) => s + parseFloat(p.monto || 0), 0)
   }
 
   async function cargarPrestamos() {
@@ -382,23 +384,23 @@
     if (!prestamo) return
     const moneda = prestamo.moneda || '$'
 
-    const abonos = (todosPagos[id] || []).map(pg => ({
-      fecha: pg.fecha,
-      descripcion: pg.descripcion || 'Abono',
-      monto: parseFloat(pg.monto || 0),
-      tipo: 'abono'
-    }))
+    const movimientos = (todosPagos[id] || [])
+      .map(pg => ({
+        fecha: pg.fecha,
+        descripcion: pg.descripcion || (pg.tipo === 'prestado' ? 'Préstamo' : 'Abono'),
+        monto: parseFloat(pg.monto || 0),
+        tipo: pg.tipo || 'abono'
+      }))
+      .sort((a, b) => (a.fecha || '').localeCompare(b.fecha || ''))
 
-    const inicial = {
-      fecha: prestamo.fecha_inicio,
-      descripcion: 'Préstamo inicial',
-      monto: parseFloat(prestamo.monto_total || 0),
-      tipo: 'prestado'
-    }
-
-    const movimientos = [inicial, ...abonos].sort((a, b) => (a.fecha || '').localeCompare(b.fecha || ''))
-    const totalDevuelto = abonos.reduce((s, m) => s + m.monto, 0)
+    const totalDevuelto = movimientos.filter(m => m.tipo === 'abono').reduce((s, m) => s + m.monto, 0)
     const pendiente = Math.max(0, parseFloat(prestamo.monto_total || 0) - totalDevuelto)
+
+    if (movimientos.length === 0) {
+      cont.innerHTML = '<div class="historial-empty">Sin movimientos registrados aún.</div>'
+      cont.style.display = 'block'
+      return
+    }
 
     cont.innerHTML = `
       <table class="historial-table">
@@ -407,7 +409,7 @@
           ${movimientos.map(m => {
             const esPrestado = m.tipo === 'prestado'
             const clase   = esPrestado ? 'monto-prestado' : 'monto-abono'
-            const etiqueta = esPrestado ? '↑ Prestado' : '↓ Abono'
+            const etiqueta = esPrestado ? '↑ PRESTADO' : '↓ ABONO'
             const signo    = esPrestado ? '+' : '-'
             return `<tr>
               <td>${fmtFechaCorta(m.fecha)}</td>
@@ -475,7 +477,7 @@
     if (!fecha || isNaN(monto) || monto <= 0) { alert('Completa fecha y monto'); return }
 
     const { data, error } = await dbClient.from('prestamos_pagos')
-      .insert([{ prestamo_id: pagoTargetId, usuario_id: window.currentUserId, fecha, descripcion, monto }])
+      .insert([{ prestamo_id: pagoTargetId, usuario_id: window.currentUserId, fecha, descripcion, monto, tipo: 'abono' }])
       .select()
     if (error) { alert('Error: ' + error.message); return }
 
