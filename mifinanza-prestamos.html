@@ -391,7 +391,10 @@
         monto: parseFloat(pg.monto || 0),
         tipo: pg.tipo || 'abono'
       }))
-      .sort((a, b) => (a.fecha || '').localeCompare(b.fecha || ''))
+      .sort((a, b) => {
+        if (a.tipo !== b.tipo) return a.tipo === 'prestado' ? -1 : 1
+        return (a.fecha || '').localeCompare(b.fecha || '')
+      })
 
     const totalDevuelto = movimientos.filter(m => m.tipo === 'abono').reduce((s, m) => s + m.monto, 0)
     const pendiente = Math.max(0, parseFloat(prestamo.monto_total || 0) - totalDevuelto)
