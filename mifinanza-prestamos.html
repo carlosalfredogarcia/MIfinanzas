@@ -78,6 +78,9 @@
   .historial-table td { padding: 7px 0; border-top: 1px solid var(--border2); color: var(--text); vertical-align: top; }
   .historial-table td.monto { font-family: 'Roboto', sans-serif; font-weight: 700; text-align: right; white-space: nowrap; }
   .historial-tag { font-size: 9px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; margin-top: 3px; }
+  .historial-acciones { text-align: right; white-space: nowrap; padding-left: 8px; }
+  .historial-btn { cursor: pointer; font-size: 13px; opacity: 0.75; margin-left: 8px; transition: opacity 0.15s; }
+  .historial-btn:hover { opacity: 1; }
   .historial-empty { color: var(--subtext); font-size: 12px; text-align: center; padding: 10px 0; }
   .historial-footer { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 6px 12px; margin-top: 10px; padding-top: 10px; border-top: 1px dashed var(--border2); font-size: 11px; color: var(--subtext); }
   .historial-footer strong { font-family: 'Roboto', sans-serif; font-weight: 700; }
@@ -243,6 +246,19 @@
   </div>
 </div>
 
+<!-- Modal editar movimiento -->
+<div class="modal-overlay" id="modal-editar-pago">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Editar movimiento</div>
+    <div class="fld"><label class="lbl">Fecha</label><input type="date" id="ep-fecha" class="inp"></div>
+    <div class="fld"><label class="lbl">Descripción</label><input type="text" id="ep-descripcion" class="inp"></div>
+    <div class="fld" style="margin-bottom:18px"><label class="lbl">Monto</label><input type="number" id="ep-monto" class="inp"></div>
+    <button class="btn-ok" onclick="guardarEdicionPago()">Guardar cambios</button>
+    <button class="btn-no" onclick="cerrarModalEditarPago()">Cancelar</button>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -386,6 +402,7 @@
 
     const movimientos = (todosPagos[id] || [])
       .map(pg => ({
+        id: pg.id,
         fecha: pg.fecha,
         descripcion: pg.descripcion || (pg.tipo === 'prestado' ? 'Préstamo' : 'Abono'),
         monto: parseFloat(pg.monto || 0),
@@ -407,7 +424,7 @@
 
     cont.innerHTML = `
       <table class="historial-table">
-        <thead><tr><th>Fecha</th><th>Descripción</th><th style="text-align:right">Monto</th></tr></thead>
+        <thead><tr><th>Fecha</th><th>Descripción</th><th style="text-align:right">Monto</th><th></th></tr></thead>
         <tbody>
           ${movimientos.map(m => {
             const esPrestado = m.tipo === 'prestado'
@@ -418,6 +435,10 @@
               <td>${fmtFechaCorta(m.fecha)}</td>
               <td>${m.descripcion}<div class="historial-tag ${clase}">${etiqueta}</div></td>
               <td class="monto ${clase}">${signo}${moneda}${fmtNum(m.monto)}</td>
+              <td class="historial-acciones">
+                <span class="historial-btn" onclick="abrirModalEditarPago('${m.id}', '${id}')">✏️</span>
+                <span class="historial-btn" onclick="eliminarPago('${m.id}', '${id}')">🗑</span>
+              </td>
             </tr>`
           }).join('')}
         </tbody>
@@ -493,6 +514,61 @@
     renderPrestamos()
   }
 
+  let pagoEditando = null
+
+  function abrirModalEditarPago(pagoId, prestamoId) {
+    const pago = (todosPagos[prestamoId] || []).find(p => String(p.id) === String(pagoId))
+    if (!pago) return
+    pagoEditando = { id: pagoId, prestamoId }
+    document.getElementById('ep-fecha').value = (pago.fecha || '').substring(0, 10)
+    document.getElementById('ep-descripcion').value = pago.descripcion || ''
+    document.getElementById('ep-monto').value = pago.monto
+    document.getElementById('modal-editar-pago').style.display = 'flex'
+  }
+
+  function cerrarModalEditarPago() {
+    document.getElementById('modal-editar-pago').style.display = 'none'
+    pagoEditando = null
+  }
+
+  async function guardarEdicionPago() {
+    if (!pagoEditando) return
+    const fecha       = document.getElementById('ep-fecha').value
+    const descripcion = document.getElementById('ep-descripcion').value.trim()
+    const monto       = parseFloat(document.getElementById('ep-monto').value)
+
+    if (!fecha || isNaN(monto) || monto <= 0) { alert('Completa fecha y monto'); return }
+
+    const { error } = await dbClient.from('prestamos_pagos')
+      .update({ fecha, descripcion, monto })
+      .eq('id', pagoEditando.id)
+      .eq('usuario_id', window.currentUserId)
+    if (error) { alert('Error: ' + error.message); return }
+
+    const lista = todosPagos[pagoEditando.prestamoId] || []
+    const idx = lista.findIndex(p => String(p.id) === String(pagoEditando.id))
+    if (idx !== -1) { lista[idx].fecha = fecha; lista[idx].descripcion = descripcion; lista[idx].monto = monto }
+
+    historialAbierto = pagoEditando.prestamoId
+    cerrarModalEditarPago()
+    toast('Movimiento actualizado ✓')
+    renderPrestamos()
+  }
+
+  async function eliminarPago(pagoId, prestamoId) {
+    if (!confirm('¿Eliminar este movimiento?')) return
+    const { error } = await dbClient.from('prestamos_pagos')
+      .delete()
+      .eq('id', pagoId)
+      .eq('usuario_id', window.currentUserId)
+    if (error) { toast('Error al eliminar', 'err'); return }
+
+    todosPagos[prestamoId] = (todosPagos[prestamoId] || []).filter(p => String(p.id) !== String(pagoId))
+    historialAbierto = prestamoId
+    toast('Movimiento eliminado')
+    renderPrestamos()
+  }
+
   function abrirModalNuevo() {
     document.getElementById('np-nombre').value  = ''
     document.getElementById('np-tipo').value    = tabActiva
@@ -533,6 +609,7 @@
   document.getElementById('panel-mas').addEventListener('click', function(e) { if (e.target === this) cerrarPanelMas() })
   document.getElementById('modal-nuevo').addEventListener('click', function(e) { if (e.target === this) cerrarModalNuevo() })
   document.getElementById('modal-pago').addEventListener('click', function(e) { if (e.target === this) cerrarModalPago() })
+  document.getElementById('modal-editar-pago').addEventListener('click', function(e) { if (e.target === this) cerrarModalEditarPago() })
 
   cargarPrestamos()
 </script>
