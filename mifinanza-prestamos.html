@@ -58,7 +58,10 @@
   .switch.on::after { transform: translateX(18px); background: var(--accent); }
 
   .prestamo-montos { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 12px; color: var(--subtext); }
-  .prestamo-montos strong { font-family: 'Roboto', sans-serif; font-weight: 700; color: var(--text); font-size: 13px; }
+  .prestamo-montos strong { font-family: 'Roboto', sans-serif; font-weight: 700; font-size: 13px; }
+  .monto-prestado  { color: #f85149; }
+  .monto-abono     { color: #3fb950; }
+  .monto-pendiente { color: #e3b341; }
 
   .progress-track { background: var(--card2); border-radius: 100px; height: 8px; overflow: hidden; margin-bottom: 6px; }
   .progress-fill { height: 100%; border-radius: 100px; background: var(--accent); transition: width 1s ease; }
@@ -74,7 +77,10 @@
   .historial-table th { text-align: left; color: var(--subtext); font-size: 10px; text-transform: uppercase; letter-spacing: 0.06em; padding-bottom: 8px; font-family: 'DM Sans', sans-serif; font-weight: 500; }
   .historial-table td { padding: 7px 0; border-top: 1px solid var(--border2); color: var(--text); vertical-align: top; }
   .historial-table td.monto { font-family: 'Roboto', sans-serif; font-weight: 700; text-align: right; white-space: nowrap; }
+  .historial-tag { font-size: 9px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; margin-top: 3px; }
   .historial-empty { color: var(--subtext); font-size: 12px; text-align: center; padding: 10px 0; }
+  .historial-footer { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 6px 12px; margin-top: 10px; padding-top: 10px; border-top: 1px dashed var(--border2); font-size: 11px; color: var(--subtext); }
+  .historial-footer strong { font-family: 'Roboto', sans-serif; font-weight: 700; }
 
   .fab { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%); background: var(--accent); color: #0d1117; width: 56px; height: 56px; border-radius: 50%; border: none; font-size: 28px; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 32px rgba(88,166,255,0.35); transition: transform 0.2s, box-shadow 0.2s; z-index: 100; }
   .fab:hover { transform: translateX(-50%) scale(1.08); box-shadow: 0 12px 40px rgba(88,166,255,0.5); }
@@ -294,13 +300,9 @@
     ])
 
     if (errP || errPg) {
-      console.log('[prestamos] error al cargar:', errP, errPg)
       document.getElementById('lista-prestamos').innerHTML = '<div class="loading">No se pudieron cargar los préstamos.</div>'
       return
     }
-
-    console.log('[prestamos] prestamos crudos de Supabase:', prestamos)
-    console.log('[prestamos] pagos crudos de Supabase:', pagos)
 
     todosPrestamos = prestamos || []
     todosPagos = {}
@@ -308,9 +310,6 @@
       if (!todosPagos[p.prestamo_id]) todosPagos[p.prestamo_id] = []
       todosPagos[p.prestamo_id].push(p)
     })
-
-    console.log('[prestamos] IDs de prestamos:', todosPrestamos.map(p => p.id))
-    console.log('[prestamos] todosPagos agrupado por prestamo_id:', todosPagos)
 
     renderPrestamos()
   }
@@ -329,8 +328,9 @@
     const ordenados = [...activos, ...pagados]
 
     const totalPendiente = activos.reduce((s, p) => s + Math.max(0, p.monto_total - pagadoTotal(p.id)), 0)
+    const monedaBanner   = (activos[0] || lista[0])?.moneda || '$'
     document.getElementById('banner-label').textContent = tabActiva === 'preste' ? 'Total que te deben' : 'Total que debes'
-    document.getElementById('banner-valor').textContent = window.moneda + fmtNum(totalPendiente)
+    document.getElementById('banner-valor').textContent = monedaBanner + fmtNum(totalPendiente)
     document.getElementById('banner-icon').textContent  = tabActiva === 'preste' ? '📥' : '📤'
 
     const wrap = document.getElementById('lista-prestamos')
@@ -358,8 +358,8 @@
           <div class="switch ${p.activo ? 'on' : ''}" onclick="toggleActivo('${p.id}')"></div>
         </div>
         <div class="prestamo-montos">
-          <span>Total: <strong>${moneda}${fmtNum(p.monto_total)}</strong></span>
-          <span>Pendiente: <strong>${moneda}${fmtNum(pendiente)}</strong></span>
+          <span>Total prestado: <strong class="monto-prestado">${moneda}${fmtNum(p.monto_total)}</strong></span>
+          <span>Pendiente: <strong class="monto-pendiente">${moneda}${fmtNum(pendiente)}</strong></span>
         </div>
         <div class="progress-track"><div class="progress-fill" style="width:${pct}%"></div></div>
         <div class="prestamo-percent">${pct.toFixed(0)}%</div>
@@ -371,38 +371,63 @@
         <div class="historial-wrap" id="historial-${p.id}"></div>
       `
       wrap.appendChild(card)
-      if (String(historialAbierto) === String(p.id)) {
-        console.log('[historial] renderPrestamos: coincide historialAbierto con card', p.id, '-> llamando renderHistorial')
-        renderHistorial(p.id)
-      }
+      if (String(historialAbierto) === String(p.id)) renderHistorial(p.id)
     })
   }
 
   function renderHistorial(id) {
     const cont = document.getElementById('historial-' + id)
-    console.log('[historial] renderHistorial id:', id, '| elemento encontrado:', !!cont, '| todosPagos[id]:', todosPagos[id])
     if (!cont) return
-    const pagos = (todosPagos[id] || []).slice().sort((a, b) => b.fecha.localeCompare(a.fecha))
-    if (pagos.length === 0) {
-      cont.innerHTML = '<div class="historial-empty">Sin pagos registrados aún.</div>'
-    } else {
-      const prestamo = todosPrestamos.find(pr => String(pr.id) === String(id))
-      const moneda = prestamo?.moneda || '$'
-      cont.innerHTML = `
-        <table class="historial-table">
-          <thead><tr><th>Fecha</th><th>Descripción</th><th style="text-align:right">Monto</th></tr></thead>
-          <tbody>
-            ${pagos.map(pg => `<tr><td>${fmtFechaCorta(pg.fecha)}</td><td>${pg.descripcion || '—'}</td><td class="monto">${moneda}${fmtNum(pg.monto)}</td></tr>`).join('')}
-          </tbody>
-        </table>
-      `
+    const prestamo = todosPrestamos.find(pr => String(pr.id) === String(id))
+    if (!prestamo) return
+    const moneda = prestamo.moneda || '$'
+
+    const abonos = (todosPagos[id] || []).map(pg => ({
+      fecha: pg.fecha,
+      descripcion: pg.descripcion || 'Abono',
+      monto: parseFloat(pg.monto || 0),
+      tipo: 'abono'
+    }))
+
+    const inicial = {
+      fecha: prestamo.fecha_inicio,
+      descripcion: 'Préstamo inicial',
+      monto: parseFloat(prestamo.monto_total || 0),
+      tipo: 'prestado'
     }
+
+    const movimientos = [inicial, ...abonos].sort((a, b) => (a.fecha || '').localeCompare(b.fecha || ''))
+    const totalDevuelto = abonos.reduce((s, m) => s + m.monto, 0)
+    const pendiente = Math.max(0, parseFloat(prestamo.monto_total || 0) - totalDevuelto)
+
+    cont.innerHTML = `
+      <table class="historial-table">
+        <thead><tr><th>Fecha</th><th>Descripción</th><th style="text-align:right">Monto</th></tr></thead>
+        <tbody>
+          ${movimientos.map(m => {
+            const esPrestado = m.tipo === 'prestado'
+            const clase   = esPrestado ? 'monto-prestado' : 'monto-abono'
+            const etiqueta = esPrestado ? '↑ Prestado' : '↓ Abono'
+            const signo    = esPrestado ? '+' : '-'
+            return `<tr>
+              <td>${fmtFechaCorta(m.fecha)}</td>
+              <td>${m.descripcion}<div class="historial-tag ${clase}">${etiqueta}</div></td>
+              <td class="monto ${clase}">${signo}${moneda}${fmtNum(m.monto)}</td>
+            </tr>`
+          }).join('')}
+        </tbody>
+      </table>
+      <div class="historial-footer">
+        <span>${movimientos.length} movimiento${movimientos.length === 1 ? '' : 's'}</span>
+        <span>Devuelto: <strong class="monto-abono">${moneda}${fmtNum(totalDevuelto)}</strong></span>
+        <span>Pendiente: <strong class="monto-pendiente">${moneda}${fmtNum(pendiente)}</strong></span>
+      </div>
+    `
     cont.style.display = 'block'
   }
 
   function toggleHistorial(id) {
     historialAbierto = String(historialAbierto) === String(id) ? null : id
-    console.log('[historial] pagos para id ' + id + ':', todosPagos[id])
     renderPrestamos()
   }
 
