@@ -694,17 +694,6 @@
     <div class="modal-handle"></div>
     <div class="modal-title">Nuevo movimiento</div>
     <div class="input-group">
-      <label>Tipo</label>
-      <select id="col-tipo">
-        <option value="entrada">↑ Entrada</option>
-        <option value="retirada">↓ Retirada</option>
-      </select>
-    </div>
-    <div class="input-group">
-      <label>Fecha</label>
-      <input type="date" id="col-fecha">
-    </div>
-    <div class="input-group">
       <label>Descripción</label>
       <input type="text" id="col-descripcion" placeholder="Ej: Ahorro mensual, Emergencia...">
     </div>
@@ -1151,8 +1140,6 @@
   }
 
   function abrirModalColchon() {
-    document.getElementById('col-tipo').value = 'entrada'
-    document.getElementById('col-fecha').value = new Date().toISOString().split('T')[0]
     document.getElementById('col-descripcion').value = ''
     document.getElementById('col-monto').value = ''
     document.getElementById('modal-colchon').classList.add('visible')
@@ -1163,15 +1150,14 @@
   }
 
   async function guardarColchon() {
-    const tipo        = document.getElementById('col-tipo').value
-    const fecha       = document.getElementById('col-fecha').value
     const descripcion = document.getElementById('col-descripcion').value.trim()
-    const monto       = parseFloat(document.getElementById('col-monto').value)
+    const monto        = parseFloat(document.getElementById('col-monto').value)
 
-    if (!fecha || isNaN(monto) || monto <= 0) { toast('Completa fecha y monto', 'err'); return }
+    if (isNaN(monto) || monto <= 0) { toast('Completa el monto', 'err'); return }
 
+    const fecha = new Date().toISOString().split('T')[0]
     const { data, error } = await dbClient.from('colchon_movimientos')
-      .insert({ usuario_id: window.currentUserId, fecha, descripcion, monto, tipo, activo: true })
+      .insert({ usuario_id: window.currentUserId, fecha, descripcion, monto, tipo: 'entrada', activo: true })
       .select()
     if (error) { toast('Error: ' + error.message, 'err'); return }
 
