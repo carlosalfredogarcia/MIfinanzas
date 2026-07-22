@@ -376,6 +376,32 @@
     padding: 12px; font-family: 'DM Sans', sans-serif;
   }
 
+  /* COLCHÓN DE AHORRO */
+  .colchon-card { margin: 0 24px 16px; background: var(--card); border-radius: 20px; padding: 20px; border: 1px solid var(--border); text-align: center; animation: fadeUp 0.4s ease both; opacity: 0; }
+  .colchon-label { font-size: 11px; color: var(--subtext); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 8px; }
+  .colchon-total { font-family: 'Roboto', sans-serif; font-size: 30px; font-weight: 700; color: #3fb950; margin-bottom: 14px; }
+  .btn-colchon-add { background: var(--accent); color: #0d1117; border: none; border-radius: 12px; padding: 11px 22px; font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 700; cursor: pointer; transition: opacity 0.2s; }
+  .btn-colchon-add:hover { opacity: 0.9; }
+
+  .colchon-historial-wrap { padding: 0 24px; margin-bottom: 16px; animation: fadeUp 0.4s 0.05s ease both; opacity: 0; }
+  .colchon-table-card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 14px 16px; }
+  .colchon-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  .colchon-table th { text-align: left; color: var(--subtext); font-size: 10px; text-transform: uppercase; letter-spacing: 0.06em; padding-bottom: 8px; font-family: 'DM Sans', sans-serif; font-weight: 500; }
+  .colchon-table td { padding: 8px 0; border-top: 1px solid var(--border2); color: var(--text); vertical-align: top; }
+  .colchon-table td.monto { font-family: 'Roboto', sans-serif; font-weight: 700; text-align: right; white-space: nowrap; }
+  .colchon-tag { font-size: 9px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; margin-top: 3px; }
+  .monto-entrada  { color: #3fb950; }
+  .monto-retirada { color: #f85149; }
+  .colchon-acciones { text-align: right; white-space: nowrap; padding-left: 8px; }
+  .fila-inactiva { opacity: 0.4; }
+  .switch-sm { display: inline-block; width: 28px; height: 16px; background: var(--card2); border-radius: 100px; border: 1px solid var(--border2); position: relative; cursor: pointer; vertical-align: middle; margin-right: 8px; transition: background 0.3s, border-color 0.3s; }
+  .switch-sm.on { background: rgba(88,166,255,0.2); border-color: rgba(88,166,255,0.4); }
+  .switch-sm::after { content: ''; position: absolute; top: 1px; left: 1px; width: 12px; height: 12px; border-radius: 50%; background: var(--subtext); transition: transform 0.3s, background 0.3s; }
+  .switch-sm.on::after { transform: translateX(12px); background: var(--accent); }
+  .colchon-btn { cursor: pointer; font-size: 13px; opacity: 0.75; margin-left: 6px; transition: opacity 0.15s; }
+  .colchon-btn:hover { opacity: 1; }
+  .colchon-empty { color: var(--subtext); font-size: 12px; text-align: center; padding: 10px 0; }
+
   /* FAB: centro, flotando sobre la navbar */
   .fab {
     position: fixed;
@@ -546,6 +572,16 @@
     </div>
   </div>
 
+  <div class="seccion-label" style="margin-top:16px">Mi colchón de ahorro</div>
+  <div class="colchon-card">
+    <div class="colchon-label">Total acumulado</div>
+    <div class="colchon-total" id="colchon-total">$0</div>
+    <button class="btn-colchon-add" onclick="abrirModalColchon()">+ Añadir</button>
+  </div>
+  <div class="colchon-historial-wrap">
+    <div class="colchon-table-card" id="colchon-historial"><div class="colchon-empty">Cargando...</div></div>
+  </div>
+
   <div class="spacer"></div>
 </div>
 
@@ -649,6 +685,64 @@
     </div>
     <button class="btn-guardar" onclick="confirmarAbono()">Confirmar abono</button>
     <button class="btn-cancelar" onclick="cerrarModalAbonar()">Cancelar</button>
+  </div>
+</div>
+
+<!-- Modal nuevo movimiento del colchón -->
+<div class="modal-overlay" id="modal-colchon">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Nuevo movimiento</div>
+    <div class="input-group">
+      <label>Tipo</label>
+      <select id="col-tipo">
+        <option value="entrada">↑ Entrada</option>
+        <option value="retirada">↓ Retirada</option>
+      </select>
+    </div>
+    <div class="input-group">
+      <label>Fecha</label>
+      <input type="date" id="col-fecha">
+    </div>
+    <div class="input-group">
+      <label>Descripción</label>
+      <input type="text" id="col-descripcion" placeholder="Ej: Ahorro mensual, Emergencia...">
+    </div>
+    <div class="input-group">
+      <label>Monto</label>
+      <input type="number" id="col-monto" placeholder="$0.00">
+    </div>
+    <button class="btn-guardar" onclick="guardarColchon()">Guardar</button>
+    <button class="btn-cancelar" onclick="cerrarModalColchon()">Cancelar</button>
+  </div>
+</div>
+
+<!-- Modal editar movimiento del colchón -->
+<div class="modal-overlay" id="modal-editar-colchon">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Editar movimiento</div>
+    <div class="input-group">
+      <label>Tipo</label>
+      <select id="ecol-tipo">
+        <option value="entrada">↑ Entrada</option>
+        <option value="retirada">↓ Retirada</option>
+      </select>
+    </div>
+    <div class="input-group">
+      <label>Fecha</label>
+      <input type="date" id="ecol-fecha">
+    </div>
+    <div class="input-group">
+      <label>Descripción</label>
+      <input type="text" id="ecol-descripcion">
+    </div>
+    <div class="input-group">
+      <label>Monto</label>
+      <input type="number" id="ecol-monto">
+    </div>
+    <button class="btn-guardar" onclick="guardarEdicionColchon()">Guardar cambios</button>
+    <button class="btn-cancelar" onclick="cerrarModalEditarColchon()">Cancelar</button>
   </div>
 </div>
 
@@ -967,6 +1061,168 @@
 
   document.getElementById('modal').addEventListener('click', function(e) { if (e.target === this) cerrarModal() })
   document.getElementById('modal-abonar').addEventListener('click', function(e) { if (e.target === this) cerrarModalAbonar() })
+
+  const MESES_ABR_COLCHON = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic']
+
+  function fmtDiaColchon(f) {
+    if (!f) return '—'
+    const [, mes, dia] = f.substring(0, 10).split('-')
+    return `${parseInt(dia, 10)} ${MESES_ABR_COLCHON[parseInt(mes, 10) - 1]}`
+  }
+
+  let colchonMovimientos = []
+  let colchonEditando = null
+
+  async function cargarColchon() {
+    if (!window.currentUserId) {
+      await new Promise(resolve => {
+        const iv = setInterval(() => { if (window.currentUserId) { clearInterval(iv); resolve() } }, 50)
+        setTimeout(() => { clearInterval(iv); resolve() }, 5000)
+      })
+    }
+    if (!window.currentUserId) return
+    const { data, error } = await dbClient.from('colchon_movimientos')
+      .select('*')
+      .eq('usuario_id', window.currentUserId)
+      .order('fecha', { ascending: false })
+    if (error) {
+      document.getElementById('colchon-historial').innerHTML = '<div class="colchon-empty">No se pudo cargar.</div>'
+      return
+    }
+    colchonMovimientos = data || []
+    renderColchon()
+  }
+
+  function renderColchon() {
+    const activos = colchonMovimientos.filter(m => m.activo)
+    const total = activos.reduce((s, m) => s + (m.tipo === 'entrada' ? parseFloat(m.monto || 0) : -parseFloat(m.monto || 0)), 0)
+    document.getElementById('colchon-total').textContent = fmt(total)
+
+    const wrap = document.getElementById('colchon-historial')
+    if (colchonMovimientos.length === 0) {
+      wrap.innerHTML = '<div class="colchon-empty">Sin movimientos todavía.</div>'
+      return
+    }
+
+    wrap.innerHTML = `
+      <table class="colchon-table">
+        <thead><tr><th>Fecha</th><th>Descripción</th><th style="text-align:right">Monto</th><th></th></tr></thead>
+        <tbody>
+          ${colchonMovimientos.map(m => {
+            const esEntrada = m.tipo === 'entrada'
+            const clase    = esEntrada ? 'monto-entrada' : 'monto-retirada'
+            const etiqueta = esEntrada ? '↑ Entrada' : '↓ Retirada'
+            const signo    = esEntrada ? '+' : '-'
+            return `<tr class="${m.activo ? '' : 'fila-inactiva'}">
+              <td>${fmtDiaColchon(m.fecha)}</td>
+              <td>${m.descripcion || '—'}<div class="colchon-tag ${clase}">${etiqueta}</div></td>
+              <td class="monto ${clase}">${signo}${fmt(m.monto)}</td>
+              <td class="colchon-acciones">
+                <span class="switch-sm ${m.activo ? 'on' : ''}" onclick="toggleColchonActivo('${m.id}')"></span>
+                <span class="colchon-btn" onclick="abrirModalEditarColchon('${m.id}')">✏️</span>
+                <span class="colchon-btn" onclick="eliminarColchon('${m.id}')">🗑</span>
+              </td>
+            </tr>`
+          }).join('')}
+        </tbody>
+      </table>
+    `
+  }
+
+  async function toggleColchonActivo(id) {
+    const m = colchonMovimientos.find(x => String(x.id) === String(id))
+    if (!m) return
+    const { error } = await dbClient.from('colchon_movimientos')
+      .update({ activo: !m.activo })
+      .eq('id', id).eq('usuario_id', window.currentUserId)
+    if (error) { toast('Error al actualizar', 'err'); return }
+    m.activo = !m.activo
+    renderColchon()
+  }
+
+  async function eliminarColchon(id) {
+    if (!confirm('¿Eliminar este movimiento?')) return
+    const { error } = await dbClient.from('colchon_movimientos')
+      .delete().eq('id', id).eq('usuario_id', window.currentUserId)
+    if (error) { toast('Error al eliminar', 'err'); return }
+    colchonMovimientos = colchonMovimientos.filter(x => String(x.id) !== String(id))
+    toast('Movimiento eliminado')
+    renderColchon()
+  }
+
+  function abrirModalColchon() {
+    document.getElementById('col-tipo').value = 'entrada'
+    document.getElementById('col-fecha').value = new Date().toISOString().split('T')[0]
+    document.getElementById('col-descripcion').value = ''
+    document.getElementById('col-monto').value = ''
+    document.getElementById('modal-colchon').classList.add('visible')
+  }
+
+  function cerrarModalColchon() {
+    document.getElementById('modal-colchon').classList.remove('visible')
+  }
+
+  async function guardarColchon() {
+    const tipo        = document.getElementById('col-tipo').value
+    const fecha       = document.getElementById('col-fecha').value
+    const descripcion = document.getElementById('col-descripcion').value.trim()
+    const monto       = parseFloat(document.getElementById('col-monto').value)
+
+    if (!fecha || isNaN(monto) || monto <= 0) { toast('Completa fecha y monto', 'err'); return }
+
+    const { data, error } = await dbClient.from('colchon_movimientos')
+      .insert({ usuario_id: window.currentUserId, fecha, descripcion, monto, tipo, activo: true })
+      .select()
+    if (error) { toast('Error: ' + error.message, 'err'); return }
+
+    colchonMovimientos.unshift(data[0])
+    cerrarModalColchon()
+    toast('Movimiento guardado ✓')
+    renderColchon()
+  }
+
+  function abrirModalEditarColchon(id) {
+    const m = colchonMovimientos.find(x => String(x.id) === String(id))
+    if (!m) return
+    colchonEditando = id
+    document.getElementById('ecol-tipo').value = m.tipo
+    document.getElementById('ecol-fecha').value = (m.fecha || '').substring(0, 10)
+    document.getElementById('ecol-descripcion').value = m.descripcion || ''
+    document.getElementById('ecol-monto').value = m.monto
+    document.getElementById('modal-editar-colchon').classList.add('visible')
+  }
+
+  function cerrarModalEditarColchon() {
+    document.getElementById('modal-editar-colchon').classList.remove('visible')
+    colchonEditando = null
+  }
+
+  async function guardarEdicionColchon() {
+    if (!colchonEditando) return
+    const tipo        = document.getElementById('ecol-tipo').value
+    const fecha       = document.getElementById('ecol-fecha').value
+    const descripcion = document.getElementById('ecol-descripcion').value.trim()
+    const monto       = parseFloat(document.getElementById('ecol-monto').value)
+
+    if (!fecha || isNaN(monto) || monto <= 0) { toast('Completa fecha y monto', 'err'); return }
+
+    const { error } = await dbClient.from('colchon_movimientos')
+      .update({ tipo, fecha, descripcion, monto })
+      .eq('id', colchonEditando).eq('usuario_id', window.currentUserId)
+    if (error) { toast('Error: ' + error.message, 'err'); return }
+
+    const m = colchonMovimientos.find(x => String(x.id) === String(colchonEditando))
+    if (m) { m.tipo = tipo; m.fecha = fecha; m.descripcion = descripcion; m.monto = monto }
+
+    cerrarModalEditarColchon()
+    toast('Movimiento actualizado ✓')
+    renderColchon()
+  }
+
+  document.getElementById('modal-colchon').addEventListener('click', function(e) { if (e.target === this) cerrarModalColchon() })
+  document.getElementById('modal-editar-colchon').addEventListener('click', function(e) { if (e.target === this) cerrarModalEditarColchon() })
+
+  cargarColchon()
 
   function abrirPanelMas()  { document.getElementById('panel-mas').classList.add('visible') }
   function cerrarPanelMas() { document.getElementById('panel-mas').classList.remove('visible') }
