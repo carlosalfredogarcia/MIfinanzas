@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MiFinanza – Viajes</title>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d1117;
+    --card: #161b22;
+    --card2: #21262d;
+    --accent: #58a6ff;
+    --danger: #f85149;
+    --success: #3fb950;
+    --text: #e6edf3;
+    --subtext: #8b949e;
+    --border: #21262d;
+    --border2: #30363d;
+  }
+  html { visibility: hidden }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; min-height: 100vh; display: flex; justify-content: center; }
+  .phone { width: 390px; min-height: 100vh; background: var(--bg); }
+
+  .header { padding: 52px 24px 16px; animation: fadeUp 0.4s ease both; }
+  .header-title { font-family: 'DM Sans', sans-serif; font-size: 26px; font-weight: 700; color: var(--text); }
+  .header-sub { font-size: 13px; color: var(--subtext); margin-top: 2px; }
+
+  .lista-wrap { padding: 0 24px; animation: fadeUp 0.4s 0.1s ease both; opacity: 0; }
+  .loading { text-align: center; color: var(--subtext); font-size: 13px; padding: 30px 0; }
+
+  .viaje-card { display: flex; align-items: center; gap: 12px; background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 14px; margin-bottom: 10px; cursor: pointer; transition: opacity 0.15s; }
+  .viaje-card:active { opacity: 0.7; }
+  .viaje-icon { width: 42px; height: 42px; border-radius: 13px; background: var(--card2); display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
+  .viaje-info { flex: 1; min-width: 0; }
+  .viaje-nombre { font-size: 15px; font-weight: 600; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .viaje-fecha { font-size: 12px; color: var(--subtext); margin-top: 2px; }
+  .viaje-balance { font-family: 'Roboto', sans-serif; font-size: 14px; font-weight: 700; flex-shrink: 0; }
+  .viaje-balance.positivo { color: #3fb950; }
+  .viaje-balance.negativo { color: #f85149; }
+
+  .fab { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%); background: var(--accent); color: #0d1117; width: 56px; height: 56px; border-radius: 50%; border: none; font-size: 28px; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 32px rgba(88,166,255,0.35); transition: transform 0.2s, box-shadow 0.2s; z-index: 100; }
+  .fab:hover { transform: translateX(-50%) scale(1.08); box-shadow: 0 12px 40px rgba(88,166,255,0.5); }
+
+  /* VISTA DETALLE */
+  .detalle-header { padding: 52px 24px 16px; animation: fadeUp 0.4s ease both; }
+  .detalle-top-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+  .btn-volver { font-size: 13px; color: var(--accent); cursor: pointer; font-weight: 600; }
+  .btn-eliminar-viaje { font-size: 11px; color: var(--danger); cursor: pointer; background: rgba(248,81,73,0.1); border: 1px solid rgba(248,81,73,0.2); border-radius: 8px; padding: 6px 10px; font-family: 'DM Sans', sans-serif; }
+  .detalle-nombre { font-family: 'DM Sans', sans-serif; font-size: 22px; font-weight: 700; color: var(--text); }
+  .detalle-fecha { font-size: 12px; color: var(--subtext); margin-top: 2px; }
+
+  .resumen-row { margin: 0 24px 16px; display: flex; gap: 10px; animation: fadeUp 0.4s 0.05s ease both; opacity: 0; }
+  .res-item { flex: 1; background: var(--card); border-radius: 16px; padding: 13px 10px; border: 1px solid var(--border); text-align: center; }
+  .res-label { font-size: 9px; color: var(--subtext); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 5px; }
+  .res-value { font-family: 'Roboto', sans-serif; font-size: 15px; font-weight: 700; }
+
+  .tabs { margin: 0 24px 16px; display: flex; background: var(--card); border-radius: 14px; padding: 4px; gap: 4px; border: 1px solid var(--border); animation: fadeUp 0.4s 0.1s ease both; opacity: 0; }
+  .tab { flex: 1; text-align: center; padding: 10px 6px; border-radius: 10px; font-size: 12px; font-weight: 600; color: var(--subtext); cursor: pointer; transition: all 0.2s; }
+  .tab.active { background: rgba(88,166,255,0.15); color: var(--accent); }
+
+  .item-row { display: flex; align-items: center; gap: 10px; background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 12px 14px; margin-bottom: 8px; }
+  .item-desc { flex: 1; font-size: 14px; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .item-monto { font-family: 'Roboto', sans-serif; font-size: 14px; font-weight: 700; color: var(--text); flex-shrink: 0; }
+  .item-acciones { display: flex; gap: 8px; flex-shrink: 0; }
+  .item-btn { cursor: pointer; font-size: 14px; opacity: 0.75; transition: opacity 0.15s; }
+  .item-btn:hover { opacity: 1; }
+
+  .btn-add-item { width: 100%; background: var(--card2); border: 1px dashed var(--border2); border-radius: 14px; padding: 12px; color: var(--accent); font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 600; cursor: pointer; margin-top: 4px; }
+  .btn-add-item:hover { border-color: var(--accent); }
+
+  .navbar { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 390px; background: rgba(13,17,23,0.97); backdrop-filter: blur(20px); border-top: 1px solid var(--border2); padding: 12px 0 24px; display: flex; justify-content: space-around; align-items: center; z-index: 99; }
+  .nav-item { display: flex; flex-direction: column; align-items: center; gap: 5px; cursor: pointer; opacity: 0.35; transition: opacity 0.2s; flex: 1; }
+  .nav-item.active { opacity: 1; }
+  .nav-icon { font-size: 22px; }
+  .nav-dot { width: 4px; height: 4px; border-radius: 50%; background: var(--accent); }
+
+  .mas-item { display: flex; align-items: center; gap: 14px; padding: 14px 2px; cursor: pointer; border-bottom: 1px solid var(--border2); transition: opacity 0.15s; }
+  .mas-item:last-of-type { border-bottom: none; margin-bottom: 16px; }
+  .mas-item:active { opacity: 0.6; }
+  .mas-icon { width: 42px; height: 42px; border-radius: 13px; background: rgba(88,166,255,0.12); display: flex; align-items: center; justify-content: center; font-size: 19px; flex-shrink: 0; }
+  .mas-label { flex: 1; font-size: 15px; font-weight: 600; color: var(--text); }
+  .mas-arrow { color: #58a6ff; font-size: 18px; }
+
+  .spacer { height: 120px; }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+
+  .inp { width: 100%; background: var(--card2); border: 1px solid var(--border2); border-radius: 12px; padding: 12px 14px; color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 15px; outline: none; transition: border-color 0.15s; }
+  .inp:focus { border-color: var(--accent); }
+  .lbl { font-size: 11px; color: var(--subtext); text-transform: uppercase; letter-spacing: 0.08em; display: block; margin-bottom: 6px; }
+  .fld { margin-bottom: 12px; }
+  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.75); backdrop-filter: blur(8px); z-index: 200; display: none; align-items: flex-end; justify-content: center; }
+  .modal { width: 390px; background: var(--card); border-radius: 28px 28px 0 0; padding: 24px 24px 40px; border-top: 1px solid var(--border2); }
+  .modal-handle { width: 40px; height: 4px; background: rgba(255,255,255,0.08); border-radius: 100px; margin: 0 auto 20px; }
+  .modal-title { font-family: 'DM Sans', sans-serif; font-size: 18px; font-weight: 700; color: var(--text); margin-bottom: 18px; }
+  .btn-ok { width: 100%; background: var(--accent); color: #0d1117; border: none; border-radius: 14px; padding: 15px; font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 700; cursor: pointer; margin-bottom: 8px; transition: opacity 0.2s; }
+  .btn-ok:hover { opacity: 0.9; }
+  .btn-no { width: 100%; background: none; border: none; color: var(--subtext); font-size: 14px; cursor: pointer; padding: 10px; font-family: 'DM Sans', sans-serif; }
+
+  .toast { position: fixed; top: 24px; left: 50%; transform: translateX(-50%) translateY(-80px); background: var(--card); border: 1px solid var(--border2); border-radius: 14px; padding: 12px 20px; font-size: 13px; color: var(--text); z-index: 300; transition: transform 0.3s ease; white-space: nowrap; }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+  .toast.ok  { border-color: rgba(88,166,255,0.4); color: var(--accent); }
+  .toast.err { border-color: rgba(248,81,73,0.4);  color: var(--danger); }
+</style>
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="/icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="MiFinanza">
+<meta name="theme-color" content="#58a6ff">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="auth.js"></script>
+</head>
+<body>
+<div class="phone">
+
+  <div id="vista-lista">
+    <div class="header">
+      <div class="header-title">Viajes</div>
+      <div class="header-sub">Planifica y controla tus viajes</div>
+    </div>
+    <div class="lista-wrap">
+      <div id="lista-viajes"><div class="loading">Cargando...</div></div>
+    </div>
+    <div class="spacer"></div>
+  </div>
+
+  <div id="vista-detalle" style="display:none">
+    <div class="detalle-header">
+      <div class="detalle-top-row">
+        <span class="btn-volver" onclick="volverALista()">‹ Viajes</span>
+        <span class="btn-eliminar-viaje" onclick="eliminarViaje()">🗑 Eliminar viaje</span>
+      </div>
+      <div class="detalle-nombre" id="det-nombre">—</div>
+      <div class="detalle-fecha" id="det-fecha"></div>
+    </div>
+
+    <div class="resumen-row">
+      <div class="res-item">
+        <div class="res-label">Ingresos</div>
+        <div class="res-value" style="color:#3fb950" id="det-ingresos">$0</div>
+      </div>
+      <div class="res-item">
+        <div class="res-label">Gastos</div>
+        <div class="res-value" style="color:#f85149" id="det-gastos">$0</div>
+      </div>
+      <div class="res-item">
+        <div class="res-label">Balance</div>
+        <div class="res-value" id="det-balance">$0</div>
+      </div>
+    </div>
+
+    <div class="tabs">
+      <div class="tab active" id="tab-gastos" onclick="setTabViaje('gasto')">💸 Gastos estimados</div>
+      <div class="tab" id="tab-ingresos" onclick="setTabViaje('ingreso')">💰 Ingresos estimados</div>
+    </div>
+
+    <div class="lista-wrap">
+      <div id="lista-items"></div>
+      <button class="btn-add-item" onclick="abrirModalItem()">+ Añadir</button>
+    </div>
+
+    <div class="spacer"></div>
+  </div>
+</div>
+
+<button class="fab" id="fab-viaje" onclick="abrirModalViaje()">+</button>
+
+<nav class="navbar">
+  <div class="nav-item" onclick="location.href='inicio.html'">
+    <span class="nav-icon">🏠</span>
+  </div>
+  <div class="nav-item" onclick="location.href='mifinanza-movimientos.html'">
+    <span class="nav-icon">📋</span>
+  </div>
+  <div class="nav-item" onclick="location.href='mifinanza-estadisticas-v2.html'">
+    <span class="nav-icon">📊</span>
+  </div>
+  <div class="nav-item active" onclick="abrirPanelMas()">
+    <span class="nav-icon">···</span>
+    <div class="nav-dot"></div>
+  </div>
+</nav>
+
+<div class="modal-overlay" id="panel-mas">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Más opciones</div>
+    <div class="mas-item" onclick="location.href='mifinanza-metas.html'">
+      <div class="mas-icon">🎯</div>
+      <div class="mas-label">Metas</div>
+      <div class="mas-arrow">›</div>
+    </div>
+    <div class="mas-item" onclick="location.href='mifinanza-fijos.html'">
+      <div class="mas-icon">📌</div>
+      <div class="mas-label">Gastos Fijos</div>
+      <div class="mas-arrow">›</div>
+    </div>
+    <div class="mas-item" onclick="location.href='mifinanza-prestamos.html'">
+      <div class="mas-icon">🤝</div>
+      <div class="mas-label">Préstamos</div>
+      <div class="mas-arrow">›</div>
+    </div>
+    <div class="mas-item" onclick="location.href='mifinanza-viajes.html'">
+      <div class="mas-icon">✈️</div>
+      <div class="mas-label">Viajes</div>
+      <div class="mas-arrow">›</div>
+    </div>
+    <div class="mas-item" onclick="location.href='mifinanza-perfil.html'">
+      <div class="mas-icon">👤</div>
+      <div class="mas-label">Perfil</div>
+      <div class="mas-arrow">›</div>
+    </div>
+    <button class="btn-no" onclick="cerrarPanelMas()">Cancelar</button>
+  </div>
+</div>
+
+<!-- Modal nuevo viaje -->
+<div class="modal-overlay" id="modal-viaje">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Nuevo viaje</div>
+    <div class="fld"><label class="lbl">Nombre</label><input type="text" id="v-nombre" class="inp" placeholder="Ej: Playa, Europa..."></div>
+    <div class="fld"><label class="lbl">Emoji</label><input type="text" id="v-emoji" class="inp" placeholder="Ej: ✈️ 🏖️ 🗻" maxlength="2"></div>
+    <div class="fld" style="margin-bottom:18px"><label class="lbl">Fecha estimada</label><input type="date" id="v-fecha" class="inp"></div>
+    <button class="btn-ok" onclick="guardarViaje()">Guardar viaje</button>
+    <button class="btn-no" onclick="cerrarModalViaje()">Cancelar</button>
+  </div>
+</div>
+
+<!-- Modal añadir/editar item -->
+<div class="modal-overlay" id="modal-item">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="item-modal-title">Añadir gasto</div>
+    <div class="fld"><label class="lbl">Descripción</label><input type="text" id="item-descripcion" class="inp" placeholder="Ej: Vuelo, Hotel..."></div>
+    <div class="fld" style="margin-bottom:18px"><label class="lbl">Monto</label><input type="number" id="item-monto" class="inp" placeholder="$0.00"></div>
+    <button class="btn-ok" onclick="guardarItem()">Guardar</button>
+    <button class="btn-no" onclick="cerrarModalItem()">Cancelar</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  window.moneda = localStorage.getItem('moneda') || '$'
+  const _color = localStorage.getItem('color'); if (_color) document.documentElement.style.setProperty('--accent', _color)
+
+  const MESES_ABR = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic']
+
+  let todosViajes   = []
+  let itemsPorViaje = {}
+  let viajeActivo   = null
+  let tabViajeActiva = 'gasto'
+  let itemEditando  = null
+
+  function toast(msg, tipo = 'ok') {
+    const t = document.getElementById('toast')
+    t.textContent = msg
+    t.className = `toast ${tipo} show`
+    setTimeout(() => { t.className = 'toast' }, 2500)
+  }
+
+  function fmt(n) {
+    return window.moneda + parseFloat(n || 0).toLocaleString('es-MX', { minimumFractionDigits: 0, maximumFractionDigits: 0 })
+  }
+
+  function fmtFechaViaje(f) {
+    if (!f) return 'Sin fecha estimada'
+    const [anio, mes, dia] = f.substring(0, 10).split('-')
+    return `${parseInt(dia, 10)} ${MESES_ABR[parseInt(mes, 10) - 1]} ${anio}`
+  }
+
+  async function cargarViajes() {
+    if (!window.currentUserId) {
+      await new Promise(resolve => {
+        const iv = setInterval(() => { if (window.currentUserId) { clearInterval(iv); resolve() } }, 50)
+        setTimeout(() => { clearInterval(iv); resolve() }, 5000)
+      })
+    }
+    if (!window.currentUserId) return
+    const uid = window.currentUserId
+
+    const [{ data: viajes, error: errV }, { data: items, error: errI }] = await Promise.all([
+      dbClient.from('viajes').select('*').eq('usuario_id', uid).order('created_at', { ascending: false }),
+      dbClient.from('viajes_items').select('*').eq('usuario_id', uid)
+    ])
+
+    if (errV || errI) {
+      document.getElementById('lista-viajes').innerHTML = '<div class="loading">No se pudieron cargar los viajes.</div>'
+      return
+    }
+
+    todosViajes = viajes || []
+    itemsPorViaje = {}
+    ;(items || []).forEach(it => {
+      if (!itemsPorViaje[it.viaje_id]) itemsPorViaje[it.viaje_id] = []
+      itemsPorViaje[it.viaje_id].push(it)
+    })
+
+    renderListaViajes()
+  }
+
+  function balanceViaje(id) {
+    const items = itemsPorViaje[id] || []
+    const ingresos = items.filter(i => i.tipo === 'ingreso').reduce((s, i) => s + parseFloat(i.monto || 0), 0)
+    const gastos   = items.filter(i => i.tipo === 'gasto').reduce((s, i) => s + parseFloat(i.monto || 0), 0)
+    return { ingresos, gastos, balance: ingresos - gastos }
+  }
+
+  function renderListaViajes() {
+    const wrap = document.getElementById('lista-viajes')
+    if (todosViajes.length === 0) {
+      wrap.innerHTML = '<div class="loading">Aún no tienes viajes. ¡Crea uno! ✈️</div>'
+      return
+    }
+    wrap.innerHTML = ''
+    todosViajes.forEach(v => {
+      const { balance } = balanceViaje(v.id)
+      const positivo = balance >= 0
+      const div = document.createElement('div')
+      div.className = 'viaje-card'
+      div.onclick = () => abrirDetalle(v.id)
+      div.innerHTML = `
+        <div class="viaje-icon">${v.emoji || '✈️'}</div>
+        <div class="viaje-info">
+          <div class="viaje-nombre">${v.nombre}</div>
+          <div class="viaje-fecha">${fmtFechaViaje(v.fecha_estimada)}</div>
+        </div>
+        <div class="viaje-balance ${positivo ? 'positivo' : 'negativo'}">${positivo ? '+' : '-'}${fmt(Math.abs(balance))}</div>
+      `
+      wrap.appendChild(div)
+    })
+  }
+
+  function abrirDetalle(id) {
+    viajeActivo = id
+    tabViajeActiva = 'gasto'
+    document.getElementById('vista-lista').style.display = 'none'
+    document.getElementById('vista-detalle').style.display = 'block'
+    document.getElementById('fab-viaje').style.display = 'none'
+    renderDetalle()
+  }
+
+  function volverALista() {
+    viajeActivo = null
+    document.getElementById('vista-detalle').style.display = 'none'
+    document.getElementById('vista-lista').style.display = 'block'
+    document.getElementById('fab-viaje').style.display = 'flex'
+    renderListaViajes()
+  }
+
+  function renderDetalle() {
+    const v = todosViajes.find(x => String(x.id) === String(viajeActivo))
+    if (!v) { volverALista(); return }
+
+    document.getElementById('det-nombre').textContent = `${v.emoji || '✈️'} ${v.nombre}`
+    document.getElementById('det-fecha').textContent = fmtFechaViaje(v.fecha_estimada)
+
+    const { ingresos, gastos, balance } = balanceViaje(v.id)
+    document.getElementById('det-ingresos').textContent = fmt(ingresos)
+    document.getElementById('det-gastos').textContent = fmt(gastos)
+    const balEl = document.getElementById('det-balance')
+    balEl.textContent = (balance >= 0 ? '+' : '-') + fmt(Math.abs(balance))
+    balEl.style.color = balance >= 0 ? '#3fb950' : '#f85149'
+
+    document.getElementById('tab-gastos').classList.toggle('active', tabViajeActiva === 'gasto')
+    document.getElementById('tab-ingresos').classList.toggle('active', tabViajeActiva === 'ingreso')
+
+    renderListaItems()
+  }
+
+  function setTabViaje(tipo) {
+    tabViajeActiva = tipo
+    renderDetalle()
+  }
+
+  function renderListaItems() {
+    const wrap = document.getElementById('lista-items')
+    const items = (itemsPorViaje[viajeActivo] || []).filter(i => i.tipo === tabViajeActiva)
+    if (items.length === 0) {
+      wrap.innerHTML = `<div class="loading">Sin ${tabViajeActiva === 'gasto' ? 'gastos' : 'ingresos'} todavía.</div>`
+      return
+    }
+    wrap.innerHTML = items.map(it => `
+      <div class="item-row">
+        <div class="item-desc">${it.descripcion || '—'}</div>
+        <div class="item-monto">${fmt(it.monto)}</div>
+        <div class="item-acciones">
+          <span class="item-btn" onclick="abrirModalEditarItem('${it.id}')">✏️</span>
+          <span class="item-btn" onclick="eliminarItem('${it.id}')">🗑</span>
+        </div>
+      </div>
+    `).join('')
+  }
+
+  async function eliminarViaje() {
+    if (!viajeActivo) return
+    if (!confirm('¿Eliminar este viaje y todos sus gastos/ingresos?')) return
+    const { error: errItems } = await dbClient.from('viajes_items')
+      .delete().eq('viaje_id', viajeActivo).eq('usuario_id', window.currentUserId)
+    if (errItems) { toast('Error al eliminar items', 'err'); return }
+    const { error } = await dbClient.from('viajes')
+      .delete().eq('id', viajeActivo).eq('usuario_id', window.currentUserId)
+    if (error) { toast('Error al eliminar', 'err'); return }
+
+    todosViajes = todosViajes.filter(v => String(v.id) !== String(viajeActivo))
+    delete itemsPorViaje[viajeActivo]
+    toast('Viaje eliminado')
+    volverALista()
+  }
+
+  function abrirModalViaje() {
+    document.getElementById('v-nombre').value = ''
+    document.getElementById('v-emoji').value = ''
+    document.getElementById('v-fecha').value = ''
+    document.getElementById('modal-viaje').style.display = 'flex'
+  }
+  function cerrarModalViaje() { document.getElementById('modal-viaje').style.display = 'none' }
+
+  async function guardarViaje() {
+    const nombre = document.getElementById('v-nombre').value.trim()
+    const emoji  = document.getElementById('v-emoji').value.trim() || '✈️'
+    const fecha  = document.getElementById('v-fecha').value
+
+    if (!nombre) { alert('Escribe un nombre'); return }
+
+    const { data, error } = await dbClient.from('viajes')
+      .insert([{ nombre, emoji, fecha_estimada: fecha || null, usuario_id: window.currentUserId }])
+      .select()
+    if (error) { alert('Error: ' + error.message); return }
+
+    todosViajes.unshift(data[0])
+    itemsPorViaje[data[0].id] = []
+    cerrarModalViaje()
+    toast('Viaje creado ✓')
+    renderListaViajes()
+  }
+
+  function abrirModalItem() {
+    itemEditando = null
+    document.getElementById('item-modal-title').textContent = tabViajeActiva === 'gasto' ? 'Añadir gasto' : 'Añadir ingreso'
+    document.getElementById('item-descripcion').value = ''
+    document.getElementById('item-monto').value = ''
+    document.getElementById('modal-item').style.display = 'flex'
+  }
+
+  function cerrarModalItem() {
+    document.getElementById('modal-item').style.display = 'none'
+    itemEditando = null
+  }
+
+  function abrirModalEditarItem(id) {
+    const it = (itemsPorViaje[viajeActivo] || []).find(x => String(x.id) === String(id))
+    if (!it) return
+    itemEditando = id
+    document.getElementById('item-modal-title').textContent = it.tipo === 'gasto' ? 'Editar gasto' : 'Editar ingreso'
+    document.getElementById('item-descripcion').value = it.descripcion || ''
+    document.getElementById('item-monto').value = it.monto
+    document.getElementById('modal-item').style.display = 'flex'
+  }
+
+  async function guardarItem() {
+    const descripcion = document.getElementById('item-descripcion').value.trim()
+    const monto = parseFloat(document.getElementById('item-monto').value)
+
+    if (!descripcion || isNaN(monto) || monto <= 0) { alert('Completa descripción y monto'); return }
+
+    if (itemEditando) {
+      const { error } = await dbClient.from('viajes_items')
+        .update({ descripcion, monto })
+        .eq('id', itemEditando).eq('usuario_id', window.currentUserId)
+      if (error) { alert('Error: ' + error.message); return }
+      const it = (itemsPorViaje[viajeActivo] || []).find(x => String(x.id) === String(itemEditando))
+      if (it) { it.descripcion = descripcion; it.monto = monto }
+      toast('Actualizado ✓')
+    } else {
+      const { data, error } = await dbClient.from('viajes_items')
+        .insert([{ viaje_id: viajeActivo, usuario_id: window.currentUserId, tipo: tabViajeActiva, descripcion, monto }])
+        .select()
+      if (error) { alert('Error: ' + error.message); return }
+      if (!itemsPorViaje[viajeActivo]) itemsPorViaje[viajeActivo] = []
+      itemsPorViaje[viajeActivo].push(data[0])
+      toast('Guardado ✓')
+    }
+
+    cerrarModalItem()
+    renderDetalle()
+    renderListaViajes()
+  }
+
+  async function eliminarItem(id) {
+    if (!confirm('¿Eliminar este movimiento?')) return
+    const { error } = await dbClient.from('viajes_items')
+      .delete().eq('id', id).eq('usuario_id', window.currentUserId)
+    if (error) { toast('Error al eliminar', 'err'); return }
+
+    itemsPorViaje[viajeActivo] = (itemsPorViaje[viajeActivo] || []).filter(x => String(x.id) !== String(id))
+    toast('Eliminado')
+    renderDetalle()
+    renderListaViajes()
+  }
+
+  function abrirPanelMas()  { document.getElementById('panel-mas').style.display = 'flex' }
+  function cerrarPanelMas() { document.getElementById('panel-mas').style.display = 'none' }
+  document.getElementById('panel-mas').addEventListener('click', function(e) { if (e.target === this) cerrarPanelMas() })
+  document.getElementById('modal-viaje').addEventListener('click', function(e) { if (e.target === this) cerrarModalViaje() })
+  document.getElementById('modal-item').addEventListener('click', function(e) { if (e.target === this) cerrarModalItem() })
+
+  cargarViajes()
+</script>
+<script>
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/sw.js');
+  }
+</script>
+</body>
+</html>
