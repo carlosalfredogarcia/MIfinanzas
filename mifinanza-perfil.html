@@ -283,9 +283,8 @@
       localStorage.setItem('color', datos.color)
     }
 
-    if (datos.categorias) {
-      renderCats(datos.categorias.split(',').map(c => c.trim()).filter(Boolean))
-    }
+    const catsStr = datos.categorias || CATS_DEFAULT
+    renderCats(catsStr.split(',').map(c => c.trim()).filter(Boolean))
   }
 
   const iconsCat = {
