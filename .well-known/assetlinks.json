@@ -1,0 +1,8 @@
+[{
+      "relation": ["delegate_permission/common.handle_all_urls"],
+      "target": {
+        "namespace": "android_app",
+        "package_name": "com.mifinanza.app",
+        "sha256_cert_fingerprints": ["08:D5:46:EA:F7:05:AE:F5:88:B7:10:6A:ED:8C:44:5F:75:AB:61:F3:CB:7C:65:19:14:9D:2B:4D:2E:E0:B1:2C"]
+      }
+    }]
