@@ -253,7 +253,11 @@
     animation: fadeUp 0.4s 0.3s ease both; opacity: 0;
   }
 
-  .plan-header { display: flex; align-items: center; gap: 10px; margin-bottom: 18px; }
+  .plan-header { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 18px; }
+  .plan-header-left { display: flex; align-items: center; gap: 10px; }
+  .plan-header-right { text-align: right; flex-shrink: 0; }
+  .plan-header-right-label { font-size: 11px; color: var(--subtext); text-transform: uppercase; letter-spacing: 0.08em; }
+  .plan-header-right-value { font-family: 'DM Sans', sans-serif; font-size: 16px; font-weight: 700; color: var(--text); }
 
   .plan-icon {
     width: 38px; height: 38px; border-radius: 12px;
@@ -536,10 +540,16 @@
   <div class="seccion-label" style="margin-top:16px">¿Cuánto puedo ahorrar?</div>
   <div class="planificador">
     <div class="plan-header">
-      <div class="plan-icon">🧮</div>
-      <div>
-        <div class="plan-title">Planificador</div>
-        <div class="plan-sub">Calcula tu potencial real de ahorro</div>
+      <div class="plan-header-left">
+        <div class="plan-icon">🧮</div>
+        <div>
+          <div class="plan-title">Planificador</div>
+          <div class="plan-sub">Calcula tu potencial real de ahorro</div>
+        </div>
+      </div>
+      <div class="plan-header-right">
+        <div class="plan-header-right-label">Disponible</div>
+        <div class="plan-header-right-value" id="p-disponible-header">—</div>
       </div>
     </div>
     <div class="plan-row">
@@ -1259,6 +1269,7 @@
     const anual    = (ahorro * 12).toFixed(2)
 
     document.getElementById('r-disponible').textContent = `$${disponible.toFixed(2)}`
+    document.getElementById('p-disponible-header').textContent = `$${disponible.toFixed(2)}`
     document.getElementById('r-ahorro').textContent     = `$${ahorro}/mes`
     document.getElementById('r-disfrute').textContent   = `$${disfrute}/mes`
     document.getElementById('r-anual').textContent      = `$${parseFloat(anual).toLocaleString()}`
