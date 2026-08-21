@@ -552,7 +552,7 @@
     </div>
     <div class="plan-row">
       <label>Gastos necesarios estimados (comida, transporte...)</label>
-      <input class="plan-input" type="number" id="p-necesarios" placeholder="$0.00" value="400">
+      <input class="plan-input" type="number" id="p-necesarios" placeholder="$0.00">
     </div>
     <div class="slider-wrap">
       <label><span>¿Cómo distribuyes lo que queda?</span></label>
@@ -1246,6 +1246,14 @@
     document.getElementById('p-fijos').value = totalFijos.toFixed(2)
   }
 
+  function initGastosNecesarios() {
+    const guardado = localStorage.getItem('planificador_gastos_necesarios')
+    if (guardado !== null) document.getElementById('p-necesarios').value = guardado
+    document.getElementById('p-necesarios').addEventListener('input', function() {
+      localStorage.setItem('planificador_gastos_necesarios', this.value)
+    })
+  }
+
   function calcular() {
     const ingreso    = parseFloat(document.getElementById('p-ingreso').value)    || 0
     const fijos      = parseFloat(document.getElementById('p-fijos').value)      || 0
@@ -1275,6 +1283,7 @@
 
   cargarMetas()
   cargarGastosFijosPlanificador()
+  initGastosNecesarios()
 </script>
 <script>
   if ('serviceWorker' in navigator) {
