@@ -284,6 +284,8 @@
   }
 
   .plan-input:focus { border-color: rgba(88,166,255,0.3); }
+  .plan-input-readonly { color: var(--subtext); cursor: default; }
+  .plan-input-readonly:focus { border-color: var(--border); }
 
   .modal-overlay, .modal-abonar-overlay {
     position: fixed; inset: 0;
@@ -516,7 +518,7 @@
     </div>
     <div class="plan-row">
       <label>Gastos fijos recurrentes</label>
-      <input class="plan-input" type="number" id="p-fijos" placeholder="$0.00" value="780">
+      <input class="plan-input plan-input-readonly" type="number" id="p-fijos" placeholder="$0.00" value="780" readonly>
     </div>
     <div class="plan-row">
       <label>Gastos necesarios estimados (comida, transporte...)</label>
