@@ -281,48 +281,6 @@
 
   .plan-input:focus { border-color: rgba(88,166,255,0.3); }
 
-  .slider-wrap { margin-bottom: 14px; }
-
-  .slider-wrap label {
-    font-size: 11px; color: var(--subtext);
-    text-transform: uppercase; letter-spacing: 0.08em;
-    display: flex; justify-content: space-between; margin-bottom: 8px;
-  }
-
-  .slider-labels { display: flex; justify-content: space-between; margin-bottom: 6px; }
-
-  .slider-pill { font-size: 12px; font-weight: 600; padding: 3px 10px; border-radius: 100px; }
-  .pill-ahorro   { background: rgba(88,166,255,0.15); color: var(--accent); }
-  .pill-disfrute { background: rgba(245,200,66,0.15);  color: var(--gold); }
-
-  input[type=range] { width: 100%; accent-color: var(--accent); height: 6px; cursor: pointer; }
-
-  .plan-resultado {
-    background: var(--card2); border-radius: 16px;
-    padding: 16px; margin-top: 16px; border: 1px solid var(--border);
-  }
-
-  .resultado-row {
-    display: flex; justify-content: space-between; align-items: center;
-    padding: 6px 0; border-bottom: 1px solid var(--border); font-size: 13px;
-  }
-
-  .resultado-row:last-of-type { border-bottom: none; }
-  .resultado-row span   { color: var(--subtext); }
-  .resultado-row strong { color: var(--text); font-weight: 600; }
-  .resultado-row .val-green { color: var(--accent); font-family: 'Roboto', sans-serif; font-weight: 700; }
-  .resultado-row .val-gold  { color: var(--gold);   font-family: 'Roboto', sans-serif; font-weight: 700; }
-
-  .plan-mensaje { margin-top: 14px; font-size: 13px; color: var(--accent); line-height: 1.5; text-align: center; font-style: italic; }
-
-  .btn-calcular {
-    width: 100%; background: var(--accent); color: #0d1117;
-    border: none; border-radius: 14px; padding: 13px;
-    font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 700;
-    cursor: pointer; margin-top: 14px; transition: opacity 0.2s;
-  }
-  .btn-calcular:hover { opacity: 0.9; }
-
   .modal-overlay, .modal-abonar-overlay {
     position: fixed; inset: 0;
     background: rgba(0,0,0,0.7); backdrop-filter: blur(6px);
@@ -553,22 +511,6 @@
     <div class="plan-row">
       <label>Gastos necesarios estimados (comida, transporte...)</label>
       <input class="plan-input" type="number" id="p-necesarios" placeholder="$0.00">
-    </div>
-    <div class="slider-wrap">
-      <label><span>¿Cómo distribuyes lo que queda?</span></label>
-      <div class="slider-labels">
-        <span class="slider-pill pill-ahorro"   id="lbl-ahorro">Ahorro 70%</span>
-        <span class="slider-pill pill-disfrute" id="lbl-disfrute">Disfrute 30%</span>
-      </div>
-      <input type="range" id="slider-ahorro" min="10" max="90" value="70" oninput="actualizarSlider()">
-    </div>
-    <button class="btn-calcular" onclick="calcular()">Calcular</button>
-    <div class="plan-resultado" id="resultado" style="display:none">
-      <div class="resultado-row"><span>Disponible real</span><strong id="r-disponible"></strong></div>
-      <div class="resultado-row"><span>💚 Para ahorrar</span><span class="val-green" id="r-ahorro"></span></div>
-      <div class="resultado-row"><span>🎉 Para disfrutar</span><span class="val-gold" id="r-disfrute"></span></div>
-      <div class="resultado-row"><span>En 12 meses ahorrarías</span><span class="val-green" id="r-anual"></span></div>
-      <div class="plan-mensaje" id="r-mensaje"></div>
     </div>
   </div>
 
@@ -1219,12 +1161,6 @@
   function cerrarPanelMas() { document.getElementById('panel-mas').classList.remove('visible') }
   document.getElementById('panel-mas').addEventListener('click', function(e) { if (e.target === this) cerrarPanelMas() })
 
-  function actualizarSlider() {
-    const val = parseInt(document.getElementById('slider-ahorro').value)
-    document.getElementById('lbl-ahorro').textContent   = `Ahorro ${val}%`
-    document.getElementById('lbl-disfrute').textContent = `Disfrute ${100 - val}%`
-  }
-
   async function cargarGastosFijosPlanificador() {
     if (!window.currentUserId) {
       await new Promise(resolve => {
@@ -1252,33 +1188,6 @@
     document.getElementById('p-necesarios').addEventListener('input', function() {
       localStorage.setItem('planificador_gastos_necesarios', this.value)
     })
-  }
-
-  function calcular() {
-    const ingreso    = parseFloat(document.getElementById('p-ingreso').value)    || 0
-    const fijos      = parseFloat(document.getElementById('p-fijos').value)      || 0
-    const necesarios = parseFloat(document.getElementById('p-necesarios').value) || 0
-    const pct        = parseInt(document.getElementById('slider-ahorro').value)
-    const disponible = ingreso - fijos - necesarios
-    if (disponible <= 0) { toast('Tus gastos superan tus ingresos', 'err'); return }
-
-    const ahorro   = (disponible * pct / 100).toFixed(2)
-    const disfrute = (disponible * (100 - pct) / 100).toFixed(2)
-    const anual    = (ahorro * 12).toFixed(2)
-
-    document.getElementById('r-disponible').textContent = `$${disponible.toFixed(2)}`
-    document.getElementById('r-ahorro').textContent     = `$${ahorro}/mes`
-    document.getElementById('r-disfrute').textContent   = `$${disfrute}/mes`
-    document.getElementById('r-anual').textContent      = `$${parseFloat(anual).toLocaleString()}`
-
-    const mensajes = [
-      `Con disciplina, en un año puedes tener $${parseFloat(anual).toLocaleString()}. Ahorrar y vivir no son opuestos. 💚`,
-      `$${disfrute} al mes para ti. $${ahorro} para tu futuro. Eso es equilibrio real. 🎯`,
-      `No se trata de privarte — se trata de elegir. Y tú ya estás eligiendo bien. ✨`
-    ]
-
-    document.getElementById('r-mensaje').textContent = mensajes[Math.floor(Math.random() * mensajes.length)]
-    document.getElementById('resultado').style.display = 'block'
   }
 
   cargarMetas()
