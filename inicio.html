@@ -380,14 +380,10 @@
 
     const listaFijos = document.getElementById('fijos-lista')
     listaFijos.innerHTML = ''
-    const iconMap = [
-      ['Comida','🍔'],['Alquiler','🏠'],['dito','💳'],['nea','📱'],['Gym','🏋️'],
-      ['Gasolina','⛽'],['Tecnolog','💻'],['Salud','❤️'],['Ropa','👕'],
-      ['Salidas','🎉'],['Remesas','🌍'],['Imprevisto','⚠️'],['mite','📋'],['Veh','🚗']
-    ]
     ;(fijos || []).forEach(f => {
-      const cat  = f.categoria || ''
-      const icon = (iconMap.find(([k]) => cat.includes(k)) || [null,'📦'])[1]
+      const cat   = f.categoria || ''
+      const first = [...cat.trim()][0]
+      const icon  = first && first.codePointAt(0) > 127 ? first : '📦'
       const div = document.createElement('div')
       div.className = 'fijo-item'
       div.innerHTML = `
