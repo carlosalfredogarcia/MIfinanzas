@@ -165,7 +165,7 @@
       <div class="mas-arrow">›</div>
     </div>
     <div class="mas-item" onclick="location.href='mifinanza-fijos.html'">
-      <div class="mas-icon">🔁</div>
+      <div class="mas-icon"><span style="color:#58a6ff">↻</span></div>
       <div class="mas-label">Gastos Fijos</div>
       <div class="mas-arrow">›</div>
     </div>
@@ -193,7 +193,7 @@
     <div class="modal-handle"></div>
     <button onclick="abrirGasto()" style="width:100%;background:#21262d;border:1px solid #30363d;border-radius:14px;padding:16px;color:#e6edf3;font-family:'DM Sans',sans-serif;font-size:15px;cursor:pointer;margin-bottom:10px;text-align:left;">💸 Registrar gasto</button>
     <button onclick="abrirIngreso()" style="width:100%;background:#21262d;border:1px solid #30363d;border-radius:14px;padding:16px;color:#e6edf3;font-family:'DM Sans',sans-serif;font-size:15px;cursor:pointer;margin-bottom:10px;text-align:left;">💰 Registrar ingreso</button>
-    <button onclick="abrirGastoFijo()" style="width:100%;background:#21262d;border:1px solid #30363d;border-radius:14px;padding:16px;color:#e6edf3;font-family:'DM Sans',sans-serif;font-size:15px;cursor:pointer;margin-bottom:10px;text-align:left;">🔁 Registrar gasto fijo</button>
+    <button onclick="abrirGastoFijo()" style="width:100%;background:#21262d;border:1px solid #30363d;border-radius:14px;padding:16px;color:#e6edf3;font-family:'DM Sans',sans-serif;font-size:15px;cursor:pointer;margin-bottom:10px;text-align:left;"><span style="color:#58a6ff">↻</span> Registrar gasto fijo</button>
     <button onclick="cerrarMenu()" class="btn-no">Cancelar</button>
   </div>
 </div>
@@ -412,7 +412,7 @@
         div.className = 'movimiento ' + (esFijo ? 'mov-bar-fijo' : esIngreso ? 'mov-bar-ingreso' : 'mov-bar-gasto');
         div.setAttribute('onclick', `abrirEditarIdx(${idx})`);
         div.dataset.idx = idx;
-        const icon = esIngreso ? '💰' : esFijo ? '🔁' : getIcon(m.categoria);
+        const icon = esIngreso ? '💰' : esFijo ? '<span style="color:#58a6ff">↻</span>' : getIcon(m.categoria);
         div.innerHTML = `
           <div class="mov-icon">${icon}</div>
           <div class="mov-info">
