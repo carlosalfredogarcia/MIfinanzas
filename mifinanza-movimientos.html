@@ -412,7 +412,7 @@
         div.className = 'movimiento ' + (esFijo ? 'mov-bar-fijo' : esIngreso ? 'mov-bar-ingreso' : 'mov-bar-gasto');
         div.setAttribute('onclick', `abrirEditarIdx(${idx})`);
         div.dataset.idx = idx;
-        const icon = esIngreso ? '💰' : esFijo ? '<span style="color:#58a6ff">↻</span>' : getIcon(m.categoria);
+        const icon = esIngreso ? '💰' : esFijo ? '🔃' : getIcon(m.categoria);
         div.innerHTML = `
           <div class="mov-icon">${icon}</div>
           <div class="mov-info">
