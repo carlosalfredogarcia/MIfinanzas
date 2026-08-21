@@ -1242,7 +1242,10 @@
     if (errG || errF) return
 
     const categoriasFijas = new Set((fijosData || []).map(f => f.categoria))
-    const mesesDisponibles = [...new Set((gastosData || []).map(g => g.fecha.substring(0, 7)))].sort().reverse()
+    const mesActual = new Date().toISOString().substring(0, 7)
+    const mesesDisponibles = [...new Set((gastosData || []).map(g => g.fecha.substring(0, 7)))]
+      .filter(m => m !== mesActual)
+      .sort().reverse()
     const mesesUsar = mesesDisponibles.slice(0, 3)
     const numMeses = mesesUsar.length || 1
 
