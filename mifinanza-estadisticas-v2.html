@@ -296,7 +296,7 @@
       <div class="mas-arrow">›</div>
     </div>
     <div class="mas-item" onclick="location.href='mifinanza-fijos.html'">
-      <div class="mas-icon">📌</div>
+      <div class="mas-icon">🔁</div>
       <div class="mas-label">Gastos Fijos</div>
       <div class="mas-arrow">›</div>
     </div>
@@ -655,7 +655,7 @@
   }
 
   function iconMov(esFijo, cat) {
-    if (esFijo) return '📌'
+    if (esFijo) return '🔁'
     if (!cat) return '📦'
     const first = [...cat.trim()][0]
     return first && first.codePointAt(0) > 127 ? first : (iconsCat[cat] || '📦')
