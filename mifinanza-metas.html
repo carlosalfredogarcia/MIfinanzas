@@ -258,6 +258,7 @@
   .plan-header-right { text-align: right; flex-shrink: 0; }
   .plan-header-right-label { font-size: 11px; color: var(--subtext); text-transform: uppercase; letter-spacing: 0.08em; }
   .plan-header-right-value { font-family: 'Roboto', sans-serif; font-size: 18px; font-weight: 700; color: var(--success); }
+  .plan-header-right-value.negativo { color: var(--danger); }
 
   .plan-icon {
     width: 38px; height: 38px; border-radius: 12px;
@@ -522,7 +523,7 @@
         <div class="plan-icon">🧮</div>
         <div>
           <div class="plan-title">Planificador</div>
-          <div class="plan-sub">Calcula tu potencial real de ahorro</div>
+          <div class="plan-sub">Calcula tu potencial de ahorro</div>
         </div>
       </div>
       <div class="plan-header-right">
@@ -1297,8 +1298,10 @@
     const fijos     = parseFloat(document.getElementById('p-fijos').value)   || 0
     const variables = totalVariables()
     const disponible = ingreso - fijos - variables
-    document.getElementById('p-disponible-header').textContent = fmt(disponible)
-    document.getElementById('p-variables-total').textContent   = fmt(variables)
+    const elDisponible = document.getElementById('p-disponible-header')
+    elDisponible.textContent = fmt(disponible)
+    elDisponible.classList.toggle('negativo', disponible < 0)
+    document.getElementById('p-variables-total').textContent = fmt(variables)
   }
 
   document.getElementById('p-ingreso').addEventListener('input', actualizarPlanificador)
