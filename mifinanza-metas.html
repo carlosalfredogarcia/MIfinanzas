@@ -287,6 +287,24 @@
   .plan-input-readonly { color: var(--subtext); cursor: default; }
   .plan-input-readonly:focus { border-color: var(--border); }
 
+  .variables-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin: 20px 0 12px; padding-top: 16px; border-top: 1px solid var(--border);
+  }
+  .variables-title { font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 700; color: var(--text); }
+  .variables-sub   { font-size: 11px; color: var(--subtext); margin-top: 2px; }
+  .variables-right { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; flex-shrink: 0; }
+  .variables-total {
+    font-family: 'Roboto', sans-serif; font-size: 15px; font-weight: 700;
+    color: var(--text);
+  }
+  .btn-restablecer {
+    background: none; border: 1px solid var(--border2); border-radius: 100px;
+    padding: 4px 12px; font-size: 11px; color: var(--subtext);
+    cursor: pointer; font-family: 'DM Sans', sans-serif; transition: all 0.2s;
+  }
+  .btn-restablecer:hover { border-color: var(--accent); color: var(--accent); }
+
   .modal-overlay, .modal-abonar-overlay {
     position: fixed; inset: 0;
     background: rgba(0,0,0,0.7); backdrop-filter: blur(6px);
@@ -520,10 +538,17 @@
       <label>Gastos fijos recurrentes</label>
       <input class="plan-input plan-input-readonly" type="number" id="p-fijos" placeholder="$0.00" value="780" readonly>
     </div>
-    <div class="plan-row">
-      <label>Gastos necesarios estimados (comida, transporte...)</label>
-      <input class="plan-input" type="number" id="p-necesarios" placeholder="$0.00">
+    <div class="variables-header">
+      <div>
+        <div class="variables-title">Gastos variables</div>
+        <div class="variables-sub">Últimos 3 meses</div>
+      </div>
+      <div class="variables-right">
+        <div class="variables-total" id="p-variables-total">$0.00</div>
+        <button class="btn-restablecer" onclick="restablecerVariables()">Restablecer</button>
+      </div>
     </div>
+    <div id="variables-lista"></div>
   </div>
 
   <div class="seccion-label" style="margin-top:16px">Mi colchón de ahorro</div>
@@ -1195,29 +1220,92 @@
     actualizarPlanificador()
   }
 
-  function initGastosNecesarios() {
-    const guardado = localStorage.getItem('planificador_gastos_necesarios')
-    if (guardado !== null) document.getElementById('p-necesarios').value = guardado
-    document.getElementById('p-necesarios').addEventListener('input', function() {
-      localStorage.setItem('planificador_gastos_necesarios', this.value)
-      actualizarPlanificador()
+  let gastosVariablesOriginal = {}
+
+  async function cargarGastosVariables() {
+    if (!window.currentUserId) {
+      await new Promise(resolve => {
+        const iv = setInterval(() => {
+          if (window.currentUserId) { clearInterval(iv); resolve() }
+        }, 50)
+        setTimeout(() => { clearInterval(iv); resolve() }, 5000)
+      })
+    }
+    if (!window.currentUserId) return
+    const uid = window.currentUserId
+
+    const [{ data: gastosData, error: errG }, { data: fijosData, error: errF }] = await Promise.all([
+      dbClient.from('gastos').select('monto, categoria, fecha').eq('usuario_id', uid).order('fecha', { ascending: false }),
+      dbClient.from('gastos_fijos').select('categoria').eq('usuario_id', uid).eq('activo', true)
+    ])
+    if (errG || errF) return
+
+    const categoriasFijas = new Set((fijosData || []).map(f => f.categoria))
+    const mesesDisponibles = [...new Set((gastosData || []).map(g => g.fecha.substring(0, 7)))].sort().reverse()
+    const mesesUsar = mesesDisponibles.slice(0, 3)
+    const numMeses = mesesUsar.length || 1
+
+    const sumasPorCategoria = {}
+    ;(gastosData || []).forEach(g => {
+      const mes = g.fecha.substring(0, 7)
+      if (!mesesUsar.includes(mes)) return
+      if (categoriasFijas.has(g.categoria)) return
+      sumasPorCategoria[g.categoria] = (sumasPorCategoria[g.categoria] || 0) + parseFloat(g.monto || 0)
+    })
+
+    gastosVariablesOriginal = {}
+    Object.keys(sumasPorCategoria).forEach(cat => {
+      gastosVariablesOriginal[cat] = sumasPorCategoria[cat] / numMeses
+    })
+
+    renderGastosVariables()
+  }
+
+  function renderGastosVariables() {
+    const cont = document.getElementById('variables-lista')
+    cont.innerHTML = ''
+    Object.keys(gastosVariablesOriginal)
+      .sort((a, b) => gastosVariablesOriginal[b] - gastosVariablesOriginal[a])
+      .forEach(cat => {
+        const row = document.createElement('div')
+        row.className = 'plan-row'
+        row.innerHTML = `
+          <label>${cat}</label>
+          <input class="plan-input variable-input" type="number" data-cat="${cat}" value="${gastosVariablesOriginal[cat].toFixed(2)}">
+        `
+        cont.appendChild(row)
+      })
+    document.querySelectorAll('.variable-input').forEach(inp => {
+      inp.addEventListener('input', actualizarPlanificador)
     })
     actualizarPlanificador()
   }
 
+  function restablecerVariables() {
+    document.querySelectorAll('.variable-input').forEach(inp => {
+      inp.value = gastosVariablesOriginal[inp.dataset.cat].toFixed(2)
+    })
+    actualizarPlanificador()
+  }
+
+  function totalVariables() {
+    return [...document.querySelectorAll('.variable-input')].reduce((s, inp) => s + (parseFloat(inp.value) || 0), 0)
+  }
+
   function actualizarPlanificador() {
-    const ingreso    = parseFloat(document.getElementById('p-ingreso').value)    || 0
-    const fijos      = parseFloat(document.getElementById('p-fijos').value)      || 0
-    const necesarios = parseFloat(document.getElementById('p-necesarios').value) || 0
-    const disponible = ingreso - fijos - necesarios
+    const ingreso   = parseFloat(document.getElementById('p-ingreso').value) || 0
+    const fijos     = parseFloat(document.getElementById('p-fijos').value)   || 0
+    const variables = totalVariables()
+    const disponible = ingreso - fijos - variables
     document.getElementById('p-disponible-header').textContent = fmt(disponible)
+    document.getElementById('p-variables-total').textContent   = fmt(variables)
   }
 
   document.getElementById('p-ingreso').addEventListener('input', actualizarPlanificador)
 
   cargarMetas()
   cargarGastosFijosPlanificador()
-  initGastosNecesarios()
+  cargarGastosVariables()
   actualizarPlanificador()
 </script>
 <script>
