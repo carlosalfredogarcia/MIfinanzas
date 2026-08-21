@@ -329,6 +329,27 @@
   }
   .var-input:focus { border-color: rgba(88,166,255,0.3); }
 
+  .tabla-comparativa {
+    margin: 0 24px 16px; background: var(--card); border-radius: 20px;
+    padding: 16px 18px; border: 1px solid var(--border);
+  }
+  .tabla-comp-header, .tabla-comp-row {
+    display: grid; grid-template-columns: 1.6fr 1fr 1fr 1fr; gap: 6px; align-items: center;
+  }
+  .tabla-comp-header {
+    font-size: 10px; color: var(--subtext); text-transform: uppercase; letter-spacing: 0.06em;
+    padding-bottom: 10px; border-bottom: 1px solid var(--border); margin-bottom: 6px;
+  }
+  .tabla-comp-header div:not(:first-child), .tabla-comp-row div:not(:first-child) { text-align: right; }
+  .tabla-comp-row { padding: 9px 0; border-bottom: 1px solid var(--border); font-size: 12px; }
+  .tabla-comp-row:last-child { border-bottom: none; }
+  .tabla-comp-cat { color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .tabla-comp-val { font-family: 'Roboto', sans-serif; color: var(--text); }
+  .tabla-comp-diff { font-family: 'Roboto', sans-serif; font-weight: 700; }
+  .tabla-comp-diff.pos { color: var(--success); }
+  .tabla-comp-diff.neg { color: var(--danger); }
+  .tabla-comp-empty { grid-column: 1 / -1; text-align: center; color: var(--subtext); font-size: 12px; padding: 12px 0; }
+
   .modal-overlay, .modal-abonar-overlay {
     position: fixed; inset: 0;
     background: rgba(0,0,0,0.7); backdrop-filter: blur(6px);
@@ -573,6 +594,17 @@
       </div>
     </div>
     <div id="variables-lista"></div>
+  </div>
+
+  <div class="seccion-label" style="margin-top:16px">Estimado vs Real</div>
+  <div class="tabla-comparativa">
+    <div class="tabla-comp-header">
+      <div>Categoría</div>
+      <div>Estimado</div>
+      <div>Real</div>
+      <div>Diferencia</div>
+    </div>
+    <div id="tabla-comp-body"></div>
   </div>
 
   <div class="seccion-label" style="margin-top:16px">Mi colchón de ahorro</div>
@@ -1366,6 +1398,63 @@
     elDisponible.textContent = fmt(disponible)
     elDisponible.classList.toggle('negativo', disponible < 0)
     document.getElementById('p-variables-total').textContent = fmt(variables)
+    renderTablaComparativa()
+  }
+
+  let gastosRealMes = {}
+
+  async function cargarGastosRealMes() {
+    if (!window.currentUserId) {
+      await new Promise(resolve => {
+        const iv = setInterval(() => {
+          if (window.currentUserId) { clearInterval(iv); resolve() }
+        }, 50)
+        setTimeout(() => { clearInterval(iv); resolve() }, 5000)
+      })
+    }
+    if (!window.currentUserId) return
+    const inicioMes = new Date().toISOString().substring(0, 7) + '-01'
+    const { data, error } = await dbClient
+      .from('gastos')
+      .select('monto, categoria')
+      .eq('usuario_id', window.currentUserId)
+      .gte('fecha', inicioMes)
+
+    if (error || !data) return
+    gastosRealMes = {}
+    data.forEach(g => {
+      gastosRealMes[g.categoria] = (gastosRealMes[g.categoria] || 0) + parseFloat(g.monto || 0)
+    })
+    renderTablaComparativa()
+  }
+
+  function renderTablaComparativa() {
+    const cont = document.getElementById('tabla-comp-body')
+    if (!cont) return
+    const inputs = [...document.querySelectorAll('.variable-input')]
+    if (inputs.length === 0) {
+      cont.innerHTML = '<div class="tabla-comp-empty">Sin categorías variables</div>'
+      return
+    }
+    cont.innerHTML = inputs.map(inp => {
+      const cat       = inp.dataset.cat
+      const estimado  = parseFloat(inp.value) || 0
+      const real      = gastosRealMes[cat] || 0
+      const diferencia = estimado - real
+      const claseDiff = diferencia >= 0 ? 'pos' : 'neg'
+      const signo     = diferencia >= 0 ? '+' : '-'
+      const partes    = cat.trim().split(' ')
+      const emoji     = partes[0]
+      const nombre    = partes.slice(1).join(' ') || cat
+      return `
+        <div class="tabla-comp-row">
+          <div class="tabla-comp-cat">${emoji} ${nombre}</div>
+          <div class="tabla-comp-val">${fmt(estimado)}</div>
+          <div class="tabla-comp-val">${fmt(real)}</div>
+          <div class="tabla-comp-diff ${claseDiff}">${signo}$${Math.abs(diferencia).toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
+        </div>
+      `
+    }).join('')
   }
 
   document.getElementById('p-ingreso').addEventListener('input', actualizarPlanificador)
@@ -1373,6 +1462,7 @@
   cargarMetas()
   cargarGastosFijosPlanificador()
   cargarGastosVariables()
+  cargarGastosRealMes()
   actualizarPlanificador()
 </script>
 <script>
