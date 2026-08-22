@@ -1382,6 +1382,12 @@
     }
     const numMeses = mesesCerrados.length || 1
 
+    console.log('[Planificador] mesActual (excluido):', mesActual)
+    console.log('[Planificador] mesMasAntiguo:', mesMasAntiguo)
+    console.log('[Planificador] mesesCerrados usados para el promedio:', mesesCerrados)
+    console.log('[Planificador] gastos crudos recibidos de Supabase:', gastosData)
+    console.log('[Planificador] gastos_fijos activos recibidos de Supabase:', fijosData)
+
     const sumasPorCategoria = {}
     ;(gastosData || []).forEach(g => {
       const mes = g.fecha.substring(0, 7)
@@ -1402,10 +1408,14 @@
       })
     })
 
+    console.log('[Planificador] sumasPorCategoria (suma de los', numMeses, 'meses):', sumasPorCategoria)
+
     gastosOriginal = {}
     Object.keys(sumasPorCategoria).forEach(cat => {
       gastosOriginal[cat] = sumasPorCategoria[cat] / numMeses
     })
+
+    console.log('[Planificador] gastosOriginal (promedio final por categoria):', gastosOriginal)
 
     renderGastos()
   }
