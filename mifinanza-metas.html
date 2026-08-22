@@ -342,7 +342,7 @@
     padding: 16px 18px; border: 1px solid var(--border);
   }
   .tabla-comp-header, .tabla-comp-row {
-    display: grid; grid-template-columns: 1.6fr 1fr; gap: 6px; align-items: center;
+    display: grid; grid-template-columns: 1.4fr 1fr auto; gap: 6px; align-items: center;
   }
   .tabla-comp-header {
     font-size: 10px; color: var(--subtext); text-transform: uppercase; letter-spacing: 0.06em;
@@ -356,15 +356,18 @@
   .tabla-comp-diff { font-family: 'Roboto', sans-serif; font-weight: 700; }
   .tabla-comp-diff.pos { color: var(--success); }
   .tabla-comp-diff.neg { color: var(--danger); }
+  .tabla-comp-chevron { color: var(--subtext); font-size: 11px; }
   .tabla-comp-empty { text-align: center; color: var(--subtext); font-size: 12px; padding: 12px 0; }
 
   .tabla-comp-detalle {
-    display: flex; flex-direction: column; gap: 5px;
-    padding: 2px 0 12px; border-bottom: 1px solid var(--border);
+    padding: 4px 0 14px; border-bottom: 1px solid var(--border);
   }
   .tabla-comp-item:last-of-type .tabla-comp-detalle { border-bottom: none; }
-  .tabla-comp-detalle-row { display: flex; justify-content: space-between; font-size: 11px; color: var(--subtext); }
-  .tabla-comp-detalle-row strong { color: var(--text); font-family: 'Roboto', sans-serif; font-weight: 600; }
+  .tabla-comp-vs { display: flex; align-items: center; justify-content: center; gap: 20px; }
+  .tabla-comp-vs-col { text-align: center; }
+  .tabla-comp-vs-label { font-size: 10px; color: var(--subtext); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 4px; }
+  .tabla-comp-vs-valor { font-family: 'Roboto', sans-serif; font-size: 15px; font-weight: 700; color: var(--text); }
+  .tabla-comp-vs-sep { font-size: 11px; color: var(--subtext); align-self: center; margin-top: 14px; }
 
   .modal-overlay, .modal-abonar-overlay {
     position: fixed; inset: 0;
@@ -628,6 +631,7 @@
     <div class="tabla-comp-header">
       <div>Categoría</div>
       <div>Diferencia</div>
+      <div></div>
     </div>
     <div id="tabla-comp-body"></div>
   </div>
@@ -1584,11 +1588,21 @@
           <div class="tabla-comp-row" onclick="toggleCategoriaComparativa('${catEscapada}')">
             <div class="tabla-comp-cat">${emoji} ${nombre}</div>
             <div class="tabla-comp-diff ${claseDiff}">${signo}$${Math.abs(diferencia).toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
+            <div class="tabla-comp-chevron">${abierta ? '▴' : '▾'}</div>
           </div>
           ${abierta ? `
             <div class="tabla-comp-detalle">
-              <div class="tabla-comp-detalle-row"><span>Estimado</span><strong>${fmt(estimado)}</strong></div>
-              <div class="tabla-comp-detalle-row"><span>Real</span><strong>${fmt(real)}</strong></div>
+              <div class="tabla-comp-vs">
+                <div class="tabla-comp-vs-col">
+                  <div class="tabla-comp-vs-label">Meta</div>
+                  <div class="tabla-comp-vs-valor">${fmt(estimado)}</div>
+                </div>
+                <div class="tabla-comp-vs-sep">vs</div>
+                <div class="tabla-comp-vs-col">
+                  <div class="tabla-comp-vs-label">Realidad</div>
+                  <div class="tabla-comp-vs-valor">${fmt(real)}</div>
+                </div>
+              </div>
             </div>
           ` : ''}
         </div>
