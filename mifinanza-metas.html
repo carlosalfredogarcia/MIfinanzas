@@ -1384,7 +1384,7 @@
 
     console.log('[Planificador] mesActual (excluido):', mesActual)
     console.log('[Planificador] mesMasAntiguo:', mesMasAntiguo)
-    console.log('[Planificador] mesesCerrados usados para el promedio:', mesesCerrados)
+    console.log('[Planificador] mesesCerrados:', JSON.stringify(mesesCerrados))
     console.log('[Planificador] gastos crudos recibidos de Supabase:', gastosData)
     console.log('[Planificador] gastos_fijos activos recibidos de Supabase:', fijosData)
 
@@ -1408,14 +1408,14 @@
       })
     })
 
-    console.log('[Planificador] sumasPorCategoria (suma de los', numMeses, 'meses):', sumasPorCategoria)
+    console.log('[Planificador] sumasPorCategoria:', JSON.stringify(sumasPorCategoria))
 
     gastosOriginal = {}
     Object.keys(sumasPorCategoria).forEach(cat => {
       gastosOriginal[cat] = sumasPorCategoria[cat] / numMeses
     })
 
-    console.log('[Planificador] gastosOriginal (promedio final por categoria):', gastosOriginal)
+    console.log('[Planificador] gastosOriginal:', JSON.stringify(gastosOriginal))
 
     renderGastos()
   }
