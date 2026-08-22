@@ -301,6 +301,7 @@
     transition: transform 0.2s ease;
   }
   .bloque-chevron.abierto { transform: rotate(90deg); }
+  .chevron-metas.abierto { transform: rotate(180deg); }
 
   .bloque-total-grande {
     font-family: 'Roboto', sans-serif; font-size: 24px; font-weight: 700;
@@ -338,7 +339,7 @@
   .var-input:focus { border-color: rgba(88,166,255,0.3); }
 
   .tabla-comparativa {
-    margin: 0 24px 16px; background: var(--card); border-radius: 20px;
+    background: var(--card); border-radius: 20px;
     padding: 16px 18px; border: 1px solid var(--border);
   }
   .tabla-comp-header, .tabla-comp-row {
@@ -629,14 +630,23 @@
     </div>
   </div>
 
-  <div class="seccion-label" style="margin-top:16px">Seguimiento de metas</div>
-  <div class="tabla-comparativa">
-    <div class="tabla-comp-header">
-      <div>Categoría</div>
-      <div>Diferencia</div>
-      <div></div>
+  <div class="bloque-acordeon" style="margin:16px 24px 0">
+    <div class="bloque-card clicable" onclick="toggleBloque('metas')">
+      <div class="bloque-card-top" style="margin-bottom:0">
+        <span class="bloque-label">Seguimiento de metas</span>
+        <span class="bloque-chevron chevron-metas" id="chevron-metas">▾</span>
+      </div>
     </div>
-    <div id="tabla-comp-body"></div>
+    <div class="bloque-detalle" id="detalle-metas" style="display:none">
+      <div class="tabla-comparativa">
+        <div class="tabla-comp-header">
+          <div>Categoría</div>
+          <div>Diferencia</div>
+          <div></div>
+        </div>
+        <div id="tabla-comp-body"></div>
+      </div>
+    </div>
   </div>
 
   <div class="seccion-label" style="margin-top:16px">Mi colchón de ahorro</div>
