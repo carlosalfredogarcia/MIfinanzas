@@ -367,6 +367,9 @@
   .tabla-comp-vs-col { text-align: center; }
   .tabla-comp-vs-label { font-size: 10px; color: var(--subtext); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 4px; }
   .tabla-comp-vs-valor { font-family: 'Roboto', sans-serif; font-size: 15px; font-weight: 700; color: var(--text); }
+  .tabla-comp-vs-valor.txt-meta { color: #e3b341; }
+  .tabla-comp-vs-valor.pos { color: #3fb950; }
+  .tabla-comp-vs-valor.neg { color: #f85149; }
   .tabla-comp-vs-sep { font-size: 11px; color: var(--subtext); align-self: center; margin-top: 14px; }
 
   .modal-overlay, .modal-abonar-overlay {
@@ -1607,12 +1610,12 @@
               <div class="tabla-comp-vs">
                 <div class="tabla-comp-vs-col">
                   <div class="tabla-comp-vs-label">Meta</div>
-                  <div class="tabla-comp-vs-valor">${fmt(estimado)}</div>
+                  <div class="tabla-comp-vs-valor txt-meta">${fmt(estimado)}</div>
                 </div>
                 <div class="tabla-comp-vs-sep">vs</div>
                 <div class="tabla-comp-vs-col">
                   <div class="tabla-comp-vs-label">Realidad</div>
-                  <div class="tabla-comp-vs-valor">${fmt(real)}</div>
+                  <div class="tabla-comp-vs-valor ${claseDiff}">${fmt(real)}</div>
                 </div>
               </div>
             </div>
