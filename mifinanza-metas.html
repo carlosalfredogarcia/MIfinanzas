@@ -281,13 +281,6 @@
 
   .plan-input:focus { border-color: rgba(88,166,255,0.3); }
 
-  .bloque-simple { margin-bottom: 16px; }
-  .bloque-simple label {
-    font-size: 11px; color: var(--subtext);
-    text-transform: uppercase; letter-spacing: 0.08em;
-    display: block; margin-bottom: 6px;
-  }
-
   .bloque-acordeon { border-top: 1px solid var(--border); }
   .bloque-acordeon:last-of-type { border-bottom: 1px solid var(--border); }
 
@@ -298,6 +291,8 @@
   .bloque-label { font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 700; color: var(--text); }
   .bloque-header-right { display: flex; align-items: center; gap: 8px; }
   .bloque-total { font-family: 'Roboto', sans-serif; font-size: 14px; font-weight: 700; color: var(--text); }
+  .bloque-total.txt-verde { color: var(--success); }
+  .bloque-total.txt-rojo  { color: var(--danger); }
   .bloque-chevron {
     display: inline-block; color: var(--subtext); font-size: 18px;
     transition: transform 0.2s ease;
@@ -578,21 +573,30 @@
       </div>
     </div>
 
-    <div class="bloque-simple">
-      <label>Ingreso mensual</label>
-      <input class="plan-input" type="number" inputmode="decimal" id="p-ingreso" placeholder="$0.00">
+    <div class="bloque-acordeon">
+      <div class="bloque-header" onclick="toggleBloque('ingresos')">
+        <span class="bloque-label">Ingresos</span>
+        <div class="bloque-header-right">
+          <span class="bloque-total txt-verde" id="p-ingresos-total">$0.00</span>
+          <span class="bloque-chevron" id="chevron-ingresos">›</span>
+        </div>
+      </div>
+      <div class="bloque-detalle" id="detalle-ingresos" style="display:none">
+        <div id="ingresos-lista-plan"></div>
+        <button class="btn-restablecer" onclick="restablecerIngresos()">Restablecer</button>
+      </div>
     </div>
 
     <div class="bloque-acordeon">
       <div class="bloque-header" onclick="toggleBloque('gastos')">
         <span class="bloque-label">Gastos</span>
         <div class="bloque-header-right">
-          <span class="bloque-total" id="p-gastos-total">$0.00</span>
+          <span class="bloque-total txt-rojo" id="p-gastos-total">$0.00</span>
           <span class="bloque-chevron" id="chevron-gastos">›</span>
         </div>
       </div>
       <div class="bloque-detalle" id="detalle-gastos" style="display:none">
-        <div class="variables-sub">Últimos 3 meses cerrados</div>
+        <div class="variables-sub">Basado en meses cerrados</div>
         <div id="gastos-lista-plan"></div>
         <button class="btn-restablecer" onclick="restablecerGastos()">Restablecer</button>
       </div>
@@ -1270,7 +1274,9 @@
     chevron.classList.toggle('abierto', abriendo)
   }
 
-  async function cargarIngresoMensual() {
+  let ingresosOriginal = []
+
+  async function cargarIngresos() {
     if (!window.currentUserId) {
       await new Promise(resolve => {
         const iv = setInterval(() => {
@@ -1280,17 +1286,56 @@
       })
     }
     if (!window.currentUserId) return
-    const inicioMes = new Date().toISOString().substring(0, 7) + '-01'
+    const hoy = new Date()
+    const inicioMes = `${hoy.getFullYear()}-${String(hoy.getMonth() + 1).padStart(2, '0')}-01`
     const { data, error } = await dbClient
       .from('ingresos')
-      .select('monto')
+      .select('id, concepto, tipo, monto, fecha')
       .eq('usuario_id', window.currentUserId)
       .gte('fecha', inicioMes)
 
     if (error || !data) return
-    const total = data.reduce((s, r) => s + parseFloat(r.monto || 0), 0)
-    document.getElementById('p-ingreso').value = total.toFixed(2)
+    ingresosOriginal = data
+    renderIngresos()
+  }
+
+  function guardarIngresosLocal() {
+    const datos = {}
+    document.querySelectorAll('.ingreso-input').forEach(inp => { datos[inp.dataset.id] = inp.value })
+    localStorage.setItem('planificador_ingresos', JSON.stringify(datos))
+  }
+
+  function renderIngresos() {
+    const cont = document.getElementById('ingresos-lista-plan')
+    const guardado = JSON.parse(localStorage.getItem('planificador_ingresos') || '{}')
+    cont.innerHTML = ingresosOriginal.map(r => {
+      const valorInicial = guardado[r.id] !== undefined ? guardado[r.id] : parseFloat(r.monto || 0).toFixed(2)
+      const label = r.concepto || r.tipo || 'Ingreso'
+      return `
+        <div class="plan-row">
+          <label>${label}</label>
+          <input class="plan-input ingreso-input" type="number" inputmode="decimal" data-id="${r.id}" value="${valorInicial}">
+        </div>
+      `
+    }).join('')
+    document.querySelectorAll('.ingreso-input').forEach(inp => {
+      inp.addEventListener('input', () => { guardarIngresosLocal(); actualizarPlanificador() })
+      inp.addEventListener('focus', function() { this.select() })
+    })
     actualizarPlanificador()
+  }
+
+  function restablecerIngresos() {
+    document.querySelectorAll('.ingreso-input').forEach(inp => {
+      const r = ingresosOriginal.find(x => String(x.id) === inp.dataset.id)
+      if (r) inp.value = parseFloat(r.monto || 0).toFixed(2)
+    })
+    localStorage.removeItem('planificador_ingresos')
+    actualizarPlanificador()
+  }
+
+  function totalIngresos() {
+    return [...document.querySelectorAll('.ingreso-input')].reduce((s, inp) => s + (parseFloat(inp.value) || 0), 0)
   }
 
   let gastosOriginal = {}
@@ -1307,14 +1352,15 @@
     if (!window.currentUserId) return
     const uid = window.currentUserId
 
+    const hoy = new Date()
+    const mesActual = `${hoy.getFullYear()}-${String(hoy.getMonth() + 1).padStart(2, '0')}`
+    const inicioMesActual = `${mesActual}-01`
+
     const [{ data: gastosData, error: errG }, { data: fijosData, error: errF }] = await Promise.all([
-      dbClient.from('gastos').select('monto, categoria, fecha').eq('usuario_id', uid),
+      dbClient.from('gastos').select('monto, categoria, fecha').eq('usuario_id', uid).lt('fecha', inicioMesActual),
       dbClient.from('gastos_fijos').select('categoria, monto, fecha_inicio, fecha_fin').eq('usuario_id', uid).eq('activo', true)
     ])
     if (errG || errF) return
-
-    const hoy = new Date()
-    const mesActual = hoy.toISOString().substring(0, 7)
 
     const fechasConocidas = [
       ...(gastosData || []).map(g => g.fecha),
@@ -1389,7 +1435,7 @@
             <span>${nombre}</span>
           </div>
           <div class="var-bottom">
-            <span class="var-promedio">Últ. 3m: ${fmt(gastosOriginal[cat])}</span>
+            <span class="var-promedio">Últ. meses: ${fmt(gastosOriginal[cat])}</span>
             <input class="var-input variable-input" type="number" inputmode="decimal" data-cat="${cat}" value="${valorInicial}">
           </div>
         `
@@ -1415,10 +1461,11 @@
   }
 
   function actualizarPlanificador() {
-    const ingreso = parseFloat(document.getElementById('p-ingreso').value) || 0
-    const gastos  = totalGastos()
-    const disponible = ingreso - gastos
-    document.getElementById('p-gastos-total').textContent = fmt(gastos)
+    const ingresos = totalIngresos()
+    const gastos   = totalGastos()
+    const disponible = ingresos - gastos
+    document.getElementById('p-ingresos-total').textContent = fmt(ingresos)
+    document.getElementById('p-gastos-total').textContent   = fmt(gastos)
     const elDisponible = document.getElementById('p-disponible-header')
     elDisponible.textContent = fmt(disponible)
     elDisponible.classList.toggle('negativo', disponible < 0)
@@ -1481,10 +1528,8 @@
     }).join('')
   }
 
-  document.getElementById('p-ingreso').addEventListener('input', actualizarPlanificador)
-
   cargarMetas()
-  cargarIngresoMensual()
+  cargarIngresos()
   cargarGastos()
   cargarGastosRealMes()
   actualizarPlanificador()
