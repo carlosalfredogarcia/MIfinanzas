@@ -1426,6 +1426,7 @@
       dragging = true
       moved = false
       front.style.transition = 'none'
+      front.setPointerCapture(e.pointerId)
     })
     front.addEventListener('pointermove', e => {
       if (!dragging) return
@@ -1440,7 +1441,6 @@
       front.style.transform = 'translateX(0)'
     }
     front.addEventListener('pointerup', soltar)
-    front.addEventListener('pointerleave', soltar)
     front.addEventListener('pointercancel', soltar)
   }
 
