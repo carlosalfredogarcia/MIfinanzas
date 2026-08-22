@@ -1321,11 +1321,12 @@
     cont.innerHTML = fijosOriginal.map(f => `
       <div class="plan-row">
         <label>${f.nombre}</label>
-        <input class="plan-input fijo-input" type="number" data-id="${f.id}" value="${parseFloat(f.monto || 0).toFixed(2)}">
+        <input class="plan-input fijo-input" type="number" inputmode="decimal" data-id="${f.id}" value="${parseFloat(f.monto || 0).toFixed(2)}">
       </div>
     `).join('')
     document.querySelectorAll('.fijo-input').forEach(inp => {
       inp.addEventListener('input', actualizarPlanificador)
+      inp.addEventListener('focus', function() { this.select() })
     })
     actualizarPlanificador()
   }
@@ -1404,7 +1405,7 @@
               <span class="var-emoji">${emoji}</span>
               <span class="var-nombre">${nombre}</span>
             </div>
-            <input class="var-input variable-input" type="number" data-cat="${cat}" value="${gastosVariablesOriginal[cat].toFixed(2)}">
+            <input class="var-input variable-input" type="number" inputmode="decimal" data-cat="${cat}" value="${gastosVariablesOriginal[cat].toFixed(2)}">
           </div>
         `
         cont.appendChild(row)
@@ -1412,6 +1413,7 @@
       })
     document.querySelectorAll('.variable-input').forEach(inp => {
       inp.addEventListener('input', actualizarPlanificador)
+      inp.addEventListener('focus', function() { this.select() })
     })
     actualizarPlanificador()
   }
