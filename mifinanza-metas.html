@@ -1541,17 +1541,29 @@
       })
     }
     if (!window.currentUserId) return
-    const inicioMes = new Date().toISOString().substring(0, 7) + '-01'
-    const { data, error } = await dbClient
-      .from('gastos')
-      .select('monto, categoria')
-      .eq('usuario_id', window.currentUserId)
-      .gte('fecha', inicioMes)
+    const uid = window.currentUserId
+    const hoy = new Date()
+    const mesActual = `${hoy.getFullYear()}-${String(hoy.getMonth() + 1).padStart(2, '0')}`
+    const inicioMes = `${mesActual}-01`
 
-    if (error || !data) return
+    const [{ data: gastosData, error: errG }, { data: fijosData, error: errF }] = await Promise.all([
+      dbClient.from('gastos').select('monto, categoria').eq('usuario_id', uid).gte('fecha', inicioMes),
+      dbClient.from('gastos_fijos').select('categoria, monto, fecha_inicio, fecha_fin').eq('usuario_id', uid)
+    ])
+
+    if (errG || errF) return
     gastosRealMes = {}
-    data.forEach(g => {
-      gastosRealMes[g.categoria] = (gastosRealMes[g.categoria] || 0) + parseFloat(g.monto || 0)
+    ;(gastosData || []).forEach(g => {
+      const cat = g.categoria || 'Otros'
+      gastosRealMes[cat] = (gastosRealMes[cat] || 0) + parseFloat(g.monto || 0)
+    })
+    ;(fijosData || []).forEach(f => {
+      const desde = f.fecha_inicio ? f.fecha_inicio.substring(0, 7) : null
+      if (!desde) return
+      const hasta = f.fecha_fin ? f.fecha_fin.substring(0, 7) : mesActual
+      if (mesActual < desde || mesActual > hasta) return
+      const cat = f.categoria || 'Otros'
+      gastosRealMes[cat] = (gastosRealMes[cat] || 0) + parseFloat(f.monto || 0)
     })
     renderTablaComparativa()
   }
