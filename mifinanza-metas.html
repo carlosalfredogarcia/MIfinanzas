@@ -584,31 +584,17 @@
     </div>
 
     <div class="bloque-acordeon">
-      <div class="bloque-header" onclick="toggleBloque('fijos')">
-        <span class="bloque-label">Gastos fijos</span>
+      <div class="bloque-header" onclick="toggleBloque('gastos')">
+        <span class="bloque-label">Gastos</span>
         <div class="bloque-header-right">
-          <span class="bloque-total" id="p-fijos-total">$0.00</span>
-          <span class="bloque-chevron" id="chevron-fijos">›</span>
+          <span class="bloque-total" id="p-gastos-total">$0.00</span>
+          <span class="bloque-chevron" id="chevron-gastos">›</span>
         </div>
       </div>
-      <div class="bloque-detalle" id="detalle-fijos" style="display:none">
-        <div id="fijos-lista-plan"></div>
-        <button class="btn-restablecer" onclick="restablecerFijos()">Restablecer</button>
-      </div>
-    </div>
-
-    <div class="bloque-acordeon">
-      <div class="bloque-header" onclick="toggleBloque('variables')">
-        <span class="bloque-label">Gastos variables</span>
-        <div class="bloque-header-right">
-          <span class="bloque-total" id="p-variables-total">$0.00</span>
-          <span class="bloque-chevron" id="chevron-variables">›</span>
-        </div>
-      </div>
-      <div class="bloque-detalle" id="detalle-variables" style="display:none">
+      <div class="bloque-detalle" id="detalle-gastos" style="display:none">
         <div class="variables-sub">Últimos 3 meses cerrados</div>
-        <div id="variables-lista"></div>
-        <button class="btn-restablecer" onclick="restablecerVariables()">Restablecer</button>
+        <div id="gastos-lista-plan"></div>
+        <button class="btn-restablecer" onclick="restablecerGastos()">Restablecer</button>
       </div>
     </div>
 
@@ -1307,68 +1293,9 @@
     actualizarPlanificador()
   }
 
-  let fijosOriginal = []
+  let gastosOriginal = {}
 
-  async function cargarGastosFijosPlanificador() {
-    if (!window.currentUserId) {
-      await new Promise(resolve => {
-        const iv = setInterval(() => {
-          if (window.currentUserId) { clearInterval(iv); resolve() }
-        }, 50)
-        setTimeout(() => { clearInterval(iv); resolve() }, 5000)
-      })
-    }
-    if (!window.currentUserId) return
-    const { data, error } = await dbClient
-      .from('gastos_fijos')
-      .select('id, nombre, monto')
-      .eq('usuario_id', window.currentUserId)
-      .eq('activo', true)
-
-    if (error || !data) return
-    fijosOriginal = data
-    renderFijosPlanificador()
-  }
-
-  function guardarFijosLocal() {
-    const datos = {}
-    document.querySelectorAll('.fijo-input').forEach(inp => { datos[inp.dataset.id] = inp.value })
-    localStorage.setItem('planificador_fijos', JSON.stringify(datos))
-  }
-
-  function renderFijosPlanificador() {
-    const cont = document.getElementById('fijos-lista-plan')
-    cont.innerHTML = fijosOriginal.map(f => `
-      <div class="plan-row">
-        <label>${f.nombre}</label>
-        <input class="plan-input fijo-input" type="number" inputmode="decimal" data-id="${f.id}" value="${parseFloat(f.monto || 0).toFixed(2)}">
-      </div>
-    `).join('')
-    const guardado = JSON.parse(localStorage.getItem('planificador_fijos') || '{}')
-    document.querySelectorAll('.fijo-input').forEach(inp => {
-      if (guardado[inp.dataset.id] !== undefined) inp.value = guardado[inp.dataset.id]
-      inp.addEventListener('input', () => { guardarFijosLocal(); actualizarPlanificador() })
-      inp.addEventListener('focus', function() { this.select() })
-    })
-    actualizarPlanificador()
-  }
-
-  function restablecerFijos() {
-    document.querySelectorAll('.fijo-input').forEach(inp => {
-      const f = fijosOriginal.find(x => String(x.id) === inp.dataset.id)
-      if (f) inp.value = parseFloat(f.monto || 0).toFixed(2)
-    })
-    localStorage.removeItem('planificador_fijos')
-    actualizarPlanificador()
-  }
-
-  function totalFijos() {
-    return [...document.querySelectorAll('.fijo-input')].reduce((s, inp) => s + (parseFloat(inp.value) || 0), 0)
-  }
-
-  let gastosVariablesOriginal = {}
-
-  async function cargarGastosVariables() {
+  async function cargarGastos() {
     if (!window.currentUserId) {
       await new Promise(resolve => {
         const iv = setInterval(() => {
@@ -1381,50 +1308,79 @@
     const uid = window.currentUserId
 
     const [{ data: gastosData, error: errG }, { data: fijosData, error: errF }] = await Promise.all([
-      dbClient.from('gastos').select('monto, categoria, fecha').eq('usuario_id', uid).order('fecha', { ascending: false }),
-      dbClient.from('gastos_fijos').select('categoria').eq('usuario_id', uid).eq('activo', true)
+      dbClient.from('gastos').select('monto, categoria, fecha').eq('usuario_id', uid),
+      dbClient.from('gastos_fijos').select('categoria, monto, fecha_inicio, fecha_fin').eq('usuario_id', uid).eq('activo', true)
     ])
     if (errG || errF) return
 
-    const categoriasFijas = new Set((fijosData || []).map(f => f.categoria))
-    const mesActual = new Date().toISOString().substring(0, 7)
-    const mesesDisponibles = [...new Set((gastosData || []).map(g => g.fecha.substring(0, 7)))]
-      .filter(m => m !== mesActual)
-      .sort().reverse()
-    const mesesUsar = mesesDisponibles.slice(0, 3)
-    const numMeses = mesesUsar.length || 1
+    const hoy = new Date()
+    const mesActual = hoy.toISOString().substring(0, 7)
+
+    const fechasConocidas = [
+      ...(gastosData || []).map(g => g.fecha),
+      ...(fijosData || []).map(f => f.fecha_inicio).filter(Boolean)
+    ]
+    if (fechasConocidas.length === 0) {
+      gastosOriginal = {}
+      renderGastos()
+      return
+    }
+    const mesMasAntiguo = fechasConocidas.map(f => f.substring(0, 7)).sort()[0]
+
+    const mesesCerrados = []
+    const cursor = new Date(hoy.getFullYear(), hoy.getMonth(), 1)
+    for (let i = 0; i < 3; i++) {
+      cursor.setMonth(cursor.getMonth() - 1)
+      const key = `${cursor.getFullYear()}-${String(cursor.getMonth() + 1).padStart(2, '0')}`
+      if (key >= mesMasAntiguo) mesesCerrados.push(key)
+    }
+    const numMeses = mesesCerrados.length || 1
 
     const sumasPorCategoria = {}
     ;(gastosData || []).forEach(g => {
       const mes = g.fecha.substring(0, 7)
-      if (!mesesUsar.includes(mes)) return
-      if (categoriasFijas.has(g.categoria)) return
-      sumasPorCategoria[g.categoria] = (sumasPorCategoria[g.categoria] || 0) + parseFloat(g.monto || 0)
+      if (!mesesCerrados.includes(mes)) return
+      const cat = g.categoria || 'Otros'
+      sumasPorCategoria[cat] = (sumasPorCategoria[cat] || 0) + parseFloat(g.monto || 0)
+    })
+    ;(fijosData || []).forEach(f => {
+      const cat    = f.categoria || 'Otros'
+      const monto  = parseFloat(f.monto || 0)
+      const desde  = f.fecha_inicio ? f.fecha_inicio.substring(0, 7) : null
+      if (!desde) return
+      const hasta = f.fecha_fin ? f.fecha_fin.substring(0, 7) : mesActual
+      mesesCerrados.forEach(mes => {
+        if (mes >= desde && mes <= hasta) {
+          sumasPorCategoria[cat] = (sumasPorCategoria[cat] || 0) + monto
+        }
+      })
     })
 
-    gastosVariablesOriginal = {}
+    gastosOriginal = {}
     Object.keys(sumasPorCategoria).forEach(cat => {
-      gastosVariablesOriginal[cat] = sumasPorCategoria[cat] / numMeses
+      gastosOriginal[cat] = sumasPorCategoria[cat] / numMeses
     })
 
-    renderGastosVariables()
+    renderGastos()
   }
 
-  function guardarVariablesLocal() {
+  function guardarGastosLocal() {
     const datos = {}
     document.querySelectorAll('.variable-input').forEach(inp => { datos[inp.dataset.cat] = inp.value })
-    localStorage.setItem('planificador_variables', JSON.stringify(datos))
+    localStorage.setItem('planificador_gastos', JSON.stringify(datos))
   }
 
-  function renderGastosVariables() {
-    const cont = document.getElementById('variables-lista')
+  function renderGastos() {
+    const cont = document.getElementById('gastos-lista-plan')
     cont.innerHTML = ''
-    Object.keys(gastosVariablesOriginal)
-      .sort((a, b) => gastosVariablesOriginal[b] - gastosVariablesOriginal[a])
+    const guardado = JSON.parse(localStorage.getItem('planificador_gastos') || '{}')
+    Object.keys(gastosOriginal)
+      .sort((a, b) => gastosOriginal[b] - gastosOriginal[a])
       .forEach(cat => {
         const partes  = cat.trim().split(' ')
         const emoji   = partes[0]
         const nombre  = partes.slice(1).join(' ') || cat
+        const valorInicial = guardado[cat] !== undefined ? guardado[cat] : gastosOriginal[cat].toFixed(2)
         const row = document.createElement('div')
         row.className = 'var-row'
         row.innerHTML = `
@@ -1433,40 +1389,36 @@
             <span>${nombre}</span>
           </div>
           <div class="var-bottom">
-            <span class="var-promedio">Últ. meses: ${fmt(gastosVariablesOriginal[cat])}</span>
-            <input class="var-input variable-input" type="number" inputmode="decimal" data-cat="${cat}" value="${gastosVariablesOriginal[cat].toFixed(2)}">
+            <span class="var-promedio">Últ. 3m: ${fmt(gastosOriginal[cat])}</span>
+            <input class="var-input variable-input" type="number" inputmode="decimal" data-cat="${cat}" value="${valorInicial}">
           </div>
         `
         cont.appendChild(row)
       })
-    const guardado = JSON.parse(localStorage.getItem('planificador_variables') || '{}')
     document.querySelectorAll('.variable-input').forEach(inp => {
-      if (guardado[inp.dataset.cat] !== undefined) inp.value = guardado[inp.dataset.cat]
-      inp.addEventListener('input', () => { guardarVariablesLocal(); actualizarPlanificador() })
+      inp.addEventListener('input', () => { guardarGastosLocal(); actualizarPlanificador() })
       inp.addEventListener('focus', function() { this.select() })
     })
     actualizarPlanificador()
   }
 
-  function restablecerVariables() {
+  function restablecerGastos() {
     document.querySelectorAll('.variable-input').forEach(inp => {
-      inp.value = gastosVariablesOriginal[inp.dataset.cat].toFixed(2)
+      inp.value = gastosOriginal[inp.dataset.cat].toFixed(2)
     })
-    localStorage.removeItem('planificador_variables')
+    localStorage.removeItem('planificador_gastos')
     actualizarPlanificador()
   }
 
-  function totalVariables() {
+  function totalGastos() {
     return [...document.querySelectorAll('.variable-input')].reduce((s, inp) => s + (parseFloat(inp.value) || 0), 0)
   }
 
   function actualizarPlanificador() {
-    const ingreso   = parseFloat(document.getElementById('p-ingreso').value) || 0
-    const fijos     = totalFijos()
-    const variables = totalVariables()
-    const disponible = ingreso - fijos - variables
-    document.getElementById('p-fijos-total').textContent     = fmt(fijos)
-    document.getElementById('p-variables-total').textContent = fmt(variables)
+    const ingreso = parseFloat(document.getElementById('p-ingreso').value) || 0
+    const gastos  = totalGastos()
+    const disponible = ingreso - gastos
+    document.getElementById('p-gastos-total').textContent = fmt(gastos)
     const elDisponible = document.getElementById('p-disponible-header')
     elDisponible.textContent = fmt(disponible)
     elDisponible.classList.toggle('negativo', disponible < 0)
@@ -1533,8 +1485,7 @@
 
   cargarMetas()
   cargarIngresoMensual()
-  cargarGastosFijosPlanificador()
-  cargarGastosVariables()
+  cargarGastos()
   cargarGastosRealMes()
   actualizarPlanificador()
 </script>
