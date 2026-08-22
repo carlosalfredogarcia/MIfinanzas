@@ -1352,59 +1352,89 @@
     if (!window.currentUserId) return
     const uid = window.currentUserId
 
-    const hoy = new Date()
-    const mesActual = `${hoy.getFullYear()}-${String(hoy.getMonth() + 1).padStart(2, '0')}`
-    const inicioMesActual = `${mesActual}-01`
+    // --- INICIO: copiado tal cual de fetchDatos() en mifinanza-estadisticas-v2.html ---
+    const MESES_LABELS  = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic']
+    const MESES_NOMBRES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre']
 
-    const [{ data: gastosData, error: errG }, { data: fijosData, error: errF }] = await Promise.all([
-      dbClient.from('gastos').select('monto, categoria, fecha').eq('usuario_id', uid).lt('fecha', inicioMesActual),
-      dbClient.from('gastos_fijos').select('categoria, monto, fecha_inicio, fecha_fin').eq('usuario_id', uid).eq('activo', true)
+    const [
+      { data: gastos,  error: errG },
+      { data: ingresos, error: errI },
+      { data: fijos,   error: errF }
+    ] = await Promise.all([
+      dbClient.from('gastos').select('id, fecha, monto, categoria, descripcion').eq('usuario_id', uid).order('fecha', { ascending: true }),
+      dbClient.from('ingresos').select('fecha, monto').eq('usuario_id', uid).order('fecha', { ascending: true }),
+      dbClient.from('gastos_fijos').select('id, monto, categoria, nombre, fecha_inicio, fecha_fin, dia_del_mes').eq('usuario_id', uid)
     ])
-    if (errG || errF) return
 
-    const fechasConocidas = [
-      ...(gastosData || []).map(g => g.fecha),
-      ...(fijosData || []).map(f => f.fecha_inicio).filter(Boolean)
-    ]
-    if (fechasConocidas.length === 0) {
-      gastosOriginal = {}
-      renderGastos()
-      return
-    }
-    const mesMasAntiguo = fechasConocidas.map(f => f.substring(0, 7)).sort()[0]
+    if (errG || errI || errF) return
 
-    const mesesCerrados = []
-    const cursor = new Date(hoy.getFullYear(), hoy.getMonth(), 1)
-    for (let i = 0; i < 3; i++) {
-      cursor.setMonth(cursor.getMonth() - 1)
-      const key = `${cursor.getFullYear()}-${String(cursor.getMonth() + 1).padStart(2, '0')}`
-      if (key >= mesMasAntiguo) mesesCerrados.push(key)
-    }
+    const mapa = {}
+
+    ingresos.forEach(r => {
+      const key = r.fecha.substring(0, 7)
+      if (!mapa[key]) mapa[key] = { ingresos: 0, gastos: 0, cats: {}, movs: {} }
+      mapa[key].ingresos += parseFloat(r.monto || 0)
+    })
+
+    gastos.forEach(r => {
+      const key = r.fecha.substring(0, 7)
+      if (!mapa[key]) mapa[key] = { ingresos: 0, gastos: 0, cats: {}, movs: {} }
+      mapa[key].gastos += parseFloat(r.monto || 0)
+      const cat = r.categoria || 'Otros'
+      mapa[key].cats[cat] = (mapa[key].cats[cat] || 0) + parseFloat(r.monto || 0)
+      if (!mapa[key].movs[cat]) mapa[key].movs[cat] = []
+      mapa[key].movs[cat].push({ id: r.id, tipo: 'gasto', label: r.descripcion || cat, fecha: r.fecha, monto: parseFloat(r.monto || 0), categoria: cat })
+    })
+
+    const mesFin = new Date().toISOString().substring(0, 7)
+    ;(fijos || []).forEach(f => {
+      const desde = f.fecha_inicio ? f.fecha_inicio.substring(0, 7) : null
+      if (!desde) return
+      const hasta = f.fecha_fin ? f.fecha_fin.substring(0, 7) : mesFin
+      const cat   = f.categoria || 'Otros'
+      const monto = parseFloat(f.monto || 0)
+      Object.keys(mapa).forEach(key => {
+        if (key >= desde && key <= hasta) {
+          mapa[key].gastos += monto
+          mapa[key].cats[cat] = (mapa[key].cats[cat] || 0) + monto
+          const [kAnio, kMes] = key.split('-').map(Number)
+          const ultimoDia = new Date(kAnio, kMes, 0).getDate()
+          const dia = Math.min(f.dia_del_mes || 1, ultimoDia)
+          const fechaFijo = `${key}-${String(dia).padStart(2, '0')}`
+          if (!mapa[key].movs[cat]) mapa[key].movs[cat] = []
+          mapa[key].movs[cat].push({ id: f.id, tipo: 'fijo', label: f.nombre || cat, fecha: fechaFijo, monto, categoria: cat })
+        }
+      })
+    })
+
+    const datosMensuales = Object.entries(mapa)
+      .sort((a, b) => b[0].localeCompare(a[0]))
+      .map(([key, val]) => {
+        const [anio, mesNum] = key.split('-').map(Number)
+        return {
+          key,
+          mes: MESES_LABELS[mesNum - 1],
+          mesNombre: MESES_NOMBRES[mesNum - 1],
+          mesNum, anio,
+          ingresos: Math.round(val.ingresos * 100) / 100,
+          gastos:   Math.round(val.gastos   * 100) / 100,
+          cats:     val.cats,
+          movs:     val.movs
+        }
+      })
+    // --- FIN: copiado tal cual de fetchDatos() en mifinanza-estadisticas-v2.html ---
+
+    const mesActual = new Date().toISOString().substring(0, 7)
+    const mesesCerrados = datosMensuales.filter(d => d.key !== mesActual).slice(0, 3)
     const numMeses = mesesCerrados.length || 1
 
     console.log('[Planificador] mesActual (excluido):', mesActual)
-    console.log('[Planificador] mesMasAntiguo:', mesMasAntiguo)
-    console.log('[Planificador] mesesCerrados:', JSON.stringify(mesesCerrados))
-    console.log('[Planificador] gastos crudos recibidos de Supabase:', gastosData)
-    console.log('[Planificador] gastos_fijos activos recibidos de Supabase:', fijosData)
+    console.log('[Planificador] mesesCerrados:', JSON.stringify(mesesCerrados.map(d => d.key)))
 
     const sumasPorCategoria = {}
-    ;(gastosData || []).forEach(g => {
-      const mes = g.fecha.substring(0, 7)
-      if (!mesesCerrados.includes(mes)) return
-      const cat = g.categoria || 'Otros'
-      sumasPorCategoria[cat] = (sumasPorCategoria[cat] || 0) + parseFloat(g.monto || 0)
-    })
-    ;(fijosData || []).forEach(f => {
-      const cat    = f.categoria || 'Otros'
-      const monto  = parseFloat(f.monto || 0)
-      const desde  = f.fecha_inicio ? f.fecha_inicio.substring(0, 7) : null
-      if (!desde) return
-      const hasta = f.fecha_fin ? f.fecha_fin.substring(0, 7) : mesActual
-      mesesCerrados.forEach(mes => {
-        if (mes >= desde && mes <= hasta) {
-          sumasPorCategoria[cat] = (sumasPorCategoria[cat] || 0) + monto
-        }
+    mesesCerrados.forEach(d => {
+      Object.entries(d.cats).forEach(([cat, val]) => {
+        sumasPorCategoria[cat] = (sumasPorCategoria[cat] || 0) + val
       })
     })
 
