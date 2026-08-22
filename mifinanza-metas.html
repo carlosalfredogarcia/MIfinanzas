@@ -1316,6 +1316,12 @@
     renderFijosPlanificador()
   }
 
+  function guardarFijosLocal() {
+    const datos = {}
+    document.querySelectorAll('.fijo-input').forEach(inp => { datos[inp.dataset.id] = inp.value })
+    localStorage.setItem('planificador_fijos', JSON.stringify(datos))
+  }
+
   function renderFijosPlanificador() {
     const cont = document.getElementById('fijos-lista-plan')
     cont.innerHTML = fijosOriginal.map(f => `
@@ -1324,8 +1330,10 @@
         <input class="plan-input fijo-input" type="number" inputmode="decimal" data-id="${f.id}" value="${parseFloat(f.monto || 0).toFixed(2)}">
       </div>
     `).join('')
+    const guardado = JSON.parse(localStorage.getItem('planificador_fijos') || '{}')
     document.querySelectorAll('.fijo-input').forEach(inp => {
-      inp.addEventListener('input', actualizarPlanificador)
+      if (guardado[inp.dataset.id] !== undefined) inp.value = guardado[inp.dataset.id]
+      inp.addEventListener('input', () => { guardarFijosLocal(); actualizarPlanificador() })
       inp.addEventListener('focus', function() { this.select() })
     })
     actualizarPlanificador()
@@ -1336,6 +1344,7 @@
       const f = fijosOriginal.find(x => String(x.id) === inp.dataset.id)
       if (f) inp.value = parseFloat(f.monto || 0).toFixed(2)
     })
+    localStorage.removeItem('planificador_fijos')
     actualizarPlanificador()
   }
 
@@ -1387,6 +1396,12 @@
     renderGastosVariables()
   }
 
+  function guardarVariablesLocal() {
+    const datos = {}
+    document.querySelectorAll('.variable-input').forEach(inp => { datos[inp.dataset.cat] = inp.value })
+    localStorage.setItem('planificador_variables', JSON.stringify(datos))
+  }
+
   function renderGastosVariables() {
     const cont = document.getElementById('variables-lista')
     cont.innerHTML = ''
@@ -1411,8 +1426,10 @@
         cont.appendChild(row)
         initSwipeReveal(row)
       })
+    const guardado = JSON.parse(localStorage.getItem('planificador_variables') || '{}')
     document.querySelectorAll('.variable-input').forEach(inp => {
-      inp.addEventListener('input', actualizarPlanificador)
+      if (guardado[inp.dataset.cat] !== undefined) inp.value = guardado[inp.dataset.cat]
+      inp.addEventListener('input', () => { guardarVariablesLocal(); actualizarPlanificador() })
       inp.addEventListener('focus', function() { this.select() })
     })
     actualizarPlanificador()
@@ -1450,6 +1467,7 @@
     document.querySelectorAll('.variable-input').forEach(inp => {
       inp.value = gastosVariablesOriginal[inp.dataset.cat].toFixed(2)
     })
+    localStorage.removeItem('planificador_variables')
     actualizarPlanificador()
   }
 
