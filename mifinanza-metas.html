@@ -281,25 +281,36 @@
 
   .plan-input:focus { border-color: rgba(88,166,255,0.3); }
 
-  .bloque-acordeon { border-top: 1px solid var(--border); }
-  .bloque-acordeon:last-of-type { border-bottom: 1px solid var(--border); }
+  .bloque-acordeon { margin-bottom: 10px; }
 
-  .bloque-header {
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 14px 0; cursor: pointer;
+  .bloque-card {
+    background: #1c2128; border-radius: 16px; padding: 16px 18px;
   }
-  .bloque-label { font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 700; color: var(--text); }
-  .bloque-header-right { display: flex; align-items: center; gap: 8px; }
-  .bloque-total { font-family: 'Roboto', sans-serif; font-size: 14px; font-weight: 700; color: var(--text); }
-  .bloque-total.txt-verde { color: var(--success); }
-  .bloque-total.txt-rojo  { color: var(--danger); }
+  .bloque-card.clicable { cursor: pointer; }
+
+  .bloque-card-top {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 8px;
+  }
+  .bloque-label {
+    font-family: 'DM Sans', sans-serif; font-size: 11px; font-weight: 700;
+    color: var(--subtext); text-transform: uppercase; letter-spacing: 0.08em;
+  }
   .bloque-chevron {
-    display: inline-block; color: var(--subtext); font-size: 18px;
+    display: inline-block; color: var(--subtext); font-size: 16px;
     transition: transform 0.2s ease;
   }
   .bloque-chevron.abierto { transform: rotate(90deg); }
 
-  .bloque-detalle { padding-bottom: 16px; }
+  .bloque-total-grande {
+    font-family: 'Roboto', sans-serif; font-size: 24px; font-weight: 700;
+    color: var(--success);
+  }
+  .bloque-total-grande.txt-verde { color: var(--success); }
+  .bloque-total-grande.txt-rojo  { color: var(--danger); }
+  .bloque-total-grande.negativo  { color: var(--danger); }
+
+  .bloque-detalle { padding: 12px 2px 4px; }
   .variables-sub { font-size: 11px; color: var(--subtext); margin-bottom: 10px; }
 
   .btn-restablecer {
@@ -310,13 +321,7 @@
   }
   .btn-restablecer:hover { border-color: var(--accent); color: var(--accent); }
 
-  .disponible-card {
-    margin-top: 18px; background: var(--card2); border-radius: 16px;
-    padding: 18px; text-align: center; border: 1px solid var(--border);
-  }
-  .disponible-label { font-size: 11px; color: var(--subtext); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 6px; }
-  .disponible-valor { font-family: 'Roboto', sans-serif; font-size: 26px; font-weight: 700; color: var(--success); }
-  .disponible-valor.negativo { color: var(--danger); }
+  .disponible-card { margin-top: 4px; }
 
   .var-row { background: var(--card2); border-radius: 12px; padding: 12px 14px; margin-bottom: 8px; }
   .var-nombre-top { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text); margin-bottom: 8px; }
@@ -574,12 +579,12 @@
     </div>
 
     <div class="bloque-acordeon">
-      <div class="bloque-header" onclick="toggleBloque('ingresos')">
-        <span class="bloque-label">Ingresos</span>
-        <div class="bloque-header-right">
-          <span class="bloque-total txt-verde" id="p-ingresos-total">$0.00</span>
+      <div class="bloque-card clicable" onclick="toggleBloque('ingresos')">
+        <div class="bloque-card-top">
+          <span class="bloque-label">Ingresos</span>
           <span class="bloque-chevron" id="chevron-ingresos">›</span>
         </div>
+        <div class="bloque-total-grande txt-verde" id="p-ingresos-total">$0.00</div>
       </div>
       <div class="bloque-detalle" id="detalle-ingresos" style="display:none">
         <div id="ingresos-lista-plan"></div>
@@ -588,12 +593,12 @@
     </div>
 
     <div class="bloque-acordeon">
-      <div class="bloque-header" onclick="toggleBloque('gastos')">
-        <span class="bloque-label">Gastos</span>
-        <div class="bloque-header-right">
-          <span class="bloque-total txt-rojo" id="p-gastos-total">$0.00</span>
+      <div class="bloque-card clicable" onclick="toggleBloque('gastos')">
+        <div class="bloque-card-top">
+          <span class="bloque-label">Gastos</span>
           <span class="bloque-chevron" id="chevron-gastos">›</span>
         </div>
+        <div class="bloque-total-grande txt-rojo" id="p-gastos-total">$0.00</div>
       </div>
       <div class="bloque-detalle" id="detalle-gastos" style="display:none">
         <div class="variables-sub">Basado en meses cerrados</div>
@@ -602,9 +607,11 @@
       </div>
     </div>
 
-    <div class="disponible-card" id="disponible-card">
-      <div class="disponible-label">Disponible</div>
-      <div class="disponible-valor" id="p-disponible-header">$0.00</div>
+    <div class="bloque-card disponible-card" id="disponible-card">
+      <div class="bloque-card-top">
+        <span class="bloque-label">Disponible</span>
+      </div>
+      <div class="bloque-total-grande" id="p-disponible-header">$0.00</div>
     </div>
   </div>
 
