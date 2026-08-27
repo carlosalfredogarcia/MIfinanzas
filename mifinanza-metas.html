@@ -66,21 +66,6 @@
     pointer-events: none;
   }
 
-  .principal-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-    background: rgba(88,166,255,0.12);
-    border: 1px solid rgba(88,166,255,0.2);
-    border-radius: 100px;
-    padding: 4px 10px;
-    font-size: 10px;
-    color: var(--accent);
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    margin-bottom: 12px;
-  }
-
   .principal-top-row {
     display: flex;
     justify-content: space-between;
@@ -241,7 +226,6 @@
   }
 
   .btn-accion:hover { background: rgba(255,255,255,0.08); color: var(--text); }
-  .btn-accion.principal-btn:hover { background: rgba(88,166,255,0.1); color: var(--accent); }
   .btn-accion.danger-btn:hover { background: rgba(255,107,107,0.1); color: var(--danger); }
   .btn-accion:disabled { opacity: 0.4; cursor: not-allowed; }
 
@@ -531,10 +515,9 @@
   </div>
 
   <div class="meta-principal" id="bloque-principal">
-    <div class="principal-badge">⭐ Meta principal</div>
     <div class="principal-top-row">
       <div class="principal-nombre" id="p-nombre">Cargando...</div>
-      <button class="btn-eliminar-principal" id="btn-eliminar-p" onclick="eliminarPrincipal()" style="display:none">🗑 Eliminar</button>
+      <button class="btn-eliminar-principal" id="btn-eliminar-p" onclick="eliminarFondo()" style="display:none">🗑 Eliminar</button>
     </div>
     <div class="principal-fecha" id="p-fecha"></div>
 
@@ -823,7 +806,7 @@
 <script src="auth.js"></script>
 <script>
 
-  let metaPrincipalData = null
+  let metaFondoData = null
   let metaAbonarId = null
 
   function toast(msg, tipo = 'ok') {
@@ -866,7 +849,6 @@
       .from('metas')
       .select('*')
       .eq('usuario_id', window.currentUserId)
-      .order('es_principal', { ascending: false })
       .order('id', { ascending: true })
 
     if (error) {
@@ -875,24 +857,22 @@
       return
     }
 
-    const principal = data.find(m => m.es_principal) || null
-    const otras     = data.filter(m => !m.es_principal)
+    const fondo = data.find(m => m.icono === '💰') || null
+    const otras = data.filter(m => m !== fondo)
 
-    metaPrincipalData = principal
-    renderPrincipal(principal)
+    metaFondoData = fondo
+    renderFondo(fondo)
     renderOtras(otras)
 
-    if (principal && principal.icono === '💰') {
-      calcularAhorroReal()
-    }
+    if (fondo) calcularAhorroReal()
   }
 
-  function renderPrincipal(meta) {
+  function renderFondo(meta) {
     const btnEliminar = document.getElementById('btn-eliminar-p')
 
     if (!meta) {
-      document.getElementById('p-nombre').textContent  = 'Sin meta principal'
-      document.getElementById('p-fecha').textContent   = 'Marca una meta como principal ⭐'
+      document.getElementById('p-nombre').textContent  = 'Sin fondo de ahorro'
+      document.getElementById('p-fecha').textContent   = 'Crea una meta de tipo Fondo 💰'
       document.getElementById('p-percent').textContent = '—'
       document.getElementById('p-barra').style.width   = '0%'
       document.getElementById('p-llevado').textContent = '$0'
@@ -907,13 +887,7 @@
     document.getElementById('p-nombre').textContent = `${meta.icono || '🎯'} ${meta.nombre}`
     document.getElementById('p-fecha').textContent  = `${fmtFecha(meta.fecha_inicio)} → ${fmtFecha(meta.fecha_limite)}`
     btnEliminar.style.display = 'block'
-
-    const esAhorro = meta.icono === '💰'
-    document.getElementById('ahorro-detalle').style.display = esAhorro ? 'flex' : 'none'
-
-    if (!esAhorro) {
-      actualizarBarraPrincipal(meta.monto_actual, meta.monto_objetivo, meta.fecha_limite)
-    }
+    document.getElementById('ahorro-detalle').style.display = 'flex'
   }
 
   function actualizarBarraPrincipal(actual, objetivo, fechaLimite) {
@@ -943,13 +917,13 @@
   }
 
   async function calcularAhorroReal() {
-    if (!metaPrincipalData) return
-    if (!metaPrincipalData.fecha_inicio) {
+    if (!metaFondoData) return
+    if (!metaFondoData.fecha_inicio) {
       toast('Esta meta no tiene fecha de inicio', 'err')
       return
     }
 
-    const desde = metaPrincipalData.fecha_inicio.substring(0, 10)
+    const desde = metaFondoData.fecha_inicio.substring(0, 10)
     const hoy   = new Date().toISOString().split('T')[0]
     const uid   = window.currentUserId
 
@@ -988,11 +962,11 @@
     document.getElementById('d-ahorro').textContent   = fmt(ahorroReal)
 
     const actualPositivo = Math.max(0, ahorroReal)
-    actualizarBarraPrincipal(actualPositivo, metaPrincipalData.monto_objetivo, metaPrincipalData.fecha_limite)
+    actualizarBarraPrincipal(actualPositivo, metaFondoData.monto_objetivo, metaFondoData.fecha_limite)
 
     await dbClient.from('metas')
       .update({ monto_actual: actualPositivo })
-      .eq('id', metaPrincipalData.id)
+      .eq('id', metaFondoData.id)
   }
 
   function renderOtras(metas) {
@@ -1023,7 +997,6 @@
           <div class="progress-fill-sm" style="width:0%"></div>
         </div>
         <div class="meta-acciones">
-          <button class="btn-accion principal-btn" onclick="hacerPrincipal('${meta.id}')">⭐ Principal</button>
           ${!esAhorro ? `<button class="btn-accion" onclick="abrirModalAbonar('${meta.id}', '${meta.nombre}')">➕ Abonar</button>` : ''}
           <button class="btn-accion danger-btn" onclick="eliminarMeta('${meta.id}', this)">🗑</button>
         </div>
@@ -1033,10 +1006,10 @@
     })
   }
 
-  async function eliminarPrincipal() {
-    if (!metaPrincipalData) return
-    if (!confirm(`¿Eliminar la meta "${metaPrincipalData.nombre}"?`)) return
-    const { error } = await dbClient.from('metas').delete().eq('id', metaPrincipalData.id)
+  async function eliminarFondo() {
+    if (!metaFondoData) return
+    if (!confirm(`¿Eliminar la meta "${metaFondoData.nombre}"?`)) return
+    const { error } = await dbClient.from('metas').delete().eq('id', metaFondoData.id)
     if (error) { toast('Error al eliminar', 'err'); return }
     toast('Meta eliminada')
     cargarMetas()
@@ -1082,15 +1055,6 @@
 
     cerrarModal()
     toast('Meta creada ✓')
-    cargarMetas()
-  }
-
-  async function hacerPrincipal(id) {
-    const { error: err1 } = await dbClient.from('metas').update({ es_principal: false }).eq('usuario_id', window.currentUserId)
-    if (err1) { toast('Error al actualizar', 'err'); return }
-    const { error: err2 } = await dbClient.from('metas').update({ es_principal: true }).eq('id', id)
-    if (err2) { toast('Error al actualizar', 'err'); return }
-    toast('Meta principal actualizada ⭐')
     cargarMetas()
   }
 
