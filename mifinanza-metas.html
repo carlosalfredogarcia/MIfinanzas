@@ -105,6 +105,11 @@
   .lf-valor { font-family: 'Roboto', sans-serif; font-size: 24px; font-weight: 700; line-height: 1.1; }
   .lf-llevas .lf-valor { color: #3fb950; }
   .lf-faltan .lf-valor { color: #c0c0c0; }
+  .lf-input {
+    background: none; border: none; outline: none; padding: 0; margin: 0;
+    width: 100%; color: inherit; font: inherit; -moz-appearance: textfield;
+  }
+  .lf-input::-webkit-outer-spin-button, .lf-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
   .lf-sub { font-size: 10px; color: var(--subtext); margin-top: 4px; font-family: 'DM Sans', sans-serif; }
 
   .principal-progress-row { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; }
@@ -528,7 +533,7 @@
       </div>
       <div class="lf-card lf-faltan">
         <div class="lf-label">Faltan</div>
-        <div class="lf-valor" id="p-faltan">$0</div>
+        <input class="lf-valor lf-input" id="p-faltan" type="number" inputmode="decimal" value="0">
         <div class="lf-sub" id="p-faltan-de"></div>
       </div>
     </div>
@@ -711,7 +716,7 @@
       <label>Tipo de meta</label>
       <select id="m-tipo">
         <option value="manual">🎯 Meta específica (viaje, objeto, fondo...)</option>
-        <option value="ahorro">💰 Meta de ahorro (calcula sola con tus datos)</option>
+        <option value="ahorro">💰 Fondo</option>
       </select>
     </div>
     <div class="input-group">
@@ -876,7 +881,7 @@
       document.getElementById('p-percent').textContent = '—'
       document.getElementById('p-barra').style.width   = '0%'
       document.getElementById('p-llevado').textContent = '$0'
-      document.getElementById('p-faltan').textContent  = '$0'
+      document.getElementById('p-faltan').value = '0'
       document.getElementById('p-faltan-de').textContent = ''
       document.getElementById('ahorro-detalle').style.display = 'none'
       document.getElementById('promedio-wrap').style.display  = 'none'
@@ -896,7 +901,7 @@
 
     document.getElementById('p-percent').textContent = `${pct.toFixed(1)}%`
     document.getElementById('p-llevado').textContent = fmt(actual)
-    document.getElementById('p-faltan').textContent  = fmt(faltan)
+    document.getElementById('p-faltan').value = faltan.toFixed(2)
     document.getElementById('p-faltan-de').textContent = `de ${fmt(objetivo)}`
     setTimeout(() => { document.getElementById('p-barra').style.width = pct + '%' }, 100)
 
@@ -915,6 +920,27 @@
       promedio.style.display = 'none'
     }
   }
+
+  async function actualizarFaltanManual() {
+    if (!metaFondoData) return
+    const input   = document.getElementById('p-faltan')
+    const faltan  = parseFloat(input.value) || 0
+    const actual  = parseFloat(metaFondoData.monto_actual || 0)
+    const objetivo = Math.max(0, actual + faltan)
+
+    const { error } = await dbClient.from('metas')
+      .update({ monto_objetivo: objetivo })
+      .eq('id', metaFondoData.id)
+
+    if (error) { toast('Error al actualizar', 'err'); return }
+
+    metaFondoData.monto_objetivo = objetivo
+    actualizarBarraPrincipal(actual, objetivo, metaFondoData.fecha_limite)
+    toast('Meta actualizada')
+  }
+
+  document.getElementById('p-faltan').addEventListener('change', actualizarFaltanManual)
+  document.getElementById('p-faltan').addEventListener('focus', function() { this.select() })
 
   async function calcularAhorroReal() {
     if (!metaFondoData) return
