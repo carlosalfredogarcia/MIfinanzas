@@ -3,6 +3,9 @@
       "target": {
         "namespace": "android_app",
         "package_name": "com.mifinanza.app",
-        "sha256_cert_fingerprints": ["08:D5:46:EA:F7:05:AE:F5:88:B7:10:6A:ED:8C:44:5F:75:AB:61:F3:CB:7C:65:19:14:9D:2B:4D:2E:E0:B1:2C"]
+        "sha256_cert_fingerprints": [
+          "08:D5:46:EA:F7:05:AE:F5:88:B7:10:6A:ED:8C:44:5F:75:AB:61:F3:CB:7C:65:19:14:9D:2B:4D:2E:E0:B1:2C",
+          "A8:69:D0:2C:2C:3B:DF:BF:E8:4E:F6:E9:97:7E:AE:BD:3D:DE:7B:18:C3:DA:8A:73:FF:D6:9C:DE:9D:A0:AF:08"
+        ]
       }
     }]
