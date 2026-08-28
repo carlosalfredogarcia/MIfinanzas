@@ -80,6 +80,8 @@
     color: var(--text);
   }
 
+  .principal-btns { display: flex; align-items: center; gap: 6px; flex-shrink: 0; margin-left: 8px; }
+
   .btn-eliminar-principal {
     background: rgba(248,81,73,0.1);
     border: 1px solid rgba(248,81,73,0.2);
@@ -91,10 +93,24 @@
     font-family: 'DM Sans', sans-serif;
     transition: background 0.2s;
     flex-shrink: 0;
-    margin-left: 8px;
   }
 
   .btn-eliminar-principal:hover { background: rgba(248,81,73,0.2); }
+
+  .btn-editar-principal {
+    background: rgba(88,166,255,0.1);
+    border: 1px solid rgba(88,166,255,0.2);
+    border-radius: 8px;
+    padding: 5px 10px;
+    font-size: 11px;
+    color: var(--accent);
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    transition: background 0.2s;
+    flex-shrink: 0;
+  }
+
+  .btn-editar-principal:hover { background: rgba(88,166,255,0.2); }
 
   .principal-fecha { font-size: 12px; color: var(--subtext); margin-bottom: 16px; }
 
@@ -522,7 +538,10 @@
   <div class="meta-principal" id="bloque-principal">
     <div class="principal-top-row">
       <div class="principal-nombre" id="p-nombre">Cargando...</div>
-      <button class="btn-eliminar-principal" id="btn-eliminar-p" onclick="eliminarFondo()" style="display:none">🗑 Eliminar</button>
+      <div class="principal-btns">
+        <button class="btn-editar-principal" id="btn-editar-p" onclick="editarFondo()" style="display:none">✏️</button>
+        <button class="btn-eliminar-principal" id="btn-eliminar-p" onclick="eliminarFondo()" style="display:none">🗑 Eliminar</button>
+      </div>
     </div>
     <div class="principal-fecha" id="p-fecha"></div>
 
@@ -715,8 +734,8 @@
     <div class="input-group">
       <label>Tipo de meta</label>
       <select id="m-tipo">
-        <option value="manual">🎯 Meta específica (viaje, objeto, fondo...)</option>
         <option value="ahorro">💰 Fondo</option>
+        <option value="manual">🎯 Meta específica (viaje, objeto, fondo...)</option>
       </select>
     </div>
     <div class="input-group">
@@ -805,6 +824,31 @@
   </div>
 </div>
 
+<div class="modal-overlay" id="modal-editar-meta">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Editar meta</div>
+    <div class="input-group">
+      <label>Nombre de la meta</label>
+      <input type="text" id="em-nombre">
+    </div>
+    <div class="input-group">
+      <label>Monto objetivo</label>
+      <input type="number" id="em-monto" placeholder="$0.00">
+    </div>
+    <div class="input-group">
+      <label>Fecha fin</label>
+      <input type="month" id="em-fecha-fin">
+    </div>
+    <div class="input-group">
+      <label>Emoji / Icono</label>
+      <input type="text" id="em-icon" placeholder="Ej: ✈️ 🚗 🏠 🎹" maxlength="2">
+    </div>
+    <button class="btn-guardar" onclick="guardarEdicionMeta()">Guardar cambios</button>
+    <button class="btn-cancelar" onclick="cerrarModalEditarMeta()">Cancelar</button>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -813,6 +857,8 @@
 
   let metaFondoData = null
   let metaAbonarId = null
+  let todasMetasData = []
+  let idMetaEditar = null
 
   function toast(msg, tipo = 'ok') {
     const t = document.getElementById('toast')
@@ -865,6 +911,7 @@
     const fondo = data.find(m => m.icono === '💰') || null
     const otras = data.filter(m => m !== fondo)
 
+    todasMetasData = data
     metaFondoData = fondo
     renderFondo(fondo)
     renderOtras(otras)
@@ -874,6 +921,7 @@
 
   function renderFondo(meta) {
     const btnEliminar = document.getElementById('btn-eliminar-p')
+    const btnEditar   = document.getElementById('btn-editar-p')
 
     if (!meta) {
       document.getElementById('p-nombre').textContent  = 'Sin fondo de ahorro'
@@ -886,12 +934,14 @@
       document.getElementById('ahorro-detalle').style.display = 'none'
       document.getElementById('promedio-wrap').style.display  = 'none'
       btnEliminar.style.display = 'none'
+      btnEditar.style.display = 'none'
       return
     }
 
     document.getElementById('p-nombre').textContent = `${meta.icono || '🎯'} ${meta.nombre}`
     document.getElementById('p-fecha').textContent  = `${fmtFecha(meta.fecha_inicio)} → ${fmtFecha(meta.fecha_limite)}`
     btnEliminar.style.display = 'block'
+    btnEditar.style.display = 'block'
     document.getElementById('ahorro-detalle').style.display = 'flex'
   }
 
@@ -1023,6 +1073,7 @@
           <div class="progress-fill-sm" style="width:0%"></div>
         </div>
         <div class="meta-acciones">
+          <button class="btn-accion" onclick="editarMeta('${meta.id}')">✏️ Editar</button>
           ${!esAhorro ? `<button class="btn-accion" onclick="abrirModalAbonar('${meta.id}', '${meta.nombre}')">➕ Abonar</button>` : ''}
           <button class="btn-accion danger-btn" onclick="eliminarMeta('${meta.id}', this)">🗑</button>
         </div>
@@ -1038,6 +1089,49 @@
     const { error } = await dbClient.from('metas').delete().eq('id', metaFondoData.id)
     if (error) { toast('Error al eliminar', 'err'); return }
     toast('Meta eliminada')
+    cargarMetas()
+  }
+
+  function editarFondo() {
+    if (metaFondoData) editarMeta(metaFondoData.id)
+  }
+
+  function editarMeta(id) {
+    const meta = todasMetasData.find(m => String(m.id) === String(id))
+    if (!meta) return
+    idMetaEditar = id
+    document.getElementById('em-nombre').value    = meta.nombre
+    document.getElementById('em-monto').value     = meta.monto_objetivo
+    document.getElementById('em-fecha-fin').value = (meta.fecha_limite || '').slice(0, 7)
+    document.getElementById('em-icon').value      = meta.icono || ''
+    document.getElementById('modal-editar-meta').classList.add('visible')
+  }
+
+  function cerrarModalEditarMeta() {
+    document.getElementById('modal-editar-meta').classList.remove('visible')
+    idMetaEditar = null
+  }
+
+  async function guardarEdicionMeta() {
+    if (!idMetaEditar) return
+    const nombre    = document.getElementById('em-nombre').value.trim()
+    const monto     = parseFloat(document.getElementById('em-monto').value)
+    const fechaFin  = document.getElementById('em-fecha-fin').value
+    let   icono     = document.getElementById('em-icon').value.trim()
+
+    if (!nombre || !monto || monto <= 0) { toast('Completa nombre y monto', 'err'); return }
+    if (!fechaFin) { toast('Completa la fecha fin', 'err'); return }
+    if (!icono) icono = '🎯'
+
+    const { error } = await dbClient.from('metas')
+      .update({ nombre, monto_objetivo: monto, fecha_limite: fechaFin + '-01', icono })
+      .eq('id', idMetaEditar)
+      .eq('usuario_id', window.currentUserId)
+
+    if (error) { toast('Error: ' + error.message, 'err'); return }
+
+    cerrarModalEditarMeta()
+    toast('Meta actualizada ✓')
     cargarMetas()
   }
 
@@ -1279,6 +1373,7 @@
 
   document.getElementById('modal-colchon').addEventListener('click', function(e) { if (e.target === this) cerrarModalColchon() })
   document.getElementById('modal-editar-colchon').addEventListener('click', function(e) { if (e.target === this) cerrarModalEditarColchon() })
+  document.getElementById('modal-editar-meta').addEventListener('click', function(e) { if (e.target === this) cerrarModalEditarMeta() })
 
   cargarColchon()
 
