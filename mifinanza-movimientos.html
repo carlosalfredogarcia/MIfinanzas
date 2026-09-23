@@ -609,6 +609,19 @@
       return;
     }
 
+    // `grabandoVoz` se marca AQUÍ MISMO, en el clic, antes de crear o
+    // arrancar nada — de forma síncrona. `r.onstart` es asíncrono (se
+    // dispara después de llamar a start()), así que si dependiéramos solo
+    // de eso, un doble clic/tap podría colar una segunda llamada a esta
+    // función antes de que la primera terminara de arrancar: la guarda de
+    // arriba (`if (grabandoVoz)`) vería `false` las dos veces y se crearían
+    // dos instancias de SpeechRecognition escuchando el mismo micrófono a
+    // la vez, cada una sumando su propio texto al mismo vozTranscritoFinal
+    // compartido → todo duplicado. Al marcar la bandera de forma síncrona,
+    // la segunda llamada (si llega) ya ve `grabandoVoz === true` y solo
+    // hace stop(), nunca crea una segunda instancia.
+    grabandoVoz = true;
+
     // Si se pulsa "Grabar de nuevo" desde la pantalla de revisión, se sigue
     // añadiendo sobre el texto que quedó ahí (tal como el usuario lo haya
     // dejado, incluso si lo editó a mano) en vez de borrarlo.
@@ -621,8 +634,18 @@
     vozErrorFatal = false;
     mostrarModoGrabacionVoz();
     document.getElementById('voz-estado').textContent = ('🔴 ' + vozTranscritoFinal).trim() || '🔴 Escuchando... pulsa de nuevo para terminar';
-    reconocimientoVoz = crearReconocimientoVoz();
-    reconocimientoVoz.start();
+
+    try {
+      reconocimientoVoz = crearReconocimientoVoz();
+      reconocimientoVoz.start();
+    } catch {
+      // start() puede lanzar si el navegador ya tenía una sesión en curso
+      // (p.ej. residuo de un clic previo). Se revierte la bandera para no
+      // dejar la UI bloqueada en "grabando" sin que realmente lo esté.
+      grabandoVoz = false;
+      mostrarModoGrabacionVoz();
+      document.getElementById('voz-estado').textContent = 'No se pudo iniciar el micrófono, pulsa para intentar de nuevo.';
+    }
   }
 
   async function confirmarTextoVoz() {
