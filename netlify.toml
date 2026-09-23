@@ -1,6 +1,9 @@
 [build.processing.html]
   pretty_urls = false
 
+[functions]
+  directory = "netlify/functions"
+
 [[headers]]
   for = "/*.html"
   [headers.values]

@@ -192,6 +192,7 @@
   <div class="modal-box">
     <div class="modal-handle"></div>
     <button onclick="abrirGasto()" style="width:100%;background:#21262d;border:1px solid #30363d;border-radius:14px;padding:16px;color:#e6edf3;font-family:'DM Sans',sans-serif;font-size:15px;cursor:pointer;margin-bottom:10px;text-align:left;">💸 Registrar gasto</button>
+    <button id="btn-voz-fab" onclick="abrirVoz()" style="width:100%;background:#21262d;border:1px solid #30363d;border-radius:14px;padding:16px;color:#e6edf3;font-family:'DM Sans',sans-serif;font-size:15px;cursor:pointer;margin-bottom:10px;text-align:left;display:none;">🎤 Gasto por voz</button>
     <button onclick="abrirIngreso()" style="width:100%;background:#21262d;border:1px solid #30363d;border-radius:14px;padding:16px;color:#e6edf3;font-family:'DM Sans',sans-serif;font-size:15px;cursor:pointer;margin-bottom:10px;text-align:left;">💰 Registrar ingreso</button>
     <button onclick="abrirGastoFijo()" style="width:100%;background:#21262d;border:1px solid #30363d;border-radius:14px;padding:16px;color:#e6edf3;font-family:'DM Sans',sans-serif;font-size:15px;cursor:pointer;margin-bottom:10px;text-align:left;">🔃 Registrar gasto fijo</button>
     <button onclick="cerrarMenu()" class="btn-no">Cancelar</button>
@@ -220,6 +221,17 @@
     <div class="fld" style="margin-bottom:18px"><label class="lbl">Monto</label><input type="number" id="g-monto" class="inp" placeholder="$0.00"></div>
     <button onclick="guardarGasto()" class="btn-ok" style="background:#f85149;color:#0d1117">Guardar gasto</button>
     <button onclick="cerrarGasto()" class="btn-no">Cancelar</button>
+  </div>
+</div>
+
+<div class="modal-base" id="modal-voz">
+  <div class="modal-box">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Gasto por voz</div>
+    <div id="voz-estado" style="text-align:center;padding:20px 8px;color:var(--subtext);font-size:14px;line-height:1.5;min-height:60px;white-space:pre-line;">Pulsa el micrófono y di, por ejemplo:
+"Almuerzo 8 dólares"</div>
+    <button id="voz-mic-btn" onclick="toggleGrabacionVoz()" style="width:72px;height:72px;border-radius:50%;background:#f85149;border:none;font-size:28px;margin:0 auto 20px;display:flex;align-items:center;justify-content:center;cursor:pointer;">🎤</button>
+    <button onclick="cerrarVoz()" class="btn-no">Cancelar</button>
   </div>
 </div>
 
@@ -441,6 +453,91 @@
   function cerrarIngreso()   { document.getElementById('modal-ingreso').style.display = 'none'; }
   async function abrirGastoFijo() { cerrarMenu(); ocultarErrorFecha('f'); await cargarCategoriasPerfil(); document.getElementById('modal-fijo').style.display = 'flex'; }
   function cerrarGastoFijo() { document.getElementById('modal-fijo').style.display = 'none'; }
+
+  const SpeechRecognitionCtor = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (SpeechRecognitionCtor) {
+    const btnVoz = document.getElementById('btn-voz-fab');
+    if (btnVoz) btnVoz.style.display = 'block';
+  }
+
+  let reconocimientoVoz = null;
+  let grabandoVoz = false;
+
+  function abrirVoz() {
+    cerrarMenu();
+    document.getElementById('voz-estado').textContent = 'Pulsa el micrófono y di, por ejemplo: "Almuerzo 8 dólares"';
+    document.getElementById('modal-voz').style.display = 'flex';
+  }
+
+  function cerrarVoz() {
+    if (reconocimientoVoz && grabandoVoz) reconocimientoVoz.stop();
+    document.getElementById('modal-voz').style.display = 'none';
+  }
+
+  function toggleGrabacionVoz() {
+    if (!SpeechRecognitionCtor) { alert('Tu navegador no soporta reconocimiento de voz. Prueba con Chrome.'); return; }
+    if (grabandoVoz) { reconocimientoVoz.stop(); return; }
+
+    reconocimientoVoz = new SpeechRecognitionCtor();
+    reconocimientoVoz.lang = 'es-ES';
+    reconocimientoVoz.interimResults = false;
+    reconocimientoVoz.maxAlternatives = 1;
+
+    reconocimientoVoz.onstart = () => {
+      grabandoVoz = true;
+      document.getElementById('voz-estado').textContent = '🔴 Escuchando...';
+    };
+
+    reconocimientoVoz.onerror = () => {
+      grabandoVoz = false;
+      document.getElementById('voz-estado').textContent = 'No se entendió, intenta de nuevo.';
+    };
+
+    reconocimientoVoz.onend = () => { grabandoVoz = false; };
+
+    reconocimientoVoz.onresult = async (e) => {
+      const texto = e.results[0][0].transcript;
+      document.getElementById('voz-estado').textContent = `"${texto}"\n\nProcesando con IA...`;
+      await procesarTextoVoz(texto);
+    };
+
+    reconocimientoVoz.start();
+  }
+
+  async function procesarTextoVoz(texto) {
+    try {
+      const { data: { session } } = await dbClient.auth.getSession();
+      const token = session?.access_token;
+      if (!token) { document.getElementById('voz-estado').textContent = 'Sesión expirada, vuelve a iniciar sesión.'; return; }
+
+      await cargarCategoriasPerfil();
+      const categorias = Array.from(document.getElementById('g-categoria').options).map(o => o.textContent);
+
+      const resp = await fetch('/.netlify/functions/parse-gasto', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', authorization: 'Bearer ' + token },
+        body: JSON.stringify({ texto, categorias })
+      });
+
+      if (!resp.ok) {
+        const err = await resp.json().catch(() => ({}));
+        throw new Error(err.error || 'Error del servidor');
+      }
+
+      const datos = await resp.json();
+
+      cerrarVoz();
+      document.getElementById('g-fecha').value = datos.fecha || hoy;
+      document.getElementById('g-descripcion').value = datos.descripcion || texto;
+      document.getElementById('g-monto').value = datos.monto ?? '';
+      const sel = document.getElementById('g-categoria');
+      const opciones = Array.from(sel.options).map(o => o.textContent);
+      if (opciones.includes(datos.categoria)) sel.value = datos.categoria;
+      document.getElementById('modal-gasto').style.display = 'flex';
+    } catch (err) {
+      document.getElementById('voz-estado').textContent = 'Error: ' + err.message;
+    }
+  }
 
   async function guardarGasto() {
     const fecha       = document.getElementById('g-fecha').value;
