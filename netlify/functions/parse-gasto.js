@@ -1,7 +1,7 @@
 // netlify/functions/parse-gasto.js
 // Recibe una transcripción de voz + las categorías del usuario, y usa Claude
 // (server-side, con la API key nunca expuesta al cliente) para devolver
-// un gasto estructurado: { descripcion, categoria, monto, fecha }.
+// uno o varios gastos estructurados: { gastos: [{ descripcion, categoria, monto, fecha }, ...] }.
 
 const SUPABASE_URL = 'https://gapeweomesgawnodarsp.supabase.co'
 const SUPABASE_KEY = 'sb_publishable_u7ug3SBOsuz2zb56gqBLjw_aLJ0Vvp8'
@@ -58,17 +58,27 @@ exports.handler = async (event) => {
   const hoy = new Date().toISOString().slice(0, 10)
 
   const tool = {
-    name: 'registrar_gasto',
-    description: 'Extrae los datos estructurados de un gasto a partir de una frase hablada por el usuario.',
+    name: 'registrar_gastos',
+    description: 'Extrae la lista de gastos mencionados en una transcripción de voz del usuario. El usuario puede mencionar uno o varios gastos distintos en la misma frase.',
     input_schema: {
       type: 'object',
       properties: {
-        descripcion: { type: 'string', description: 'Descripción breve del gasto, ej: "Almuerzo", "Gasolina"' },
-        categoria: { type: 'string', enum: categorias, description: 'La categoría de la lista que mejor encaje. Si ninguna encaja, usa "📦 Otros".' },
-        monto: { type: 'number', description: 'Monto del gasto, solo el número, sin símbolos' },
-        fecha: { type: 'string', description: `Fecha en formato YYYY-MM-DD. Si no se menciona, usa ${hoy}. Si dice "ayer", "antier", etc., calcúlala en relación a ${hoy}.` }
+        gastos: {
+          type: 'array',
+          description: 'Un elemento por cada gasto distinto mencionado en el texto.',
+          items: {
+            type: 'object',
+            properties: {
+              descripcion: { type: 'string', description: 'Descripción breve del gasto, ej: "Almuerzo", "Gasolina"' },
+              categoria: { type: 'string', enum: categorias, description: 'La categoría de la lista que mejor encaje. Si ninguna encaja, usa "📦 Otros".' },
+              monto: { type: 'number', description: 'Monto del gasto, solo el número, sin símbolos' },
+              fecha: { type: 'string', description: `Fecha en formato YYYY-MM-DD. Si no se menciona, usa ${hoy}. Si dice "ayer", "antier", etc., calcúlala en relación a ${hoy}.` }
+            },
+            required: ['descripcion', 'categoria', 'monto', 'fecha']
+          }
+        }
       },
-      required: ['descripcion', 'categoria', 'monto', 'fecha']
+      required: ['gastos']
     }
   }
 
@@ -85,10 +95,10 @@ exports.handler = async (event) => {
         model: 'claude-haiku-4-5-20251001',
         max_tokens: 300,
         tools: [tool],
-        tool_choice: { type: 'tool', name: 'registrar_gasto' },
+        tool_choice: { type: 'tool', name: 'registrar_gastos' },
         messages: [{
           role: 'user',
-          content: `Transcripción de voz del usuario: "${texto}"\n\nCategorías disponibles: ${categorias.join(', ')}\n\nExtrae los datos del gasto con la herramienta registrar_gasto.`
+          content: `Transcripción de voz del usuario (puede mencionar uno o varios gastos distintos): "${texto}"\n\nCategorías disponibles: ${categorias.join(', ')}\n\nExtrae todos los gastos mencionados con la herramienta registrar_gastos.`
         }]
       })
     })

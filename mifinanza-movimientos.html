@@ -235,6 +235,16 @@
   </div>
 </div>
 
+<div class="modal-base" id="modal-revision-voz">
+  <div class="modal-box" style="max-height:80vh;overflow-y:auto;">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="revision-voz-titulo">Gastos detectados</div>
+    <div id="revision-voz-lista"></div>
+    <button onclick="guardarRevisionVoz()" class="btn-ok" style="background:#f85149;color:#0d1117">Guardar todos</button>
+    <button onclick="cerrarRevisionVoz()" class="btn-no">Cancelar</button>
+  </div>
+</div>
+
 <div class="modal-base" id="modal-ingreso">
   <div class="modal-box">
     <div class="modal-handle"></div>
@@ -462,15 +472,19 @@
 
   let reconocimientoVoz = null;
   let grabandoVoz = false;
+  let vozTranscritoFinal = '';
 
   function abrirVoz() {
     cerrarMenu();
-    document.getElementById('voz-estado').textContent = 'Pulsa el micrófono y di, por ejemplo: "Almuerzo 8 dólares"';
+    vozTranscritoFinal = '';
+    document.getElementById('voz-mic-btn').textContent = '🎤';
+    document.getElementById('voz-estado').textContent = 'Pulsa el micrófono y menciona uno o varios gastos, ej:\n"Almuerzo 8 dólares y gasolina 20 dólares"\nPulsa de nuevo para terminar.';
     document.getElementById('modal-voz').style.display = 'flex';
   }
 
   function cerrarVoz() {
-    if (reconocimientoVoz && grabandoVoz) reconocimientoVoz.stop();
+    if (reconocimientoVoz && grabandoVoz) { reconocimientoVoz.onend = null; reconocimientoVoz.stop(); }
+    grabandoVoz = false;
     document.getElementById('modal-voz').style.display = 'none';
   }
 
@@ -478,30 +492,51 @@
     if (!SpeechRecognitionCtor) { alert('Tu navegador no soporta reconocimiento de voz. Prueba con Chrome.'); return; }
     if (grabandoVoz) { reconocimientoVoz.stop(); return; }
 
+    vozTranscritoFinal = '';
     reconocimientoVoz = new SpeechRecognitionCtor();
     reconocimientoVoz.lang = 'es-ES';
-    reconocimientoVoz.interimResults = false;
+    reconocimientoVoz.continuous = true;
+    reconocimientoVoz.interimResults = true;
     reconocimientoVoz.maxAlternatives = 1;
 
     reconocimientoVoz.onstart = () => {
       grabandoVoz = true;
-      document.getElementById('voz-estado').textContent = '🔴 Escuchando...';
+      document.getElementById('voz-mic-btn').textContent = '⏹️';
+      document.getElementById('voz-estado').textContent = '🔴 Escuchando... pulsa de nuevo para terminar';
     };
 
-    reconocimientoVoz.onerror = () => {
+    reconocimientoVoz.onerror = (e) => {
+      if (e.error === 'no-speech' || e.error === 'aborted') return;
+      document.getElementById('voz-estado').textContent = 'Error de reconocimiento, intenta de nuevo.';
+    };
+
+    reconocimientoVoz.onresult = (e) => {
+      let interim = '';
+      for (let i = e.resultIndex; i < e.results.length; i++) {
+        const transcript = e.results[i][0].transcript;
+        if (e.results[i].isFinal) vozTranscritoFinal += transcript + ' ';
+        else interim += transcript;
+      }
+      document.getElementById('voz-estado').textContent = ('🔴 ' + vozTranscritoFinal + interim).trim();
+    };
+
+    reconocimientoVoz.onend = async () => {
       grabandoVoz = false;
-      document.getElementById('voz-estado').textContent = 'No se entendió, intenta de nuevo.';
-    };
-
-    reconocimientoVoz.onend = () => { grabandoVoz = false; };
-
-    reconocimientoVoz.onresult = async (e) => {
-      const texto = e.results[0][0].transcript;
+      document.getElementById('voz-mic-btn').textContent = '🎤';
+      const texto = vozTranscritoFinal.trim();
+      if (!texto) {
+        document.getElementById('voz-estado').textContent = 'No se detectó texto. Pulsa el micrófono e intenta de nuevo.';
+        return;
+      }
       document.getElementById('voz-estado').textContent = `"${texto}"\n\nProcesando con IA...`;
       await procesarTextoVoz(texto);
     };
 
     reconocimientoVoz.start();
+  }
+
+  function escapeHtml(str) {
+    return String(str ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   }
 
   async function procesarTextoVoz(texto) {
@@ -525,18 +560,71 @@
       }
 
       const datos = await resp.json();
+      const gastos = Array.isArray(datos.gastos) ? datos.gastos : [];
+      if (!gastos.length) throw new Error('No se detectó ningún gasto en lo que dijiste');
 
       cerrarVoz();
-      document.getElementById('g-fecha').value = datos.fecha || hoy;
-      document.getElementById('g-descripcion').value = datos.descripcion || texto;
-      document.getElementById('g-monto').value = datos.monto ?? '';
-      const sel = document.getElementById('g-categoria');
-      const opciones = Array.from(sel.options).map(o => o.textContent);
-      if (opciones.includes(datos.categoria)) sel.value = datos.categoria;
-      document.getElementById('modal-gasto').style.display = 'flex';
+      abrirRevisionVoz(gastos);
     } catch (err) {
       document.getElementById('voz-estado').textContent = 'Error: ' + err.message;
     }
+  }
+
+  function abrirRevisionVoz(gastos) {
+    const categorias = Array.from(document.getElementById('g-categoria').options).map(o => o.textContent);
+    const cont = document.getElementById('revision-voz-lista');
+    cont.innerHTML = gastos.map((g, i) => `
+      <div class="revision-item" data-idx="${i}" style="background:#21262d;border:1px solid #30363d;border-radius:14px;padding:14px;margin-bottom:10px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+          <span style="font-size:11px;color:var(--subtext);text-transform:uppercase;letter-spacing:0.08em;">Gasto ${i + 1}</span>
+          <span onclick="this.closest('.revision-item').remove(); actualizarContadorRevision();" style="cursor:pointer;color:#f85149;font-size:13px;">✕ Quitar</span>
+        </div>
+        <div class="fld"><label class="lbl">Descripción</label><input type="text" class="inp rv-descripcion" value="${escapeHtml(g.descripcion)}"></div>
+        <div class="fld">
+          <label class="lbl">Categoría</label>
+          <select class="inp rv-categoria">
+            ${categorias.map(c => `<option ${c === g.categoria ? 'selected' : ''}>${escapeHtml(c)}</option>`).join('')}
+          </select>
+        </div>
+        <div style="display:flex;gap:8px;">
+          <div class="fld" style="flex:1"><label class="lbl">Monto</label><input type="number" class="inp rv-monto" value="${g.monto ?? ''}"></div>
+          <div class="fld" style="flex:1"><label class="lbl">Fecha</label><input type="date" class="inp rv-fecha" value="${g.fecha || hoy}"></div>
+        </div>
+      </div>
+    `).join('');
+    actualizarContadorRevision();
+    document.getElementById('modal-revision-voz').style.display = 'flex';
+  }
+
+  function actualizarContadorRevision() {
+    const n = document.querySelectorAll('#revision-voz-lista .revision-item').length;
+    document.getElementById('revision-voz-titulo').textContent = n ? `${n} gasto${n === 1 ? '' : 's'} detectado${n === 1 ? '' : 's'}` : 'Sin gastos';
+  }
+
+  function cerrarRevisionVoz() {
+    document.getElementById('modal-revision-voz').style.display = 'none';
+  }
+
+  async function guardarRevisionVoz() {
+    const items = Array.from(document.querySelectorAll('#revision-voz-lista .revision-item'));
+    if (!items.length) { alert('No hay gastos para guardar'); return; }
+
+    const filas = items.map(item => ({
+      fecha: item.querySelector('.rv-fecha').value || hoy,
+      descripcion: item.querySelector('.rv-descripcion').value.trim(),
+      categoria: item.querySelector('.rv-categoria').value,
+      monto: parseFloat(item.querySelector('.rv-monto').value),
+      usuario_id: window.currentUserId
+    })).filter(f => f.descripcion && !isNaN(f.monto));
+
+    if (!filas.length) { alert('Completa al menos un gasto válido (descripción y monto)'); return; }
+
+    const { error } = await dbClient.from('gastos').insert(filas);
+    if (error) { alert('Error: ' + error.message); return; }
+
+    cerrarRevisionVoz();
+    toast(`✅ ${filas.length} gasto${filas.length === 1 ? '' : 's'} guardado${filas.length === 1 ? '' : 's'}`);
+    cargarMovimientos();
   }
 
   async function guardarGasto() {
