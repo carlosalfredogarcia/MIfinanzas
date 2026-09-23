@@ -470,47 +470,62 @@
     if (btnVoz) btnVoz.style.display = 'block';
   }
 
+  // El motor de reconocimiento de voz del navegador (Web Speech API) no expone
+  // ninguna propiedad de "timeout" configurable: aunque `continuous = true`,
+  // Chrome corta la sesión por su cuenta tras un rato de silencio o un tiempo
+  // máximo interno. No hay forma de desactivar ese corte desde la API, así que
+  // en vez de tratarlo como el final de la grabación, lo detectamos en `onend`
+  // y si el usuario no pidió parar manualmente, reiniciamos el reconocimiento
+  // al vuelo sin perder el texto ya acumulado — desde fuera se ve como una
+  // grabación continua indefinida hasta que se pulsa "parar".
   let reconocimientoVoz = null;
   let grabandoVoz = false;
   let vozTranscritoFinal = '';
+  let vozParadaManual = false;
+  let vozErrorFatal = false;
 
   function abrirVoz() {
     cerrarMenu();
     vozTranscritoFinal = '';
+    vozParadaManual = false;
+    vozErrorFatal = false;
     document.getElementById('voz-mic-btn').textContent = '🎤';
     document.getElementById('voz-estado').textContent = 'Pulsa el micrófono y menciona uno o varios gastos, ej:\n"Almuerzo 8 dólares y gasolina 20 dólares"\nPulsa de nuevo para terminar.';
     document.getElementById('modal-voz').style.display = 'flex';
   }
 
   function cerrarVoz() {
+    vozParadaManual = true;
     if (reconocimientoVoz && grabandoVoz) { reconocimientoVoz.onend = null; reconocimientoVoz.stop(); }
     grabandoVoz = false;
     document.getElementById('modal-voz').style.display = 'none';
   }
 
-  function toggleGrabacionVoz() {
-    if (!SpeechRecognitionCtor) { alert('Tu navegador no soporta reconocimiento de voz. Prueba con Chrome.'); return; }
-    if (grabandoVoz) { reconocimientoVoz.stop(); return; }
+  function crearReconocimientoVoz() {
+    const r = new SpeechRecognitionCtor();
+    r.lang = 'es-ES';
+    r.continuous = true;
+    r.interimResults = true;
+    r.maxAlternatives = 1;
 
-    vozTranscritoFinal = '';
-    reconocimientoVoz = new SpeechRecognitionCtor();
-    reconocimientoVoz.lang = 'es-ES';
-    reconocimientoVoz.continuous = true;
-    reconocimientoVoz.interimResults = true;
-    reconocimientoVoz.maxAlternatives = 1;
-
-    reconocimientoVoz.onstart = () => {
+    r.onstart = () => {
       grabandoVoz = true;
       document.getElementById('voz-mic-btn').textContent = '⏹️';
-      document.getElementById('voz-estado').textContent = '🔴 Escuchando... pulsa de nuevo para terminar';
+      document.getElementById('voz-estado').textContent = ('🔴 ' + vozTranscritoFinal).trim() || '🔴 Escuchando... pulsa de nuevo para terminar';
     };
 
-    reconocimientoVoz.onerror = (e) => {
-      if (e.error === 'no-speech' || e.error === 'aborted') return;
-      document.getElementById('voz-estado').textContent = 'Error de reconocimiento, intenta de nuevo.';
+    // Errores irrecuperables (permiso denegado, sin micrófono, etc.): se detiene
+    // de verdad y se avisa. Cualquier otro error (silencio, corte de red del
+    // servicio de reconocimiento) se ignora aquí — lo resuelve onend reiniciando.
+    r.onerror = (e) => {
+      if (e.error === 'not-allowed' || e.error === 'service-not-allowed' || e.error === 'audio-capture') {
+        vozErrorFatal = true;
+        vozParadaManual = true;
+        document.getElementById('voz-estado').textContent = 'No se pudo acceder al micrófono (' + e.error + ').';
+      }
     };
 
-    reconocimientoVoz.onresult = (e) => {
+    r.onresult = (e) => {
       let interim = '';
       for (let i = e.resultIndex; i < e.results.length; i++) {
         const transcript = e.results[i][0].transcript;
@@ -520,9 +535,24 @@
       document.getElementById('voz-estado').textContent = ('🔴 ' + vozTranscritoFinal + interim).trim();
     };
 
-    reconocimientoVoz.onend = async () => {
+    r.onend = async () => {
+      if (!vozParadaManual && !vozErrorFatal) {
+        // El navegador cortó la sesión solo: reiniciar sin perder lo grabado.
+        try {
+          reconocimientoVoz = crearReconocimientoVoz();
+          reconocimientoVoz.start();
+        } catch {
+          grabandoVoz = false;
+          document.getElementById('voz-mic-btn').textContent = '🎤';
+          document.getElementById('voz-estado').textContent = 'Se interrumpió el micrófono, pulsa para intentar de nuevo.';
+        }
+        return;
+      }
+
       grabandoVoz = false;
       document.getElementById('voz-mic-btn').textContent = '🎤';
+      if (vozErrorFatal) return;
+
       const texto = vozTranscritoFinal.trim();
       if (!texto) {
         document.getElementById('voz-estado').textContent = 'No se detectó texto. Pulsa el micrófono e intenta de nuevo.';
@@ -532,6 +562,22 @@
       await procesarTextoVoz(texto);
     };
 
+    return r;
+  }
+
+  function toggleGrabacionVoz() {
+    if (!SpeechRecognitionCtor) { alert('Tu navegador no soporta reconocimiento de voz. Prueba con Chrome.'); return; }
+
+    if (grabandoVoz) {
+      vozParadaManual = true;
+      reconocimientoVoz.stop();
+      return;
+    }
+
+    vozTranscritoFinal = '';
+    vozParadaManual = false;
+    vozErrorFatal = false;
+    reconocimientoVoz = crearReconocimientoVoz();
     reconocimientoVoz.start();
   }
 
