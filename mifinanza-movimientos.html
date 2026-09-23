@@ -230,6 +230,7 @@
     <div class="modal-title">Gasto por voz</div>
     <div id="voz-estado" style="text-align:center;padding:20px 8px;color:var(--subtext);font-size:14px;line-height:1.5;min-height:60px;white-space:pre-line;">Pulsa el micrófono y di, por ejemplo:
 "Almuerzo 8 dólares"</div>
+    <div id="voz-ayuda" style="display:none;text-align:center;padding:0 8px 16px;color:var(--subtext);font-size:12px;line-height:1.5;background:rgba(255,255,255,0.03);border:1px solid #30363d;border-radius:12px;margin:0 0 14px;padding-top:10px;">Menciona: fecha, descripción, categoría y monto.<br>Ejemplo: "ayer gasté 15 euros en comida"</div>
     <textarea id="voz-texto-editable" class="inp" style="display:none;min-height:90px;resize:vertical;margin-bottom:14px;font-family:'DM Sans',sans-serif;"></textarea>
     <button id="voz-mic-btn" onclick="toggleGrabacionVoz()" style="width:72px;height:72px;border-radius:50%;background:#f85149;border:none;font-size:28px;margin:0 auto 20px;display:flex;align-items:center;justify-content:center;cursor:pointer;">🎤</button>
     <button id="voz-btn-enviar" onclick="confirmarTextoVoz()" class="btn-ok" style="display:none;background:#f85149;color:#0d1117">Enviar a la IA</button>
@@ -487,16 +488,22 @@
   let vozParadaManual = false;
   let vozErrorFatal = false;
 
+  function mostrarAyudaVoz(visible) {
+    document.getElementById('voz-ayuda').style.display = visible ? 'block' : 'none';
+  }
+
   function mostrarModoGrabacionVoz() {
     document.getElementById('voz-texto-editable').style.display = 'none';
     document.getElementById('voz-btn-enviar').style.display = 'none';
     document.getElementById('voz-btn-regrabar').style.display = 'none';
     document.getElementById('voz-mic-btn').style.display = 'flex';
     document.getElementById('voz-mic-btn').textContent = '🎤';
+    mostrarAyudaVoz(false);
   }
 
   function mostrarModoRevisionTextoVoz(texto) {
     document.getElementById('voz-mic-btn').style.display = 'none';
+    mostrarAyudaVoz(false);
     const ta = document.getElementById('voz-texto-editable');
     ta.value = texto;
     ta.style.display = 'block';
@@ -520,6 +527,7 @@
     vozParadaManual = true;
     if (reconocimientoVoz && grabandoVoz) { reconocimientoVoz.onend = null; reconocimientoVoz.stop(); }
     grabandoVoz = false;
+    mostrarAyudaVoz(false);
     document.getElementById('modal-voz').style.display = 'none';
   }
 
@@ -533,6 +541,7 @@
     r.onstart = () => {
       grabandoVoz = true;
       mostrarModoGrabacionVoz();
+      mostrarAyudaVoz(true);
       document.getElementById('voz-mic-btn').textContent = '⏹️';
       document.getElementById('voz-estado').textContent = ('🔴 ' + vozTranscritoFinal).trim() || '🔴 Escuchando... pulsa de nuevo para terminar';
     };
