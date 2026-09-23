@@ -476,16 +476,16 @@
 
   // El motor de reconocimiento de voz del navegador (Web Speech API) no expone
   // ninguna propiedad de "timeout" configurable: aunque `continuous = true`,
-  // Chrome corta la sesión por su cuenta tras un rato de silencio o un tiempo
-  // máximo interno. No hay forma de desactivar ese corte desde la API, así que
-  // en vez de tratarlo como el final de la grabación, lo detectamos en `onend`
-  // y si el usuario no pidió parar manualmente, reiniciamos el reconocimiento
-  // al vuelo sin perder el texto ya acumulado — desde fuera se ve como una
-  // grabación continua indefinida hasta que se pulsa "parar".
+  // Chrome puede cortar la sesión por su cuenta tras un rato de silencio.
+  // En vez de reiniciar el reconocimiento automáticamente (eso disparaba
+  // duplicados de texto por un bug real de `resultIndex` en Chrome), ese
+  // corte se trata exactamente igual que si el usuario hubiera pulsado
+  // "parar": se muestra el texto acumulado en el textarea editable y listo.
+  // Si el usuario quiere seguir dictando, pulsa "Grabar de nuevo" y lo que
+  // diga se añade al texto que ya estaba (ver toggleGrabacionVoz).
   let reconocimientoVoz = null;
   let grabandoVoz = false;
   let vozTranscritoFinal = '';
-  let vozParadaManual = false;
   let vozErrorFatal = false;
 
   function mostrarAyudaVoz(visible) {
@@ -516,7 +516,6 @@
   function abrirVoz() {
     cerrarMenu();
     vozTranscritoFinal = '';
-    vozParadaManual = false;
     vozErrorFatal = false;
     mostrarModoGrabacionVoz();
     document.getElementById('voz-estado').textContent = 'Pulsa el micrófono y menciona uno o varios gastos, ej:\n"Almuerzo 8 dólares y gasolina 20 dólares"\nPulsa de nuevo para terminar.';
@@ -524,7 +523,8 @@
   }
 
   function cerrarVoz() {
-    vozParadaManual = true;
+    // Se quita onend antes de stop() para que no dispare la pantalla de
+    // revisión al cancelar mientras se estaba grabando.
     if (reconocimientoVoz && grabandoVoz) { reconocimientoVoz.onend = null; reconocimientoVoz.stop(); }
     grabandoVoz = false;
     mostrarAyudaVoz(false);
@@ -557,13 +557,12 @@
       document.getElementById('voz-estado').textContent = ('🔴 ' + vozTranscritoFinal).trim() || '🔴 Escuchando... pulsa de nuevo para terminar';
     };
 
-    // Errores irrecuperables (permiso denegado, sin micrófono, etc.): se detiene
-    // de verdad y se avisa. Cualquier otro error (silencio, corte de red del
-    // servicio de reconocimiento) se ignora aquí — lo resuelve onend reiniciando.
+    // Errores irrecuperables (permiso denegado, sin micrófono, etc.): se avisa
+    // y se deja todo en modo grabación para reintentar. Cualquier otro error
+    // (p.ej. "no-speech") se ignora aquí — onend decide qué hacer al parar.
     r.onerror = (e) => {
       if (e.error === 'not-allowed' || e.error === 'service-not-allowed' || e.error === 'audio-capture') {
         vozErrorFatal = true;
-        vozParadaManual = true;
         document.getElementById('voz-estado').textContent = 'No se pudo acceder al micrófono (' + e.error + ').';
       }
     };
@@ -584,20 +583,9 @@
       document.getElementById('voz-estado').textContent = ('🔴 ' + vozTranscritoFinal + interim).trim();
     };
 
-    r.onend = async () => {
-      if (!vozParadaManual && !vozErrorFatal) {
-        // El navegador cortó la sesión solo: reiniciar sin perder lo grabado.
-        try {
-          reconocimientoVoz = crearReconocimientoVoz();
-          reconocimientoVoz.start();
-        } catch {
-          grabandoVoz = false;
-          document.getElementById('voz-mic-btn').textContent = '🎤';
-          document.getElementById('voz-estado').textContent = 'Se interrumpió el micrófono, pulsa para intentar de nuevo.';
-        }
-        return;
-      }
-
+    // Sin auto-reinicio: se pare por lo que se pare (el usuario, silencio,
+    // el límite interno de Chrome...) esto es siempre el final de la sesión.
+    r.onend = () => {
       grabandoVoz = false;
       if (vozErrorFatal) { mostrarModoGrabacionVoz(); return; }
 
@@ -617,16 +605,22 @@
     if (!SpeechRecognitionCtor) { alert('Tu navegador no soporta reconocimiento de voz. Prueba con Chrome.'); return; }
 
     if (grabandoVoz) {
-      vozParadaManual = true;
       reconocimientoVoz.stop();
       return;
     }
 
-    vozTranscritoFinal = '';
-    vozParadaManual = false;
+    // Si se pulsa "Grabar de nuevo" desde la pantalla de revisión, se sigue
+    // añadiendo sobre el texto que quedó ahí (tal como el usuario lo haya
+    // dejado, incluso si lo editó a mano) en vez de borrarlo.
+    const ta = document.getElementById('voz-texto-editable');
+    if (ta.style.display !== 'none') {
+      vozTranscritoFinal = ta.value.trim();
+      if (vozTranscritoFinal) vozTranscritoFinal += ' ';
+    }
+
     vozErrorFatal = false;
     mostrarModoGrabacionVoz();
-    document.getElementById('voz-estado').textContent = '🔴 Escuchando... pulsa de nuevo para terminar';
+    document.getElementById('voz-estado').textContent = ('🔴 ' + vozTranscritoFinal).trim() || '🔴 Escuchando... pulsa de nuevo para terminar';
     reconocimientoVoz = crearReconocimientoVoz();
     reconocimientoVoz.start();
   }
