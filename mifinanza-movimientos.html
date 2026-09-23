@@ -476,17 +476,58 @@
 
   // El motor de reconocimiento de voz del navegador (Web Speech API) no expone
   // ninguna propiedad de "timeout" configurable: aunque `continuous = true`,
-  // Chrome puede cortar la sesión por su cuenta tras un rato de silencio.
-  // En vez de reiniciar el reconocimiento automáticamente (eso disparaba
-  // duplicados de texto por un bug real de `resultIndex` en Chrome), ese
-  // corte se trata exactamente igual que si el usuario hubiera pulsado
-  // "parar": se muestra el texto acumulado en el textarea editable y listo.
-  // Si el usuario quiere seguir dictando, pulsa "Grabar de nuevo" y lo que
-  // diga se añade al texto que ya estaba (ver toggleGrabacionVoz).
+  // Chrome puede cortar la sesión por su cuenta tras un rato de silencio. Eso
+  // se trata igual que si el usuario hubiera pulsado "parar": se muestra el
+  // texto acumulado en el textarea editable y listo (sin auto-reinicio). Si
+  // el usuario quiere seguir dictando, pulsa "Grabar de nuevo" y lo que diga
+  // se añade al texto que ya estaba (ver toggleGrabacionVoz).
+  //
+  // En Chrome Android, cada resultado marcado "final" no siempre es la
+  // versión definitiva de un fragmento: el motor a veces va emitiendo, cada
+  // una como "final", varias versiones cada vez más completas del mismo
+  // fragmento — p.ej. para "21 de septiembre Mercadona" llegan como final
+  // "21", luego "21 de", luego "21 de septiembre", luego la frase completa.
+  // En escritorio esto no pasa (cada fragmento llega una sola vez, ya
+  // completo). Por eso el texto final no se guarda como una sola cadena a
+  // la que simplemente se le va sumando cada fragmento nuevo — eso
+  // duplicaría todas esas versiones intermedias en Android — sino como una
+  // lista de fragmentos (`vozSegmentosFinales`), donde cada fragmento nuevo
+  // que llega ya empieza igual que el último de la lista REEMPLAZA a ese
+  // último (es una versión más completa del mismo trozo) en vez de sumarse
+  // aparte; solo se añade como fragmento nuevo cuando de verdad es distinto.
   let reconocimientoVoz = null;
   let grabandoVoz = false;
-  let vozTranscritoFinal = '';
+  let vozSegmentosFinales = [];
+  let vozTranscritoFinal = ''; // = vozSegmentosFinales.join(' '), recalculado tras cada cambio
   let vozErrorFatal = false;
+
+  function reiniciarTextoVoz(textoInicial) {
+    vozSegmentosFinales = textoInicial ? [textoInicial.trim()] : [];
+    vozTranscritoFinal = vozSegmentosFinales.join(' ');
+  }
+
+  function agregarFragmentoFinalVoz(fragmento) {
+    fragmento = fragmento.trim();
+    if (!fragmento) return;
+
+    const anterior = vozSegmentosFinales[vozSegmentosFinales.length - 1];
+    if (anterior !== undefined) {
+      const nuevoMin = fragmento.toLowerCase();
+      const anteriorMin = anterior.toLowerCase();
+      if (nuevoMin.startsWith(anteriorMin)) {
+        // Versión más completa del último fragmento: lo reemplaza.
+        vozSegmentosFinales[vozSegmentosFinales.length - 1] = fragmento;
+        vozTranscritoFinal = vozSegmentosFinales.join(' ');
+        return;
+      }
+      if (anteriorMin.startsWith(nuevoMin)) {
+        // Fragmento más corto que el que ya teníamos (repetido/atrasado): se descarta.
+        return;
+      }
+    }
+    vozSegmentosFinales.push(fragmento);
+    vozTranscritoFinal = vozSegmentosFinales.join(' ');
+  }
 
   function mostrarAyudaVoz(visible) {
     document.getElementById('voz-ayuda').style.display = visible ? 'block' : 'none';
@@ -515,7 +556,7 @@
 
   function abrirVoz() {
     cerrarMenu();
-    vozTranscritoFinal = '';
+    reiniciarTextoVoz('');
     vozErrorFatal = false;
     mostrarModoGrabacionVoz();
     document.getElementById('voz-estado').textContent = 'Pulsa el micrófono y menciona uno o varios gastos, ej:\n"Almuerzo 8 dólares y gasolina 20 dólares"\nPulsa de nuevo para terminar.';
@@ -537,17 +578,6 @@
     r.continuous = true;
     r.interimResults = true;
     r.maxAlternatives = 1;
-
-    // Índice del último resultado final ya sumado a vozTranscritoFinal, propio
-    // de ESTA instancia/sesión de reconocimiento (se reinicia en cada llamada
-    // a crearReconocimientoVoz, es decir en cada arranque o reinicio). Chrome
-    // no siempre reporta `resultIndex` de forma fiable en modo continuo — a
-    // veces reenvía en un evento posterior resultados que ya había marcado
-    // como finales — así que además de arrancar el barrido en `resultIndex`,
-    // solo se admite un resultado final si su índice es mayor que el último
-    // ya contado. Así nunca se puede sumar dos veces el mismo resultado,
-    // pase lo que pase con resultIndex.
-    let ultimoIndiceFinal = -1;
 
     r.onstart = () => {
       grabandoVoz = true;
@@ -572,15 +602,13 @@
       for (let i = e.resultIndex; i < e.results.length; i++) {
         const resultado = e.results[i];
         if (resultado.isFinal) {
-          if (i > ultimoIndiceFinal) {
-            vozTranscritoFinal += resultado[0].transcript + ' ';
-            ultimoIndiceFinal = i;
-          }
+          agregarFragmentoFinalVoz(resultado[0].transcript);
         } else {
           interim += resultado[0].transcript;
         }
       }
-      document.getElementById('voz-estado').textContent = ('🔴 ' + vozTranscritoFinal + interim).trim();
+      const textoMostrado = [vozTranscritoFinal, interim].filter(Boolean).join(' ');
+      document.getElementById('voz-estado').textContent = ('🔴 ' + textoMostrado).trim();
     };
 
     // Sin auto-reinicio: se pare por lo que se pare (el usuario, silencio,
@@ -624,11 +652,12 @@
 
     // Si se pulsa "Grabar de nuevo" desde la pantalla de revisión, se sigue
     // añadiendo sobre el texto que quedó ahí (tal como el usuario lo haya
-    // dejado, incluso si lo editó a mano) en vez de borrarlo.
+    // dejado, incluso si lo editó a mano) en vez de borrarlo: ese texto se
+    // guarda como un único fragmento previo, y lo que se diga a partir de
+    // ahora se compara solo contra ÉL (ver agregarFragmentoFinalVoz).
     const ta = document.getElementById('voz-texto-editable');
     if (ta.style.display !== 'none') {
-      vozTranscritoFinal = ta.value.trim();
-      if (vozTranscritoFinal) vozTranscritoFinal += ' ';
+      reiniciarTextoVoz(ta.value);
     }
 
     vozErrorFatal = false;
