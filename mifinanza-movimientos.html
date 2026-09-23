@@ -538,6 +538,17 @@
     r.interimResults = true;
     r.maxAlternatives = 1;
 
+    // Índice del último resultado final ya sumado a vozTranscritoFinal, propio
+    // de ESTA instancia/sesión de reconocimiento (se reinicia en cada llamada
+    // a crearReconocimientoVoz, es decir en cada arranque o reinicio). Chrome
+    // no siempre reporta `resultIndex` de forma fiable en modo continuo — a
+    // veces reenvía en un evento posterior resultados que ya había marcado
+    // como finales — así que además de arrancar el barrido en `resultIndex`,
+    // solo se admite un resultado final si su índice es mayor que el último
+    // ya contado. Así nunca se puede sumar dos veces el mismo resultado,
+    // pase lo que pase con resultIndex.
+    let ultimoIndiceFinal = -1;
+
     r.onstart = () => {
       grabandoVoz = true;
       mostrarModoGrabacionVoz();
@@ -560,9 +571,15 @@
     r.onresult = (e) => {
       let interim = '';
       for (let i = e.resultIndex; i < e.results.length; i++) {
-        const transcript = e.results[i][0].transcript;
-        if (e.results[i].isFinal) vozTranscritoFinal += transcript + ' ';
-        else interim += transcript;
+        const resultado = e.results[i];
+        if (resultado.isFinal) {
+          if (i > ultimoIndiceFinal) {
+            vozTranscritoFinal += resultado[0].transcript + ' ';
+            ultimoIndiceFinal = i;
+          }
+        } else {
+          interim += resultado[0].transcript;
+        }
       }
       document.getElementById('voz-estado').textContent = ('🔴 ' + vozTranscritoFinal + interim).trim();
     };
