@@ -476,11 +476,14 @@
 
   // El motor de reconocimiento de voz del navegador (Web Speech API) no expone
   // ninguna propiedad de "timeout" configurable: aunque `continuous = true`,
-  // Chrome puede cortar la sesión por su cuenta tras un rato de silencio. Eso
-  // se trata igual que si el usuario hubiera pulsado "parar": se muestra el
-  // texto acumulado en el textarea editable y listo (sin auto-reinicio). Si
-  // el usuario quiere seguir dictando, pulsa "Grabar de nuevo" y lo que diga
-  // se añade al texto que ya estaba (ver toggleGrabacionVoz).
+  // Chrome puede cortar la sesión por su cuenta tras un rato de silencio. Si
+  // ese corte NO lo pidió el usuario (no pulsó "parar"), se reinicia el
+  // reconocimiento al vuelo sin mostrar nada — desde fuera se ve como una
+  // grabación continua indefinida. El textarea de revisión solo aparece
+  // cuando el usuario pulsa "parar" de verdad (o hay un error fatal de
+  // micrófono). El texto acumulado (vozSegmentosFinales/vozTranscritoFinal)
+  // vive fuera de cada instancia de SpeechRecognition, así que sobrevive
+  // intacto a cada reinicio.
   //
   // En Chrome Android, cada resultado marcado "final" no siempre es la
   // versión definitiva de un fragmento: el motor a veces va emitiendo, cada
@@ -499,6 +502,7 @@
   let grabandoVoz = false;
   let vozSegmentosFinales = [];
   let vozTranscritoFinal = ''; // = vozSegmentosFinales.join(' '), recalculado tras cada cambio
+  let vozParadaManual = false;
   let vozErrorFatal = false;
 
   function reiniciarTextoVoz(textoInicial) {
@@ -557,6 +561,7 @@
   function abrirVoz() {
     cerrarMenu();
     reiniciarTextoVoz('');
+    vozParadaManual = false;
     vozErrorFatal = false;
     mostrarModoGrabacionVoz();
     document.getElementById('voz-estado').textContent = 'Pulsa el micrófono y menciona uno o varios gastos, ej:\n"Almuerzo 8 dólares y gasolina 20 dólares"\nPulsa de nuevo para terminar.';
@@ -564,8 +569,11 @@
   }
 
   function cerrarVoz() {
-    // Se quita onend antes de stop() para que no dispare la pantalla de
-    // revisión al cancelar mientras se estaba grabando.
+    // vozParadaManual = true primero para que, si el stop() de abajo llega a
+    // disparar onend, este no intente reiniciar el reconocimiento.
+    vozParadaManual = true;
+    // Además se quita onend antes de stop() para que tampoco dispare la
+    // pantalla de revisión al cancelar mientras se estaba grabando.
     if (reconocimientoVoz && grabandoVoz) { reconocimientoVoz.onend = null; reconocimientoVoz.stop(); }
     grabandoVoz = false;
     mostrarAyudaVoz(false);
@@ -611,9 +619,26 @@
       document.getElementById('voz-estado').textContent = ('🔴 ' + textoMostrado).trim();
     };
 
-    // Sin auto-reinicio: se pare por lo que se pare (el usuario, silencio,
-    // el límite interno de Chrome...) esto es siempre el final de la sesión.
     r.onend = () => {
+      if (!vozParadaManual && !vozErrorFatal) {
+        // El navegador cortó la sesión solo (silencio, límite interno de
+        // Chrome...): se reinicia sin mostrar nada. vozSegmentosFinales
+        // vive fuera de esta instancia, así que lo ya transcrito no se
+        // pierde ni se duplica — la nueva instancia sigue comparando cada
+        // fragmento nuevo contra el último fragmento de esa misma lista.
+        try {
+          reconocimientoVoz = crearReconocimientoVoz();
+          reconocimientoVoz.start();
+        } catch {
+          grabandoVoz = false;
+          mostrarModoGrabacionVoz();
+          document.getElementById('voz-estado').textContent = 'Se interrumpió el micrófono, pulsa para intentar de nuevo.';
+        }
+        return;
+      }
+
+      // El usuario pulsó "parar" (o hubo un error fatal): aquí, y solo
+      // aquí, se muestra el textarea de revisión.
       grabandoVoz = false;
       if (vozErrorFatal) { mostrarModoGrabacionVoz(); return; }
 
@@ -633,6 +658,7 @@
     if (!SpeechRecognitionCtor) { alert('Tu navegador no soporta reconocimiento de voz. Prueba con Chrome.'); return; }
 
     if (grabandoVoz) {
+      vozParadaManual = true;
       reconocimientoVoz.stop();
       return;
     }
@@ -660,6 +686,7 @@
       reiniciarTextoVoz(ta.value);
     }
 
+    vozParadaManual = false;
     vozErrorFatal = false;
     mostrarModoGrabacionVoz();
     document.getElementById('voz-estado').textContent = ('🔴 ' + vozTranscritoFinal).trim() || '🔴 Escuchando... pulsa de nuevo para terminar';
