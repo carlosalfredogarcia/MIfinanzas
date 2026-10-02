@@ -169,6 +169,8 @@
   .detalle-val-red   { color: #f85149;      font-family: 'Roboto', sans-serif; font-weight: 700; font-size: 13px; }
   .detalle-val-blue  { color: var(--accent); font-family: 'Roboto', sans-serif; font-weight: 700; font-size: 13px; }
 
+  .ahorro-nota { font-size: 11px; color: var(--subtext); font-family: 'DM Sans', sans-serif; margin: -4px 0 10px; }
+
   .promedio-banner {
     display: flex;
     align-items: center;
@@ -578,6 +580,7 @@
         <span class="detalle-val-blue" id="d-ahorro">$0</span>
       </div>
     </div>
+    <div class="ahorro-nota" id="ahorro-nota" style="display:none"></div>
 
     <div class="promedio-banner" id="promedio-wrap" style="display:none">
       <div class="promedio-icon">📅</div>
@@ -932,6 +935,7 @@
       document.getElementById('p-faltan').value = '0'
       document.getElementById('p-faltan-de').textContent = ''
       document.getElementById('ahorro-detalle').style.display = 'none'
+      document.getElementById('ahorro-nota').style.display    = 'none'
       document.getElementById('promedio-wrap').style.display  = 'none'
       btnEliminar.style.display = 'none'
       btnEditar.style.display = 'none'
@@ -1043,6 +1047,10 @@
     document.getElementById('d-ingresos').textContent = fmt(totalIngresos)
     document.getElementById('d-gastos').textContent   = fmt(totalGastos + totalFijos)
     document.getElementById('d-ahorro').textContent   = fmt(ahorroReal)
+
+    const notaEl = document.getElementById('ahorro-nota')
+    notaEl.textContent = `ℹ️ No incluye ${fmtFecha(hoyDate.toISOString())} (mes en curso)`
+    notaEl.style.display = 'block'
 
     const actualPositivo = Math.max(0, ahorroReal)
     actualizarBarraPrincipal(actualPositivo, metaFondoData.monto_objetivo, metaFondoData.fecha_limite)
