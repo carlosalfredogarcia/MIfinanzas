@@ -169,7 +169,20 @@
   .detalle-val-red   { color: #f85149;      font-family: 'Roboto', sans-serif; font-weight: 700; font-size: 13px; }
   .detalle-val-blue  { color: var(--accent); font-family: 'Roboto', sans-serif; font-weight: 700; font-size: 13px; }
 
-  .ahorro-nota { font-size: 11px; color: var(--subtext); font-family: 'DM Sans', sans-serif; margin: -4px 0 10px; }
+  .ahorro-nota {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(255,193,7,0.12);
+    border: 1px solid rgba(255,193,7,0.3);
+    border-radius: 12px;
+    padding: 10px 14px;
+    margin-bottom: 10px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+  }
 
   .promedio-banner {
     display: flex;
@@ -566,6 +579,7 @@
       <div class="principal-percent" id="p-percent">—</div>
     </div>
 
+    <div class="ahorro-nota" id="ahorro-nota" style="display:none"></div>
     <div class="ahorro-detalle" id="ahorro-detalle" style="display:none">
       <div class="detalle-item">
         <span class="detalle-label">Ingresos</span>
@@ -580,7 +594,6 @@
         <span class="detalle-val-blue" id="d-ahorro">$0</span>
       </div>
     </div>
-    <div class="ahorro-nota" id="ahorro-nota" style="display:none"></div>
 
     <div class="promedio-banner" id="promedio-wrap" style="display:none">
       <div class="promedio-icon">📅</div>
