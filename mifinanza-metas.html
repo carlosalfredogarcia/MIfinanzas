@@ -898,7 +898,10 @@
     if (!fechaLimite) return null
     const hoy    = new Date()
     const limite = new Date(fechaLimite.substring(0, 7) + '-01')
-    const diff   = (limite.getFullYear() - hoy.getFullYear()) * 12 + (limite.getMonth() - hoy.getMonth())
+    // +1 porque el mes en curso todavía cuenta como un mes disponible para
+    // ahorrar (coincide con que el ahorro real tampoco lo da por cerrado
+    // todavía): de octubre a diciembre son 3 meses (oct, nov, dic), no 2.
+    const diff = (limite.getFullYear() - hoy.getFullYear()) * 12 + (limite.getMonth() - hoy.getMonth()) + 1
     return Math.max(1, diff)
   }
 
