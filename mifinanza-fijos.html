@@ -334,8 +334,12 @@
     if (!f) return;
 
     if (f.activo) {
+      // Si el registro ya tiene una fecha_fin guardada (se puede fijar desde
+      // "Editar" aunque el gasto siga activo), se muestra esa — no la fecha
+      // de hoy. Solo se usa hoy como valor por defecto si nunca tuvo una.
+      const fechaFinGuardada = (f.fecha_fin || '').slice(0, 10);
       const hoy = new Date().toISOString().split('T')[0];
-      document.getElementById('fecha-fin-input').value = hoy;
+      document.getElementById('fecha-fin-input').value = fechaFinGuardada || hoy;
       document.getElementById('nombre-fijo-confirm').textContent = f.nombre;
       idFijoDesactivar = id;
       document.getElementById('modal-desactivar').style.display = 'flex';
