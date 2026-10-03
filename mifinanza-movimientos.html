@@ -193,6 +193,7 @@
     <div class="modal-handle"></div>
     <button onclick="abrirGasto()" style="width:100%;background:#21262d;border:1px solid #30363d;border-radius:14px;padding:16px;color:#e6edf3;font-family:'DM Sans',sans-serif;font-size:15px;cursor:pointer;margin-bottom:10px;text-align:left;">💸 Registrar gasto</button>
     <button id="btn-voz-fab" onclick="abrirVoz()" style="width:100%;background:#21262d;border:1px solid #30363d;border-radius:14px;padding:16px;color:#e6edf3;font-family:'DM Sans',sans-serif;font-size:15px;cursor:pointer;margin-bottom:10px;text-align:left;display:none;">🎤 Gasto por voz</button>
+    <button onclick="abrirImportarCSV()" style="width:100%;background:#21262d;border:1px solid #30363d;border-radius:14px;padding:16px;color:#e6edf3;font-family:'DM Sans',sans-serif;font-size:15px;cursor:pointer;margin-bottom:10px;text-align:left;">📂 Importar extracto CSV</button>
     <button onclick="abrirIngreso()" style="width:100%;background:#21262d;border:1px solid #30363d;border-radius:14px;padding:16px;color:#e6edf3;font-family:'DM Sans',sans-serif;font-size:15px;cursor:pointer;margin-bottom:10px;text-align:left;">💰 Registrar ingreso</button>
     <button onclick="abrirGastoFijo()" style="width:100%;background:#21262d;border:1px solid #30363d;border-radius:14px;padding:16px;color:#e6edf3;font-family:'DM Sans',sans-serif;font-size:15px;cursor:pointer;margin-bottom:10px;text-align:left;">🔃 Registrar gasto fijo</button>
     <button onclick="cerrarMenu()" class="btn-no">Cancelar</button>
@@ -320,6 +321,17 @@
     <button onclick="guardarEdicion()" class="btn-ok" id="edit-btn-ok" style="background:#58a6ff;color:#0d1117">Guardar cambios</button>
     <button onclick="eliminarMovimiento()" class="btn-del">Eliminar</button>
     <button onclick="cerrarEditar()" class="btn-no">Cancelar</button>
+  </div>
+</div>
+
+<div class="modal-base" id="modal-csv">
+  <div class="modal-box">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Importar extracto bancario</div>
+    <div id="csv-estado" style="text-align:center;padding:20px 8px;color:var(--subtext);font-size:14px;line-height:1.6;min-height:70px;white-space:pre-line;">Selecciona el archivo CSV de tu banco.\nClaude detectará y categorizará todos los gastos automáticamente.</div>
+    <input type="file" id="csv-file" accept=".csv,.txt,text/csv,text/plain" style="display:none" onchange="procesarArchivoCSV(this)">
+    <button id="csv-btn-seleccionar" onclick="document.getElementById('csv-file').click()" class="btn-ok" style="background:#58a6ff;color:#0d1117">📂 Seleccionar archivo CSV</button>
+    <button onclick="cerrarCSV()" class="btn-no">Cancelar</button>
   </div>
 </div>
 
@@ -1027,6 +1039,54 @@
 
     cerrarNuevaCat();
     toast('✅ Categoría añadida');
+  }
+
+  function abrirImportarCSV() {
+    cerrarMenu();
+    document.getElementById('csv-estado').textContent = 'Selecciona el archivo CSV de tu banco.\nClaude detectará y categorizará todos los gastos automáticamente.';
+    document.getElementById('csv-btn-seleccionar').style.display = 'block';
+    document.getElementById('csv-file').value = '';
+    document.getElementById('modal-csv').style.display = 'flex';
+  }
+
+  function cerrarCSV() {
+    document.getElementById('modal-csv').style.display = 'none';
+  }
+
+  async function procesarArchivoCSV(input) {
+    const file = input.files[0];
+    if (!file) return;
+    document.getElementById('csv-btn-seleccionar').style.display = 'none';
+    document.getElementById('csv-estado').textContent = `📄 ${file.name}\n\nAnalizando con IA...`;
+    try {
+      const csvText = await file.text();
+      const { data: { session } } = await dbClient.auth.getSession();
+      const token = session?.access_token;
+      if (!token) {
+        document.getElementById('csv-estado').textContent = 'Sesión expirada, vuelve a iniciar sesión.';
+        document.getElementById('csv-btn-seleccionar').style.display = 'block';
+        return;
+      }
+      await cargarCategoriasPerfil();
+      const categorias = Array.from(document.getElementById('g-categoria').options).map(o => o.textContent);
+      const resp = await fetch('/.netlify/functions/import-csv', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', authorization: 'Bearer ' + token },
+        body: JSON.stringify({ csv: csvText, categorias })
+      });
+      if (!resp.ok) {
+        const err = await resp.json().catch(() => ({}));
+        throw new Error(err.error || 'Error del servidor');
+      }
+      const datos = await resp.json();
+      const gastos = Array.isArray(datos.gastos) ? datos.gastos : [];
+      if (!gastos.length) throw new Error('No se encontraron gastos en el archivo');
+      cerrarCSV();
+      abrirRevisionVoz(gastos);
+    } catch (err) {
+      document.getElementById('csv-estado').textContent = '❌ ' + err.message + '\n\nRevisa que el archivo sea un CSV válido.';
+      document.getElementById('csv-btn-seleccionar').style.display = 'block';
+    }
   }
 
   cargarMovimientos();
