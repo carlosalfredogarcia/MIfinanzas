@@ -1139,7 +1139,12 @@
         cargarMovimientos();
         return;
       }
-      const movimientos = Array.isArray(datos.movimientos) ? datos.movimientos : [];
+      // Aceptar tanto el nuevo formato (movimientos) como el antiguo (gastos)
+      let movimientos = Array.isArray(datos.movimientos) && datos.movimientos.length
+        ? datos.movimientos
+        : Array.isArray(datos.gastos)
+          ? datos.gastos.map(g => ({ ...g, tipo: g.tipo || 'gasto' }))
+          : [];
       if (!movimientos.length) throw new Error('No se encontraron movimientos en el archivo');
       cerrarCSV();
       abrirRevisionVoz(movimientos);

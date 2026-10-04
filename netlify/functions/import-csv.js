@@ -274,9 +274,12 @@ ${csvFinal}`
     return { statusCode: 502, body: JSON.stringify({ error: 'Claude no pudo interpretar el extracto' }) }
   }
 
+  const movimientos = toolUse.input.movimientos || []
   return {
     statusCode: 200,
     headers: { 'content-type': 'application/json' },
-    body: JSON.stringify({ tipo: 'banco', ...toolUse.input })
+    // Incluir gastos como alias de movimientos para compatibilidad con versiones
+    // anteriores del front-end que pudieran estar en caché del CDN.
+    body: JSON.stringify({ tipo: 'banco', movimientos, gastos: movimientos })
   }
 }
