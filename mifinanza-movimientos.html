@@ -322,7 +322,7 @@
   <div class="modal-box">
     <div class="modal-handle"></div>
     <div class="modal-title">Importar extracto bancario</div>
-    <div id="csv-estado" style="text-align:center;padding:20px 8px;color:var(--subtext);font-size:14px;line-height:1.6;min-height:70px;white-space:pre-line;">Selecciona el archivo CSV de tu banco.\nClaude detectará y categorizará todos los gastos automáticamente.</div>
+    <div id="csv-estado" style="text-align:center;padding:20px 8px;color:var(--subtext);font-size:14px;line-height:1.6;min-height:70px;white-space:pre-line;">Selecciona el CSV de tu banco. La app detectará los movimientos automáticamente — revisa las categorías antes de guardar.</div>
     <input type="file" id="csv-file" accept=".csv,.txt,text/csv,text/plain" style="display:none" onchange="procesarArchivoCSV(this)">
     <button id="csv-btn-seleccionar" onclick="document.getElementById('csv-file').click()" class="btn-ok" style="background:#58a6ff;color:#0d1117">📂 Seleccionar archivo CSV</button>
     <button onclick="cerrarCSV()" class="btn-no">Cancelar</button>
@@ -817,7 +817,7 @@
 
   function abrirImportarCSV() {
     cerrarMenu();
-    document.getElementById('csv-estado').textContent = 'Selecciona el archivo CSV de tu banco.\nClaude detectará y categorizará todos los gastos automáticamente.';
+    document.getElementById('csv-estado').textContent = 'Selecciona el CSV de tu banco. La app detectará los movimientos automáticamente — revisa las categorías antes de guardar.';
     document.getElementById('csv-btn-seleccionar').style.display = 'block';
     document.getElementById('csv-file').value = '';
     document.getElementById('modal-csv').style.display = 'flex';
