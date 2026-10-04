@@ -825,11 +825,14 @@
         </div>
       </div>
     `}).join('');
-    const nGastos = movimientos.filter(m => m.tipo !== 'ingreso').length;
-    const nIngresos = movimientos.filter(m => m.tipo === 'ingreso').length;
+    const fmt = n => n.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + '€';
+    const gastosArr   = movimientos.filter(m => m.tipo !== 'ingreso');
+    const ingresosArr = movimientos.filter(m => m.tipo === 'ingreso');
+    const sumGastos   = gastosArr.reduce((a, m) => a + (parseFloat(m.monto) || 0), 0);
+    const sumIngresos = ingresosArr.reduce((a, m) => a + (parseFloat(m.monto) || 0), 0);
     const partes = [];
-    if (nGastos)   partes.push(`${nGastos} gasto${nGastos !== 1 ? 's' : ''}`);
-    if (nIngresos) partes.push(`${nIngresos} ingreso${nIngresos !== 1 ? 's' : ''}`);
+    if (gastosArr.length)   partes.push(`${gastosArr.length} gasto${gastosArr.length !== 1 ? 's' : ''} (${fmt(sumGastos)})`);
+    if (ingresosArr.length) partes.push(`${ingresosArr.length} ingreso${ingresosArr.length !== 1 ? 's' : ''} (${fmt(sumIngresos)})`);
     document.getElementById('revision-resumen').textContent =
       `Se encontraron ${movimientos.length} movimiento${movimientos.length !== 1 ? 's' : ''}: ${partes.join(' y ')}.`;
     actualizarContadorRevision();
