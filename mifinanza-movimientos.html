@@ -200,6 +200,7 @@
     <button onclick="abrirImportarCSV()" style="width:100%;background:#21262d;border:1px solid #30363d;border-radius:14px;padding:16px;color:#e6edf3;font-family:'DM Sans',sans-serif;font-size:15px;cursor:pointer;margin-bottom:10px;text-align:left;">📂 Importar extracto CSV</button>
     <button onclick="abrirIngreso()" style="width:100%;background:#21262d;border:1px solid #30363d;border-radius:14px;padding:16px;color:#e6edf3;font-family:'DM Sans',sans-serif;font-size:15px;cursor:pointer;margin-bottom:10px;text-align:left;">💰 Registrar ingreso</button>
     <button onclick="abrirGastoFijo()" style="width:100%;background:#21262d;border:1px solid #30363d;border-radius:14px;padding:16px;color:#e6edf3;font-family:'DM Sans',sans-serif;font-size:15px;cursor:pointer;margin-bottom:10px;text-align:left;">🔃 Registrar gasto fijo</button>
+    <button onclick="abrirBorrarTodo()" style="width:100%;background:rgba(248,81,73,0.08);border:1px solid rgba(248,81,73,0.3);border-radius:14px;padding:16px;color:#f85149;font-family:'DM Sans',sans-serif;font-size:15px;cursor:pointer;margin-bottom:10px;text-align:left;">🗑 Eliminar todo</button>
     <button onclick="cerrarMenu()" class="btn-no">Cancelar</button>
   </div>
 </div>
@@ -337,6 +338,29 @@
     <div class="fld"><label class="lbl">Hasta</label><input type="date" id="csv-rango-hasta" class="inp"></div>
     <button id="csv-rango-btn-ok" onclick="confirmarDescargaCSV()" class="btn-ok" style="background:#58a6ff;color:#0d1117">⬇ Descargar CSV</button>
     <button onclick="cerrarModalCSV()" class="btn-no">Cancelar</button>
+  </div>
+</div>
+
+<!-- Modal borrar todo — paso 1 -->
+<div class="modal-base" id="modal-borrar-1" style="display:none">
+  <div class="modal-box">
+    <div class="modal-handle"></div>
+    <div class="modal-title" style="color:#f85149">🗑 Eliminar todo</div>
+    <p style="color:#e6edf3;font-size:15px;line-height:1.5;margin:0 0 20px">¿Seguro que quieres eliminar todos tus movimientos? Esta acción no se puede deshacer.</p>
+    <button onclick="continuarBorrar()" class="btn-ok" style="background:#f85149;color:#fff">Continuar</button>
+    <button onclick="cerrarBorrar()" class="btn-no">Cancelar</button>
+  </div>
+</div>
+
+<!-- Modal borrar todo — paso 2 -->
+<div class="modal-base" id="modal-borrar-2" style="display:none">
+  <div class="modal-box">
+    <div class="modal-handle"></div>
+    <div class="modal-title" style="color:#f85149">Confirmación final</div>
+    <p style="color:#e6edf3;font-size:15px;line-height:1.5;margin:0 0 8px">Escribe <strong>CONFIRMAR</strong> para borrar todos los movimientos.</p>
+    <input type="text" id="borrar-confirmar-input" class="inp" placeholder="CONFIRMAR" autocomplete="off" oninput="actualizarBtnBorrar()" style="margin-bottom:12px">
+    <button id="borrar-btn-ok" onclick="ejecutarBorrarTodo()" class="btn-ok" style="background:#f85149;color:#fff;opacity:0.4;pointer-events:none">🗑 Eliminar todo</button>
+    <button onclick="cerrarBorrar()" class="btn-no">Cancelar</button>
   </div>
 </div>
 
@@ -545,6 +569,49 @@
   function cerrarIngreso()   { document.getElementById('modal-ingreso').style.display = 'none'; }
   async function abrirGastoFijo() { cerrarMenu(); ocultarErrorFecha('f'); await cargarCategoriasPerfil(); document.getElementById('modal-fijo').style.display = 'flex'; }
   function cerrarGastoFijo() { document.getElementById('modal-fijo').style.display = 'none'; }
+
+  function abrirBorrarTodo() {
+    cerrarMenu();
+    document.getElementById('modal-borrar-1').style.display = 'flex';
+  }
+  function cerrarBorrar() {
+    document.getElementById('modal-borrar-1').style.display = 'none';
+    document.getElementById('modal-borrar-2').style.display = 'none';
+    document.getElementById('borrar-confirmar-input').value = '';
+    actualizarBtnBorrar();
+  }
+  function continuarBorrar() {
+    document.getElementById('modal-borrar-1').style.display = 'none';
+    document.getElementById('borrar-confirmar-input').value = '';
+    actualizarBtnBorrar();
+    document.getElementById('modal-borrar-2').style.display = 'flex';
+  }
+  function actualizarBtnBorrar() {
+    const val = document.getElementById('borrar-confirmar-input').value;
+    const btn = document.getElementById('borrar-btn-ok');
+    const ok = val === 'CONFIRMAR';
+    btn.style.opacity = ok ? '1' : '0.4';
+    btn.style.pointerEvents = ok ? 'auto' : 'none';
+  }
+  async function ejecutarBorrarTodo() {
+    if (document.getElementById('borrar-confirmar-input').value !== 'CONFIRMAR') return;
+    cerrarBorrar();
+    const uid = window.currentUserId;
+    if (!uid) { mostrarToast('No se pudo identificar el usuario'); return; }
+    toast('Eliminando movimientos…', '');
+    try {
+      const [r1, r2, r3] = await Promise.all([
+        dbClient.from('gastos').delete().eq('usuario_id', uid),
+        dbClient.from('ingresos').delete().eq('usuario_id', uid),
+        dbClient.from('gastos_fijos').delete().eq('usuario_id', uid)
+      ]);
+      if (r1.error || r2.error || r3.error) throw new Error('Error en Supabase');
+      toast('✅ Todos los movimientos eliminados');
+      cargarMovimientos();
+    } catch (e) {
+      toast('❌ Error al eliminar: ' + e.message, '');
+    }
+  }
 
   function escapeHtml(str) {
     return String(str ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
