@@ -621,52 +621,29 @@
 
   function abrirRevisionVoz(movimientos) {
     const categorias = Array.from(document.getElementById('g-categoria').options).map(o => o.textContent);
-    const ci = 'background:#21262d;border:1px solid #30363d;border-radius:8px;padding:5px 7px;color:#e6edf3;font-size:12px;width:100%;font-family:\'DM Sans\',sans-serif;outline:none;';
-    const th = 'padding:6px 8px;font-size:10px;color:var(--subtext);text-transform:uppercase;letter-spacing:0.08em;font-weight:600;text-align:left;white-space:nowrap;';
-    const td = 'padding:4px 4px;vertical-align:middle;';
+    const ci = 'background:#0d1117;border:1px solid #30363d;border-radius:8px;padding:6px 8px;color:#e6edf3;font-size:13px;font-family:\'DM Sans\',sans-serif;outline:none;box-sizing:border-box;';
     const cont = document.getElementById('revision-voz-lista');
-    cont.innerHTML = `
-      <table style="width:100%;border-collapse:collapse;min-width:560px;">
-        <thead>
-          <tr style="position:sticky;top:0;background:#161b22;z-index:2;border-bottom:1px solid #30363d;">
-            <th style="${th}width:80px">Tipo</th>
-            <th style="${th}">Descripción</th>
-            <th style="${th}width:140px">Categoría</th>
-            <th style="${th}width:72px">Monto</th>
-            <th style="${th}width:112px">Fecha</th>
-            <th style="${th}width:28px"></th>
-          </tr>
-        </thead>
-        <tbody>
-          ${movimientos.map((g, i) => {
-            const esIngreso = g.tipo === 'ingreso';
-            const opts = categorias.map(c => `<option ${c === g.categoria ? 'selected' : ''}>${escapeHtml(c)}</option>`).join('');
-            return `<tr class="revision-item" style="border-bottom:1px solid #21262d;">
-              <td style="${td}">
-                <select class="rv-tipo" style="${ci}">
-                  <option value="gasto" ${!esIngreso ? 'selected' : ''}>Gasto</option>
-                  <option value="ingreso" ${esIngreso ? 'selected' : ''}>Ingreso</option>
-                </select>
-              </td>
-              <td style="${td}min-width:110px;">
-                <input type="text" class="rv-descripcion" style="${ci}" value="${escapeHtml(g.descripcion)}">
-              </td>
-              <td style="${td}">
-                <select class="rv-categoria" style="${ci}">${opts}</select>
-              </td>
-              <td style="${td}">
-                <input type="number" class="rv-monto" style="${ci}" value="${g.monto ?? ''}">
-              </td>
-              <td style="${td}">
-                <input type="date" class="rv-fecha" style="${ci}" value="${g.fecha || hoy}">
-              </td>
-              <td style="${td}text-align:center;">
-                <button onclick="this.closest('.revision-item').remove();actualizarContadorRevision();" style="background:none;border:none;color:#f85149;font-size:15px;cursor:pointer;padding:2px 4px;line-height:1;">✕</button>
-              </td>
-            </tr>`;
-          }).join('')}
-        </tbody>
-      </table>`;
+    cont.innerHTML = movimientos.map((g, i) => {
+      const esIngreso = g.tipo === 'ingreso';
+      const opts = categorias.map(c => `<option ${c === g.categoria ? 'selected' : ''}>${escapeHtml(c)}</option>`).join('');
+      const sep = i < movimientos.length - 1 ? 'border-bottom:1px solid #30363d;' : '';
+      return `<div class="revision-item" style="padding:10px 0;${sep}">
+        <div style="display:flex;gap:6px;margin-bottom:6px;">
+          <input type="text" class="rv-descripcion" style="${ci}flex:1;min-width:0;" value="${escapeHtml(g.descripcion)}" placeholder="Descripción">
+          <select class="rv-categoria" style="${ci}width:130px;flex-shrink:0;">${opts}</select>
+          <input type="number" class="rv-monto" style="${ci}width:68px;flex-shrink:0;" value="${g.monto ?? ''}" placeholder="0">
+        </div>
+        <div style="display:flex;gap:6px;align-items:center;">
+          <input type="date" class="rv-fecha" style="${ci}width:130px;flex-shrink:0;" value="${g.fecha || hoy}">
+          <select class="rv-tipo" style="${ci}width:90px;flex-shrink:0;">
+            <option value="gasto" ${!esIngreso ? 'selected' : ''}>Gasto</option>
+            <option value="ingreso" ${esIngreso ? 'selected' : ''}>Ingreso</option>
+          </select>
+          <div style="flex:1;"></div>
+          <button onclick="this.closest('.revision-item').remove();actualizarContadorRevision();" style="background:none;border:none;color:#f85149;font-size:16px;cursor:pointer;padding:4px 6px;line-height:1;flex-shrink:0;">✕</button>
+        </div>
+      </div>`;
+    }).join('');
     const fmt = n => n.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + '€';
     const gastosArr   = movimientos.filter(m => m.tipo !== 'ingreso');
     const ingresosArr = movimientos.filter(m => m.tipo === 'ingreso');
