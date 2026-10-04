@@ -185,15 +185,17 @@
 
   async function inicializar() {
     if (pkceCode) {
-      // Flujo PKCE: intercambia el código explícitamente
-      mostrarCarga('Verificando enlace...', '')
+      // Flujo PKCE: intercambia el código (login con Google, magic link, recuperación)
+      mostrarCarga('Verificando...', '')
       const { error } = await dbClient.auth.exchangeCodeForSession(pkceCode)
-      document.getElementById('loading').classList.remove('visible')
       if (error) {
+        document.getElementById('loading').classList.remove('visible')
         mostrarError('El enlace expiró o ya fue usado. Solicita uno nuevo.')
         return
       }
-      // PASSWORD_RECOVERY se dispara vía onAuthStateChange tras el exchange
+      // Éxito: onAuthStateChange decide si es PASSWORD_RECOVERY o redirige al inicio
+      authListo = true
+      return
     } else if (hashRecovery) {
       // Flujo implícito: el SDK ya procesó el token del hash
       modoRecuperacion = true
@@ -208,11 +210,17 @@
 
   dbClient.auth.onAuthStateChange((event, session) => {
     if (event === 'PASSWORD_RECOVERY') {
+      document.getElementById('loading').classList.remove('visible')
       modoRecuperacion = true
       setTab('nueva-clave')
       return
     }
-    // Solo redirige si no estamos en un flujo de callback
+    // Redirige tras OAuth/PKCE completado (Google, magic link, etc.)
+    if (pkceCode && authListo && session && !modoRecuperacion) {
+      window.location.replace('inicio.html')
+      return
+    }
+    // Redirige si ya hay sesión activa (login normal, sesión restaurada)
     if (authListo && !pkceCode && !hashRecovery && !modoRecuperacion && session) {
       window.location.replace('inicio.html')
     }
