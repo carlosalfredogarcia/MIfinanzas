@@ -113,7 +113,7 @@
       <div class="header-title">Movimientos</div>
       <div class="header-sub" id="mes-subtitle">Cargando...</div>
     </div>
-    <button id="btn-csv-dl" onclick="descargarCSV()" style="margin-top:4px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:10px;padding:7px 12px;color:#e6edf3;font-family:'DM Sans',sans-serif;font-size:13px;cursor:pointer;display:flex;align-items:center;gap:6px;transition:background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.1)'" onmouseout="this.style.background='rgba(255,255,255,0.06)'">
+    <button id="btn-csv-dl" onclick="abrirModalCSV()" style="margin-top:4px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:10px;padding:7px 12px;color:#e6edf3;font-family:'DM Sans',sans-serif;font-size:13px;cursor:pointer;display:flex;align-items:center;gap:6px;transition:background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.1)'" onmouseout="this.style.background='rgba(255,255,255,0.06)'">
       ⬇ CSV
     </button>
   </div>
@@ -329,6 +329,17 @@
   </div>
 </div>
 
+<div class="modal-base" id="modal-csv-rango">
+  <div class="modal-box">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Descargar CSV</div>
+    <div class="fld"><label class="lbl">Desde</label><input type="date" id="csv-rango-desde" class="inp"></div>
+    <div class="fld"><label class="lbl">Hasta</label><input type="date" id="csv-rango-hasta" class="inp"></div>
+    <button id="csv-rango-btn-ok" onclick="confirmarDescargaCSV()" class="btn-ok" style="background:#58a6ff;color:#0d1117">⬇ Descargar CSV</button>
+    <button onclick="cerrarModalCSV()" class="btn-no">Cancelar</button>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 <script>
   window.moneda = localStorage.getItem('moneda') || '$'
@@ -354,27 +365,65 @@
     cargarMovimientos();
   }
 
-  function descargarCSV() {
-    const escape = v => '"' + String(v ?? '').replace(/"/g, '""') + '"'
-    const filas = todosMovimientos.map(m => [
-      m.fecha, m.descripcion, m.categoria, m.monto,
-      m.tipo === 'ingreso' ? 'Ingreso' : m.tipo === 'fijo' ? 'Fijo' : 'Gasto'
-    ])
-    const csvContent = [
-      ['Fecha', 'Concepto', 'Categoría', 'Importe', 'Tipo'],
-      ...filas
-    ].map(row => row.map(escape).join(',')).join('\n')
-
+  function abrirModalCSV() {
     const mm = String(mesActual + 1).padStart(2, '0')
-    const blob = new Blob(['﻿' + csvContent], { type: 'text/csv;charset=utf-8;' })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = 'movimientos-' + anioActual + '-' + mm + '.csv'
-    document.body.appendChild(a)
-    a.click()
-    document.body.removeChild(a)
-    URL.revokeObjectURL(url)
+    const ultimo = new Date(anioActual, mesActual + 1, 0).getDate()
+    document.getElementById('csv-rango-desde').value = `${anioActual}-${mm}-01`
+    document.getElementById('csv-rango-hasta').value = `${anioActual}-${mm}-${String(ultimo).padStart(2, '0')}`
+    document.getElementById('modal-csv-rango').style.display = 'flex'
+  }
+
+  function cerrarModalCSV() {
+    document.getElementById('modal-csv-rango').style.display = 'none'
+  }
+
+  async function confirmarDescargaCSV() {
+    const desde = document.getElementById('csv-rango-desde').value
+    const hasta = document.getElementById('csv-rango-hasta').value
+    if (!desde || !hasta) { alert('Selecciona ambas fechas'); return }
+    if (desde > hasta) { alert('La fecha de inicio debe ser anterior al fin'); return }
+
+    const btn = document.getElementById('csv-rango-btn-ok')
+    const textoOrig = btn.textContent
+    btn.textContent = '⏳ Generando...'
+    btn.disabled = true
+
+    try {
+      const uid = window.currentUserId
+      if (!uid) return
+
+      const [{ data: gastos }, { data: ingresos }, { data: fijos }] = await Promise.all([
+        dbClient.from('gastos').select('fecha,descripcion,categoria,monto').eq('usuario_id', uid).gte('fecha', desde).lte('fecha', hasta).order('fecha', { ascending: false }),
+        dbClient.from('ingresos').select('fecha,concepto,tipo,monto').eq('usuario_id', uid).gte('fecha', desde).lte('fecha', hasta).order('fecha', { ascending: false }),
+        dbClient.from('gastos_fijos').select('fecha_inicio,nombre,categoria,monto').eq('usuario_id', uid).eq('activo', true).lte('fecha_inicio', hasta).or(`fecha_fin.gte.${desde},fecha_fin.is.null`)
+      ])
+
+      const filas = []
+      for (const g of (gastos   || [])) filas.push([g.fecha, g.descripcion, g.categoria, g.monto, 'Gasto'])
+      for (const i of (ingresos || [])) filas.push([i.fecha, i.concepto, i.tipo, i.monto, 'Ingreso'])
+      for (const f of (fijos    || [])) filas.push([f.fecha_inicio, f.nombre, f.categoria, f.monto, 'Fijo'])
+      filas.sort((a, b) => new Date(b[0]) - new Date(a[0]))
+
+      const escape = v => '"' + String(v ?? '').replace(/"/g, '""') + '"'
+      const csvContent = [
+        ['Fecha', 'Concepto', 'Categoría', 'Importe', 'Tipo'],
+        ...filas
+      ].map(row => row.map(escape).join(',')).join('\n')
+
+      const blob = new Blob(['﻿' + csvContent], { type: 'text/csv;charset=utf-8;' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `movimientos-${desde}_${hasta}.csv`
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      URL.revokeObjectURL(url)
+      cerrarModalCSV()
+    } finally {
+      btn.textContent = textoOrig
+      btn.disabled = false
+    }
   }
 
   async function cargarMovimientos() {
