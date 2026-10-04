@@ -634,8 +634,8 @@
       const esIngreso = g.tipo === 'ingreso';
       const opts = categorias.map(c => `<option ${c === g.categoria ? 'selected' : ''}>${escapeHtml(c)}</option>`).join('');
       const sep = i < movimientos.length - 1 ? 'border-bottom:1px solid #30363d;' : '';
-      return `<div class="revision-item" style="padding:10px 0;${sep}display:flex;gap:8px;align-items:flex-start;">
-        <span style="flex-shrink:0;width:20px;padding-top:8px;font-size:11px;color:#484f58;text-align:right;line-height:1;">${i + 1}</span>
+      return `<div class="revision-item" style="padding:10px 0;${sep}display:flex;gap:8px;align-items:center;">
+        <span style="flex-shrink:0;width:20px;font-size:11px;color:#484f58;text-align:right;line-height:1;">${i + 1}</span>
         <div style="flex:1;min-width:0;">
         <div style="display:flex;gap:6px;margin-bottom:6px;">
           <input type="text" class="rv-descripcion" style="${ci}flex:1;min-width:0;" value="${escapeHtml(g.descripcion)}" placeholder="Descripción">
