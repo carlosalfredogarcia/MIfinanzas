@@ -76,7 +76,8 @@
   @keyframes fadeUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
 
   .inp { width:100%;background:var(--card2);border:1px solid var(--border);border-radius:12px;padding:12px 14px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:15px;outline:none; }
-  select.inp { padding:9px 10px;font-size:14px; }
+  select.inp { padding:9px 32px 9px 10px;font-size:14px;appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M2 5l6 6 6-6' stroke='%238b949e' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;background-size:14px; }
+  .rv-categoria { appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M2 5l6 6 6-6' stroke='%238b949e' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 8px center;background-size:12px;padding-right:24px; }
   .lbl { font-size:11px;color:var(--subtext);text-transform:uppercase;letter-spacing:0.08em;display:block;margin-bottom:6px; }
   .fld { margin-bottom:12px; }
   .inp.inp-error { border-color: var(--danger); }
@@ -883,9 +884,11 @@
     if (!uid) return;
     const { data: perfil } = await dbClient.from('perfil').select('categorias').eq('usuario_id', uid).maybeSingle();
     const catsStr = perfil?.categorias || CATS_DEFAULT;
-    const cats = catsStr.split(',').map(c => c.trim()).filter(Boolean);
+    const cats = [...new Set(catsStr.split(',').map(c => c.trim()).filter(Boolean))];
     const defaults = CATS_DEFAULT.split(',').map(c => c.trim());
     const allCats = cats.concat(defaults.filter(d => !cats.includes(d)));
+    const sk = s => s.replace(/^[^\p{L}]+/u, '').toLowerCase();
+    allCats.sort((a, b) => sk(a).localeCompare(sk(b), 'es'));
     ['g-categoria', 'f-categoria', 'e-categoria', 'e-cat-fijo'].forEach(id => {
       const sel = document.getElementById(id);
       if (sel) sel.innerHTML = allCats.map(c => `<option>${c}</option>`).join('');
