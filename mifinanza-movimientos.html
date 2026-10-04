@@ -790,14 +790,23 @@
     }
   }
 
-  function abrirRevisionVoz(gastos) {
+  function abrirRevisionVoz(movimientos) {
     const categorias = Array.from(document.getElementById('g-categoria').options).map(o => o.textContent);
     const cont = document.getElementById('revision-voz-lista');
-    cont.innerHTML = gastos.map((g, i) => `
+    cont.innerHTML = movimientos.map((g, i) => {
+      const esIngreso = g.tipo === 'ingreso';
+      return `
       <div class="revision-item" data-idx="${i}" style="background:#21262d;border:1px solid #30363d;border-radius:14px;padding:14px;margin-bottom:10px;">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
-          <span style="font-size:11px;color:var(--subtext);text-transform:uppercase;letter-spacing:0.08em;">Gasto ${i + 1}</span>
+          <span style="font-size:11px;color:var(--subtext);text-transform:uppercase;letter-spacing:0.08em;">Mov. ${i + 1}</span>
           <span onclick="this.closest('.revision-item').remove(); actualizarContadorRevision();" style="cursor:pointer;color:#f85149;font-size:13px;">✕ Quitar</span>
+        </div>
+        <div class="fld">
+          <label class="lbl">Tipo</label>
+          <select class="inp rv-tipo">
+            <option value="gasto" ${!esIngreso ? 'selected' : ''}>Gasto</option>
+            <option value="ingreso" ${esIngreso ? 'selected' : ''}>Ingreso</option>
+          </select>
         </div>
         <div class="fld"><label class="lbl">Descripción</label><input type="text" class="inp rv-descripcion" value="${escapeHtml(g.descripcion)}"></div>
         <div class="fld">
@@ -811,14 +820,14 @@
           <div class="fld" style="flex:1"><label class="lbl">Fecha</label><input type="date" class="inp rv-fecha" value="${g.fecha || hoy}"></div>
         </div>
       </div>
-    `).join('');
+    `}).join('');
     actualizarContadorRevision();
     document.getElementById('modal-revision-voz').style.display = 'flex';
   }
 
   function actualizarContadorRevision() {
     const n = document.querySelectorAll('#revision-voz-lista .revision-item').length;
-    document.getElementById('revision-voz-titulo').textContent = n ? `${n} gasto${n === 1 ? '' : 's'} detectado${n === 1 ? '' : 's'}` : 'Sin gastos';
+    document.getElementById('revision-voz-titulo').textContent = n ? `${n} movimiento${n === 1 ? '' : 's'} detectado${n === 1 ? '' : 's'}` : 'Sin movimientos';
   }
 
   function cerrarRevisionVoz() {
@@ -827,23 +836,39 @@
 
   async function guardarRevisionVoz() {
     const items = Array.from(document.querySelectorAll('#revision-voz-lista .revision-item'));
-    if (!items.length) { alert('No hay gastos para guardar'); return; }
+    if (!items.length) { alert('No hay movimientos para guardar'); return; }
 
-    const filas = items.map(item => ({
-      fecha: item.querySelector('.rv-fecha').value || hoy,
-      descripcion: item.querySelector('.rv-descripcion').value.trim(),
-      categoria: item.querySelector('.rv-categoria').value,
-      monto: parseFloat(item.querySelector('.rv-monto').value),
-      usuario_id: window.currentUserId
-    })).filter(f => f.descripcion && !isNaN(f.monto));
+    const gastos = [], ingresos = [];
+    for (const item of items) {
+      const fecha = item.querySelector('.rv-fecha').value || hoy;
+      const descripcion = item.querySelector('.rv-descripcion').value.trim();
+      const categoria = item.querySelector('.rv-categoria').value;
+      const monto = parseFloat(item.querySelector('.rv-monto').value);
+      const tipoSelect = item.querySelector('.rv-tipo');
+      const tipo = tipoSelect ? tipoSelect.value : 'gasto';
+      if (!descripcion || isNaN(monto)) continue;
+      if (tipo === 'ingreso') {
+        ingresos.push({ fecha, concepto: descripcion, tipo: categoria, monto, usuario_id: window.currentUserId });
+      } else {
+        gastos.push({ fecha, descripcion, categoria, monto, usuario_id: window.currentUserId });
+      }
+    }
 
-    if (!filas.length) { alert('Completa al menos un gasto válido (descripción y monto)'); return; }
+    if (!gastos.length && !ingresos.length) {
+      alert('Completa al menos un movimiento válido (descripción y monto)');
+      return;
+    }
 
-    const { error } = await dbClient.from('gastos').insert(filas);
-    if (error) { alert('Error: ' + error.message); return; }
+    const ops = [];
+    if (gastos.length)   ops.push(dbClient.from('gastos').insert(gastos));
+    if (ingresos.length) ops.push(dbClient.from('ingresos').insert(ingresos));
+    const resultados = await Promise.all(ops);
+    const errOp = resultados.find(r => r.error);
+    if (errOp) { alert('Error: ' + errOp.error.message); return; }
 
     cerrarRevisionVoz();
-    toast(`✅ ${filas.length} gasto${filas.length === 1 ? '' : 's'} guardado${filas.length === 1 ? '' : 's'}`);
+    const total = gastos.length + ingresos.length;
+    toast(`✅ ${total} movimiento${total === 1 ? '' : 's'} guardado${total === 1 ? '' : 's'}`);
     cargarMovimientos();
   }
 
@@ -1107,10 +1132,17 @@
         throw new Error(err.error || 'Error del servidor');
       }
       const datos = await resp.json();
-      const gastos = Array.isArray(datos.gastos) ? datos.gastos : [];
-      if (!gastos.length) throw new Error('No se encontraron gastos en el archivo');
+      if (datos.tipo === 'mifinanza') {
+        cerrarCSV();
+        const n = datos.importados || 0;
+        toast(`✅ ${n} movimiento${n === 1 ? '' : 's'} importado${n === 1 ? '' : 's'}`);
+        cargarMovimientos();
+        return;
+      }
+      const movimientos = Array.isArray(datos.movimientos) ? datos.movimientos : [];
+      if (!movimientos.length) throw new Error('No se encontraron movimientos en el archivo');
       cerrarCSV();
-      abrirRevisionVoz(gastos);
+      abrirRevisionVoz(movimientos);
     } catch (err) {
       document.getElementById('csv-estado').textContent = '❌ ' + err.message + '\n\nRevisa que el archivo sea un CSV válido.';
       document.getElementById('csv-btn-seleccionar').style.display = 'block';

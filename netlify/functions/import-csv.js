@@ -1,6 +1,8 @@
 // netlify/functions/import-csv.js
-// Recibe el contenido de un extracto bancario CSV y usa Claude para extraer
-// todos los gastos (débitos/pagos). Devuelve { gastos: [{ descripcion, categoria, monto, fecha }] }.
+// Tipo A — CSV propio de MiFinanza (cabecera: Fecha,Concepto,Categoría,Importe,Tipo):
+//   procesa directamente y guarda en Supabase sin llamar a Claude.
+// Tipo B — CSV de banco externo (cualquier otro formato):
+//   envía a Claude para normalizar y devuelve movimientos con tipo (gasto/ingreso).
 
 const SUPABASE_URL = 'https://gapeweomesgawnodarsp.supabase.co'
 const SUPABASE_KEY = 'sb_publishable_u7ug3SBOsuz2zb56gqBLjw_aLJ0Vvp8'
@@ -12,16 +14,86 @@ const CATS_DEFAULT = [
   '🛒 Supermercado', '💧 Agua', '🧴 Cuidado personal', '📺 Suscripción', '💡 Luz', '🌐 Internet'
 ]
 
-async function usuarioValido(token) {
-  if (!token) return false
+const CABECERA_PROPIA = 'Fecha,Concepto,Categoría,Importe,Tipo'
+
+function detectarSeparador(linea) {
+  const tabs = (linea.match(/\t/g) || []).length
+  const puntos = (linea.match(/;/g) || []).length
+  const comas = (linea.match(/,/g) || []).length
+  if (tabs >= puntos && tabs >= comas) return '\t'
+  if (puntos >= comas) return ';'
+  return ','
+}
+
+function parseCSVLinea(linea, sep) {
+  const campos = []
+  let cur = ''
+  let enComillas = false
+  for (let i = 0; i < linea.length; i++) {
+    const c = linea[i]
+    if (enComillas) {
+      if (c === '"' && linea[i + 1] === '"') { cur += '"'; i++ }
+      else if (c === '"') { enComillas = false }
+      else { cur += c }
+    } else {
+      if (c === '"') { enComillas = true }
+      else if (c === sep) { campos.push(cur); cur = '' }
+      else { cur += c }
+    }
+  }
+  campos.push(cur)
+  return campos
+}
+
+function parsearMonto(str) {
+  if (str == null) return NaN
+  const s = String(str).trim()
+  // Si tiene coma y punto, el último es el decimal
+  if (s.includes(',') && s.includes('.')) {
+    const lastComma = s.lastIndexOf(',')
+    const lastDot = s.lastIndexOf('.')
+    return lastComma > lastDot
+      ? parseFloat(s.replace(/\./g, '').replace(',', '.'))
+      : parseFloat(s.replace(/,/g, ''))
+  }
+  // Solo coma → puede ser decimal o miles; si hay exactamente 3 dígitos después asumimos miles
+  if (s.includes(',')) {
+    const partes = s.split(',')
+    if (partes.length === 2 && partes[1].length === 3 && /^\d+$/.test(partes[1])) {
+      return parseFloat(s.replace(',', ''))
+    }
+    return parseFloat(s.replace(',', '.'))
+  }
+  return parseFloat(s)
+}
+
+async function obtenerUsuario(token) {
+  if (!token) return null
   try {
     const resp = await fetch(`${SUPABASE_URL}/auth/v1/user`, {
       headers: { authorization: `Bearer ${token}`, apikey: SUPABASE_KEY }
     })
-    return resp.ok
+    if (!resp.ok) return null
+    const data = await resp.json()
+    return data.id ? data : null
   } catch {
-    return false
+    return null
   }
+}
+
+async function insertarFilas(tabla, filas, token) {
+  if (!filas.length) return true
+  const resp = await fetch(`${SUPABASE_URL}/rest/v1/${tabla}`, {
+    method: 'POST',
+    headers: {
+      'content-type': 'application/json',
+      authorization: `Bearer ${token}`,
+      apikey: SUPABASE_KEY,
+      prefer: 'return=minimal'
+    },
+    body: JSON.stringify(filas)
+  })
+  return resp.ok
 }
 
 exports.handler = async (event) => {
@@ -31,9 +103,12 @@ exports.handler = async (event) => {
 
   const authHeader = event.headers.authorization || event.headers.Authorization || ''
   const token = authHeader.replace(/^Bearer\s+/i, '')
-  if (!(await usuarioValido(token))) {
+
+  const usuario = await obtenerUsuario(token)
+  if (!usuario) {
     return { statusCode: 401, body: JSON.stringify({ error: 'No autorizado' }) }
   }
+  const uid = usuario.id
 
   let body
   try {
@@ -42,7 +117,8 @@ exports.handler = async (event) => {
     return { statusCode: 400, body: JSON.stringify({ error: 'JSON inválido' }) }
   }
 
-  const csv = String(body.csv || '').trim()
+  // Quitar BOM si viene
+  const csv = String(body.csv || '').replace(/^﻿/, '').trim()
   if (!csv) {
     return { statusCode: 400, body: JSON.stringify({ error: 'Falta el contenido del CSV' }) }
   }
@@ -51,40 +127,107 @@ exports.handler = async (event) => {
     ? body.categorias
     : CATS_DEFAULT
 
-  // Limitar a las primeras 200 líneas para no exceder el contexto de Claude
-  const lineas = csv.split('\n')
-  const csvFinal = lineas.slice(0, 200).join('\n')
-  const truncado = lineas.length > 200
+  const lineas = csv.split(/\r?\n/).filter(l => l.trim())
+  const cabecera = lineas[0].trim()
 
+  // ─── Tipo A: CSV propio de MiFinanza ───────────────────────────────────────
+  if (cabecera === CABECERA_PROPIA) {
+    const gastos = [], ingresos = [], fijos = []
+    let errores = 0
+
+    for (let i = 1; i < lineas.length; i++) {
+      const cols = parseCSVLinea(lineas[i], ',').map(s => s.trim())
+      if (cols.length < 5) { errores++; continue }
+      const [fecha, concepto, categoria, importeStr, tipo] = cols
+      const monto = parsearMonto(importeStr)
+      if (!fecha || !concepto || isNaN(monto)) { errores++; continue }
+
+      if (tipo === 'Gasto') {
+        gastos.push({ usuario_id: uid, fecha, descripcion: concepto, categoria, monto })
+      } else if (tipo === 'Ingreso') {
+        // En el CSV propio, la columna Categoría guarda ingresos.tipo
+        ingresos.push({ usuario_id: uid, fecha, concepto, tipo: categoria, monto })
+      } else if (tipo === 'Fijo') {
+        fijos.push({
+          usuario_id: uid,
+          fecha_inicio: fecha,
+          nombre: concepto,
+          categoria,
+          monto,
+          activo: true,
+          dia_del_mes: new Date(fecha + 'T00:00:00').getDate()
+        })
+      } else {
+        errores++
+      }
+    }
+
+    const resultados = await Promise.all([
+      insertarFilas('gastos', gastos, token),
+      insertarFilas('ingresos', ingresos, token),
+      insertarFilas('gastos_fijos', fijos, token)
+    ])
+
+    if (resultados.some(r => !r)) {
+      return { statusCode: 502, body: JSON.stringify({ error: 'Error al guardar en Supabase' }) }
+    }
+
+    const importados = gastos.length + ingresos.length + fijos.length
+    return {
+      statusCode: 200,
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({
+        tipo: 'mifinanza',
+        importados,
+        desglose: { gastos: gastos.length, ingresos: ingresos.length, fijos: fijos.length },
+        ...(errores > 0 && { errores })
+      })
+    }
+  }
+
+  // ─── Tipo B: CSV de banco externo — enviar a Claude ────────────────────────
   const apiKey = process.env.ANTHROPIC_API_KEY
   if (!apiKey) {
     return { statusCode: 500, body: JSON.stringify({ error: 'ANTHROPIC_API_KEY no configurada en el servidor' }) }
   }
 
+  const csvFinal = lineas.slice(0, 200).join('\n')
+  const truncado = lineas.length > 200
   const hoy = new Date().toISOString().slice(0, 10)
 
+  const separadorDetectado = detectarSeparador(lineas[0] || '')
+
   const tool = {
-    name: 'registrar_gastos',
-    description: 'Extrae todos los gastos/débitos del extracto bancario CSV. Solo incluye salidas de dinero: compras, pagos, débitos, cargos. Ignora ingresos, abonos y transferencias recibidas.',
+    name: 'registrar_movimientos',
+    description: 'Extrae todos los movimientos del extracto bancario CSV: tanto gastos/débitos como ingresos/abonos.',
     input_schema: {
       type: 'object',
       properties: {
-        gastos: {
+        movimientos: {
           type: 'array',
-          description: 'Un elemento por cada gasto o débito encontrado en el extracto.',
+          description: 'Un elemento por cada movimiento encontrado.',
           items: {
             type: 'object',
             properties: {
-              descripcion: { type: 'string', description: 'Descripción limpia del gasto tal como aparece en el extracto' },
-              categoria: { type: 'string', enum: categorias, description: 'La categoría de la lista que mejor encaje. Si ninguna encaja, usa "📦 Otros".' },
-              monto: { type: 'number', description: 'Monto siempre positivo, solo el número sin símbolo de moneda' },
-              fecha: { type: 'string', description: `Fecha en formato YYYY-MM-DD. Si el año no aparece, asume ${hoy.slice(0, 4)}.` }
+              descripcion: { type: 'string', description: 'Descripción limpia del movimiento tal como aparece en el extracto' },
+              categoria: {
+                type: 'string',
+                enum: categorias,
+                description: 'Categoría de la lista que mejor encaje con el movimiento. Para ingresos usa "📦 Otros" si no hay una adecuada.'
+              },
+              monto: { type: 'number', description: 'Valor absoluto del monto (siempre positivo), sin símbolo de moneda' },
+              fecha: { type: 'string', description: `Fecha en formato YYYY-MM-DD. Si falta el año usa ${hoy.slice(0, 4)}.` },
+              tipo: {
+                type: 'string',
+                enum: ['gasto', 'ingreso'],
+                description: 'gasto si es un débito, compra, pago o cargo; ingreso si es un abono, cobro o transferencia recibida. Infiere por el signo del importe o por palabras clave en la descripción.'
+              }
             },
-            required: ['descripcion', 'categoria', 'monto', 'fecha']
+            required: ['descripcion', 'categoria', 'monto', 'fecha', 'tipo']
           }
         }
       },
-      required: ['gastos']
+      required: ['movimientos']
     }
   }
 
@@ -101,10 +244,18 @@ exports.handler = async (event) => {
         model: 'claude-haiku-4-5-20251001',
         max_tokens: 8192,
         tools: [tool],
-        tool_choice: { type: 'tool', name: 'registrar_gastos' },
+        tool_choice: { type: 'tool', name: 'registrar_movimientos' },
         messages: [{
           role: 'user',
-          content: `Extrae todos los gastos (débitos, pagos, compras) del siguiente extracto bancario en CSV${truncado ? ' (truncado a las primeras 200 líneas)' : ''}.\n\nCategorías disponibles: ${categorias.join(', ')}\nFecha de hoy: ${hoy}\n\nEXTRACTO:\n${csvFinal}`
+          content: `Analiza el siguiente extracto bancario en CSV${truncado ? ' (truncado a las primeras 200 líneas)' : ''} e identifica todos los movimientos (gastos e ingresos).
+
+El separador detectado es: ${separadorDetectado === '\t' ? 'tabulador' : separadorDetectado === ';' ? 'punto y coma' : 'coma'}. Los importes pueden usar coma o punto como separador decimal. Si hay una columna con importes negativos, son gastos; los positivos son ingresos. Si hay columnas separadas de débito/crédito, extrae ambas.
+
+Categorías disponibles: ${categorias.join(', ')}
+Fecha de hoy: ${hoy}
+
+EXTRACTO:
+${csvFinal}`
         }]
       })
     })
@@ -126,6 +277,6 @@ exports.handler = async (event) => {
   return {
     statusCode: 200,
     headers: { 'content-type': 'application/json' },
-    body: JSON.stringify(toolUse.input)
+    body: JSON.stringify({ tipo: 'banco', ...toolUse.input })
   }
 }
