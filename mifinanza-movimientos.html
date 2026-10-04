@@ -631,9 +631,8 @@
         <div class="fld">
           <label class="lbl">Tipo</label>
           <select class="inp rv-tipo">
-            <option value="gasto" ${g.tipo === 'gasto' || (!esIngreso && g.tipo !== 'fijo') ? 'selected' : ''}>Gasto</option>
+            <option value="gasto" ${!esIngreso ? 'selected' : ''}>Gasto</option>
             <option value="ingreso" ${esIngreso ? 'selected' : ''}>Ingreso</option>
-            <option value="fijo" ${g.tipo === 'fijo' ? 'selected' : ''}>Fijo</option>
           </select>
         </div>
         <div class="fld"><label class="lbl">Descripción</label><input type="text" class="inp rv-descripcion" value="${escapeHtml(g.descripcion)}"></div>
@@ -650,18 +649,15 @@
       </div>
     `}).join('');
     const fmt = n => n.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + '€';
-    const gastosArr   = movimientos.filter(m => m.tipo === 'gasto');
+    const gastosArr   = movimientos.filter(m => m.tipo !== 'ingreso');
     const ingresosArr = movimientos.filter(m => m.tipo === 'ingreso');
-    const fijosArr    = movimientos.filter(m => m.tipo === 'fijo');
     const sumGastos   = gastosArr.reduce((a, m) => a + (parseFloat(m.monto) || 0), 0);
     const sumIngresos = ingresosArr.reduce((a, m) => a + (parseFloat(m.monto) || 0), 0);
-    const sumFijos    = fijosArr.reduce((a, m) => a + (parseFloat(m.monto) || 0), 0);
     const partes = [];
     if (gastosArr.length)   partes.push(`${gastosArr.length} gasto${gastosArr.length !== 1 ? 's' : ''} (${fmt(sumGastos)})`);
     if (ingresosArr.length) partes.push(`${ingresosArr.length} ingreso${ingresosArr.length !== 1 ? 's' : ''} (${fmt(sumIngresos)})`);
-    if (fijosArr.length)    partes.push(`${fijosArr.length} fijo${fijosArr.length !== 1 ? 's' : ''} (${fmt(sumFijos)})`);
     document.getElementById('revision-resumen').textContent =
-      `Se encontraron ${movimientos.length} movimiento${movimientos.length !== 1 ? 's' : ''}: ${partes.join(', ')}.`;
+      `Se encontraron ${movimientos.length} movimiento${movimientos.length !== 1 ? 's' : ''}: ${partes.join(' y ')}.`;
     actualizarContadorRevision();
     document.getElementById('modal-revision-voz').style.display = 'flex';
   }
@@ -679,7 +675,7 @@
     const items = Array.from(document.querySelectorAll('#revision-voz-lista .revision-item'));
     if (!items.length) { alert('No hay movimientos para guardar'); return; }
 
-    const gastos = [], ingresos = [], fijos = [];
+    const gastos = [], ingresos = [];
     for (const item of items) {
       const fecha = item.querySelector('.rv-fecha').value || hoy;
       const descripcion = item.querySelector('.rv-descripcion').value.trim();
@@ -690,14 +686,12 @@
       if (!descripcion || isNaN(monto)) continue;
       if (tipo === 'ingreso') {
         ingresos.push({ fecha, concepto: descripcion, tipo: categoria, monto, usuario_id: window.currentUserId });
-      } else if (tipo === 'fijo') {
-        fijos.push({ fecha_inicio: fecha, nombre: descripcion, categoria, monto, activo: true, dia_del_mes: new Date(fecha + 'T00:00:00').getDate(), usuario_id: window.currentUserId });
       } else {
         gastos.push({ fecha, descripcion, categoria, monto, usuario_id: window.currentUserId });
       }
     }
 
-    if (!gastos.length && !ingresos.length && !fijos.length) {
+    if (!gastos.length && !ingresos.length) {
       alert('Completa al menos un movimiento válido (descripción y monto)');
       return;
     }
@@ -705,13 +699,12 @@
     const ops = [];
     if (gastos.length)   ops.push(dbClient.from('gastos').insert(gastos));
     if (ingresos.length) ops.push(dbClient.from('ingresos').insert(ingresos));
-    if (fijos.length)    ops.push(dbClient.from('gastos_fijos').insert(fijos));
     const resultados = await Promise.all(ops);
     const errOp = resultados.find(r => r.error);
     if (errOp) { alert('Error: ' + errOp.error.message); return; }
 
     cerrarRevisionVoz();
-    const total = gastos.length + ingresos.length + fijos.length;
+    const total = gastos.length + ingresos.length;
     toast(`✅ ${total} movimiento${total === 1 ? '' : 's'} guardado${total === 1 ? '' : 's'}`);
     cargarMovimientos();
   }

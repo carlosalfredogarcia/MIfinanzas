@@ -149,7 +149,7 @@ exports.handler = async (event) => {
       } else if (tipo === 'Ingreso') {
         movimientos.push({ fecha, descripcion: concepto, categoria, monto, tipo: 'ingreso' })
       } else if (tipo === 'Fijo') {
-        movimientos.push({ fecha, descripcion: concepto, categoria, monto, tipo: 'fijo' })
+        movimientos.push({ fecha, descripcion: concepto, categoria, monto, tipo: 'gasto' })
       }
     }
 
