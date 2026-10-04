@@ -108,9 +108,14 @@
 </head>
 <body>
 <div class="phone">
-  <div class="header">
-    <div class="header-title">Movimientos</div>
-    <div class="header-sub" id="mes-subtitle">Cargando...</div>
+  <div class="header" style="display:flex;justify-content:space-between;align-items:flex-start;">
+    <div>
+      <div class="header-title">Movimientos</div>
+      <div class="header-sub" id="mes-subtitle">Cargando...</div>
+    </div>
+    <button id="btn-csv-dl" onclick="descargarCSV()" style="margin-top:4px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:10px;padding:7px 12px;color:#e6edf3;font-family:'DM Sans',sans-serif;font-size:13px;cursor:pointer;display:flex;align-items:center;gap:6px;transition:background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.1)'" onmouseout="this.style.background='rgba(255,255,255,0.06)'">
+      ⬇ CSV
+    </button>
   </div>
 
   <div class="mes-selector">
@@ -358,6 +363,50 @@
     if (mesActual < 0)  { mesActual = 11; anioActual--; }
     actualizarMesLabel();
     cargarMovimientos();
+  }
+
+  async function descargarCSV() {
+    const btn = document.getElementById('btn-csv-dl')
+    const textoOrig = btn.textContent.trim()
+    btn.textContent = '⏳'
+    btn.disabled = true
+
+    try {
+      const { data: { session } } = await dbClient.auth.getSession()
+      const uid = session?.user?.id
+      if (!uid) return
+
+      const [{ data: gastos }, { data: ingresos }, { data: fijos }] = await Promise.all([
+        dbClient.from('gastos').select('fecha,descripcion,categoria,monto').eq('usuario_id', uid).order('fecha', { ascending: false }),
+        dbClient.from('ingresos').select('fecha,concepto,tipo,monto').eq('usuario_id', uid).order('fecha', { ascending: false }),
+        dbClient.from('gastos_fijos').select('fecha_inicio,nombre,categoria,monto').eq('usuario_id', uid).eq('activo', true)
+      ])
+
+      const filas = []
+      for (const g of (gastos || []))   filas.push([g.fecha, g.descripcion, g.categoria, g.monto, 'Gasto'])
+      for (const i of (ingresos || [])) filas.push([i.fecha, i.concepto, i.tipo, i.monto, 'Ingreso'])
+      for (const f of (fijos || []))    filas.push([f.fecha_inicio, f.nombre, f.categoria, f.monto, 'Fijo'])
+      filas.sort((a, b) => new Date(b[0]) - new Date(a[0]))
+
+      const escape = v => '"' + String(v ?? '').replace(/"/g, '""') + '"'
+      const csvContent = [
+        ['Fecha', 'Concepto', 'Categoría', 'Importe', 'Tipo'],
+        ...filas
+      ].map(row => row.map(escape).join(',')).join('\n')
+
+      const blob = new Blob(['﻿' + csvContent], { type: 'text/csv;charset=utf-8;' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = 'mifinanza-' + new Date().toISOString().slice(0, 10) + '.csv'
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      URL.revokeObjectURL(url)
+    } finally {
+      btn.textContent = textoOrig
+      btn.disabled = false
+    }
   }
 
   async function cargarMovimientos() {
