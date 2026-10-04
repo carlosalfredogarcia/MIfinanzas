@@ -947,7 +947,7 @@
     const file = input.files[0];
     if (!file) return;
     document.getElementById('csv-btn-seleccionar').style.display = 'none';
-    document.getElementById('csv-estado').textContent = `📄 ${file.name}\n\nAnalizando con IA...`;
+    document.getElementById('csv-estado').textContent = `📄 ${file.name}\n\nAnalizando tus movimientos...`;
     try {
       const csvText = await file.text();
       const { data: { session } } = await dbClient.auth.getSession();
