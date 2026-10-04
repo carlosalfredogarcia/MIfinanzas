@@ -634,7 +634,9 @@
       const esIngreso = g.tipo === 'ingreso';
       const opts = categorias.map(c => `<option ${c === g.categoria ? 'selected' : ''}>${escapeHtml(c)}</option>`).join('');
       const sep = i < movimientos.length - 1 ? 'border-bottom:1px solid #30363d;' : '';
-      return `<div class="revision-item" style="padding:10px 0;${sep}">
+      return `<div class="revision-item" style="padding:10px 0;${sep}display:flex;gap:8px;align-items:flex-start;">
+        <span style="flex-shrink:0;width:20px;padding-top:8px;font-size:11px;color:#484f58;text-align:right;line-height:1;">${i + 1}</span>
+        <div style="flex:1;min-width:0;">
         <div style="display:flex;gap:6px;margin-bottom:6px;">
           <input type="text" class="rv-descripcion" style="${ci}flex:1;min-width:0;" value="${escapeHtml(g.descripcion)}" placeholder="Descripción">
           <select class="rv-categoria" style="${ci}width:130px;flex-shrink:0;">${opts}</select>
@@ -653,6 +655,7 @@
           </select>
           <div style="flex:1;"></div>
           <button onclick="this.closest('.revision-item').remove();actualizarContadorRevision();" style="background:none;border:none;color:#f85149;font-size:16px;cursor:pointer;padding:4px 6px;line-height:1;flex-shrink:0;">✕</button>
+        </div>
         </div>
       </div>`;
     }).join('');
