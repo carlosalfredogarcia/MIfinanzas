@@ -300,6 +300,14 @@
   }
 
   .plan-input:focus { border-color: rgba(88,166,255,0.3); }
+  .ingreso-extra-row { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; }
+  .ingreso-extra-row .plan-input { padding: 10px 12px; font-size: 14px; }
+  .ingreso-extra-label { flex: 1; }
+  .ingreso-extra-valor { flex: 1.2; }
+  .btn-ing-quitar { background: none; border: none; color: var(--subtext); font-size: 22px; line-height: 1; cursor: pointer; padding: 0 2px; flex-shrink: 0; transition: color 0.15s; }
+  .btn-ing-quitar:hover { color: var(--danger); }
+  .btn-ing-add { width: 100%; background: none; border: 1px dashed var(--border2); border-radius: 12px; padding: 11px; color: var(--accent); font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 600; cursor: pointer; margin-bottom: 10px; transition: border-color 0.2s, background 0.2s; }
+  .btn-ing-add:hover { background: rgba(88,166,255,0.06); border-color: var(--accent); }
 
   .bloque-acordeon { margin-bottom: 10px; }
 
@@ -626,6 +634,7 @@
       </div>
       <div class="bloque-detalle" id="detalle-ingresos" style="display:none">
         <div id="ingresos-lista-plan"></div>
+        <button class="btn-ing-add" onclick="agregarIngresoExtra()">+ Añadir fuente de ingreso</button>
         <button class="btn-restablecer" onclick="restablecerIngresos()">Restablecer</button>
       </div>
     </div>
@@ -1445,26 +1454,89 @@
     renderIngresos()
   }
 
+  function getIngresosExtra() {
+    try { return JSON.parse(localStorage.getItem('planificador_ingresos_extra') || '[]') } catch { return [] }
+  }
+
+  function saveIngresosExtra(extra) {
+    localStorage.setItem('planificador_ingresos_extra', JSON.stringify(extra))
+  }
+
   function guardarIngresosLocal() {
+    // Guardar valores de filas Supabase
     const datos = {}
     document.querySelectorAll('.ingreso-input').forEach(inp => { datos[inp.dataset.id] = inp.value })
     localStorage.setItem('planificador_ingresos', JSON.stringify(datos))
+    // Guardar label y valor de filas extra
+    const extra = getIngresosExtra()
+    document.querySelectorAll('.ingreso-extra-row').forEach(row => {
+      const id = row.dataset.id
+      const item = extra.find(e => e.id === id)
+      if (item) {
+        const labelEl = row.querySelector('.ingreso-extra-label')
+        const valorEl = row.querySelector('.ingreso-extra-valor')
+        if (labelEl) item.label = labelEl.value
+        if (valorEl) item.valor = parseFloat(valorEl.value) || 0
+      }
+    })
+    saveIngresosExtra(extra)
+  }
+
+  function agregarIngresoExtra() {
+    const extra = getIngresosExtra()
+    extra.push({ id: 'extra_' + Date.now(), label: '', valor: 0 })
+    saveIngresosExtra(extra)
+    renderIngresos()
+    setTimeout(() => {
+      const rows = document.querySelectorAll('.ingreso-extra-row')
+      const last = rows[rows.length - 1]
+      if (last) last.querySelector('.ingreso-extra-label').focus()
+    }, 30)
+  }
+
+  function eliminarIngresoExtra(id) {
+    saveIngresosExtra(getIngresosExtra().filter(e => e.id !== id))
+    renderIngresos()
+    actualizarPlanificador()
   }
 
   function renderIngresos() {
     const cont = document.getElementById('ingresos-lista-plan')
     const guardado = JSON.parse(localStorage.getItem('planificador_ingresos') || '{}')
-    cont.innerHTML = ingresosOriginal.map(r => {
-      const valorInicial = guardado[r.id] !== undefined ? guardado[r.id] : parseFloat(r.monto || 0).toFixed(2)
+    let extra = getIngresosExtra()
+
+    // Si no hay ningún dato, inicializar con una fila por defecto
+    if (!ingresosOriginal.length && !extra.length) {
+      extra = [{ id: 'extra_default', label: 'Ingreso mensual', valor: 0 }]
+      saveIngresosExtra(extra)
+    }
+
+    // Filas de Supabase (editables)
+    const filasSupabase = ingresosOriginal.map(r => {
+      const val = guardado[r.id] !== undefined ? guardado[r.id] : parseFloat(r.monto || 0).toFixed(2)
       const label = r.concepto || r.tipo || 'Ingreso'
       return `
         <div class="plan-row">
           <label>${label}</label>
-          <input class="plan-input ingreso-input" type="number" inputmode="decimal" data-id="${r.id}" value="${valorInicial}">
-        </div>
-      `
+          <input class="plan-input ingreso-input" type="number" inputmode="decimal" data-id="${r.id}" value="${val}">
+        </div>`
     }).join('')
-    document.querySelectorAll('.ingreso-input').forEach(inp => {
+
+    // Filas extra manuales (label editable + valor + quitar)
+    const filasExtra = extra.map(e => `
+      <div class="ingreso-extra-row" data-id="${e.id}">
+        <input type="text" class="plan-input ingreso-extra-label" placeholder="Fuente de ingreso" value="${e.label}" data-id="${e.id}">
+        <input type="number" class="plan-input ingreso-extra-valor" inputmode="decimal" placeholder="0" value="${e.valor || ''}" data-id="${e.id}">
+        <button class="btn-ing-quitar" onclick="eliminarIngresoExtra('${e.id}')" title="Quitar">×</button>
+      </div>`).join('')
+
+    cont.innerHTML = filasSupabase + filasExtra
+
+    cont.querySelectorAll('.ingreso-input').forEach(inp => {
+      inp.addEventListener('input', () => { guardarIngresosLocal(); actualizarPlanificador() })
+      inp.addEventListener('focus', function() { this.select() })
+    })
+    cont.querySelectorAll('.ingreso-extra-label, .ingreso-extra-valor').forEach(inp => {
       inp.addEventListener('input', () => { guardarIngresosLocal(); actualizarPlanificador() })
       inp.addEventListener('focus', function() { this.select() })
     })
@@ -1477,11 +1549,15 @@
       if (r) inp.value = parseFloat(r.monto || 0).toFixed(2)
     })
     localStorage.removeItem('planificador_ingresos')
+    localStorage.removeItem('planificador_ingresos_extra')
+    renderIngresos()
     actualizarPlanificador()
   }
 
   function totalIngresos() {
-    return [...document.querySelectorAll('.ingreso-input')].reduce((s, inp) => s + (parseFloat(inp.value) || 0), 0)
+    const deSupabase = [...document.querySelectorAll('.ingreso-input')].reduce((s, inp) => s + (parseFloat(inp.value) || 0), 0)
+    const deExtra    = [...document.querySelectorAll('.ingreso-extra-valor')].reduce((s, inp) => s + (parseFloat(inp.value) || 0), 0)
+    return deSupabase + deExtra
   }
 
   let gastosOriginal = {}
