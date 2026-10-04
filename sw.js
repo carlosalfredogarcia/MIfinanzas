@@ -1,4 +1,4 @@
-const CACHE = 'mifinanza-v10';
+const CACHE = 'mifinanza-v11';
 const ASSETS = ['/icon-192.png', '/icon-512.png'];
 
 self.addEventListener('install', e => {
@@ -21,6 +21,10 @@ self.addEventListener('activate', e => {
 self.addEventListener('fetch', e => {
   if (e.request.method !== 'GET') return;
   const url = new URL(e.request.url);
+
+  // Callback OAuth (Google, magic link, recuperación): el SW no debe consumir
+  // la respuesta antes de que Supabase JS lea ?code= o ?error= de window.location
+  if (url.search.includes('code=') || url.search.includes('error=')) return;
 
   // Peticiones externas: sin interferencia
   if (
