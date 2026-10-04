@@ -411,7 +411,7 @@
   function cerrarPanelMas() { document.getElementById('panel-mas').style.display = 'none' }
   document.getElementById('panel-mas').addEventListener('click', function(e) { if (e.target === this) cerrarPanelMas() })
 
-  const CATS_DEFAULT = '🍔 Comida,🏠 Alquiler,💳 Crédito,📱 Línea,🏋️ Gym,⛽ Gasolina,💻 Tecnología,❤️ Salud,👕 Ropa,🎉 Salidas,🌍 Remesas,⚠️ Gastos Imprevistos,📋 Trámite,🚗 Vehículo,📦 Otros'
+  const CATS_DEFAULT = '🏠 Alquiler,💳 Crédito,📱 Línea,🏋️ Gym,⛽ Gasolina,💻 Tecnología,❤️ Salud,👕 Ropa,🎉 Salidas,🌍 Remesas,⚠️ Gastos Imprevistos,📋 Trámite,🚗 Vehículo,📦 Otros,🛒 Supermercado,💧 Agua,🧴 Cuidado personal,📺 Suscripción,💡 Luz,🌐 Internet'
 
   async function cargarCategoriasPerfil() {
     const uid = window.currentUserId

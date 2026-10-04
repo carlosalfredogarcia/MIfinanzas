@@ -489,7 +489,7 @@
   document.getElementById('f-fecha').addEventListener('input', () => ocultarErrorFecha('f'));
   document.getElementById('e-fecha').addEventListener('input', () => ocultarErrorFecha('e'));
 
-  const CATS_DEFAULT = '🍔 Comida,🏠 Alquiler,💳 Crédito,📱 Línea,🏋️ Gym,⛽ Gasolina,💻 Tecnología,❤️ Salud,👕 Ropa,🎉 Salidas,🌍 Remesas,⚠️ Gastos Imprevistos,📋 Trámite,🚗 Vehículo,📦 Otros'
+  const CATS_DEFAULT = '🏠 Alquiler,💳 Crédito,📱 Línea,🏋️ Gym,⛽ Gasolina,💻 Tecnología,❤️ Salud,👕 Ropa,🎉 Salidas,🌍 Remesas,⚠️ Gastos Imprevistos,📋 Trámite,🚗 Vehículo,📦 Otros,🛒 Supermercado,💧 Agua,🧴 Cuidado personal,📺 Suscripción,💡 Luz,🌐 Internet'
 
   async function cargarCategoriasPerfil() {
     const { data: { session } } = await dbClient.auth.getSession();
