@@ -229,6 +229,18 @@
   </div>
 </div>
 
+<!-- Modal confirmar eliminar categoría -->
+<div class="modal-overlay" id="modal-borrar-cat" style="display:none">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title" style="color:#f85149">Eliminar categoría</div>
+    <p style="color:#e6edf3;font-size:15px;line-height:1.5;margin:0 0 8px">Escribe <strong>CONFIRMAR</strong> para eliminar la categoría <strong id="borrar-cat-nombre"></strong>.</p>
+    <input type="text" id="borrar-cat-input" class="inp" placeholder="CONFIRMAR" autocomplete="off" oninput="actualizarBtnCat()" style="margin-bottom:12px">
+    <button id="borrar-cat-btn" onclick="confirmarEliminarCat()" class="btn-ok" style="background:#f85149;color:#fff;opacity:0.4;pointer-events:none">Eliminar categoría</button>
+    <button class="btn-cancelar" onclick="cerrarBorrarCat()">Cancelar</button>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 <script>
 
@@ -308,10 +320,33 @@
     return [...document.querySelectorAll('.cat-tag .cat-text')].map(t => t.textContent.trim())
   }
 
+  let _catTagPendiente = null
+
   function eliminarCat(tagEl) {
-    if (confirm('¿Eliminar esta categoría? Los datos de estadísticas se perderán.')) {
-      tagEl.remove()
-    }
+    _catTagPendiente = tagEl
+    const nombre = tagEl.querySelector('.cat-text').textContent.trim()
+    document.getElementById('borrar-cat-nombre').textContent = nombre
+    document.getElementById('borrar-cat-input').value = ''
+    actualizarBtnCat()
+    document.getElementById('modal-borrar-cat').style.display = 'flex'
+  }
+
+  function cerrarBorrarCat() {
+    document.getElementById('modal-borrar-cat').style.display = 'none'
+    _catTagPendiente = null
+  }
+
+  function actualizarBtnCat() {
+    const ok = document.getElementById('borrar-cat-input').value === 'CONFIRMAR'
+    const btn = document.getElementById('borrar-cat-btn')
+    btn.style.opacity = ok ? '1' : '0.4'
+    btn.style.pointerEvents = ok ? 'auto' : 'none'
+  }
+
+  function confirmarEliminarCat() {
+    if (document.getElementById('borrar-cat-input').value !== 'CONFIRMAR') return
+    if (_catTagPendiente) _catTagPendiente.remove()
+    cerrarBorrarCat()
   }
 
   function agregarCat() {
