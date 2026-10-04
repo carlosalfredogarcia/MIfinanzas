@@ -631,8 +631,9 @@
         <div class="fld">
           <label class="lbl">Tipo</label>
           <select class="inp rv-tipo">
-            <option value="gasto" ${!esIngreso ? 'selected' : ''}>Gasto</option>
+            <option value="gasto" ${g.tipo === 'gasto' || (!esIngreso && g.tipo !== 'fijo') ? 'selected' : ''}>Gasto</option>
             <option value="ingreso" ${esIngreso ? 'selected' : ''}>Ingreso</option>
+            <option value="fijo" ${g.tipo === 'fijo' ? 'selected' : ''}>Fijo</option>
           </select>
         </div>
         <div class="fld"><label class="lbl">Descripción</label><input type="text" class="inp rv-descripcion" value="${escapeHtml(g.descripcion)}"></div>
@@ -649,15 +650,18 @@
       </div>
     `}).join('');
     const fmt = n => n.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + '€';
-    const gastosArr   = movimientos.filter(m => m.tipo !== 'ingreso');
+    const gastosArr   = movimientos.filter(m => m.tipo === 'gasto');
     const ingresosArr = movimientos.filter(m => m.tipo === 'ingreso');
+    const fijosArr    = movimientos.filter(m => m.tipo === 'fijo');
     const sumGastos   = gastosArr.reduce((a, m) => a + (parseFloat(m.monto) || 0), 0);
     const sumIngresos = ingresosArr.reduce((a, m) => a + (parseFloat(m.monto) || 0), 0);
+    const sumFijos    = fijosArr.reduce((a, m) => a + (parseFloat(m.monto) || 0), 0);
     const partes = [];
     if (gastosArr.length)   partes.push(`${gastosArr.length} gasto${gastosArr.length !== 1 ? 's' : ''} (${fmt(sumGastos)})`);
     if (ingresosArr.length) partes.push(`${ingresosArr.length} ingreso${ingresosArr.length !== 1 ? 's' : ''} (${fmt(sumIngresos)})`);
+    if (fijosArr.length)    partes.push(`${fijosArr.length} fijo${fijosArr.length !== 1 ? 's' : ''} (${fmt(sumFijos)})`);
     document.getElementById('revision-resumen').textContent =
-      `Se encontraron ${movimientos.length} movimiento${movimientos.length !== 1 ? 's' : ''}: ${partes.join(' y ')}.`;
+      `Se encontraron ${movimientos.length} movimiento${movimientos.length !== 1 ? 's' : ''}: ${partes.join(', ')}.`;
     actualizarContadorRevision();
     document.getElementById('modal-revision-voz').style.display = 'flex';
   }
@@ -675,7 +679,7 @@
     const items = Array.from(document.querySelectorAll('#revision-voz-lista .revision-item'));
     if (!items.length) { alert('No hay movimientos para guardar'); return; }
 
-    const gastos = [], ingresos = [];
+    const gastos = [], ingresos = [], fijos = [];
     for (const item of items) {
       const fecha = item.querySelector('.rv-fecha').value || hoy;
       const descripcion = item.querySelector('.rv-descripcion').value.trim();
@@ -686,12 +690,14 @@
       if (!descripcion || isNaN(monto)) continue;
       if (tipo === 'ingreso') {
         ingresos.push({ fecha, concepto: descripcion, tipo: categoria, monto, usuario_id: window.currentUserId });
+      } else if (tipo === 'fijo') {
+        fijos.push({ fecha_inicio: fecha, nombre: descripcion, categoria, monto, activo: true, dia_del_mes: new Date(fecha + 'T00:00:00').getDate(), usuario_id: window.currentUserId });
       } else {
         gastos.push({ fecha, descripcion, categoria, monto, usuario_id: window.currentUserId });
       }
     }
 
-    if (!gastos.length && !ingresos.length) {
+    if (!gastos.length && !ingresos.length && !fijos.length) {
       alert('Completa al menos un movimiento válido (descripción y monto)');
       return;
     }
@@ -699,12 +705,13 @@
     const ops = [];
     if (gastos.length)   ops.push(dbClient.from('gastos').insert(gastos));
     if (ingresos.length) ops.push(dbClient.from('ingresos').insert(ingresos));
+    if (fijos.length)    ops.push(dbClient.from('gastos_fijos').insert(fijos));
     const resultados = await Promise.all(ops);
     const errOp = resultados.find(r => r.error);
     if (errOp) { alert('Error: ' + errOp.error.message); return; }
 
     cerrarRevisionVoz();
-    const total = gastos.length + ingresos.length;
+    const total = gastos.length + ingresos.length + fijos.length;
     toast(`✅ ${total} movimiento${total === 1 ? '' : 's'} guardado${total === 1 ? '' : 's'}`);
     cargarMovimientos();
   }
@@ -969,14 +976,7 @@
         throw new Error(err.error || 'Error del servidor');
       }
       const datos = await resp.json();
-      if (datos.tipo === 'mifinanza') {
-        cerrarCSV();
-        const n = datos.importados || 0;
-        toast(`✅ ${n} movimiento${n === 1 ? '' : 's'} importado${n === 1 ? '' : 's'}`);
-        cargarMovimientos();
-        return;
-      }
-      // Aceptar tanto el nuevo formato (movimientos) como el antiguo (gastos)
+      // Aceptar movimientos de Tipo A (mifinanza) y Tipo B (banco), más alias gastos
       let movimientos = Array.isArray(datos.movimientos) && datos.movimientos.length
         ? datos.movimientos
         : Array.isArray(datos.gastos)

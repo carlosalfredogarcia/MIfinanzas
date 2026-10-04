@@ -133,58 +133,30 @@ exports.handler = async (event) => {
   const sep0 = detectarSeparador(cabecera)
   const cabeceraLimpia = parseCSVLinea(cabecera, sep0).map(s => s.trim()).join(',')
 
-  // ─── Tipo A: CSV propio de MiFinanza ───────────────────────────────────────
+  // ─── Tipo A: CSV propio de MiFinanza — parsear y devolver para previsualización ──
   if (cabeceraLimpia === CABECERA_PROPIA) {
-    const gastos = [], ingresos = [], fijos = []
-    let errores = 0
+    const movimientos = []
 
     for (let i = 1; i < lineas.length; i++) {
       const cols = parseCSVLinea(lineas[i], sep0).map(s => s.trim())
-      if (cols.length < 5) { errores++; continue }
+      if (cols.length < 5) continue
       const [fecha, concepto, categoria, importeStr, tipo] = cols
       const monto = parsearMonto(importeStr)
-      if (!fecha || !concepto || isNaN(monto)) { errores++; continue }
+      if (!fecha || !concepto || isNaN(monto)) continue
 
       if (tipo === 'Gasto') {
-        gastos.push({ usuario_id: uid, fecha, descripcion: concepto, categoria, monto })
+        movimientos.push({ fecha, descripcion: concepto, categoria, monto, tipo: 'gasto' })
       } else if (tipo === 'Ingreso') {
-        // En el CSV propio, la columna Categoría guarda ingresos.tipo
-        ingresos.push({ usuario_id: uid, fecha, concepto, tipo: categoria, monto })
+        movimientos.push({ fecha, descripcion: concepto, categoria, monto, tipo: 'ingreso' })
       } else if (tipo === 'Fijo') {
-        fijos.push({
-          usuario_id: uid,
-          fecha_inicio: fecha,
-          nombre: concepto,
-          categoria,
-          monto,
-          activo: true,
-          dia_del_mes: new Date(fecha + 'T00:00:00').getDate()
-        })
-      } else {
-        errores++
+        movimientos.push({ fecha, descripcion: concepto, categoria, monto, tipo: 'fijo' })
       }
     }
 
-    const resultados = await Promise.all([
-      insertarFilas('gastos', gastos, token),
-      insertarFilas('ingresos', ingresos, token),
-      insertarFilas('gastos_fijos', fijos, token)
-    ])
-
-    if (resultados.some(r => !r)) {
-      return { statusCode: 502, body: JSON.stringify({ error: 'Error al guardar en Supabase' }) }
-    }
-
-    const importados = gastos.length + ingresos.length + fijos.length
     return {
       statusCode: 200,
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({
-        tipo: 'mifinanza',
-        importados,
-        desglose: { gastos: gastos.length, ingresos: ingresos.length, fijos: fijos.length },
-        ...(errores > 0 && { errores })
-      })
+      body: JSON.stringify({ tipo: 'mifinanza', movimientos })
     }
   }
 
