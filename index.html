@@ -162,7 +162,7 @@
   </div>
 </div>
 
-<div class="loading-overlay" id="loading">
+<div class="loading-overlay visible" id="loading">
   <div class="loading-spinner"></div>
   <div class="loading-text" id="loading-text">Verificando...</div>
   <div class="loading-sub" id="loading-sub"></div>
@@ -185,8 +185,8 @@
 
   async function inicializar() {
     if (pkceCode) {
-      // Flujo PKCE: intercambia el código (login con Google, magic link, recuperación)
-      mostrarCarga('Verificando...', '')
+      // Flujo PKCE: intercambia el código (Google OAuth, magic link, recuperación)
+      document.getElementById('loading-text').textContent = 'Verificando...'
       const { error } = await dbClient.auth.exchangeCodeForSession(pkceCode)
       if (error) {
         document.getElementById('loading').classList.remove('visible')
@@ -199,11 +199,16 @@
     } else if (hashRecovery) {
       // Flujo implícito: el SDK ya procesó el token del hash
       modoRecuperacion = true
+      document.getElementById('loading').classList.remove('visible')
       setTab('nueva-clave')
     } else {
-      // Carga normal: verificar sesión existente
+      // Carga normal: verificar sesión existente antes de mostrar el formulario
       const { data: { session } } = await dbClient.auth.getSession()
-      if (session) window.location.replace('inicio.html')
+      if (session) {
+        window.location.replace('inicio.html')
+        return
+      }
+      document.getElementById('loading').classList.remove('visible')
     }
     authListo = true
   }
