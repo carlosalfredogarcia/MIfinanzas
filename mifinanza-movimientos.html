@@ -249,6 +249,10 @@
   <div class="modal-box" style="max-height:80vh;overflow-y:auto;">
     <div class="modal-handle"></div>
     <div class="modal-title" id="revision-voz-titulo">Gastos detectados</div>
+    <div style="background:rgba(248,81,73,0.08);border:1px solid rgba(248,81,73,0.25);border-radius:10px;padding:11px 13px;margin-bottom:12px;font-size:13px;color:#e6edf3;line-height:1.5;">
+      ⚠️ Revisa que los datos sean correctos, especialmente la categoría de cada movimiento. Una buena revisión te dará datos precisos y un mejor control de tus finanzas.
+    </div>
+    <div id="revision-resumen" style="font-size:13px;color:var(--subtext);margin-bottom:14px;"></div>
     <div id="revision-voz-lista"></div>
     <button onclick="guardarRevisionVoz()" class="btn-ok" style="background:#f85149;color:#0d1117">Guardar todos</button>
     <button onclick="cerrarRevisionVoz()" class="btn-no">Cancelar</button>
@@ -821,6 +825,13 @@
         </div>
       </div>
     `}).join('');
+    const nGastos = movimientos.filter(m => m.tipo !== 'ingreso').length;
+    const nIngresos = movimientos.filter(m => m.tipo === 'ingreso').length;
+    const partes = [];
+    if (nGastos)   partes.push(`${nGastos} gasto${nGastos !== 1 ? 's' : ''}`);
+    if (nIngresos) partes.push(`${nIngresos} ingreso${nIngresos !== 1 ? 's' : ''}`);
+    document.getElementById('revision-resumen').textContent =
+      `Se encontraron ${movimientos.length} movimiento${movimientos.length !== 1 ? 's' : ''}: ${partes.join(' y ')}.`;
     actualizarContadorRevision();
     document.getElementById('modal-revision-voz').style.display = 'flex';
   }
