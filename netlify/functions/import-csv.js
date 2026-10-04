@@ -129,14 +129,17 @@ exports.handler = async (event) => {
 
   const lineas = csv.split(/\r?\n/).filter(l => l.trim())
   const cabecera = lineas[0].trim()
+  // Normalizar cabecera: parsear campos (quita comillas) y reunir con coma
+  const sep0 = detectarSeparador(cabecera)
+  const cabeceraLimpia = parseCSVLinea(cabecera, sep0).map(s => s.trim()).join(',')
 
   // ─── Tipo A: CSV propio de MiFinanza ───────────────────────────────────────
-  if (cabecera === CABECERA_PROPIA) {
+  if (cabeceraLimpia === CABECERA_PROPIA) {
     const gastos = [], ingresos = [], fijos = []
     let errores = 0
 
     for (let i = 1; i < lineas.length; i++) {
-      const cols = parseCSVLinea(lineas[i], ',').map(s => s.trim())
+      const cols = parseCSVLinea(lineas[i], sep0).map(s => s.trim())
       if (cols.length < 5) { errores++; continue }
       const [fecha, concepto, categoria, importeStr, tipo] = cols
       const monto = parsearMonto(importeStr)
