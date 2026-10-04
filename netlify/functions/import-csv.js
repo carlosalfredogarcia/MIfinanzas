@@ -96,9 +96,11 @@ async function insertarFilas(tabla, filas, token) {
   return resp.ok
 }
 
+const NO_CACHE = { 'content-type': 'application/json', 'cache-control': 'no-store, no-cache' }
+
 exports.handler = async (event) => {
   if (event.httpMethod !== 'POST') {
-    return { statusCode: 405, body: JSON.stringify({ error: 'Método no permitido' }) }
+    return { statusCode: 405, headers: NO_CACHE, body: JSON.stringify({ error: 'Método no permitido' }) }
   }
 
   const authHeader = event.headers.authorization || event.headers.Authorization || ''
@@ -106,7 +108,7 @@ exports.handler = async (event) => {
 
   const usuario = await obtenerUsuario(token)
   if (!usuario) {
-    return { statusCode: 401, body: JSON.stringify({ error: 'No autorizado' }) }
+    return { statusCode: 401, headers: NO_CACHE, body: JSON.stringify({ error: 'No autorizado' }) }
   }
   const uid = usuario.id
 
@@ -114,13 +116,13 @@ exports.handler = async (event) => {
   try {
     body = JSON.parse(event.body || '{}')
   } catch {
-    return { statusCode: 400, body: JSON.stringify({ error: 'JSON inválido' }) }
+    return { statusCode: 400, headers: NO_CACHE, body: JSON.stringify({ error: 'JSON inválido' }) }
   }
 
   // Quitar BOM si viene
   const csv = String(body.csv || '').replace(/^﻿/, '').trim()
   if (!csv) {
-    return { statusCode: 400, body: JSON.stringify({ error: 'Falta el contenido del CSV' }) }
+    return { statusCode: 400, headers: NO_CACHE, body: JSON.stringify({ error: 'Falta el contenido del CSV' }) }
   }
 
   const categorias = Array.isArray(body.categorias) && body.categorias.length
@@ -155,7 +157,7 @@ exports.handler = async (event) => {
 
     return {
       statusCode: 200,
-      headers: { 'content-type': 'application/json' },
+      headers: NO_CACHE,
       body: JSON.stringify({ tipo: 'mifinanza', movimientos })
     }
   }
@@ -163,7 +165,7 @@ exports.handler = async (event) => {
   // ─── Tipo B: CSV de banco externo — enviar a Claude ────────────────────────
   const apiKey = process.env.ANTHROPIC_API_KEY
   if (!apiKey) {
-    return { statusCode: 500, body: JSON.stringify({ error: 'ANTHROPIC_API_KEY no configurada en el servidor' }) }
+    return { statusCode: 500, headers: NO_CACHE, body: JSON.stringify({ error: 'ANTHROPIC_API_KEY no configurada en el servidor' }) }
   }
 
   const csvFinal = lineas.slice(0, 200).join('\n')
@@ -235,26 +237,24 @@ ${csvFinal}`
       })
     })
   } catch (err) {
-    return { statusCode: 502, body: JSON.stringify({ error: 'No se pudo contactar a Anthropic', detalle: String(err) }) }
+    return { statusCode: 502, headers: NO_CACHE, body: JSON.stringify({ error: 'No se pudo contactar a Anthropic', detalle: String(err) }) }
   }
 
   if (!resp.ok) {
     const errText = await resp.text()
-    return { statusCode: 502, body: JSON.stringify({ error: 'Error de la API de Anthropic', detalle: errText }) }
+    return { statusCode: 502, headers: NO_CACHE, body: JSON.stringify({ error: 'Error de la API de Anthropic', detalle: errText }) }
   }
 
   const data = await resp.json()
   const toolUse = (data.content || []).find(b => b.type === 'tool_use')
   if (!toolUse) {
-    return { statusCode: 502, body: JSON.stringify({ error: 'Claude no pudo interpretar el extracto' }) }
+    return { statusCode: 502, headers: NO_CACHE, body: JSON.stringify({ error: 'Claude no pudo interpretar el extracto' }) }
   }
 
   const movimientos = toolUse.input.movimientos || []
   return {
     statusCode: 200,
-    headers: { 'content-type': 'application/json' },
-    // Incluir gastos como alias de movimientos para compatibilidad con versiones
-    // anteriores del front-end que pudieran estar en caché del CDN.
+    headers: NO_CACHE,
     body: JSON.stringify({ tipo: 'banco', movimientos, gastos: movimientos })
   }
 }
