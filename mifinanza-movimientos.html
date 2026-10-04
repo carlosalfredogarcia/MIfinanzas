@@ -859,7 +859,7 @@
   function cerrarPanelMas() { document.getElementById('panel-mas').style.display = 'none'; }
   document.getElementById('panel-mas').addEventListener('click', function(e) { if (e.target === this) cerrarPanelMas(); });
 
-  const CATS_DEFAULT = '🏠 Alquiler,💳 Crédito,📱 Línea,🏋️ Gym,⛽ Gasolina,💻 Tecnología,❤️ Salud,👕 Ropa,🎉 Salidas,🌍 Remesas,⚠️ Gastos Imprevistos,📋 Trámite,🚗 Vehículo,📦 Otros,🛒 Supermercado,💧 Agua,🧴 Cuidado personal,📺 Suscripción,💡 Luz,🌐 Internet'
+  const CATS_DEFAULT = '🏠 Alquiler,💳 Crédito,📱 Línea,🏋️ Gym,⛽ Gasolina,💻 Tecnología,❤️ Salud,👕 Ropa,🎉 Salidas,🌍 Remesas,⚠️ Gastos Imprevistos,📋 Trámite,🚗 Vehículo,📦 Otros,🛒 Supermercado,💧 Agua,🧴 Cuidado personal,📺 Suscripción,💡 Luz,🌐 Internet,💼 Nómina'
 
   async function cargarCategoriasPerfil() {
     const { data: { session } } = await dbClient.auth.getSession();
@@ -868,9 +868,11 @@
     const { data: perfil } = await dbClient.from('perfil').select('categorias').eq('usuario_id', uid).maybeSingle();
     const catsStr = perfil?.categorias || CATS_DEFAULT;
     const cats = catsStr.split(',').map(c => c.trim()).filter(Boolean);
+    const defaults = CATS_DEFAULT.split(',').map(c => c.trim());
+    const allCats = cats.concat(defaults.filter(d => !cats.includes(d)));
     ['g-categoria', 'f-categoria', 'e-categoria', 'e-cat-fijo'].forEach(id => {
       const sel = document.getElementById(id);
-      if (sel) sel.innerHTML = cats.map(c => `<option>${c}</option>`).join('');
+      if (sel) sel.innerHTML = allCats.map(c => `<option>${c}</option>`).join('');
     });
   }
 

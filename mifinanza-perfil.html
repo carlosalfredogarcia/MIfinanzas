@@ -259,7 +259,7 @@
     document.getElementById('avatar-letra').textContent = val ? val[0].toUpperCase() : '?'
   }
 
-  const CATS_DEFAULT = '🏠 Alquiler,💳 Crédito,📱 Línea,🏋️ Gym,⛽ Gasolina,💻 Tecnología,❤️ Salud,👕 Ropa,🎉 Salidas,🌍 Remesas,⚠️ Gastos Imprevistos,📋 Trámite,🚗 Vehículo,📦 Otros,🛒 Supermercado,💧 Agua,🧴 Cuidado personal,📺 Suscripción,💡 Luz,🌐 Internet'
+  const CATS_DEFAULT = '🏠 Alquiler,💳 Crédito,📱 Línea,🏋️ Gym,⛽ Gasolina,💻 Tecnología,❤️ Salud,👕 Ropa,🎉 Salidas,🌍 Remesas,⚠️ Gastos Imprevistos,📋 Trámite,🚗 Vehículo,📦 Otros,🛒 Supermercado,💧 Agua,🧴 Cuidado personal,📺 Suscripción,💡 Luz,🌐 Internet,💼 Nómina'
 
   async function cargarPerfil() {
     const { data: { session } } = await dbClient.auth.getSession()
@@ -297,7 +297,9 @@
     }
 
     const catsStr = datos.categorias || CATS_DEFAULT
-    renderCats(catsStr.split(',').map(c => c.trim()).filter(Boolean))
+    const cats = catsStr.split(',').map(c => c.trim()).filter(Boolean)
+    const defaults = CATS_DEFAULT.split(',').map(c => c.trim())
+    renderCats(cats.concat(defaults.filter(d => !cats.includes(d))))
   }
 
   const iconsCat = {
