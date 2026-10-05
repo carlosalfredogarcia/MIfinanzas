@@ -328,7 +328,7 @@
   <div class="modal-box">
     <div class="modal-handle"></div>
     <div class="modal-title">Importar extracto bancario</div>
-    <div id="csv-estado" style="text-align:center;padding:20px 8px;color:var(--subtext);font-size:14px;line-height:1.6;min-height:70px;white-space:pre-line;">Selecciona el extracto de tu banco (CSV, XLS o XLSX). La app detectará los movimientos automáticamente — revisa las categorías antes de guardar.</div>
+    <div id="csv-estado" style="text-align:left;padding:20px 8px;color:var(--subtext);font-size:13px;line-height:1.6;min-height:70px;white-space:pre-wrap;word-break:break-all;max-height:60vh;overflow-y:auto;">Selecciona el extracto de tu banco (CSV, XLS o XLSX). La app detectará los movimientos automáticamente — revisa las categorías antes de guardar.</div>
     <input type="file" id="csv-file" accept=".csv,.txt,.xls,.xlsx,text/csv,text/plain" style="display:none" onchange="procesarArchivoCSV(this)">
     <button id="csv-btn-seleccionar" onclick="document.getElementById('csv-file').click()" class="btn-ok" style="background:#58a6ff;color:#0d1117">📂 Seleccionar archivo</button>
     <button onclick="cerrarCSV()" class="btn-no">Cancelar</button>
@@ -993,18 +993,27 @@
         headers: { 'content-type': 'application/json', authorization: 'Bearer ' + token },
         body: JSON.stringify({ csv: csvText, categorias })
       });
+      let datos;
       if (!resp.ok) {
-        const err = await resp.json().catch(() => ({}));
-        throw new Error(err.error || 'Error del servidor');
+        datos = await resp.json().catch(() => ({}));
+        const dbgTxt = datos.dbg ? '\n\n─── DEBUG ───\n' + JSON.stringify(datos.dbg, null, 2) : '';
+        document.getElementById('csv-estado').textContent = '❌ ' + (datos.error || 'Error del servidor') + dbgTxt;
+        document.getElementById('csv-btn-seleccionar').style.display = 'block';
+        return;
       }
-      const datos = await resp.json();
+      datos = await resp.json();
       // Aceptar movimientos de Tipo A (mifinanza) y Tipo B (banco), más alias gastos
       let movimientos = Array.isArray(datos.movimientos) && datos.movimientos.length
         ? datos.movimientos
         : Array.isArray(datos.gastos)
           ? datos.gastos.map(g => ({ ...g, tipo: g.tipo || 'gasto' }))
           : [];
-      if (!movimientos.length) throw new Error('No se encontraron movimientos en el archivo');
+      if (!movimientos.length) {
+        const dbgTxt = datos.dbg ? '\n\n─── DEBUG ───\n' + JSON.stringify(datos.dbg, null, 2) : '';
+        document.getElementById('csv-estado').textContent = '❌ No se encontraron movimientos en el archivo' + dbgTxt;
+        document.getElementById('csv-btn-seleccionar').style.display = 'block';
+        return;
+      }
       cerrarCSV();
       abrirRevisionVoz(movimientos);
     } catch (err) {

@@ -171,6 +171,16 @@ exports.handler = async (event) => {
   const filasEnviar = filasDatos.slice(0, MAX_FILAS)
   const sepLabel    = sep === '\t' ? 'tabulador' : sep === ';' ? 'punto y coma' : 'coma'
 
+  // Objeto de depuración — se incluye en todas las respuestas
+  const dbg = {
+    total_lineas: lineas.length,
+    total_filas_datos: filasDatos.length,
+    filas_a_enviar: filasEnviar.length,
+    separador: sepLabel,
+    cabecera: lineas[0] || '',
+    muestra_filas: lineas.slice(1, 4)
+  }
+
   // ── Llamada 1: detectar esquema de columnas (cabecera + 3 filas de muestra) ─
   const muestra = lineas.slice(0, 4).join('\n')
 
@@ -215,23 +225,27 @@ ${muestra}`
       })
     })
   } catch (err) {
-    return { statusCode: 502, headers: NO_CACHE, body: JSON.stringify({ error: 'No se pudo contactar a Anthropic', detalle: String(err) }) }
+    return { statusCode: 502, headers: NO_CACHE, body: JSON.stringify({ error: 'No se pudo contactar a Anthropic', detalle: String(err), dbg }) }
   }
 
   if (!schemaResp.ok) {
     const errText = await schemaResp.text()
-    return { statusCode: 502, headers: NO_CACHE, body: JSON.stringify({ error: 'Error de la API de Anthropic', detalle: errText }) }
+    return { statusCode: 502, headers: NO_CACHE, body: JSON.stringify({ error: 'Error de la API de Anthropic', detalle: errText, dbg }) }
   }
 
   const schemaData   = await schemaResp.json()
+  dbg.schema_call_raw = schemaData  // LOG 1: respuesta completa de Claude (schema call)
+
   const schemaToolUse = (schemaData.content || []).find(b => b.type === 'tool_use')
   if (!schemaToolUse) {
-    return { statusCode: 502, headers: NO_CACHE, body: JSON.stringify({ error: 'Claude no pudo detectar el esquema de columnas' }) }
+    return { statusCode: 502, headers: NO_CACHE, body: JSON.stringify({ error: 'Claude no pudo detectar el esquema de columnas', dbg }) }
   }
 
   const esquema = schemaToolUse.input
+  dbg.esquema = esquema  // LOG 2: índices detectados
+
   if (typeof esquema.fecha_col !== 'number' || typeof esquema.descripcion_col !== 'number') {
-    return { statusCode: 502, headers: NO_CACHE, body: JSON.stringify({ error: 'Esquema de columnas incompleto' }) }
+    return { statusCode: 502, headers: NO_CACHE, body: JSON.stringify({ error: 'Esquema de columnas incompleto', dbg }) }
   }
 
   // ── Llamada 2: simplificar conceptos y categorizar usando el índice correcto ─
@@ -239,6 +253,9 @@ ${muestra}`
   const listaConceptos = filasEnviar
     .map((linea, i) => `${i + 1}. ${(parseCSVLinea(linea, sep)[esquema.descripcion_col] || '').trim()}`)
     .join('\n')
+
+  // LOG 3: primeros 3 conceptos que se van a enviar a Claude
+  dbg.primeros_3_conceptos_enviados = listaConceptos.split('\n').slice(0, 3)
 
   const conceptsTool = {
     name: 'simplificar_conceptos',
@@ -293,27 +310,41 @@ Categorías disponibles: ${categorias.join(', ')}`
       })
     })
   } catch (err) {
-    return { statusCode: 502, headers: NO_CACHE, body: JSON.stringify({ error: 'No se pudo contactar a Anthropic (conceptos)', detalle: String(err) }) }
+    return { statusCode: 502, headers: NO_CACHE, body: JSON.stringify({ error: 'No se pudo contactar a Anthropic (conceptos)', detalle: String(err), dbg }) }
   }
 
   if (!conceptsResp.ok) {
     const errText = await conceptsResp.text()
-    return { statusCode: 502, headers: NO_CACHE, body: JSON.stringify({ error: 'Error de la API de Anthropic (conceptos)', detalle: errText }) }
+    return { statusCode: 502, headers: NO_CACHE, body: JSON.stringify({ error: 'Error de la API de Anthropic (conceptos)', detalle: errText, dbg }) }
   }
 
   const conceptsData    = await conceptsResp.json()
+  // LOG 4: respuesta completa de Claude (concepts call) — truncar a primeros 5 conceptos para no saturar
+  dbg.concepts_call_raw = {
+    stop_reason: conceptsData.stop_reason,
+    usage: conceptsData.usage,
+    content_types: (conceptsData.content || []).map(b => b.type),
+    tool_input_preview: (() => {
+      const tu = (conceptsData.content || []).find(b => b.type === 'tool_use')
+      if (!tu) return null
+      const c = tu.input && tu.input.conceptos
+      return Array.isArray(c) ? { total: c.length, primeros_5: c.slice(0, 5) } : tu.input
+    })()
+  }
+
   const conceptsToolUse = (conceptsData.content || []).find(b => b.type === 'tool_use')
   if (!conceptsToolUse) {
-    return { statusCode: 502, headers: NO_CACHE, body: JSON.stringify({ error: 'Claude no pudo procesar los conceptos' }) }
+    return { statusCode: 502, headers: NO_CACHE, body: JSON.stringify({ error: 'Claude no pudo procesar los conceptos', dbg }) }
   }
 
   const { conceptos } = conceptsToolUse.input
   if (!Array.isArray(conceptos) || conceptos.length === 0) {
-    return { statusCode: 502, headers: NO_CACHE, body: JSON.stringify({ error: 'Respuesta de Claude incompleta' }) }
+    return { statusCode: 502, headers: NO_CACHE, body: JSON.stringify({ error: 'Respuesta de Claude incompleta', dbg }) }
   }
 
   // ── Parseo JS de todas las filas usando el esquema detectado ──────────────
   const movimientos = []
+  const dbg_filas_saltadas = []
 
   for (let i = 0; i < filasEnviar.length; i++) {
     const linea = filasEnviar[i]
@@ -321,10 +352,16 @@ Categorías disponibles: ${categorias.join(', ')}`
 
     const cols  = parseCSVLinea(linea, sep)
     const fecha = normalizarFecha(cols[esquema.fecha_col])
-    if (!fecha) continue
+    if (!fecha) {
+      if (i < 3) dbg_filas_saltadas.push({ i, motivo: 'fecha_nula', val_fecha_col: cols[esquema.fecha_col], cols })
+      continue
+    }
 
     const info = conceptos[i]
-    if (!info) continue
+    if (!info) {
+      if (i < 3) dbg_filas_saltadas.push({ i, motivo: 'sin_concepto', fecha })
+      continue
+    }
 
     let monto, tipo
 
@@ -333,11 +370,20 @@ Categorías disponibles: ${categorias.join(', ')}`
       const cre = esquema.credito_col != null ? parsearMonto(cols[esquema.credito_col] || '') : NaN
       if (!isNaN(deb) && deb > 0)      { monto = deb; tipo = 'gasto'   }
       else if (!isNaN(cre) && cre > 0) { monto = cre; tipo = 'ingreso' }
-      else continue
+      else {
+        if (i < 3) dbg_filas_saltadas.push({ i, motivo: 'deb_cre_vacios', deb, cre, cols })
+        continue
+      }
     } else {
-      if (esquema.monto_col == null) continue
+      if (esquema.monto_col == null) {
+        if (i < 3) dbg_filas_saltadas.push({ i, motivo: 'monto_col_null' })
+        continue
+      }
       const raw = parsearMonto(cols[esquema.monto_col] || '')
-      if (isNaN(raw) || raw === 0) continue
+      if (isNaN(raw) || raw === 0) {
+        if (i < 3) dbg_filas_saltadas.push({ i, motivo: 'monto_invalido', val_monto_col: cols[esquema.monto_col], raw })
+        continue
+      }
       monto = Math.abs(raw)
       tipo  = esquema.tipo_signo === 'negativo_es_gasto'
         ? (raw < 0 ? 'gasto' : 'ingreso')
@@ -353,9 +399,12 @@ Categorías disponibles: ${categorias.join(', ')}`
     })
   }
 
+  dbg.parseo_filas_saltadas = dbg_filas_saltadas
+  dbg.movimientos_encontrados = movimientos.length
+
   return {
     statusCode: 200,
     headers: NO_CACHE,
-    body: JSON.stringify({ tipo: 'banco', movimientos, gastos: movimientos })
+    body: JSON.stringify({ tipo: 'banco', movimientos, gastos: movimientos, dbg })
   }
 }
