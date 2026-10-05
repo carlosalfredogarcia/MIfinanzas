@@ -106,6 +106,7 @@
 <meta name="apple-mobile-web-app-title" content="MiFinanza">
 <meta name="theme-color" content="#58a6ff">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="auth.js"></script>
 </head>
 <body>
@@ -327,9 +328,9 @@
   <div class="modal-box">
     <div class="modal-handle"></div>
     <div class="modal-title">Importar extracto bancario</div>
-    <div id="csv-estado" style="text-align:center;padding:20px 8px;color:var(--subtext);font-size:14px;line-height:1.6;min-height:70px;white-space:pre-line;">Selecciona el CSV de tu banco. La app detectará los movimientos automáticamente — revisa las categorías antes de guardar.</div>
-    <input type="file" id="csv-file" accept=".csv,.txt,text/csv,text/plain" style="display:none" onchange="procesarArchivoCSV(this)">
-    <button id="csv-btn-seleccionar" onclick="document.getElementById('csv-file').click()" class="btn-ok" style="background:#58a6ff;color:#0d1117">📂 Seleccionar archivo CSV</button>
+    <div id="csv-estado" style="text-align:center;padding:20px 8px;color:var(--subtext);font-size:14px;line-height:1.6;min-height:70px;white-space:pre-line;">Selecciona el extracto de tu banco (CSV, XLS o XLSX). La app detectará los movimientos automáticamente — revisa las categorías antes de guardar.</div>
+    <input type="file" id="csv-file" accept=".csv,.txt,.xls,.xlsx,text/csv,text/plain" style="display:none" onchange="procesarArchivoCSV(this)">
+    <button id="csv-btn-seleccionar" onclick="document.getElementById('csv-file').click()" class="btn-ok" style="background:#58a6ff;color:#0d1117">📂 Seleccionar archivo</button>
     <button onclick="cerrarCSV()" class="btn-no">Cancelar</button>
   </div>
 </div>
@@ -950,7 +951,7 @@
 
   function abrirImportarCSV() {
     cerrarMenu();
-    document.getElementById('csv-estado').textContent = 'Selecciona el CSV de tu banco. La app detectará los movimientos automáticamente — revisa las categorías antes de guardar.';
+    document.getElementById('csv-estado').textContent = 'Selecciona el extracto de tu banco (CSV, XLS o XLSX). La app detectará los movimientos automáticamente — revisa las categorías antes de guardar.';
     document.getElementById('csv-btn-seleccionar').style.display = 'block';
     document.getElementById('csv-file').value = '';
     document.getElementById('modal-csv').style.display = 'flex';
@@ -960,13 +961,24 @@
     document.getElementById('modal-csv').style.display = 'none';
   }
 
+  async function fileToCSV(file) {
+    const ext = file.name.split('.').pop().toLowerCase();
+    if (ext === 'xls' || ext === 'xlsx') {
+      const buffer = await file.arrayBuffer();
+      const wb = XLSX.read(buffer, { type: 'array' });
+      const ws = wb.Sheets[wb.SheetNames[0]];
+      return XLSX.utils.sheet_to_csv(ws);
+    }
+    return file.text();
+  }
+
   async function procesarArchivoCSV(input) {
     const file = input.files[0];
     if (!file) return;
     document.getElementById('csv-btn-seleccionar').style.display = 'none';
     document.getElementById('csv-estado').textContent = `📄 ${file.name}\n\nAnalizando tus movimientos...`;
     try {
-      const csvText = await file.text();
+      const csvText = await fileToCSV(file);
       const { data: { session } } = await dbClient.auth.getSession();
       const token = session?.access_token;
       if (!token) {
@@ -996,7 +1008,7 @@
       cerrarCSV();
       abrirRevisionVoz(movimientos);
     } catch (err) {
-      document.getElementById('csv-estado').textContent = '❌ ' + err.message + '\n\nRevisa que el archivo sea un CSV válido.';
+      document.getElementById('csv-estado').textContent = '❌ ' + err.message + '\n\nRevisa que el archivo sea un CSV, XLS o XLSX válido.';
       document.getElementById('csv-btn-seleccionar').style.display = 'block';
     }
   }
