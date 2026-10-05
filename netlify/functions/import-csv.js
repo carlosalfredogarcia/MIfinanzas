@@ -162,17 +162,40 @@ exports.handler = async (event) => {
     return { statusCode: 500, headers: NO_CACHE, body: JSON.stringify({ error: 'ANTHROPIC_API_KEY no configurada en el servidor' }) }
   }
 
-  const hoy  = new Date().toISOString().slice(0, 10)
-  const sep  = detectarSeparador(lineas[0] || '')
-  const MAX_FILAS   = 400
-  const filasDatos  = lineas.slice(1)
+  const hoy        = new Date().toISOString().slice(0, 10)
+  const sep        = detectarSeparador(lineas[0] || '')
+  const filasDatos = lineas.slice(1)
+  const MAX_FILAS  = 400
   const filasEnviar = filasDatos.slice(0, MAX_FILAS)
-  const muestra     = lineas.slice(0, 4).join('\n')   // cabecera + hasta 3 filas de muestra
+
+  // Detectar heurísticamente la columna de descripción:
+  // la columna con mayor longitud media de texto que no sea fecha ni número
+  const numCols = parseCSVLinea(lineas[0], sep).length
+  const scores  = new Array(numCols).fill(0)
+  for (const linea of filasEnviar.slice(0, 5)) {
+    const cols = parseCSVLinea(linea, sep)
+    for (let i = 0; i < Math.min(cols.length, numCols); i++) {
+      const v = cols[i].trim()
+      if (!v) continue
+      if (normalizarFecha(v))                              { scores[i] -= 10; continue }
+      if (!isNaN(parsearMonto(v)) && v.length <= 15)      { scores[i] -= 5;  continue }
+      scores[i] += v.length
+    }
+  }
+  const colDescHeur = scores.indexOf(Math.max(...scores))
+
+  // Lista de conceptos: una línea por fila, solo el campo descripción
+  const listaConceptos = filasEnviar
+    .map((linea, i) => `${i + 1}. ${(parseCSVLinea(linea, sep)[colDescHeur] || '').trim()}`)
+    .join('\n')
+
+  // Muestra mínima para que Claude detecte el esquema: cabecera + 3 filas
+  const muestra = lineas.slice(0, 4).join('\n')
 
   const tool = {
     name: 'analizar_extracto',
-    description: `Analiza el extracto bancario: detecta el esquema de columnas y,
-para cada fila de datos, devuelve solo el concepto simplificado y la categoría.
+    description: `Detecta el esquema de columnas del extracto bancario y, para cada concepto
+de la lista, devuelve el nombre simplificado (1-3 palabras) y la categoría.
 Las fechas e importes los parsea el cliente directamente a partir del CSV.`,
     input_schema: {
       type: 'object',
@@ -181,28 +204,28 @@ Las fechas e importes los parsea el cliente directamente a partir del CSV.`,
           type: 'object',
           description: 'Índices 0-based de las columnas relevantes del extracto',
           properties: {
-            fecha_col:       { type: 'integer',           description: 'Índice de la columna de fecha' },
-            descripcion_col: { type: 'integer',           description: 'Índice de la columna de descripción/concepto' },
-            monto_col:       { type: ['integer', 'null'], description: 'Índice de la columna de importe único (null si hay columnas separadas de débito/crédito)' },
-            debito_col:      { type: ['integer', 'null'], description: 'Índice de la columna de débito/cargo (null si no existe)' },
-            credito_col:     { type: ['integer', 'null'], description: 'Índice de la columna de crédito/abono (null si no existe)' },
+            fecha_col:       { type: 'integer',           description: 'Columna de fecha' },
+            descripcion_col: { type: 'integer',           description: 'Columna de descripción/concepto (confirma o corrige el índice ' + colDescHeur + ' detectado)' },
+            monto_col:       { type: ['integer', 'null'], description: 'Columna de importe único (null si hay débito/crédito separados)' },
+            debito_col:      { type: ['integer', 'null'], description: 'Columna de débito/cargo (null si no existe)' },
+            credito_col:     { type: ['integer', 'null'], description: 'Columna de crédito/abono (null si no existe)' },
             tipo_signo: {
               type: 'string',
               enum: ['negativo_es_gasto', 'positivo_es_gasto', 'columnas_separadas'],
-              description: 'Cómo distinguir gasto de ingreso: por el signo del importe, o por columnas separadas de débito/crédito'
+              description: 'Cómo distinguir gasto de ingreso'
             }
           },
           required: ['fecha_col', 'descripcion_col', 'tipo_signo']
         },
         conceptos: {
           type: 'array',
-          description: 'Un elemento por cada fila de datos, en el mismo orden que el CSV. Solo nombre simplificado y categoría.',
+          description: 'Un elemento por cada línea de la lista de conceptos, en el mismo orden.',
           items: {
             type: 'object',
             properties: {
               nombre: {
                 type: 'string',
-                description: 'Concepto simplificado a 1-3 palabras. Ejemplos: "PAGO TPV CARREFOUR ALAMEDA 22" → "Carrefour", "RECIBO NETFLIX ENE 2026" → "Netflix", "NOMINA EMPRESA SL OCT" → "Nómina Empresa"'
+                description: 'Concepto simplificado a 1-3 palabras. Ejemplos: "PAGO TPV CARREFOUR ALAMEDA 22" → "Carrefour", "RECIBO NETFLIX ENE 2026" → "Netflix", "NOMINA EMPRESA SL" → "Nómina Empresa"'
               },
               categoria: {
                 type: 'string',
@@ -225,22 +248,22 @@ Las fechas e importes los parsea el cliente directamente a partir del CSV.`,
       headers: { 'content-type': 'application/json', 'x-api-key': apiKey, 'anthropic-version': '2023-06-01' },
       body: JSON.stringify({
         model: 'claude-haiku-4-5-20251001',
-        max_tokens: 4096,
+        max_tokens: 8192,
         tools: [tool],
         tool_choice: { type: 'tool', name: 'analizar_extracto' },
         messages: [{
           role: 'user',
-          content: `Analiza este extracto bancario. Detecta el esquema de columnas y devuelve, para cada fila de datos, solo el concepto simplificado (1-3 palabras) y la categoría. No incluyas fechas ni importes en la respuesta; el cliente los extrae del CSV directamente.
+          content: `Extracto bancario. Detecta el esquema de columnas con la muestra y devuelve, para cada concepto de la lista, el nombre simplificado (1-3 palabras) y la categoría.
 
-MUESTRA (cabecera + primeras filas para entender el formato):
+MUESTRA — cabecera + 3 filas (para detectar el esquema):
 ${muestra}
 
-TODAS LAS FILAS DE DATOS (${filasEnviar.length}${filasDatos.length > MAX_FILAS ? ` de ${filasDatos.length} — resto truncado` : ''}):
-${filasEnviar.join('\n')}
+LISTA DE CONCEPTOS (${filasEnviar.length} filas${filasDatos.length > MAX_FILAS ? `, de ${filasDatos.length} totales — resto no procesado` : ''}):
+${listaConceptos}
 
-Separador detectado: ${sep === '\t' ? 'tabulador' : sep === ';' ? 'punto y coma' : 'coma'}
+Separador: ${sep === '\t' ? 'tabulador' : sep === ';' ? 'punto y coma' : 'coma'}
 Fecha hoy: ${hoy}
-Categorías disponibles: ${categorias.join(', ')}`
+Categorías: ${categorias.join(', ')}`
         }]
       })
     })
@@ -260,7 +283,7 @@ Categorías disponibles: ${categorias.join(', ')}`
   }
 
   const { esquema, conceptos } = toolUse.input
-  if (!esquema || !Array.isArray(conceptos)) {
+  if (!esquema || !Array.isArray(conceptos) || conceptos.length === 0) {
     return { statusCode: 502, headers: NO_CACHE, body: JSON.stringify({ error: 'Respuesta de Claude incompleta' }) }
   }
 
