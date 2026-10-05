@@ -1,7 +1,9 @@
 // netlify/functions/import-csv.js
 // Tipo A — CSV propio de MiFinanza: parseo JS directo, devuelve movimientos para previsualización.
-// Tipo B — CSV de banco externo: una sola llamada a Claude detecta el esquema de columnas y
-//   simplifica/categoriza los conceptos. Fechas e importes los parsea JS sin más llamadas a la API.
+// Tipo B — CSV de banco externo: dos llamadas pequeñas a Claude:
+//   1) cabecera + 3 filas → esquema de columnas (índices fecha/descripción/importe).
+//   2) lista de conceptos (extraída con el índice correcto) → nombre simplificado + categoría.
+//   Fechas e importes los parsea JS; sin heurístico propio de detección de columnas.
 
 const SUPABASE_URL = 'https://gapeweomesgawnodarsp.supabase.co'
 const SUPABASE_KEY = 'sb_publishable_u7ug3SBOsuz2zb56gqBLjw_aLJ0Vvp8'
@@ -167,59 +169,86 @@ exports.handler = async (event) => {
   const filasDatos = lineas.slice(1)
   const MAX_FILAS  = 400
   const filasEnviar = filasDatos.slice(0, MAX_FILAS)
+  const sepLabel    = sep === '\t' ? 'tabulador' : sep === ';' ? 'punto y coma' : 'coma'
 
-  // Detectar heurísticamente la columna de descripción:
-  // la columna con mayor longitud media de texto que no sea fecha ni número
-  const numCols = parseCSVLinea(lineas[0], sep).length
-  const scores  = new Array(numCols).fill(0)
-  for (const linea of filasEnviar.slice(0, 5)) {
-    const cols = parseCSVLinea(linea, sep)
-    for (let i = 0; i < Math.min(cols.length, numCols); i++) {
-      const v = cols[i].trim()
-      if (!v) continue
-      if (normalizarFecha(v))                              { scores[i] -= 10; continue }
-      if (!isNaN(parsearMonto(v)) && v.length <= 15)      { scores[i] -= 5;  continue }
-      scores[i] += v.length
-    }
-  }
-  const colDescHeur = scores.indexOf(Math.max(...scores))
-
-  // Lista de conceptos: una línea por fila, solo el campo descripción
-  const listaConceptos = filasEnviar
-    .map((linea, i) => `${i + 1}. ${(parseCSVLinea(linea, sep)[colDescHeur] || '').trim()}`)
-    .join('\n')
-
-  // Muestra mínima para que Claude detecte el esquema: cabecera + 3 filas
+  // ── Llamada 1: detectar esquema de columnas (cabecera + 3 filas de muestra) ─
   const muestra = lineas.slice(0, 4).join('\n')
 
-  const tool = {
-    name: 'analizar_extracto',
-    description: `Detecta el esquema de columnas del extracto bancario y, para cada concepto
-de la lista, devuelve el nombre simplificado (1-3 palabras) y la categoría.
-Las fechas e importes los parsea el cliente directamente a partir del CSV.`,
+  const schemaTool = {
+    name: 'detectar_esquema',
+    description: 'Detecta los índices 0-based de las columnas del extracto bancario a partir de la cabecera y filas de muestra.',
     input_schema: {
       type: 'object',
       properties: {
-        esquema: {
-          type: 'object',
-          description: 'Índices 0-based de las columnas relevantes del extracto',
-          properties: {
-            fecha_col:       { type: 'integer',           description: 'Columna de fecha' },
-            descripcion_col: { type: 'integer',           description: 'Columna de descripción/concepto (confirma o corrige el índice ' + colDescHeur + ' detectado)' },
-            monto_col:       { type: ['integer', 'null'], description: 'Columna de importe único (null si hay débito/crédito separados)' },
-            debito_col:      { type: ['integer', 'null'], description: 'Columna de débito/cargo (null si no existe)' },
-            credito_col:     { type: ['integer', 'null'], description: 'Columna de crédito/abono (null si no existe)' },
-            tipo_signo: {
-              type: 'string',
-              enum: ['negativo_es_gasto', 'positivo_es_gasto', 'columnas_separadas'],
-              description: 'Cómo distinguir gasto de ingreso'
-            }
-          },
-          required: ['fecha_col', 'descripcion_col', 'tipo_signo']
-        },
+        fecha_col:       { type: 'integer',           description: 'Índice (0-based) de la columna que contiene la fecha del movimiento' },
+        descripcion_col: { type: 'integer',           description: 'Índice (0-based) de la columna con la descripción o concepto del movimiento (texto libre, no número)' },
+        monto_col:       { type: ['integer', 'null'], description: 'Índice de la columna de importe único. null si hay columnas separadas de débito y crédito.' },
+        debito_col:      { type: ['integer', 'null'], description: 'Índice de la columna de débito/cargo. null si no existe.' },
+        credito_col:     { type: ['integer', 'null'], description: 'Índice de la columna de crédito/abono. null si no existe.' },
+        tipo_signo: {
+          type: 'string',
+          enum: ['negativo_es_gasto', 'positivo_es_gasto', 'columnas_separadas'],
+          description: 'Cómo determinar si un movimiento es gasto o ingreso'
+        }
+      },
+      required: ['fecha_col', 'descripcion_col', 'tipo_signo']
+    }
+  }
+
+  let schemaResp
+  try {
+    schemaResp = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', 'x-api-key': apiKey, 'anthropic-version': '2023-06-01' },
+      body: JSON.stringify({
+        model: 'claude-haiku-4-5-20251001',
+        max_tokens: 300,
+        tools: [schemaTool],
+        tool_choice: { type: 'tool', name: 'detectar_esquema' },
+        messages: [{
+          role: 'user',
+          content: `Extracto bancario con separador ${sepLabel}. Detecta los índices 0-based de las columnas: fecha, descripción del movimiento, importe (o débito/crédito separados), y cómo distinguir gasto de ingreso.
+
+CABECERA Y MUESTRA:
+${muestra}`
+        }]
+      })
+    })
+  } catch (err) {
+    return { statusCode: 502, headers: NO_CACHE, body: JSON.stringify({ error: 'No se pudo contactar a Anthropic', detalle: String(err) }) }
+  }
+
+  if (!schemaResp.ok) {
+    const errText = await schemaResp.text()
+    return { statusCode: 502, headers: NO_CACHE, body: JSON.stringify({ error: 'Error de la API de Anthropic', detalle: errText }) }
+  }
+
+  const schemaData   = await schemaResp.json()
+  const schemaToolUse = (schemaData.content || []).find(b => b.type === 'tool_use')
+  if (!schemaToolUse) {
+    return { statusCode: 502, headers: NO_CACHE, body: JSON.stringify({ error: 'Claude no pudo detectar el esquema de columnas' }) }
+  }
+
+  const esquema = schemaToolUse.input
+  if (typeof esquema.fecha_col !== 'number' || typeof esquema.descripcion_col !== 'number') {
+    return { statusCode: 502, headers: NO_CACHE, body: JSON.stringify({ error: 'Esquema de columnas incompleto' }) }
+  }
+
+  // ── Llamada 2: simplificar conceptos y categorizar usando el índice correcto ─
+  // JS usa descripcion_col devuelto por Claude — sin heurístico propio
+  const listaConceptos = filasEnviar
+    .map((linea, i) => `${i + 1}. ${(parseCSVLinea(linea, sep)[esquema.descripcion_col] || '').trim()}`)
+    .join('\n')
+
+  const conceptsTool = {
+    name: 'simplificar_conceptos',
+    description: 'Para cada concepto bancario de la lista, devuelve el nombre simplificado (1-3 palabras) y la categoría.',
+    input_schema: {
+      type: 'object',
+      properties: {
         conceptos: {
           type: 'array',
-          description: 'Un elemento por cada línea de la lista de conceptos, en el mismo orden.',
+          description: 'Un elemento por cada línea numerada de la lista, en el mismo orden.',
           items: {
             type: 'object',
             properties: {
@@ -237,53 +266,49 @@ Las fechas e importes los parsea el cliente directamente a partir del CSV.`,
           }
         }
       },
-      required: ['esquema', 'conceptos']
+      required: ['conceptos']
     }
   }
 
-  let resp
+  let conceptsResp
   try {
-    resp = await fetch('https://api.anthropic.com/v1/messages', {
+    conceptsResp = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: { 'content-type': 'application/json', 'x-api-key': apiKey, 'anthropic-version': '2023-06-01' },
       body: JSON.stringify({
         model: 'claude-haiku-4-5-20251001',
         max_tokens: 8192,
-        tools: [tool],
-        tool_choice: { type: 'tool', name: 'analizar_extracto' },
+        tools: [conceptsTool],
+        tool_choice: { type: 'tool', name: 'simplificar_conceptos' },
         messages: [{
           role: 'user',
-          content: `Extracto bancario. Detecta el esquema de columnas con la muestra y devuelve, para cada concepto de la lista, el nombre simplificado (1-3 palabras) y la categoría.
+          content: `Para cada concepto bancario de la lista, devuelve el nombre simplificado (1-3 palabras) y la categoría.
 
-MUESTRA — cabecera + 3 filas (para detectar el esquema):
-${muestra}
-
-LISTA DE CONCEPTOS (${filasEnviar.length} filas${filasDatos.length > MAX_FILAS ? `, de ${filasDatos.length} totales — resto no procesado` : ''}):
+CONCEPTOS (${filasEnviar.length} en total${filasDatos.length > MAX_FILAS ? `, de ${filasDatos.length} totales — resto no procesado` : ''}):
 ${listaConceptos}
 
-Separador: ${sep === '\t' ? 'tabulador' : sep === ';' ? 'punto y coma' : 'coma'}
 Fecha hoy: ${hoy}
-Categorías: ${categorias.join(', ')}`
+Categorías disponibles: ${categorias.join(', ')}`
         }]
       })
     })
   } catch (err) {
-    return { statusCode: 502, headers: NO_CACHE, body: JSON.stringify({ error: 'No se pudo contactar a Anthropic', detalle: String(err) }) }
+    return { statusCode: 502, headers: NO_CACHE, body: JSON.stringify({ error: 'No se pudo contactar a Anthropic (conceptos)', detalle: String(err) }) }
   }
 
-  if (!resp.ok) {
-    const errText = await resp.text()
-    return { statusCode: 502, headers: NO_CACHE, body: JSON.stringify({ error: 'Error de la API de Anthropic', detalle: errText }) }
+  if (!conceptsResp.ok) {
+    const errText = await conceptsResp.text()
+    return { statusCode: 502, headers: NO_CACHE, body: JSON.stringify({ error: 'Error de la API de Anthropic (conceptos)', detalle: errText }) }
   }
 
-  const data = await resp.json()
-  const toolUse = (data.content || []).find(b => b.type === 'tool_use')
-  if (!toolUse) {
-    return { statusCode: 502, headers: NO_CACHE, body: JSON.stringify({ error: 'Claude no pudo interpretar el extracto' }) }
+  const conceptsData    = await conceptsResp.json()
+  const conceptsToolUse = (conceptsData.content || []).find(b => b.type === 'tool_use')
+  if (!conceptsToolUse) {
+    return { statusCode: 502, headers: NO_CACHE, body: JSON.stringify({ error: 'Claude no pudo procesar los conceptos' }) }
   }
 
-  const { esquema, conceptos } = toolUse.input
-  if (!esquema || !Array.isArray(conceptos) || conceptos.length === 0) {
+  const { conceptos } = conceptsToolUse.input
+  if (!Array.isArray(conceptos) || conceptos.length === 0) {
     return { statusCode: 502, headers: NO_CACHE, body: JSON.stringify({ error: 'Respuesta de Claude incompleta' }) }
   }
 
