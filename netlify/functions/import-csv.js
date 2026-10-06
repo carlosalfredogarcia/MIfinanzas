@@ -1,9 +1,10 @@
 // netlify/functions/import-csv.js
 // Tipo A — CSV propio de MiFinanza: parseo JS directo, devuelve movimientos para previsualización.
 // Tipo B — CSV de banco externo: dos llamadas pequeñas a Claude:
-//   1) cabecera + 3 filas → esquema de columnas (índices fecha/descripción/importe).
-//   2) lista de conceptos (extraída con el índice correcto) → nombre simplificado + categoría.
-//   Fechas e importes los parsea JS; sin heurístico propio de detección de columnas.
+//   1) Primeras 20 filas numeradas → Claude detecta qué fila es la cabecera real (puede haber
+//      metadata del banco antes), y los índices de columna para fecha/descripción/importe.
+//   2) Lista de conceptos (extraída con el índice correcto) → nombre simplificado + categoría.
+//   Fechas e importes los parsea JS puro; sin heurístico propio de detección de columnas.
 
 const SUPABASE_URL = 'https://gapeweomesgawnodarsp.supabase.co'
 const SUPABASE_KEY = 'sb_publishable_u7ug3SBOsuz2zb56gqBLjw_aLJ0Vvp8'
@@ -164,44 +165,62 @@ exports.handler = async (event) => {
     return { statusCode: 500, headers: NO_CACHE, body: JSON.stringify({ error: 'ANTHROPIC_API_KEY no configurada en el servidor' }) }
   }
 
-  const hoy        = new Date().toISOString().slice(0, 10)
-  const sep        = detectarSeparador(lineas[0] || '')
-  const filasDatos = lineas.slice(1)
-  const MAX_FILAS  = 400
-  const filasEnviar = filasDatos.slice(0, MAX_FILAS)
-  const sepLabel    = sep === '\t' ? 'tabulador' : sep === ';' ? 'punto y coma' : 'coma'
+  const hoy       = new Date().toISOString().slice(0, 10)
+  const MAX_FILAS = 400
 
   // Objeto de depuración — se incluye en todas las respuestas
-  const dbg = {
-    total_lineas: lineas.length,
-    total_filas_datos: filasDatos.length,
-    filas_a_enviar: filasEnviar.length,
-    separador: sepLabel,
-    cabecera: lineas[0] || '',
-    muestra_filas: lineas.slice(1, 4)
-  }
+  const dbg = { total_lineas: lineas.length }
 
-  // ── Llamada 1: detectar esquema de columnas (cabecera + 3 filas de muestra) ─
-  const muestra = lineas.slice(0, 4).join('\n')
+  // ── Llamada 1: identificar cabecera real + esquema de columnas ────────────
+  // Enviamos las primeras 20 filas numeradas para que Claude detecte:
+  //   - header_row: qué fila es la cabecera (puede haber metadata del banco antes)
+  //   - first_data_row: primer índice con movimientos reales
+  //   - índices de columna para fecha, descripción, importe, tipo
+  const MUESTRA_N = 20
+  const muestraNum = lineas.slice(0, MUESTRA_N).map((l, i) => `[${i}] ${l}`).join('\n')
+  dbg.muestra_enviada = lineas.slice(0, MUESTRA_N)
 
   const schemaTool = {
     name: 'detectar_esquema',
-    description: 'Detecta los índices 0-based de las columnas del extracto bancario a partir de la cabecera y filas de muestra.',
+    description: 'Analiza un extracto bancario e identifica la fila de cabecera real y los índices de columna.',
     input_schema: {
       type: 'object',
       properties: {
-        fecha_col:       { type: 'integer',           description: 'Índice (0-based) de la columna que contiene la fecha del movimiento' },
-        descripcion_col: { type: 'integer',           description: 'Índice (0-based) de la columna con la descripción o concepto del movimiento (texto libre, no número)' },
-        monto_col:       { type: ['integer', 'null'], description: 'Índice de la columna de importe único. null si hay columnas separadas de débito y crédito.' },
-        debito_col:      { type: ['integer', 'null'], description: 'Índice de la columna de débito/cargo. null si no existe.' },
-        credito_col:     { type: ['integer', 'null'], description: 'Índice de la columna de crédito/abono. null si no existe.' },
+        header_row: {
+          type: 'integer',
+          description: 'Índice (según los corchetes) de la fila que contiene los nombres de columna del extracto. Puede haber líneas de metadata del banco antes de esta fila.'
+        },
+        first_data_row: {
+          type: 'integer',
+          description: 'Índice de la primera fila con datos reales de movimientos (normalmente header_row + 1).'
+        },
+        fecha_col: {
+          type: 'integer',
+          description: 'Índice 0-based de la columna de fecha del movimiento.'
+        },
+        descripcion_col: {
+          type: 'integer',
+          description: 'Índice 0-based de la columna de descripción o concepto (texto libre, nunca un número).'
+        },
+        monto_col: {
+          type: ['integer', 'null'],
+          description: 'Índice de la columna de importe único (puede ser positivo o negativo). null si hay columnas separadas de débito y crédito.'
+        },
+        debito_col: {
+          type: ['integer', 'null'],
+          description: 'Índice de la columna de débito/cargo (solo valor absoluto). null si no existe.'
+        },
+        credito_col: {
+          type: ['integer', 'null'],
+          description: 'Índice de la columna de crédito/abono (solo valor absoluto). null si no existe.'
+        },
         tipo_signo: {
           type: 'string',
           enum: ['negativo_es_gasto', 'positivo_es_gasto', 'columnas_separadas'],
-          description: 'Cómo determinar si un movimiento es gasto o ingreso'
+          description: 'Cómo distinguir gasto de ingreso: negativo_es_gasto, positivo_es_gasto, o columnas_separadas.'
         }
       },
-      required: ['fecha_col', 'descripcion_col', 'tipo_signo']
+      required: ['header_row', 'first_data_row', 'fecha_col', 'descripcion_col', 'tipo_signo']
     }
   }
 
@@ -212,15 +231,15 @@ exports.handler = async (event) => {
       headers: { 'content-type': 'application/json', 'x-api-key': apiKey, 'anthropic-version': '2023-06-01' },
       body: JSON.stringify({
         model: 'claude-haiku-4-5-20251001',
-        max_tokens: 300,
+        max_tokens: 400,
         tools: [schemaTool],
         tool_choice: { type: 'tool', name: 'detectar_esquema' },
         messages: [{
           role: 'user',
-          content: `Extracto bancario con separador ${sepLabel}. Detecta los índices 0-based de las columnas: fecha, descripción del movimiento, importe (o débito/crédito separados), y cómo distinguir gasto de ingreso.
+          content: `Extracto bancario. Identifica la fila de cabecera real (puede haber metadata antes) y los índices de columna para fecha, descripción del movimiento, importe y tipo gasto/ingreso.
 
-CABECERA Y MUESTRA:
-${muestra}`
+PRIMERAS ${Math.min(MUESTRA_N, lineas.length)} FILAS DEL ARCHIVO:
+${muestraNum}`
         }]
       })
     })
@@ -233,8 +252,8 @@ ${muestra}`
     return { statusCode: 502, headers: NO_CACHE, body: JSON.stringify({ error: 'Error de la API de Anthropic', detalle: errText, dbg }) }
   }
 
-  const schemaData   = await schemaResp.json()
-  dbg.schema_call_raw = schemaData  // LOG 1: respuesta completa de Claude (schema call)
+  const schemaData    = await schemaResp.json()
+  dbg.schema_call_raw = schemaData
 
   const schemaToolUse = (schemaData.content || []).find(b => b.type === 'tool_use')
   if (!schemaToolUse) {
@@ -242,19 +261,29 @@ ${muestra}`
   }
 
   const esquema = schemaToolUse.input
-  dbg.esquema = esquema  // LOG 2: índices detectados
+  dbg.esquema = esquema
 
-  if (typeof esquema.fecha_col !== 'number' || typeof esquema.descripcion_col !== 'number') {
+  if (typeof esquema.header_row !== 'number' || typeof esquema.first_data_row !== 'number' ||
+      typeof esquema.fecha_col !== 'number'   || typeof esquema.descripcion_col !== 'number') {
     return { statusCode: 502, headers: NO_CACHE, body: JSON.stringify({ error: 'Esquema de columnas incompleto', dbg }) }
   }
 
-  // ── Llamada 2: simplificar conceptos y categorizar usando el índice correcto ─
-  // JS usa descripcion_col devuelto por Claude — sin heurístico propio
+  // Usar el separador de la cabecera real (no necesariamente lineas[0])
+  const firstDataRow = Math.max(1, Math.min(esquema.first_data_row, lineas.length - 1))
+  const sep          = detectarSeparador(lineas[esquema.header_row] || lineas[0])
+  const sepLabel     = sep === '\t' ? 'tabulador' : sep === ';' ? 'punto y coma' : 'coma'
+  dbg.separador         = sepLabel
+  dbg.first_data_row    = firstDataRow
+
+  // Extraer filas de datos reales descartando toda la metadata
+  const filasEnviar = lineas.slice(firstDataRow, firstDataRow + MAX_FILAS)
+  dbg.filas_datos = filasEnviar.length
+
+  // ── Llamada 2: simplificar conceptos y categorizar ────────────────────────
   const listaConceptos = filasEnviar
     .map((linea, i) => `${i + 1}. ${(parseCSVLinea(linea, sep)[esquema.descripcion_col] || '').trim()}`)
     .join('\n')
 
-  // LOG 3: primeros 3 conceptos que se van a enviar a Claude
   dbg.primeros_3_conceptos_enviados = listaConceptos.split('\n').slice(0, 3)
 
   const conceptsTool = {
@@ -301,7 +330,7 @@ ${muestra}`
           role: 'user',
           content: `Para cada concepto bancario de la lista, devuelve el nombre simplificado (1-3 palabras) y la categoría.
 
-CONCEPTOS (${filasEnviar.length} en total${filasDatos.length > MAX_FILAS ? `, de ${filasDatos.length} totales — resto no procesado` : ''}):
+CONCEPTOS (${filasEnviar.length} en total${lineas.length - firstDataRow > MAX_FILAS ? `, de ${lineas.length - firstDataRow} totales — resto no procesado` : ''}):
 ${listaConceptos}
 
 Fecha hoy: ${hoy}
@@ -319,7 +348,6 @@ Categorías disponibles: ${categorias.join(', ')}`
   }
 
   const conceptsData    = await conceptsResp.json()
-  // LOG 4: respuesta completa de Claude (concepts call) — truncar a primeros 5 conceptos para no saturar
   dbg.concepts_call_raw = {
     stop_reason: conceptsData.stop_reason,
     usage: conceptsData.usage,
@@ -343,7 +371,7 @@ Categorías disponibles: ${categorias.join(', ')}`
   }
 
   // ── Parseo JS de todas las filas usando el esquema detectado ──────────────
-  const movimientos = []
+  const movimientos       = []
   const dbg_filas_saltadas = []
 
   for (let i = 0; i < filasEnviar.length; i++) {
@@ -353,13 +381,13 @@ Categorías disponibles: ${categorias.join(', ')}`
     const cols  = parseCSVLinea(linea, sep)
     const fecha = normalizarFecha(cols[esquema.fecha_col])
     if (!fecha) {
-      if (i < 3) dbg_filas_saltadas.push({ i, motivo: 'fecha_nula', val_fecha_col: cols[esquema.fecha_col], cols })
+      if (dbg_filas_saltadas.length < 5) dbg_filas_saltadas.push({ i, motivo: 'fecha_nula', val: cols[esquema.fecha_col], cols })
       continue
     }
 
     const info = conceptos[i]
     if (!info) {
-      if (i < 3) dbg_filas_saltadas.push({ i, motivo: 'sin_concepto', fecha })
+      if (dbg_filas_saltadas.length < 5) dbg_filas_saltadas.push({ i, motivo: 'sin_concepto', fecha })
       continue
     }
 
@@ -368,20 +396,20 @@ Categorías disponibles: ${categorias.join(', ')}`
     if (esquema.tipo_signo === 'columnas_separadas') {
       const deb = esquema.debito_col  != null ? parsearMonto(cols[esquema.debito_col]  || '') : NaN
       const cre = esquema.credito_col != null ? parsearMonto(cols[esquema.credito_col] || '') : NaN
-      if (!isNaN(deb) && deb > 0)      { monto = deb; tipo = 'gasto'   }
+      if      (!isNaN(deb) && deb > 0) { monto = deb; tipo = 'gasto'   }
       else if (!isNaN(cre) && cre > 0) { monto = cre; tipo = 'ingreso' }
       else {
-        if (i < 3) dbg_filas_saltadas.push({ i, motivo: 'deb_cre_vacios', deb, cre, cols })
+        if (dbg_filas_saltadas.length < 5) dbg_filas_saltadas.push({ i, motivo: 'deb_cre_vacios', deb, cre, cols })
         continue
       }
     } else {
       if (esquema.monto_col == null) {
-        if (i < 3) dbg_filas_saltadas.push({ i, motivo: 'monto_col_null' })
+        if (dbg_filas_saltadas.length < 5) dbg_filas_saltadas.push({ i, motivo: 'monto_col_null' })
         continue
       }
       const raw = parsearMonto(cols[esquema.monto_col] || '')
       if (isNaN(raw) || raw === 0) {
-        if (i < 3) dbg_filas_saltadas.push({ i, motivo: 'monto_invalido', val_monto_col: cols[esquema.monto_col], raw })
+        if (dbg_filas_saltadas.length < 5) dbg_filas_saltadas.push({ i, motivo: 'monto_invalido', val: cols[esquema.monto_col], raw })
         continue
       }
       monto = Math.abs(raw)
@@ -399,7 +427,7 @@ Categorías disponibles: ${categorias.join(', ')}`
     })
   }
 
-  dbg.parseo_filas_saltadas = dbg_filas_saltadas
+  dbg.parseo_filas_saltadas   = dbg_filas_saltadas
   dbg.movimientos_encontrados = movimientos.length
 
   return {
