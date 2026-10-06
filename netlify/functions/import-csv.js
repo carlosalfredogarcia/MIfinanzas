@@ -279,12 +279,14 @@ ${muestraNum}`
   const filasEnviar = lineas.slice(firstDataRow, firstDataRow + MAX_FILAS)
   dbg.filas_datos = filasEnviar.length
 
-  // ── Llamada 2: simplificar conceptos y categorizar ────────────────────────
-  const listaConceptos = filasEnviar
-    .map((linea, i) => `${i + 1}. ${(parseCSVLinea(linea, sep)[esquema.descripcion_col] || '').trim()}`)
-    .join('\n')
+  // ── Llamada 2: simplificar conceptos en lotes paralelos ──────────────────
+  // Lotes de 50 → Promise.all → se resuelven en paralelo (~3-4 s para 400 filas)
+  const CHUNK_SIZE = 50
+  const conceptosTodos = filasEnviar.map(linea =>
+    (parseCSVLinea(linea, sep)[esquema.descripcion_col] || '').trim()
+  )
 
-  dbg.primeros_3_conceptos_enviados = listaConceptos.split('\n').slice(0, 3)
+  dbg.primeros_3_conceptos_enviados = conceptosTodos.slice(0, 3)
 
   const conceptsTool = {
     name: 'simplificar_conceptos',
@@ -316,57 +318,57 @@ ${muestraNum}`
     }
   }
 
-  let conceptsResp
-  try {
-    conceptsResp = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: { 'content-type': 'application/json', 'x-api-key': apiKey, 'anthropic-version': '2023-06-01' },
-      body: JSON.stringify({
-        model: 'claude-haiku-4-5-20251001',
-        max_tokens: 8192,
-        tools: [conceptsTool],
-        tool_choice: { type: 'tool', name: 'simplificar_conceptos' },
-        messages: [{
-          role: 'user',
-          content: `Para cada concepto bancario de la lista, devuelve el nombre simplificado (1-3 palabras) y la categoría.
+  // Partir en lotes y lanzarlos todos en paralelo
+  const chunks = []
+  for (let s = 0; s < conceptosTodos.length; s += CHUNK_SIZE) {
+    chunks.push(conceptosTodos.slice(s, s + CHUNK_SIZE))
+  }
+  dbg.lotes = chunks.length
 
-CONCEPTOS (${filasEnviar.length} en total${lineas.length - firstDataRow > MAX_FILAS ? `, de ${lineas.length - firstDataRow} totales — resto no procesado` : ''}):
-${listaConceptos}
+  let chunkResults
+  try {
+    chunkResults = await Promise.all(chunks.map((chunk, ci) => {
+      const lista = chunk.map((txt, j) => `${j + 1}. ${txt}`).join('\n')
+      return fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', 'x-api-key': apiKey, 'anthropic-version': '2023-06-01' },
+        body: JSON.stringify({
+          model: 'claude-haiku-4-5-20251001',
+          max_tokens: 2048,
+          tools: [conceptsTool],
+          tool_choice: { type: 'tool', name: 'simplificar_conceptos' },
+          messages: [{
+            role: 'user',
+            content: `Para cada concepto bancario devuelve nombre simplificado (1-3 palabras) y categoría.
+
+CONCEPTOS (lote ${ci + 1}/${chunks.length}):
+${lista}
 
 Fecha hoy: ${hoy}
-Categorías disponibles: ${categorias.join(', ')}`
-        }]
-      })
-    })
+Categorías: ${categorias.join(', ')}`
+          }]
+        })
+      }).then(r => r.json())
+    }))
   } catch (err) {
     return { statusCode: 502, headers: NO_CACHE, body: JSON.stringify({ error: 'No se pudo contactar a Anthropic (conceptos)', detalle: String(err), dbg }) }
   }
 
-  if (!conceptsResp.ok) {
-    const errText = await conceptsResp.text()
-    return { statusCode: 502, headers: NO_CACHE, body: JSON.stringify({ error: 'Error de la API de Anthropic (conceptos)', detalle: errText, dbg }) }
+  // Verificar cada lote y concatenar en orden
+  const conceptos = []
+  for (let ci = 0; ci < chunkResults.length; ci++) {
+    const data = chunkResults[ci]
+    const tu   = (data.content || []).find(b => b.type === 'tool_use')
+    if (!tu || !Array.isArray(tu.input.conceptos) || tu.input.conceptos.length === 0) {
+      dbg.lote_fallido = { ci, data }
+      return { statusCode: 502, headers: NO_CACHE, body: JSON.stringify({ error: `Lote ${ci + 1} sin respuesta válida`, dbg }) }
+    }
+    conceptos.push(...tu.input.conceptos)
   }
 
-  const conceptsData    = await conceptsResp.json()
-  dbg.concepts_call_raw = {
-    stop_reason: conceptsData.stop_reason,
-    usage: conceptsData.usage,
-    content_types: (conceptsData.content || []).map(b => b.type),
-    tool_input_preview: (() => {
-      const tu = (conceptsData.content || []).find(b => b.type === 'tool_use')
-      if (!tu) return null
-      const c = tu.input && tu.input.conceptos
-      return Array.isArray(c) ? { total: c.length, primeros_5: c.slice(0, 5) } : tu.input
-    })()
-  }
+  dbg.concepts_preview = { total: conceptos.length, primeros_5: conceptos.slice(0, 5) }
 
-  const conceptsToolUse = (conceptsData.content || []).find(b => b.type === 'tool_use')
-  if (!conceptsToolUse) {
-    return { statusCode: 502, headers: NO_CACHE, body: JSON.stringify({ error: 'Claude no pudo procesar los conceptos', dbg }) }
-  }
-
-  const { conceptos } = conceptsToolUse.input
-  if (!Array.isArray(conceptos) || conceptos.length === 0) {
+  if (conceptos.length === 0) {
     return { statusCode: 502, headers: NO_CACHE, body: JSON.stringify({ error: 'Respuesta de Claude incompleta', dbg }) }
   }
 
