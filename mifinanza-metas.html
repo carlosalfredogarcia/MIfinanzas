@@ -1660,19 +1660,20 @@
     await dbClient.from('categoria_tipo').upsert({ user_id: window.currentUserId, categoria: cat, tipo }, { onConflict: 'user_id,categoria' })
   }
 
-  function aplicarTiposUI() {
-    document.querySelectorAll('.var-row').forEach(row => {
-      const inp = row.querySelector('.variable-input')
-      if (!inp) return
-      const cat  = inp.dataset.cat
-      const tipo = categoriaTipos[cat] || null
-      row.classList.toggle('tipo-necesario', tipo === 'necesario')
-      row.classList.toggle('tipo-opcional',  tipo === 'opcional')
-      row.querySelectorAll('.btn-tipo').forEach(b => {
-        b.classList.toggle('activo-necesario', b.dataset.tipo === 'necesario' && tipo === 'necesario')
-        b.classList.toggle('activo-opcional',  b.dataset.tipo === 'opcional'  && tipo === 'opcional')
-      })
+  function aplicarTipoRow(row) {
+    const cat  = row._planCat
+    if (!cat) return
+    const tipo = categoriaTipos[cat] || null
+    row.classList.toggle('tipo-necesario', tipo === 'necesario')
+    row.classList.toggle('tipo-opcional',  tipo === 'opcional')
+    row.querySelectorAll('.btn-tipo').forEach(b => {
+      b.classList.toggle('activo-necesario', b.dataset.tipo === 'necesario' && tipo === 'necesario')
+      b.classList.toggle('activo-opcional',  b.dataset.tipo === 'opcional'  && tipo === 'opcional')
     })
+  }
+
+  function aplicarTiposUI() {
+    document.querySelectorAll('.var-row').forEach(row => aplicarTipoRow(row))
     reordenarFilas()
     actualizarResumenTipos()
   }
@@ -1683,8 +1684,8 @@
     const orden = { necesario: 0, opcional: 1 }
     ;[...cont.querySelectorAll('.var-row')]
       .sort((a, b) => {
-        const tA = categoriaTipos[a.querySelector('.variable-input')?.dataset.cat] || ''
-        const tB = categoriaTipos[b.querySelector('.variable-input')?.dataset.cat] || ''
+        const tA = categoriaTipos[a._planCat] || ''
+        const tB = categoriaTipos[b._planCat] || ''
         return (orden[tA] ?? 2) - (orden[tB] ?? 2)
       })
       .forEach(r => cont.appendChild(r))
@@ -1694,8 +1695,10 @@
     const el = document.getElementById('resumen-tipos')
     if (!el) return
     let necesario = 0, opcional = 0
-    document.querySelectorAll('.variable-input').forEach(inp => {
-      const tipo = categoriaTipos[inp.dataset.cat]
+    document.querySelectorAll('.var-row').forEach(row => {
+      const inp  = row.querySelector('.variable-input')
+      if (!inp) return
+      const tipo = categoriaTipos[row._planCat]
       const val  = parseFloat(inp.value) || 0
       if (tipo === 'necesario') necesario += val
       else if (tipo === 'opcional') opcional += val
@@ -1725,7 +1728,10 @@
 
   function guardarGastosLocal() {
     const datos = {}
-    document.querySelectorAll('.variable-input').forEach(inp => { datos[inp.dataset.cat] = inp.value })
+    document.querySelectorAll('.var-row').forEach(row => {
+      const inp = row.querySelector('.variable-input')
+      if (row._planCat && inp) datos[row._planCat] = inp.value
+    })
     localStorage.setItem('planificador_gastos', JSON.stringify(datos))
   }
 
@@ -1742,7 +1748,7 @@
         const valorInicial = guardado[cat] !== undefined ? guardado[cat] : gastosOriginal[cat].toFixed(2)
         const row = document.createElement('div')
         row.className = 'var-row'
-        const catEsc = cat.replace(/"/g, '&quot;')
+        row._planCat = cat
         row.innerHTML = `
           <div class="var-nombre-top">
             <span class="var-emoji">${emoji}</span>
@@ -1750,7 +1756,7 @@
           </div>
           <div class="var-bottom">
             <span class="var-promedio">Últ. meses: ${fmt(gastosOriginal[cat])}</span>
-            <input class="var-input variable-input" type="number" inputmode="decimal" data-cat="${catEsc}" value="${valorInicial}">
+            <input class="var-input variable-input" type="number" inputmode="decimal" value="${valorInicial}">
           </div>
           <div class="tipo-btns">
             <button class="btn-tipo" data-tipo="necesario">🔒 Necesario</button>
@@ -1771,8 +1777,9 @@
   }
 
   function restablecerGastos() {
-    document.querySelectorAll('.variable-input').forEach(inp => {
-      inp.value = gastosOriginal[inp.dataset.cat].toFixed(2)
+    document.querySelectorAll('.var-row').forEach(row => {
+      const inp = row.querySelector('.variable-input')
+      if (row._planCat && inp) inp.value = (gastosOriginal[row._planCat] ?? 0).toFixed(2)
     })
     localStorage.removeItem('planificador_gastos')
     actualizarPlanificador()
