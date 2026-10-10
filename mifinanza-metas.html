@@ -383,10 +383,7 @@
   .analisis-chevron { color: var(--subtext); font-size: 16px; transition: transform 0.25s; }
   .analisis-chevron.abierto { transform: rotate(90deg); }
   .analisis-body { overflow: hidden; max-height: 0; transition: max-height 0.35s ease, opacity 0.25s ease; opacity: 0; }
-  .analisis-body.abierto { max-height: 600px; opacity: 1; }
-  .modo-btns { display: flex; gap: 6px; margin-bottom: 14px; }
-  .btn-modo { flex: 1; background: none; border: 1px solid #30363d; border-radius: 8px; padding: 8px 4px; font-size: 11px; font-family: 'DM Sans', sans-serif; font-weight: 500; color: #8b949e; cursor: pointer; text-align: center; transition: all 0.15s; line-height: 1.4; }
-  .btn-modo.activo { background: rgba(88,166,255,0.1); border-color: rgba(88,166,255,0.4); color: #58a6ff; }
+  .analisis-body.abierto { max-height: 500px; opacity: 1; }
   .analisis-tabla { width: 100%; border-collapse: collapse; margin-bottom: 10px; }
   .analisis-tabla th { font-size: 10px; color: var(--subtext); text-transform: uppercase; letter-spacing: 0.08em; padding: 0 0 8px; font-weight: 600; }
   .analisis-tabla th:not(:first-child) { text-align: right; }
@@ -654,11 +651,6 @@
         <span class="analisis-chevron" id="analisis-chevron">›</span>
       </div>
       <div class="analisis-body" id="analisis-body">
-        <div class="modo-btns">
-          <button class="btn-modo" data-modo="ajustado"    onclick="setModoAnalisis('ajustado')">😮‍💨 Ajustado</button>
-          <button class="btn-modo" data-modo="equilibrado" onclick="setModoAnalisis('equilibrado')">⚖️ Equilibrado</button>
-          <button class="btn-modo" data-modo="ahorrador"   onclick="setModoAnalisis('ahorrador')">💪 Ahorrador</button>
-        </div>
         <div id="analisis-contenido"></div>
       </div>
     </div>
@@ -1827,21 +1819,24 @@
   }
 
   const MODOS_ANALISIS = {
-    ajustado:    { nec: 70, opc: 20, aho: 10 },
+    basico:      { nec: 70, opc: 20, aho: 10 },
     equilibrado: { nec: 60, opc: 30, aho: 10 },
     ahorrador:   { nec: 50, opc: 30, aho: 20 },
   }
+  const MODOS_ORDEN = ['basico', 'equilibrado', 'ahorrador']
+  const MODOS_LABEL = { basico: 'Básico', equilibrado: 'Equilibrado', ahorrador: 'Ahorrador' }
   let modoAnalisis = localStorage.getItem('planificador_modo_analisis') || 'equilibrado'
+  if (modoAnalisis === 'ajustado') modoAnalisis = 'basico'
 
   function setModoAnalisis(modo) {
     modoAnalisis = modo
     localStorage.setItem('planificador_modo_analisis', modo)
-    document.querySelectorAll('.btn-modo').forEach(b => b.classList.toggle('activo', b.dataset.modo === modo))
     actualizarAnalisis()
   }
 
-  function iniciarModoAnalisis() {
-    document.querySelectorAll('.btn-modo').forEach(b => b.classList.toggle('activo', b.dataset.modo === modoAnalisis))
+  function ciclarModo() {
+    const idx = MODOS_ORDEN.indexOf(modoAnalisis)
+    setModoAnalisis(MODOS_ORDEN[(idx + 1) % MODOS_ORDEN.length])
   }
 
   function actualizarAnalisis() {
@@ -1903,7 +1898,14 @@
 
     cont.innerHTML = `
       <table class="analisis-tabla">
-        <thead><tr><th></th><th>Tu caso</th><th>Ideal</th><th></th></tr></thead>
+        <thead><tr>
+          <th></th>
+          <th>Tu caso</th>
+          <th onclick="ciclarModo()" style="cursor:pointer;user-select:none;white-space:nowrap;">
+            Ideal&nbsp;<span style="font-size:9px;color:#58a6ff;font-weight:600;text-transform:none;letter-spacing:0;">${MODOS_LABEL[modoAnalisis]}&nbsp;›</span>
+          </th>
+          <th></th>
+        </tr></thead>
         <tbody>${filas}</tbody>
       </table>
       <div class="analisis-msg">💡 ${msg}</div>
@@ -2035,7 +2037,6 @@
   cargarGastos()
   cargarGastosRealMes()
   cargarTipos()
-  iniciarModoAnalisis()
   actualizarPlanificador()
 </script>
 <script>
