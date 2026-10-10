@@ -1948,7 +1948,8 @@
     const diasQuedan = Math.round((dFin - dHoy) / 86400000) + 1
 
     const tarjetas = inputs.map(inp => {
-      const cat      = inp.dataset.cat
+      const cat      = inp.closest('.var-row')?._planCat || inp.dataset.cat
+      if (!cat) return null
       const estimado = parseFloat(inp.value) || 0
       const real     = gastosRealMes[cat] || 0
       const activo   = seguimientoActivos[cat] !== false
@@ -1991,14 +1992,15 @@
       }
     })
 
-    tarjetas.sort((a, b) => {
+    const tarjetasValidas = tarjetas.filter(Boolean)
+    tarjetasValidas.sort((a, b) => {
       if (a.activo !== b.activo) return a.activo ? -1 : 1
       return b.diff - a.diff
     })
 
     cont.innerHTML = `
       <div class="sc-dias">📅 Quedan ${diasQuedan} día${diasQuedan === 1 ? '' : 's'} para cerrar el mes</div>
-      ${tarjetas.map(t => t.html).join('')}
+      ${tarjetasValidas.map(t => t.html).join('')}
     `
   }
 
