@@ -1630,6 +1630,7 @@
     if (categoriaTipos[cat] === tipo) return
     categoriaTipos[cat] = tipo
     aplicarTiposUI()
+    actualizarAnalisis()
     if (!window.currentUserId) return
     await dbClient.from('categoria_tipo').upsert({ user_id: window.currentUserId, categoria: cat, tipo }, { onConflict: 'user_id,categoria' })
   }
