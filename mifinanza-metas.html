@@ -1645,7 +1645,21 @@
         b.classList.toggle('activo-opcional',  b.dataset.tipo === 'opcional'  && tipo === 'opcional')
       })
     })
+    reordenarFilas()
     actualizarResumenTipos()
+  }
+
+  function reordenarFilas() {
+    const cont = document.getElementById('gastos-lista-plan')
+    if (!cont) return
+    const orden = { necesario: 0, opcional: 1 }
+    ;[...cont.querySelectorAll('.var-row')]
+      .sort((a, b) => {
+        const tA = categoriaTipos[a.querySelector('.variable-input')?.dataset.cat] || ''
+        const tB = categoriaTipos[b.querySelector('.variable-input')?.dataset.cat] || ''
+        return (orden[tA] ?? 2) - (orden[tB] ?? 2)
+      })
+      .forEach(r => cont.appendChild(r))
   }
 
   function actualizarResumenTipos() {
