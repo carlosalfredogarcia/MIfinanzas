@@ -1859,7 +1859,7 @@
     const pNec = Math.round(necesario / ingresos * 100)
     const pOpc = Math.round(opcional  / ingresos * 100)
     const pAho = Math.round(ahorro    / ingresos * 100)
-    el.textContent = '📊 Análisis en tiempo real'
+    el.innerHTML = `📊&nbsp;<b style="color:var(--text)">Análisis</b>&nbsp;&nbsp;🔒&nbsp;${pNec}%&nbsp;·&nbsp;🎯&nbsp;${pOpc}%&nbsp;·&nbsp;💰&nbsp;${pAho}%`
   }
   function mostrarAnalisisFloat() {
     clearTimeout(_floatHideTimer)
