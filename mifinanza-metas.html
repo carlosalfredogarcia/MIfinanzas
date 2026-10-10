@@ -1652,8 +1652,7 @@
     aplicarTiposUI()
   }
 
-  async function setTipo(btn, tipo) {
-    const cat = btn.dataset.cat
+  async function setTipo(cat, tipo) {
     if (categoriaTipos[cat] === tipo) return
     categoriaTipos[cat] = tipo
     aplicarTiposUI()
@@ -1754,11 +1753,14 @@
             <input class="var-input variable-input" type="number" inputmode="decimal" data-cat="${catEsc}" value="${valorInicial}">
           </div>
           <div class="tipo-btns">
-            <button class="btn-tipo" data-cat="${catEsc}" data-tipo="necesario" onclick="setTipo(this,'necesario')">🔒 Necesario</button>
-            <button class="btn-tipo" data-cat="${catEsc}" data-tipo="opcional"  onclick="setTipo(this,'opcional')">🎯 Opcional</button>
+            <button class="btn-tipo" data-tipo="necesario">🔒 Necesario</button>
+            <button class="btn-tipo" data-tipo="opcional">🎯 Opcional</button>
           </div>
         `
         cont.appendChild(row)
+        row.querySelectorAll('.btn-tipo').forEach(btn => {
+          btn.addEventListener('click', () => setTipo(cat, btn.dataset.tipo))
+        })
       })
     document.querySelectorAll('.variable-input').forEach(inp => {
       inp.addEventListener('input', () => { guardarGastosLocal(); actualizarPlanificador() })
