@@ -608,7 +608,6 @@
       <div class="principal-percent" id="p-percent">—</div>
     </div>
 
-    <div class="ahorro-nota" id="ahorro-nota" style="display:none"></div>
     <div class="ahorro-detalle" id="ahorro-detalle" style="display:none">
       <div class="detalle-item">
         <span class="detalle-label">Ingresos</span>
@@ -623,6 +622,7 @@
         <span class="detalle-val-blue" id="d-ahorro">$0</span>
       </div>
     </div>
+    <div class="ahorro-nota" id="ahorro-nota" style="display:none"></div>
 
     <div class="promedio-banner" id="promedio-wrap" style="display:none">
       <div class="promedio-icon">📅</div>
@@ -997,7 +997,6 @@
     document.getElementById('p-fecha').textContent  = `${fmtFecha(meta.fecha_inicio)} → ${fmtFecha(meta.fecha_limite)}`
     btnEliminar.style.display = 'block'
     btnEditar.style.display = 'block'
-    document.getElementById('ahorro-detalle').style.display = 'flex'
   }
 
   function actualizarBarraPrincipal(actual, objetivo, fechaLimite) {
