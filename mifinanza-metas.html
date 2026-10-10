@@ -667,7 +667,7 @@
           <span class="bloque-label">Ingresos</span>
         </div>
         <input type="number" inputmode="decimal" id="p-ingresos-total" class="bloque-ing-input" placeholder="0">
-        <button class="btn-restablecer" onclick="restablecerIngresos()">Restablecer</button>
+        <button class="btn-restablecer" onclick="pedirConfirmacionReset(restablecerIngresos)">Restablecer</button>
       </div>
     </div>
 
@@ -683,7 +683,7 @@
         <div id="resumen-tipos" style="display:none"></div>
         <div class="variables-sub">Basado en meses cerrados</div>
         <div id="gastos-lista-plan"></div>
-        <button class="btn-restablecer" onclick="restablecerGastos()">Restablecer</button>
+        <button class="btn-restablecer" onclick="pedirConfirmacionReset(restablecerGastos)">Restablecer</button>
       </div>
     </div>
 
@@ -897,6 +897,17 @@
     </div>
     <button class="btn-guardar" onclick="guardarEdicionMeta()">Guardar cambios</button>
     <button class="btn-cancelar" onclick="cerrarModalEditarMeta()">Cancelar</button>
+  </div>
+</div>
+
+<!-- Modal confirmación restablecer -->
+<div class="modal-overlay" id="modal-reset">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">¿Restablecer valores?</div>
+    <p style="font-size:14px;color:var(--subtext);line-height:1.55;margin-bottom:22px;">Se borrarán los cambios que hayas introducido manualmente.</p>
+    <button class="btn-guardar" onclick="confirmarReset()">Confirmar</button>
+    <button class="btn-cancelar" onclick="cerrarModalReset()">Cancelar</button>
   </div>
 </div>
 
@@ -1496,6 +1507,21 @@
     inp.addEventListener('focus', function() { this.select() })
     actualizarPlanificador()
   }
+
+  let _pendingReset = null
+  function pedirConfirmacionReset(cb) {
+    _pendingReset = cb
+    document.getElementById('modal-reset').classList.add('visible')
+  }
+  function confirmarReset() {
+    cerrarModalReset()
+    if (_pendingReset) { _pendingReset(); _pendingReset = null }
+  }
+  function cerrarModalReset() {
+    document.getElementById('modal-reset').classList.remove('visible')
+    _pendingReset = null
+  }
+  document.getElementById('modal-reset').addEventListener('click', function(e) { if (e.target === this) cerrarModalReset() })
 
   function restablecerIngresos() {
     localStorage.removeItem('planificador_ingresos_override')
