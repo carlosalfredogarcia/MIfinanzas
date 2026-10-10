@@ -393,40 +393,34 @@
   .analisis-ideal { color: var(--subtext); }
   .analisis-msg { background: rgba(88,166,255,0.07); border: 1px solid rgba(88,166,255,0.18); border-radius: 10px; padding: 10px 12px; font-size: 12px; color: var(--subtext); line-height: 1.55; }
 
-  .tabla-comparativa {
-    background: var(--card); border-radius: 20px;
-    padding: 16px 18px; border: 1px solid var(--border);
-  }
-  .tabla-comp-header, .tabla-comp-row {
-    display: grid; grid-template-columns: 1.4fr 1fr auto; gap: 6px; align-items: center;
-  }
-  .tabla-comp-header {
-    font-size: 10px; color: var(--subtext); text-transform: uppercase; letter-spacing: 0.06em;
-    padding-bottom: 10px; border-bottom: 1px solid var(--border); margin-bottom: 6px;
-  }
-  .tabla-comp-header div:not(:first-child), .tabla-comp-row div:not(:first-child) { text-align: right; }
-  .tabla-comp-row { padding: 9px 0; border-bottom: 1px solid var(--border); font-size: 12px; cursor: pointer; }
-  .tabla-comp-item:last-of-type .tabla-comp-row { border-bottom: none; }
-  .tabla-comp-cat { color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .tabla-comp-val { font-family: 'Roboto', sans-serif; color: var(--text); }
-  .tabla-comp-diff { font-family: 'Roboto', sans-serif; font-weight: 700; }
-  .tabla-comp-diff.pos { color: var(--success); }
-  .tabla-comp-diff.neg { color: var(--danger); }
-  .tabla-comp-chevron { color: var(--subtext); font-size: 11px; }
+  .tabla-comparativa { background: none; border: none; padding: 0; }
   .tabla-comp-empty { text-align: center; color: var(--subtext); font-size: 12px; padding: 12px 0; }
 
-  .tabla-comp-detalle {
-    padding: 4px 0 14px; border-bottom: 1px solid var(--border);
-  }
-  .tabla-comp-item:last-of-type .tabla-comp-detalle { border-bottom: none; }
-  .tabla-comp-vs { display: flex; align-items: center; justify-content: center; gap: 20px; }
-  .tabla-comp-vs-col { text-align: center; }
-  .tabla-comp-vs-label { font-size: 10px; color: var(--subtext); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 4px; }
-  .tabla-comp-vs-valor { font-family: 'Roboto', sans-serif; font-size: 15px; font-weight: 700; color: var(--text); }
-  .tabla-comp-vs-valor.txt-meta { color: #e3b341; }
-  .tabla-comp-vs-valor.pos { color: #3fb950; }
-  .tabla-comp-vs-valor.neg { color: #f85149; }
-  .tabla-comp-vs-sep { font-size: 11px; color: var(--subtext); align-self: center; margin-top: 14px; }
+  .sc-dias { font-size: 12px; color: var(--subtext); margin-bottom: 12px; padding-left: 2px; }
+  .sc-card { background: var(--card); border-radius: 14px; padding: 12px 14px; margin-bottom: 8px; border: 1px solid var(--border); transition: opacity 0.3s, filter 0.3s; }
+  .sc-card.sc-apagado { opacity: 0.3; filter: grayscale(0.8); }
+  .sc-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+  .sc-cat { font-size: 13px; font-weight: 600; color: var(--text); }
+  .sc-top-right { display: flex; align-items: center; gap: 8px; }
+  .sc-diff { font-family: 'Roboto', sans-serif; font-size: 12px; font-weight: 700; }
+  .sc-over  { color: var(--danger); }
+  .sc-under { color: var(--success); }
+  .sc-toggle { width: 32px; height: 18px; border-radius: 100px; border: 1px solid #30363d; background: #21262d; cursor: pointer; position: relative; transition: background 0.2s, border-color 0.2s; flex-shrink: 0; padding: 0; }
+  .sc-toggle::after { content: ''; position: absolute; top: 2px; left: 2px; width: 12px; height: 12px; border-radius: 50%; background: #8b949e; transition: transform 0.2s, background 0.2s; }
+  .sc-toggle.sc-on { background: rgba(63,185,80,0.15); border-color: rgba(63,185,80,0.45); }
+  .sc-toggle.sc-on::after { transform: translateX(14px); background: #3fb950; }
+  .sc-mid { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+  .sc-col { text-align: center; flex: 1; }
+  .sc-lbl { font-size: 9px; color: var(--subtext); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 3px; }
+  .sc-valor { font-family: 'Roboto', sans-serif; font-size: 14px; font-weight: 700; }
+  .sc-val-meta { color: #e3b341; }
+  .sc-val-ok   { color: var(--success); }
+  .sc-val-over { color: var(--danger); }
+  .sc-sep { font-size: 11px; color: var(--subtext); padding-top: 14px; flex-shrink: 0; }
+  .sc-bar { height: 4px; background: var(--border2); border-radius: 100px; overflow: hidden; }
+  .sc-bar-fill { height: 100%; border-radius: 100px; transition: width 0.4s; }
+  .sc-bar-ok   { background: var(--success); }
+  .sc-bar-over { background: var(--danger); }
 
   .modal-overlay, .modal-abonar-overlay {
     position: fixed; inset: 0;
@@ -704,11 +698,6 @@
     </div>
     <div class="bloque-detalle" id="detalle-metas" style="display:none">
       <div class="tabla-comparativa">
-        <div class="tabla-comp-header">
-          <div>Categoría</div>
-          <div>Diferencia</div>
-          <div></div>
-        </div>
         <div id="tabla-comp-body"></div>
       </div>
     </div>
@@ -1931,10 +1920,11 @@
     renderTablaComparativa()
   }
 
-  let categoriaComparativaAbierta = null
+  let seguimientoActivos = JSON.parse(localStorage.getItem('seguimiento_activos') || '{}')
 
-  function toggleCategoriaComparativa(cat) {
-    categoriaComparativaAbierta = categoriaComparativaAbierta === cat ? null : cat
+  function toggleSeguimiento(cat) {
+    seguimientoActivos[cat] = seguimientoActivos[cat] === false ? true : false
+    localStorage.setItem('seguimiento_activos', JSON.stringify(seguimientoActivos))
     renderTablaComparativa()
   }
 
@@ -1946,43 +1936,66 @@
       cont.innerHTML = '<div class="tabla-comp-empty">Sin categorías variables</div>'
       return
     }
-    cont.innerHTML = inputs.map(inp => {
-      const cat       = inp.dataset.cat
-      const estimado  = parseFloat(inp.value) || 0
-      const real      = gastosRealMes[cat] || 0
-      const diferencia = estimado - real
-      const claseDiff = diferencia >= 0 ? 'pos' : 'neg'
-      const signo     = diferencia >= 0 ? '+' : '-'
-      const partes    = cat.trim().split(' ')
-      const emoji     = partes[0]
-      const nombre    = partes.slice(1).join(' ') || cat
-      const abierta   = categoriaComparativaAbierta === cat
-      const catEscapada = cat.replace(/'/g, "\\'")
-      return `
-        <div class="tabla-comp-item">
-          <div class="tabla-comp-row" onclick="toggleCategoriaComparativa('${catEscapada}')">
-            <div class="tabla-comp-cat">${emoji} ${nombre}</div>
-            <div class="tabla-comp-diff ${claseDiff}">${signo}$${Math.abs(diferencia).toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
-            <div class="tabla-comp-chevron">${abierta ? '▴' : '▾'}</div>
-          </div>
-          ${abierta ? `
-            <div class="tabla-comp-detalle">
-              <div class="tabla-comp-vs">
-                <div class="tabla-comp-vs-col">
-                  <div class="tabla-comp-vs-label">Meta</div>
-                  <div class="tabla-comp-vs-valor txt-meta">${fmt(estimado)}</div>
-                </div>
-                <div class="tabla-comp-vs-sep">vs</div>
-                <div class="tabla-comp-vs-col">
-                  <div class="tabla-comp-vs-label">Realidad</div>
-                  <div class="tabla-comp-vs-valor ${claseDiff}">${fmt(real)}</div>
-                </div>
+
+    const hoy    = new Date()
+    const finMes = new Date(hoy.getFullYear(), hoy.getMonth() + 1, 0)
+    const dHoy   = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate())
+    const dFin   = new Date(finMes.getFullYear(), finMes.getMonth(), finMes.getDate())
+    const diasQuedan = Math.round((dFin - dHoy) / 86400000) + 1
+
+    const tarjetas = inputs.map(inp => {
+      const cat      = inp.dataset.cat
+      const estimado = parseFloat(inp.value) || 0
+      const real     = gastosRealMes[cat] || 0
+      const activo   = seguimientoActivos[cat] !== false
+      const partes   = cat.trim().split(' ')
+      const emoji    = partes[0]
+      const nombre   = partes.slice(1).join(' ') || cat
+      const catEsc   = cat.replace(/\\/g, '\\\\').replace(/'/g, "\\'")
+
+      const diff    = real - estimado
+      const over    = diff > 0
+      const diffFmt = '$' + Math.abs(diff).toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+      const barPct  = estimado > 0 ? Math.min(real / estimado * 100, 100) : (real > 0 ? 100 : 0)
+
+      return {
+        activo, diff,
+        html: `
+          <div class="sc-card${activo ? '' : ' sc-apagado'}">
+            <div class="sc-top">
+              <span class="sc-cat">${emoji} ${nombre}</span>
+              <div class="sc-top-right">
+                <span class="sc-diff ${over ? 'sc-over' : 'sc-under'}">${over ? '▲' : '▼'} ${diffFmt}</span>
+                <button class="sc-toggle${activo ? ' sc-on' : ''}" onclick="toggleSeguimiento('${catEsc}')"></button>
               </div>
             </div>
-          ` : ''}
-        </div>
-      `
-    }).join('')
+            <div class="sc-mid">
+              <div class="sc-col">
+                <div class="sc-lbl">Meta</div>
+                <div class="sc-valor sc-val-meta">${fmt(estimado)}</div>
+              </div>
+              <div class="sc-sep">vs</div>
+              <div class="sc-col">
+                <div class="sc-lbl">Realidad</div>
+                <div class="sc-valor ${over ? 'sc-val-over' : 'sc-val-ok'}">${fmt(real)}</div>
+              </div>
+            </div>
+            <div class="sc-bar">
+              <div class="sc-bar-fill ${over ? 'sc-bar-over' : 'sc-bar-ok'}" style="width:${barPct}%"></div>
+            </div>
+          </div>`
+      }
+    })
+
+    tarjetas.sort((a, b) => {
+      if (a.activo !== b.activo) return a.activo ? -1 : 1
+      return b.diff - a.diff
+    })
+
+    cont.innerHTML = `
+      <div class="sc-dias">📅 Quedan ${diasQuedan} día${diasQuedan === 1 ? '' : 's'} para cerrar el mes</div>
+      ${tarjetas.map(t => t.html).join('')}
+    `
   }
 
   cargarMetas()
