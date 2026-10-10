@@ -877,6 +877,10 @@
       <input type="number" id="em-monto" placeholder="$0.00">
     </div>
     <div class="input-group">
+      <label>Fecha inicio</label>
+      <input type="month" id="em-fecha-inicio">
+    </div>
+    <div class="input-group">
       <label>Fecha fin</label>
       <input type="month" id="em-fecha-fin">
     </div>
@@ -1165,10 +1169,11 @@
     const meta = todasMetasData.find(m => String(m.id) === String(id))
     if (!meta) return
     idMetaEditar = id
-    document.getElementById('em-nombre').value    = meta.nombre
-    document.getElementById('em-monto').value     = meta.monto_objetivo
-    document.getElementById('em-fecha-fin').value = (meta.fecha_limite || '').slice(0, 7)
-    document.getElementById('em-icon').value      = meta.icono || ''
+    document.getElementById('em-nombre').value       = meta.nombre
+    document.getElementById('em-monto').value        = meta.monto_objetivo
+    document.getElementById('em-fecha-inicio').value = (meta.fecha_inicio || '').slice(0, 7)
+    document.getElementById('em-fecha-fin').value    = (meta.fecha_limite || '').slice(0, 7)
+    document.getElementById('em-icon').value         = meta.icono || ''
     document.getElementById('modal-editar-meta').classList.add('visible')
   }
 
@@ -1179,17 +1184,19 @@
 
   async function guardarEdicionMeta() {
     if (!idMetaEditar) return
-    const nombre    = document.getElementById('em-nombre').value.trim()
-    const monto     = parseFloat(document.getElementById('em-monto').value)
-    const fechaFin  = document.getElementById('em-fecha-fin').value
-    let   icono     = document.getElementById('em-icon').value.trim()
+    const nombre      = document.getElementById('em-nombre').value.trim()
+    const monto       = parseFloat(document.getElementById('em-monto').value)
+    const fechaInicio = document.getElementById('em-fecha-inicio').value
+    const fechaFin    = document.getElementById('em-fecha-fin').value
+    let   icono       = document.getElementById('em-icon').value.trim()
 
     if (!nombre || !monto || monto <= 0) { toast('Completa nombre y monto', 'err'); return }
-    if (!fechaFin) { toast('Completa la fecha fin', 'err'); return }
+    if (!fechaInicio) { toast('Completa la fecha inicio', 'err'); return }
+    if (!fechaFin)    { toast('Completa la fecha fin', 'err'); return }
     if (!icono) icono = '🎯'
 
     const { error } = await dbClient.from('metas')
-      .update({ nombre, monto_objetivo: monto, fecha_limite: fechaFin + '-01', icono })
+      .update({ nombre, monto_objetivo: monto, fecha_inicio: fechaInicio + '-01', fecha_limite: fechaFin + '-01', icono })
       .eq('id', idMetaEditar)
       .eq('usuario_id', window.currentUserId)
 
