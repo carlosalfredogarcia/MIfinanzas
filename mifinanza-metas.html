@@ -585,7 +585,10 @@
 
   <div class="meta-principal" id="bloque-principal">
     <div class="principal-top-row">
-      <div class="principal-nombre" id="p-nombre">Cargando...</div>
+      <div>
+        <div class="principal-nombre" id="p-nombre">Cargando...</div>
+        <div id="p-objetivo" style="font-size:12px;color:var(--subtext);margin-top:2px;"></div>
+      </div>
       <div class="principal-btns">
         <button class="btn-editar-principal" id="btn-editar-p" onclick="editarFondo()" style="display:none">✏️</button>
         <button class="btn-eliminar-principal" id="btn-eliminar-p" onclick="eliminarFondo()" style="display:none">🗑 Eliminar</button>
@@ -601,7 +604,6 @@
       <div class="lf-card lf-faltan">
         <div class="lf-label">Faltan</div>
         <input class="lf-valor lf-input" id="p-faltan" type="number" inputmode="decimal" value="0">
-        <div class="lf-sub" id="p-faltan-de"></div>
       </div>
     </div>
 
@@ -992,7 +994,7 @@
       document.getElementById('p-barra').style.width   = '0%'
       document.getElementById('p-llevado').textContent = '$0'
       document.getElementById('p-faltan').value = '0'
-      document.getElementById('p-faltan-de').textContent = ''
+      document.getElementById('p-objetivo').textContent = ''
       document.getElementById('ahorro-detalle').style.display = 'none'
       document.getElementById('ahorro-nota').style.display    = 'none'
       document.getElementById('promedio-wrap').style.display  = 'none'
@@ -1014,7 +1016,7 @@
     document.getElementById('p-percent').textContent = `${pct.toFixed(1)}%`
     document.getElementById('p-llevado').textContent = fmt(actual)
     document.getElementById('p-faltan').value = faltan.toFixed(2)
-    document.getElementById('p-faltan-de').textContent = `de ${fmt(objetivo)}`
+    document.getElementById('p-objetivo').textContent = `Meta: ${fmt(objetivo)}`
     setTimeout(() => { document.getElementById('p-barra').style.width = pct + '%' }, 100)
 
     const meses = mesesRestantes(fechaLimite)
