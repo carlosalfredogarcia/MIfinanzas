@@ -764,13 +764,6 @@
     <div class="modal-handle"></div>
     <div class="modal-title">Nueva meta</div>
     <div class="input-group">
-      <label>Tipo de meta</label>
-      <select id="m-tipo">
-        <option value="ahorro">💰 Fondo</option>
-        <option value="manual">🎯 Meta específica</option>
-      </select>
-    </div>
-    <div class="input-group">
       <label>Nombre de la meta</label>
       <input type="text" id="m-nombre" placeholder="Ej: Viaje, Carro, Fondo...">
     </div>
@@ -1183,7 +1176,7 @@
   }
 
   async function guardarMeta() {
-    const tipo        = document.getElementById('m-tipo').value
+    const tipo        = 'ahorro'
     const nombre       = document.getElementById('m-nombre').value.trim()
     const monto        = parseFloat(document.getElementById('m-monto').value)
     const fechaInicio  = document.getElementById('m-fecha-inicio').value
