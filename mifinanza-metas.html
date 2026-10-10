@@ -377,6 +377,22 @@
   .bar-necesario { background: rgba(74,222,128,0.65); transition: width 0.3s; }
   .bar-opcional  { background: rgba(251,146,60,0.55); transition: width 0.3s; }
 
+  .analisis-header { display: flex; align-items: center; justify-content: space-between; cursor: pointer; padding: 14px 16px; background: #1c2128; border-radius: 14px; border: 1px solid var(--border2); user-select: none; transition: background 0.15s; margin-bottom: 10px; }
+  .analisis-header:active { background: #21262d; }
+  .analisis-header-left { display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 600; color: var(--text); }
+  .analisis-chevron { color: var(--subtext); font-size: 16px; transition: transform 0.25s; }
+  .analisis-chevron.abierto { transform: rotate(90deg); }
+  .analisis-body { overflow: hidden; max-height: 0; transition: max-height 0.3s ease, opacity 0.25s ease; opacity: 0; }
+  .analisis-body.abierto { max-height: 400px; opacity: 1; }
+  .analisis-tabla { width: 100%; border-collapse: collapse; margin-bottom: 10px; }
+  .analisis-tabla th { font-size: 10px; color: var(--subtext); text-transform: uppercase; letter-spacing: 0.08em; padding: 0 0 8px; font-weight: 600; }
+  .analisis-tabla th:not(:first-child) { text-align: right; }
+  .analisis-tabla td { padding: 5px 0; font-size: 13px; vertical-align: middle; }
+  .analisis-tabla td:not(:first-child) { text-align: right; font-family: 'Roboto', sans-serif; font-weight: 700; }
+  .analisis-cat { display: flex; align-items: center; gap: 6px; }
+  .analisis-ideal { color: var(--subtext); }
+  .analisis-msg { background: rgba(88,166,255,0.07); border: 1px solid rgba(88,166,255,0.18); border-radius: 10px; padding: 10px 12px; font-size: 12px; color: var(--subtext); line-height: 1.55; }
+
   .tabla-comparativa {
     background: var(--card); border-radius: 20px;
     padding: 16px 18px; border: 1px solid var(--border);
@@ -632,6 +648,16 @@
       <div>
         <div class="plan-title">Planificador</div>
         <div class="plan-sub">Calcula tu potencial de ahorro</div>
+      </div>
+    </div>
+
+    <div>
+      <div class="analisis-header" onclick="toggleAnalisis()">
+        <span class="analisis-header-left">📊 Análisis de tu presupuesto</span>
+        <span class="analisis-chevron" id="analisis-chevron">›</span>
+      </div>
+      <div class="analisis-body" id="analisis-body">
+        <div id="analisis-contenido"></div>
       </div>
     </div>
 
@@ -1754,6 +1780,90 @@
     elDisponible.classList.toggle('negativo', disponible < 0)
     renderTablaComparativa()
     actualizarResumenTipos()
+    actualizarAnalisis()
+  }
+
+  function toggleAnalisis() {
+    const body    = document.getElementById('analisis-body')
+    const chevron = document.getElementById('analisis-chevron')
+    const abre    = !body.classList.contains('abierto')
+    body.classList.toggle('abierto', abre)
+    chevron.classList.toggle('abierto', abre)
+  }
+
+  function actualizarAnalisis() {
+    const cont = document.getElementById('analisis-contenido')
+    if (!cont) return
+    const ingresos = totalIngresos()
+    if (ingresos <= 0) { cont.innerHTML = '<p style="font-size:12px;color:var(--subtext);padding:0 2px 12px">Introduce tus ingresos para ver el análisis.</p>'; return }
+
+    let necesario = 0, opcional = 0
+    document.querySelectorAll('.variable-input').forEach(inp => {
+      const tipo = categoriaTipos[inp.dataset.cat]
+      const val  = parseFloat(inp.value) || 0
+      if (tipo === 'necesario') necesario += val
+      else if (tipo === 'opcional') opcional += val
+    })
+    const ahorro    = Math.max(0, ingresos - totalGastos())
+    const pNec      = necesario / ingresos * 100
+    const pOpc      = opcional  / ingresos * 100
+    const pAho      = ahorro    / ingresos * 100
+    const ideales   = { nec: 60, opc: 30, aho: 10 }
+
+    function estado(actual, ideal) {
+      const diff = actual - ideal
+      if (diff <= 0)  return '✅'
+      if (diff <= 15) return '⚠️'
+      return '❌'
+    }
+    function colorPct(val, ideal) {
+      const diff = val - ideal
+      if (diff <= 0)  return '#4ade80'
+      if (diff <= 15) return '#e3b341'
+      return '#f85149'
+    }
+
+    const estNec = estado(pNec, ideales.nec)
+    const estOpc = estado(pOpc, ideales.opc)
+    const estAho = estado(0,    pAho - ideales.aho < 0 ? 0 : pAho - ideales.aho)
+
+    const rows = [
+      { label: '🔒 Necesarios', val: pNec, ideal: ideales.nec, est: estNec },
+      { label: '🎯 Opcionales', val: pOpc, ideal: ideales.opc, est: estOpc },
+      { label: '💰 Ahorro',     val: pAho, ideal: ideales.aho, est: ahorro < ingresos * ideales.aho / 100 ? (pAho < ideales.aho - 15 ? '❌' : '⚠️') : '✅' },
+    ]
+
+    const filas = rows.map(r => `
+      <tr>
+        <td><span class="analisis-cat">${r.label}</span></td>
+        <td style="color:${colorPct(r.val, r.label.includes('Ahorro') ? ideales.aho : r.ideal)}">${r.val.toFixed(0)}%</td>
+        <td class="analisis-ideal">${r.ideal}%</td>
+        <td>${r.est}</td>
+      </tr>`).join('')
+
+    // Mensaje
+    let msg = ''
+    if (pNec > ideales.nec) {
+      const exceso   = pNec - ideales.nec
+      const ahorroExtra = ingresos * exceso / 100
+      msg = `Tus necesarios están ${exceso <= 15 ? 'algo altos' : 'muy altos'}. Podrías ahorrar ~${fmt(ahorroExtra)} si los bajas al ${ideales.nec}%.`
+    } else if (pAho < ideales.aho) {
+      const falta = ingresos * (ideales.aho - pAho) / 100
+      msg = `Tu ahorro es bajo. Redirigir ${fmt(falta)} al mes te acercaría al 10% recomendado.`
+    } else {
+      msg = `¡Buen equilibrio! Estás siguiendo la regla 60/30/10.`
+    }
+
+    cont.innerHTML = `
+      <table class="analisis-tabla">
+        <thead><tr>
+          <th></th><th>Tu caso</th><th>Ideal</th><th></th>
+        </tr></thead>
+        <tbody>${filas}</tbody>
+      </table>
+      <div class="analisis-msg">💡 ${msg}</div>
+      <div style="height:12px"></div>
+    `
   }
 
   let gastosRealMes = {}
