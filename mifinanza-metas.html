@@ -636,11 +636,6 @@
     </div>
   </div>
 
-  <div class="seccion-label">Otras metas</div>
-  <div class="metas-wrap" id="metas-wrap">
-    <div class="loading-metas">Cargando metas...</div>
-  </div>
-
   <div class="seccion-label" style="margin-top:16px">¿Cuánto puedo ahorrar?</div>
   <div class="planificador">
     <div class="plan-title-row">
@@ -968,17 +963,14 @@
 
     if (error) {
       toast('Error al cargar metas', 'err')
-      document.getElementById('metas-wrap').innerHTML = '<div class="loading-metas">No se pudieron cargar.</div>'
       return
     }
 
     const fondo = data.find(m => m.icono === '💰') || null
-    const otras = data.filter(m => m !== fondo)
 
     todasMetasData = data
     metaFondoData = fondo
     renderFondo(fondo)
-    renderOtras(otras)
 
     if (fondo) calcularAhorroReal()
   }
@@ -1120,43 +1112,6 @@
       .eq('id', metaFondoData.id)
   }
 
-  function renderOtras(metas) {
-    const wrap = document.getElementById('metas-wrap')
-    if (metas.length === 0) {
-      wrap.innerHTML = '<div class="loading-metas">Aún no tienes otras metas. ¡Crea una! 🎯</div>'
-      return
-    }
-    wrap.innerHTML = ''
-    metas.forEach(meta => {
-      const pct      = meta.monto_objetivo > 0 ? Math.min(100, (meta.monto_actual / meta.monto_objetivo) * 100) : 0
-      const esAhorro = meta.icono === '💰'
-      const card     = document.createElement('div')
-      card.className = 'meta-card'
-      card.innerHTML = `
-        <div class="meta-top">
-          <div class="meta-icon">${meta.icono || '🎯'}</div>
-          <div class="meta-info">
-            <div class="meta-nombre">${meta.nombre}</div>
-            <div class="meta-fecha">Meta: ${fmtFecha(meta.fecha_limite)}</div>
-          </div>
-          <div class="meta-monto">
-            <div class="llevado">${fmt(meta.monto_actual)}</div>
-            <div class="objetivo">de ${fmt(meta.monto_objetivo)}</div>
-          </div>
-        </div>
-        <div class="progress-track-sm">
-          <div class="progress-fill-sm" style="width:0%"></div>
-        </div>
-        <div class="meta-acciones">
-          <button class="btn-accion" onclick="editarMeta('${meta.id}')">✏️ Editar</button>
-          ${!esAhorro ? `<button class="btn-accion" onclick="abrirModalAbonar('${meta.id}', '${meta.nombre}')">➕ Abonar</button>` : ''}
-          <button class="btn-accion danger-btn" onclick="eliminarMeta('${meta.id}', this)">🗑</button>
-        </div>
-      `
-      wrap.appendChild(card)
-      setTimeout(() => { card.querySelector('.progress-fill-sm').style.width = pct + '%' }, 150)
-    })
-  }
 
   async function eliminarFondo() {
     if (!metaFondoData) return
