@@ -704,14 +704,20 @@
     </div>
   </div>
 
-  <div class="seccion-label" style="margin-top:16px">Mi colchón de ahorro</div>
-  <div class="colchon-card">
-    <div class="colchon-label">Total acumulado</div>
-    <div class="colchon-total" id="colchon-total">$0</div>
-    <button class="btn-colchon-add" onclick="abrirModalColchon()">+ Añadir</button>
-  </div>
-  <div class="colchon-historial-wrap">
-    <div class="colchon-table-card" id="colchon-historial"><div class="colchon-empty">Cargando...</div></div>
+  <div class="bloque-acordeon" style="margin:16px 24px 0">
+    <div class="bloque-card clicable" onclick="toggleBloque('colchon')">
+      <div class="bloque-card-top">
+        <span class="bloque-label">Mi colchón de ahorro</span>
+        <span class="bloque-chevron" id="chevron-colchon">›</span>
+      </div>
+      <div class="bloque-total-grande" id="colchon-total" style="color:#3fb950">$0</div>
+    </div>
+    <div class="bloque-detalle" id="detalle-colchon" style="display:none">
+      <div style="text-align:center;padding:4px 0 14px;">
+        <button class="btn-colchon-add" onclick="abrirModalColchon()">+ Añadir</button>
+      </div>
+      <div class="colchon-table-card" id="colchon-historial"><div class="colchon-empty">Cargando...</div></div>
+    </div>
   </div>
 
   <div class="spacer"></div>
