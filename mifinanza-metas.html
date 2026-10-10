@@ -392,6 +392,10 @@
   .analisis-cat { display: flex; align-items: center; gap: 6px; }
   .analisis-ideal { color: var(--subtext); }
   .analisis-msg { background: rgba(88,166,255,0.07); border: 1px solid rgba(88,166,255,0.18); border-radius: 10px; padding: 10px 12px; font-size: 12px; color: var(--subtext); line-height: 1.55; }
+  .amodo-dd { position: absolute; right: 0; top: 26px; background: #1c2128; border: 1px solid #30363d; border-radius: 10px; padding: 5px; z-index: 200; min-width: 158px; box-shadow: 0 6px 24px rgba(0,0,0,0.5); }
+  .amodo-item { padding: 9px 12px; font-size: 13px; border-radius: 6px; cursor: pointer; color: var(--text); transition: background 0.12s; }
+  .amodo-item:hover { background: rgba(255,255,255,0.07); }
+  .amodo-item.activo { color: #58a6ff; background: rgba(88,166,255,0.08); }
 
   .tabla-comparativa { background: none; border: none; padding: 0; }
   .tabla-comp-empty { text-align: center; color: var(--subtext); font-size: 12px; padding: 12px 0; }
@@ -1834,9 +1838,23 @@
     actualizarAnalisis()
   }
 
-  function ciclarModo() {
-    const idx = MODOS_ORDEN.indexOf(modoAnalisis)
-    setModoAnalisis(MODOS_ORDEN[(idx + 1) % MODOS_ORDEN.length])
+  function toggleModoDropdown(e) {
+    e.stopPropagation()
+    const dd = document.getElementById('modo-dropdown')
+    if (!dd) return
+    const abierto = dd.style.display !== 'none'
+    dd.style.display = abierto ? 'none' : 'block'
+    if (!abierto) setTimeout(() => document.addEventListener('click', cerrarModoDropdown, { once: true }), 0)
+  }
+
+  function cerrarModoDropdown() {
+    const dd = document.getElementById('modo-dropdown')
+    if (dd) dd.style.display = 'none'
+  }
+
+  function seleccionarModo(modo) {
+    cerrarModoDropdown()
+    setModoAnalisis(modo)
   }
 
   function actualizarAnalisis() {
@@ -1896,18 +1914,28 @@
       msg = `¡Buen equilibrio! Tu reparto sigue el perfil <strong>${modoAnalisis}</strong>.`
     }
 
+    const itemsDD = MODOS_ORDEN.map(m => {
+      const iconos = { basico: '😮‍💨', equilibrado: '⚖️', ahorrador: '💪' }
+      return `<div class="amodo-item${m === modoAnalisis ? ' activo' : ''}" onclick="seleccionarModo('${m}')">${iconos[m]} ${MODOS_LABEL[m]}</div>`
+    }).join('')
+
     cont.innerHTML = `
-      <table class="analisis-tabla">
-        <thead><tr>
-          <th></th>
-          <th>Tu caso</th>
-          <th onclick="ciclarModo()" style="cursor:pointer;user-select:none;white-space:nowrap;">
-            Ideal&nbsp;<span style="font-size:9px;color:#58a6ff;font-weight:600;text-transform:none;letter-spacing:0;">${MODOS_LABEL[modoAnalisis]}&nbsp;›</span>
-          </th>
-          <th></th>
-        </tr></thead>
-        <tbody>${filas}</tbody>
-      </table>
+      <div style="position:relative;">
+        <table class="analisis-tabla">
+          <thead><tr>
+            <th></th>
+            <th>Tu caso</th>
+            <th>
+              <span onclick="toggleModoDropdown(event)" style="cursor:pointer;user-select:none;white-space:nowrap;">
+                Ideal&nbsp;<span style="font-size:9px;color:#58a6ff;font-weight:600;text-transform:none;letter-spacing:0;">${MODOS_LABEL[modoAnalisis]}&nbsp;⌄</span>
+              </span>
+            </th>
+            <th></th>
+          </tr></thead>
+          <tbody>${filas}</tbody>
+        </table>
+        <div id="modo-dropdown" class="amodo-dd" style="display:none;">${itemsDD}</div>
+      </div>
       <div class="analisis-msg">💡 ${msg}</div>
       <div style="height:12px"></div>
     `
