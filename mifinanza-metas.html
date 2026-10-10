@@ -1666,9 +1666,10 @@
     const tipo = categoriaTipos[cat] || null
     row.classList.toggle('tipo-necesario', tipo === 'necesario')
     row.classList.toggle('tipo-opcional',  tipo === 'opcional')
+    const tipoActual = categoriaTipos[cat] || null
     row.querySelectorAll('.btn-tipo').forEach(b => {
-      b.classList.toggle('activo-necesario', b.dataset.tipo === 'necesario' && tipo === 'necesario')
-      b.classList.toggle('activo-opcional',  b.dataset.tipo === 'opcional'  && tipo === 'opcional')
+      b.classList.toggle('activo-necesario', b.dataset.tipo === 'necesario' && tipoActual === 'necesario')
+      b.classList.toggle('activo-opcional',  b.dataset.tipo === 'opcional'  && tipoActual === 'opcional')
     })
   }
 
