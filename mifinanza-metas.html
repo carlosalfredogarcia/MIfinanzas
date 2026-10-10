@@ -382,8 +382,11 @@
   .analisis-header-left { display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 600; color: var(--text); }
   .analisis-chevron { color: var(--subtext); font-size: 16px; transition: transform 0.25s; }
   .analisis-chevron.abierto { transform: rotate(90deg); }
-  .analisis-body { overflow: hidden; max-height: 0; transition: max-height 0.3s ease, opacity 0.25s ease; opacity: 0; }
-  .analisis-body.abierto { max-height: 400px; opacity: 1; }
+  .analisis-body { overflow: hidden; max-height: 0; transition: max-height 0.35s ease, opacity 0.25s ease; opacity: 0; }
+  .analisis-body.abierto { max-height: 600px; opacity: 1; }
+  .modo-btns { display: flex; gap: 6px; margin-bottom: 14px; }
+  .btn-modo { flex: 1; background: none; border: 1px solid #30363d; border-radius: 8px; padding: 8px 4px; font-size: 11px; font-family: 'DM Sans', sans-serif; font-weight: 500; color: #8b949e; cursor: pointer; text-align: center; transition: all 0.15s; line-height: 1.4; }
+  .btn-modo.activo { background: rgba(88,166,255,0.1); border-color: rgba(88,166,255,0.4); color: #58a6ff; }
   .analisis-tabla { width: 100%; border-collapse: collapse; margin-bottom: 10px; }
   .analisis-tabla th { font-size: 10px; color: var(--subtext); text-transform: uppercase; letter-spacing: 0.08em; padding: 0 0 8px; font-weight: 600; }
   .analisis-tabla th:not(:first-child) { text-align: right; }
@@ -651,6 +654,11 @@
         <span class="analisis-chevron" id="analisis-chevron">›</span>
       </div>
       <div class="analisis-body" id="analisis-body">
+        <div class="modo-btns">
+          <button class="btn-modo" data-modo="ajustado"    onclick="setModoAnalisis('ajustado')">😮‍💨 Ajustado</button>
+          <button class="btn-modo" data-modo="equilibrado" onclick="setModoAnalisis('equilibrado')">⚖️ Equilibrado</button>
+          <button class="btn-modo" data-modo="ahorrador"   onclick="setModoAnalisis('ahorrador')">💪 Ahorrador</button>
+        </div>
         <div id="analisis-contenido"></div>
       </div>
     </div>
@@ -1818,6 +1826,24 @@
     chevron.classList.toggle('abierto', abre)
   }
 
+  const MODOS_ANALISIS = {
+    ajustado:    { nec: 70, opc: 20, aho: 10 },
+    equilibrado: { nec: 60, opc: 30, aho: 10 },
+    ahorrador:   { nec: 50, opc: 30, aho: 20 },
+  }
+  let modoAnalisis = localStorage.getItem('planificador_modo_analisis') || 'equilibrado'
+
+  function setModoAnalisis(modo) {
+    modoAnalisis = modo
+    localStorage.setItem('planificador_modo_analisis', modo)
+    document.querySelectorAll('.btn-modo').forEach(b => b.classList.toggle('activo', b.dataset.modo === modo))
+    actualizarAnalisis()
+  }
+
+  function iniciarModoAnalisis() {
+    document.querySelectorAll('.btn-modo').forEach(b => b.classList.toggle('activo', b.dataset.modo === modoAnalisis))
+  }
+
   function actualizarAnalisis() {
     const cont = document.getElementById('analisis-contenido')
     if (!cont) return
@@ -1825,67 +1851,59 @@
     if (ingresos <= 0) { cont.innerHTML = '<p style="font-size:12px;color:var(--subtext);padding:0 2px 12px">Introduce tus ingresos para ver el análisis.</p>'; return }
 
     let necesario = 0, opcional = 0
-    document.querySelectorAll('.variable-input').forEach(inp => {
-      const tipo = categoriaTipos[inp.dataset.cat]
-      const val  = parseFloat(inp.value) || 0
+    document.querySelectorAll('.var-row').forEach(row => {
+      const tipo = categoriaTipos[row._planCat] ?? 'opcional'
+      const val  = parseFloat(row.querySelector('.variable-input')?.value) || 0
       if (tipo === 'necesario') necesario += val
-      else if (tipo === 'opcional') opcional += val
+      else opcional += val
     })
-    const ahorro    = Math.max(0, ingresos - totalGastos())
-    const pNec      = necesario / ingresos * 100
-    const pOpc      = opcional  / ingresos * 100
-    const pAho      = ahorro    / ingresos * 100
-    const ideales   = { nec: 60, opc: 30, aho: 10 }
+    const ahorro  = Math.max(0, ingresos - totalGastos())
+    const pNec    = necesario / ingresos * 100
+    const pOpc    = opcional  / ingresos * 100
+    const pAho    = ahorro    / ingresos * 100
+    const ideales = MODOS_ANALISIS[modoAnalisis] || MODOS_ANALISIS.equilibrado
 
-    function estado(actual, ideal) {
-      const diff = actual - ideal
+    function estado(actual, ideal, inverso = false) {
+      const diff = inverso ? ideal - actual : actual - ideal
       if (diff <= 0)  return '✅'
       if (diff <= 15) return '⚠️'
       return '❌'
     }
-    function colorPct(val, ideal) {
-      const diff = val - ideal
+    function colorPct(actual, ideal, inverso = false) {
+      const diff = inverso ? ideal - actual : actual - ideal
       if (diff <= 0)  return '#4ade80'
       if (diff <= 15) return '#e3b341'
       return '#f85149'
     }
 
-    const estNec = estado(pNec, ideales.nec)
-    const estOpc = estado(pOpc, ideales.opc)
-    const estAho = estado(0,    pAho - ideales.aho < 0 ? 0 : pAho - ideales.aho)
-
     const rows = [
-      { label: '🔒 Necesarios', val: pNec, ideal: ideales.nec, est: estNec },
-      { label: '🎯 Opcionales', val: pOpc, ideal: ideales.opc, est: estOpc },
-      { label: '💰 Ahorro',     val: pAho, ideal: ideales.aho, est: ahorro < ingresos * ideales.aho / 100 ? (pAho < ideales.aho - 15 ? '❌' : '⚠️') : '✅' },
+      { label: '🔒 Necesarios', val: pNec, ideal: ideales.nec, est: estado(pNec, ideales.nec),        col: colorPct(pNec, ideales.nec) },
+      { label: '🎯 Opcionales', val: pOpc, ideal: ideales.opc, est: estado(pOpc, ideales.opc),        col: colorPct(pOpc, ideales.opc) },
+      { label: '💰 Ahorro',     val: pAho, ideal: ideales.aho, est: estado(pAho, ideales.aho, true),  col: colorPct(pAho, ideales.aho, true) },
     ]
 
     const filas = rows.map(r => `
       <tr>
         <td><span class="analisis-cat">${r.label}</span></td>
-        <td style="color:${colorPct(r.val, r.label.includes('Ahorro') ? ideales.aho : r.ideal)}">${r.val.toFixed(0)}%</td>
+        <td style="color:${r.col}">${r.val.toFixed(0)}%</td>
         <td class="analisis-ideal">${r.ideal}%</td>
         <td>${r.est}</td>
       </tr>`).join('')
 
-    // Mensaje
     let msg = ''
     if (pNec > ideales.nec) {
-      const exceso   = pNec - ideales.nec
-      const ahorroExtra = ingresos * exceso / 100
-      msg = `Tus necesarios están ${exceso <= 15 ? 'algo altos' : 'muy altos'}. Podrías ahorrar ~${fmt(ahorroExtra)} si los bajas al ${ideales.nec}%.`
+      const exceso = pNec - ideales.nec
+      msg = `Tus necesarios están ${exceso <= 15 ? 'algo altos' : 'muy altos'}. Podrías ahorrar ~${fmt(ingresos * exceso / 100)} si los bajas al ${ideales.nec}%.`
     } else if (pAho < ideales.aho) {
       const falta = ingresos * (ideales.aho - pAho) / 100
-      msg = `Tu ahorro es bajo. Redirigir ${fmt(falta)} al mes te acercaría al 10% recomendado.`
+      msg = `Tu ahorro es bajo. Redirigir ${fmt(falta)} al mes te acercaría al ${ideales.aho}% objetivo.`
     } else {
-      msg = `¡Buen equilibrio! Estás siguiendo la regla 60/30/10.`
+      msg = `¡Buen equilibrio! Tu reparto sigue el perfil <strong>${modoAnalisis}</strong>.`
     }
 
     cont.innerHTML = `
       <table class="analisis-tabla">
-        <thead><tr>
-          <th></th><th>Tu caso</th><th>Ideal</th><th></th>
-        </tr></thead>
+        <thead><tr><th></th><th>Tu caso</th><th>Ideal</th><th></th></tr></thead>
         <tbody>${filas}</tbody>
       </table>
       <div class="analisis-msg">💡 ${msg}</div>
@@ -2017,6 +2035,7 @@
   cargarGastos()
   cargarGastosRealMes()
   cargarTipos()
+  iniciarModoAnalisis()
   actualizarPlanificador()
 </script>
 <script>
