@@ -1663,10 +1663,10 @@
   function aplicarTipoRow(row) {
     const cat  = row._planCat
     if (!cat) return
-    const tipo = categoriaTipos[cat] || null
+    const tipo = categoriaTipos[cat] ?? 'opcional'
     row.classList.toggle('tipo-necesario', tipo === 'necesario')
     row.classList.toggle('tipo-opcional',  tipo === 'opcional')
-    const tipoActual = categoriaTipos[cat] || null
+    const tipoActual = categoriaTipos[cat] ?? 'opcional'
     row.querySelectorAll('.btn-tipo').forEach(b => {
       b.classList.toggle('activo-necesario', b.dataset.tipo === 'necesario' && tipoActual === 'necesario')
       b.classList.toggle('activo-opcional',  b.dataset.tipo === 'opcional'  && tipoActual === 'opcional')
@@ -1685,8 +1685,8 @@
     const orden = { necesario: 0, opcional: 1 }
     ;[...cont.querySelectorAll('.var-row')]
       .sort((a, b) => {
-        const tA = categoriaTipos[a._planCat] || ''
-        const tB = categoriaTipos[b._planCat] || ''
+        const tA = categoriaTipos[a._planCat] ?? 'opcional'
+        const tB = categoriaTipos[b._planCat] ?? 'opcional'
         return (orden[tA] ?? 2) - (orden[tB] ?? 2)
       })
       .forEach(r => cont.appendChild(r))
@@ -1699,7 +1699,7 @@
     document.querySelectorAll('.var-row').forEach(row => {
       const inp  = row.querySelector('.variable-input')
       if (!inp) return
-      const tipo = categoriaTipos[row._planCat]
+      const tipo = categoriaTipos[row._planCat] ?? 'opcional'
       const val  = parseFloat(inp.value) || 0
       if (tipo === 'necesario') necesario += val
       else if (tipo === 'opcional') opcional += val
