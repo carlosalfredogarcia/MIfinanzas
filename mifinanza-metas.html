@@ -1654,15 +1654,11 @@
 
   async function setTipo(btn, tipo) {
     const cat = btn.dataset.cat
-    const nuevo = categoriaTipos[cat] === tipo ? null : tipo
-    categoriaTipos[cat] = nuevo
+    if (categoriaTipos[cat] === tipo) return
+    categoriaTipos[cat] = tipo
     aplicarTiposUI()
     if (!window.currentUserId) return
-    if (nuevo) {
-      await dbClient.from('categoria_tipo').upsert({ user_id: window.currentUserId, categoria: cat, tipo: nuevo }, { onConflict: 'user_id,categoria' })
-    } else {
-      await dbClient.from('categoria_tipo').delete().eq('user_id', window.currentUserId).eq('categoria', cat)
-    }
+    await dbClient.from('categoria_tipo').upsert({ user_id: window.currentUserId, categoria: cat, tipo }, { onConflict: 'user_id,categoria' })
   }
 
   function aplicarTiposUI() {
