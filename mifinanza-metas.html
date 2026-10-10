@@ -361,6 +361,22 @@
   }
   .var-input:focus { border-color: rgba(88,166,255,0.3); }
 
+  .tipo-btns { display: flex; gap: 6px; margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.06); }
+  .btn-tipo { flex: 1; background: none; border: 1px solid #30363d; border-radius: 8px; padding: 7px 4px; font-size: 12px; font-family: 'DM Sans', sans-serif; font-weight: 500; color: #8b949e; cursor: pointer; transition: all 0.15s; text-align: center; }
+  .btn-tipo.activo-necesario { background: rgba(74,222,128,0.12); border-color: rgba(74,222,128,0.4); color: #4ade80; }
+  .btn-tipo.activo-opcional  { background: rgba(251,146,60,0.12); border-color: rgba(251,146,60,0.35); color: #fb923c; }
+  .var-row.tipo-necesario { border: 1px solid rgba(74,222,128,0.35); }
+  .var-row.tipo-opcional  { border: 1px solid rgba(251,146,60,0.3); }
+
+  .resumen-tipos { background: #1e2230; border-radius: 12px; padding: 12px 14px; border: 1px solid #2a2e3a; margin-top: 10px; }
+  .resumen-tipos-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; font-size: 13px; }
+  .resumen-tipos-row:last-of-type { margin-bottom: 0; }
+  .resumen-tipos-label { color: var(--subtext); }
+  .resumen-tipos-valor { font-family: 'Roboto', sans-serif; font-weight: 700; }
+  .resumen-tipos-bar { height: 5px; border-radius: 100px; overflow: hidden; background: #2a2e3a; margin-top: 10px; display: flex; }
+  .bar-necesario { background: rgba(74,222,128,0.65); transition: width 0.3s; }
+  .bar-opcional  { background: rgba(251,146,60,0.55); transition: width 0.3s; }
+
   .tabla-comparativa {
     background: var(--card); border-radius: 20px;
     padding: 16px 18px; border: 1px solid var(--border);
@@ -636,6 +652,7 @@
           <span class="bloque-chevron" id="chevron-gastos">›</span>
         </div>
         <div class="bloque-total-grande txt-rojo" id="p-gastos-total">$0.00</div>
+        <div id="resumen-tipos" style="display:none" onclick="event.stopPropagation()"></div>
       </div>
       <div class="bloque-detalle" id="detalle-gastos" style="display:none">
         <div class="variables-sub">Basado en meses cerrados</div>
@@ -1585,6 +1602,85 @@
     renderGastos()
   }
 
+  let categoriaTipos = {}
+
+  async function cargarTipos() {
+    if (!window.currentUserId) {
+      await new Promise(resolve => {
+        const iv = setInterval(() => { if (window.currentUserId) { clearInterval(iv); resolve() } }, 50)
+        setTimeout(() => { clearInterval(iv); resolve() }, 5000)
+      })
+    }
+    if (!window.currentUserId) return
+    const { data, error } = await dbClient.from('categoria_tipo').select('categoria, tipo').eq('user_id', window.currentUserId)
+    if (error) return
+    categoriaTipos = {}
+    ;(data || []).forEach(r => { categoriaTipos[r.categoria] = r.tipo })
+    aplicarTiposUI()
+  }
+
+  async function setTipo(btn, tipo) {
+    const cat = btn.dataset.cat
+    const nuevo = categoriaTipos[cat] === tipo ? null : tipo
+    categoriaTipos[cat] = nuevo
+    aplicarTiposUI()
+    if (!window.currentUserId) return
+    if (nuevo) {
+      await dbClient.from('categoria_tipo').upsert({ user_id: window.currentUserId, categoria: cat, tipo: nuevo }, { onConflict: 'user_id,categoria' })
+    } else {
+      await dbClient.from('categoria_tipo').delete().eq('user_id', window.currentUserId).eq('categoria', cat)
+    }
+  }
+
+  function aplicarTiposUI() {
+    document.querySelectorAll('.var-row').forEach(row => {
+      const inp = row.querySelector('.variable-input')
+      if (!inp) return
+      const cat  = inp.dataset.cat
+      const tipo = categoriaTipos[cat] || null
+      row.classList.toggle('tipo-necesario', tipo === 'necesario')
+      row.classList.toggle('tipo-opcional',  tipo === 'opcional')
+      row.querySelectorAll('.btn-tipo').forEach(b => {
+        b.classList.toggle('activo-necesario', b.dataset.tipo === 'necesario' && tipo === 'necesario')
+        b.classList.toggle('activo-opcional',  b.dataset.tipo === 'opcional'  && tipo === 'opcional')
+      })
+    })
+    actualizarResumenTipos()
+  }
+
+  function actualizarResumenTipos() {
+    const el = document.getElementById('resumen-tipos')
+    if (!el) return
+    let necesario = 0, opcional = 0
+    document.querySelectorAll('.variable-input').forEach(inp => {
+      const tipo = categoriaTipos[inp.dataset.cat]
+      const val  = parseFloat(inp.value) || 0
+      if (tipo === 'necesario') necesario += val
+      else if (tipo === 'opcional') opcional += val
+    })
+    const total = necesario + opcional
+    if (total === 0) { el.style.display = 'none'; return }
+    const pctNec = Math.round(necesario / total * 100)
+    const pctOpc = 100 - pctNec
+    el.style.display = 'block'
+    el.innerHTML = `
+      <div class="resumen-tipos">
+        <div class="resumen-tipos-row">
+          <span class="resumen-tipos-label">🔒 Necesarios</span>
+          <span class="resumen-tipos-valor" style="color:#4ade80">${fmt(necesario)}</span>
+        </div>
+        <div class="resumen-tipos-row">
+          <span class="resumen-tipos-label">🎯 Opcionales</span>
+          <span class="resumen-tipos-valor" style="color:#fb923c">${fmt(opcional)}</span>
+        </div>
+        <div class="resumen-tipos-bar">
+          <div class="bar-necesario" style="width:${pctNec}%"></div>
+          <div class="bar-opcional"  style="width:${pctOpc}%"></div>
+        </div>
+      </div>
+    `
+  }
+
   function guardarGastosLocal() {
     const datos = {}
     document.querySelectorAll('.variable-input').forEach(inp => { datos[inp.dataset.cat] = inp.value })
@@ -1604,6 +1700,7 @@
         const valorInicial = guardado[cat] !== undefined ? guardado[cat] : gastosOriginal[cat].toFixed(2)
         const row = document.createElement('div')
         row.className = 'var-row'
+        const catEsc = cat.replace(/"/g, '&quot;')
         row.innerHTML = `
           <div class="var-nombre-top">
             <span class="var-emoji">${emoji}</span>
@@ -1611,7 +1708,11 @@
           </div>
           <div class="var-bottom">
             <span class="var-promedio">Últ. meses: ${fmt(gastosOriginal[cat])}</span>
-            <input class="var-input variable-input" type="number" inputmode="decimal" data-cat="${cat}" value="${valorInicial}">
+            <input class="var-input variable-input" type="number" inputmode="decimal" data-cat="${catEsc}" value="${valorInicial}">
+          </div>
+          <div class="tipo-btns">
+            <button class="btn-tipo" data-cat="${catEsc}" data-tipo="necesario" onclick="setTipo(this,'necesario')">🔒 Necesario</button>
+            <button class="btn-tipo" data-cat="${catEsc}" data-tipo="opcional"  onclick="setTipo(this,'opcional')">🎯 Opcional</button>
           </div>
         `
         cont.appendChild(row)
@@ -1620,6 +1721,7 @@
       inp.addEventListener('input', () => { guardarGastosLocal(); actualizarPlanificador() })
       inp.addEventListener('focus', function() { this.select() })
     })
+    aplicarTiposUI()
     actualizarPlanificador()
   }
 
@@ -1644,6 +1746,7 @@
     elDisponible.textContent = fmt(disponible)
     elDisponible.classList.toggle('negativo', disponible < 0)
     renderTablaComparativa()
+    actualizarResumenTipos()
   }
 
   let gastosRealMes = {}
@@ -1743,6 +1846,7 @@
   cargarIngresos()
   cargarGastos()
   cargarGastosRealMes()
+  cargarTipos()
   actualizarPlanificador()
 </script>
 <script>
