@@ -667,8 +667,8 @@
           <span class="bloque-label">Ingresos</span>
         </div>
         <input type="number" inputmode="decimal" id="p-ingresos-total" class="bloque-ing-input" placeholder="0">
+        <button class="btn-restablecer" onclick="restablecerIngresos()">Restablecer</button>
       </div>
-      <button class="btn-restablecer" onclick="restablecerIngresos()">Restablecer</button>
     </div>
 
     <div class="bloque-acordeon">
@@ -678,9 +678,9 @@
           <span class="bloque-chevron" id="chevron-gastos">›</span>
         </div>
         <div class="bloque-total-grande txt-rojo" id="p-gastos-total">$0.00</div>
-        <div id="resumen-tipos" style="display:none" onclick="event.stopPropagation()"></div>
       </div>
       <div class="bloque-detalle" id="detalle-gastos" style="display:none">
+        <div id="resumen-tipos" style="display:none"></div>
         <div class="variables-sub">Basado en meses cerrados</div>
         <div id="gastos-lista-plan"></div>
         <button class="btn-restablecer" onclick="restablecerGastos()">Restablecer</button>
