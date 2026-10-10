@@ -392,6 +392,8 @@
   .analisis-cat { display: flex; align-items: center; gap: 6px; }
   .analisis-ideal { color: var(--subtext); }
   .analisis-msg { background: rgba(88,166,255,0.07); border: 1px solid rgba(88,166,255,0.18); border-radius: 10px; padding: 10px 12px; font-size: 12px; color: var(--subtext); line-height: 1.55; }
+  .analisis-float { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%); background: #1c2128; border: 1px solid #30363d; border-radius: 14px; padding: 10px 18px; font-size: 12px; color: var(--subtext); white-space: nowrap; z-index: 500; box-shadow: 0 4px 24px rgba(0,0,0,0.55); opacity: 0; pointer-events: none; transition: opacity 0.15s; }
+  .analisis-float.visible { opacity: 1; }
   .amodo-dd { position: absolute; right: 0; top: 26px; background: #1c2128; border: 1px solid #30363d; border-radius: 10px; padding: 5px; z-index: 200; min-width: 158px; box-shadow: 0 6px 24px rgba(0,0,0,0.5); }
   .amodo-item { padding: 9px 12px; font-size: 13px; border-radius: 6px; cursor: pointer; color: var(--text); transition: background 0.12s; }
   .amodo-item:hover { background: rgba(255,255,255,0.07); }
@@ -722,6 +724,9 @@
 
   <div class="spacer"></div>
 </div>
+
+<!-- Tarjeta flotante de análisis (visible al editar un gasto) -->
+<div class="analisis-float" id="analisis-float"></div>
 
 <!-- FAB flotante en el centro -->
 <button class="fab" onclick="abrirModal()">+</button>
@@ -1745,8 +1750,9 @@
         })
       })
     document.querySelectorAll('.variable-input').forEach(inp => {
-      inp.addEventListener('input', () => { guardarGastosLocal(); actualizarPlanificador() })
-      inp.addEventListener('focus', function() { this.select() })
+      inp.addEventListener('input', () => { guardarGastosLocal(); actualizarPlanificador(); actualizarAnalisisFloat() })
+      inp.addEventListener('focus', function() { this.select(); mostrarAnalisisFloat() })
+      inp.addEventListener('blur', ocultarAnalisisFloat)
     })
     aplicarTiposUI()
     actualizarPlanificador()
@@ -1819,6 +1825,36 @@
   function seleccionarModo(modo) {
     cerrarModoDropdown()
     setModoAnalisis(modo)
+  }
+
+  let _floatHideTimer = null
+  function actualizarAnalisisFloat() {
+    const el = document.getElementById('analisis-float')
+    if (!el) return
+    const ingresos = totalIngresos()
+    if (ingresos <= 0) return
+    let necesario = 0, opcional = 0
+    document.querySelectorAll('.var-row').forEach(row => {
+      const tipo = categoriaTipos[row._planCat] ?? 'opcional'
+      const val  = parseFloat(row.querySelector('.variable-input')?.value) || 0
+      if (tipo === 'necesario') necesario += val; else opcional += val
+    })
+    const ahorro = Math.max(0, ingresos - totalGastos())
+    const pNec = Math.round(necesario / ingresos * 100)
+    const pOpc = Math.round(opcional  / ingresos * 100)
+    const pAho = Math.round(ahorro    / ingresos * 100)
+    el.innerHTML = `🔒 Necesarios <b style="color:var(--text)">${pNec}%</b>&nbsp;·&nbsp;🎯 Opcionales <b style="color:var(--text)">${pOpc}%</b>&nbsp;·&nbsp;💰 Ahorro <b style="color:var(--text)">${pAho}%</b>`
+  }
+  function mostrarAnalisisFloat() {
+    clearTimeout(_floatHideTimer)
+    if (document.getElementById('analisis-body')?.classList.contains('abierto')) return
+    actualizarAnalisisFloat()
+    document.getElementById('analisis-float')?.classList.add('visible')
+  }
+  function ocultarAnalisisFloat() {
+    _floatHideTimer = setTimeout(() => {
+      document.getElementById('analisis-float')?.classList.remove('visible')
+    }, 150)
   }
 
   function actualizarAnalisis() {
