@@ -86,6 +86,13 @@
   .cat-add-btn { color:#58a6ff; cursor:pointer; font-weight:600; font-size:11px; text-transform:uppercase; letter-spacing:0.08em; }
   .cat-nueva-panel { margin-top:8px; }
   .cat-nueva-row { display:flex; gap:8px; }
+  .cat-input-wrap { position:relative; display:flex; align-items:center; gap:8px; margin-bottom:8px; }
+  .cat-input-wrap .inp { margin-bottom:0; flex:1; }
+  .btn-emoji-picker { flex-shrink:0; width:42px; height:42px; background:var(--card2); border:1px solid var(--border); border-radius:10px; font-size:18px; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:border-color 0.15s; }
+  .btn-emoji-picker:hover { border-color:#58a6ff; }
+  .emoji-picker-pop { position:absolute; bottom:calc(100% + 6px); left:0; right:0; background:#1c2128; border:1px solid #30363d; border-radius:16px; padding:10px; z-index:600; display:grid; grid-template-columns:repeat(8,1fr); gap:4px; box-shadow:0 8px 32px rgba(0,0,0,0.6); }
+  .emoji-picker-pop button { background:none; border:none; font-size:20px; cursor:pointer; padding:4px; border-radius:8px; line-height:1; transition:background 0.12s; }
+  .emoji-picker-pop button:hover { background:rgba(255,255,255,0.1); }
   .btn-cat-add { flex:1; background:#58a6ff; color:#0d1117; border:none; border-radius:10px; padding:10px; font-family:'DM Sans',sans-serif; font-size:13px; font-weight:700; cursor:pointer; }
   .btn-cat-cancel { flex:1; background:none; border:1px solid var(--border2); border-radius:10px; padding:10px; color:var(--subtext); font-family:'DM Sans',sans-serif; font-size:13px; cursor:pointer; }
   .toast { position: fixed; top: 24px; left: 50%; transform: translateX(-50%) translateY(-80px); background: var(--card); border: 1px solid var(--border2); border-radius: 14px; padding: 12px 20px; font-size: 13px; color: var(--text); z-index: 300; transition: transform 0.3s ease; white-space: nowrap; }
@@ -220,7 +227,11 @@
         <option>🍔 Comida</option><option>🏠 Alquiler</option><option>💳 Crédito</option><option>📱 Línea</option><option>🏋️ Gym</option><option>⛽ Gasolina</option><option>💻 Tecnología</option><option>❤️ Salud</option><option>👕 Ropa</option><option>🎉 Salidas</option><option>🌍 Remesas</option><option>⚠️ Gastos Imprevistos</option><option>📋 Trámite</option><option>🚗 Vehículo</option><option>📦 Otros</option>
       </select>
       <div class="cat-nueva-panel" id="panel-nueva-cat" style="display:none">
-        <input type="text" id="nueva-cat-input" class="inp" placeholder="Ej: 🚗 Vehículo" style="margin-bottom:8px">
+        <div class="cat-input-wrap">
+          <input type="text" id="nueva-cat-input" class="inp" placeholder="Ej: 🚗 Vehículo">
+          <button type="button" class="btn-emoji-picker" onclick="toggleEmojiPicker(event)" aria-label="Seleccionar emoji">😊</button>
+          <div class="emoji-picker-pop" id="emoji-picker-pop" style="display:none"></div>
+        </div>
         <div class="cat-nueva-row">
           <button type="button" class="btn-cat-add" onclick="guardarNuevaCategoria()">Añadir</button>
           <button type="button" class="btn-cat-cancel" onclick="cerrarNuevaCat()">Cancelar</button>
@@ -911,13 +922,55 @@
     const panel = document.getElementById('panel-nueva-cat');
     panel.style.display = 'block';
     document.getElementById('nueva-cat-input').value = '';
+    cerrarEmojiPicker();
     document.getElementById('nueva-cat-input').focus();
   }
 
   function cerrarNuevaCat() {
     document.getElementById('panel-nueva-cat').style.display = 'none';
     document.getElementById('nueva-cat-input').value = '';
+    cerrarEmojiPicker();
   }
+
+  const EMOJIS_PICKER = [
+    '🍔','🍕','🍜','☕','🛒','🍺','🎂','🥗',
+    '🚗','🚌','✈️','⛽','🚕','🏍️','🚂','🛵',
+    '🏠','💡','🔧','📺','🛋️','🏡','🧹','🚿',
+    '🎮','🎬','🎵','📚','🎨','🎭','🏋️','⚽',
+    '❤️','💊','🏥','🧘','🦷','👓','🩺','💉',
+    '👕','👗','👟','💄','🕶️','👜','🧴','💍',
+    '💳','💰','📱','💻','🖨️','📷','⌚','🔋',
+    '📋','🎁','🏦','✂️','📦','⚠️','🌍','🔑',
+  ]
+
+  function toggleEmojiPicker(e) {
+    e.stopPropagation()
+    const pop = document.getElementById('emoji-picker-pop')
+    if (pop.style.display !== 'none') { cerrarEmojiPicker(); return }
+    if (!pop.innerHTML) {
+      pop.innerHTML = EMOJIS_PICKER.map(em =>
+        `<button type="button" onclick="seleccionarEmoji('${em}')">${em}</button>`
+      ).join('')
+    }
+    pop.style.display = 'grid'
+  }
+
+  function cerrarEmojiPicker() {
+    const pop = document.getElementById('emoji-picker-pop')
+    if (pop) pop.style.display = 'none'
+  }
+
+  function seleccionarEmoji(emoji) {
+    const inp = document.getElementById('nueva-cat-input')
+    const texto = inp.value.replace(/^\S+\s*/, '').trim()
+    inp.value = emoji + (texto ? ' ' + texto : '')
+    cerrarEmojiPicker()
+    inp.focus()
+  }
+
+  document.addEventListener('click', e => {
+    if (!e.target.closest('.cat-input-wrap')) cerrarEmojiPicker()
+  })
 
   async function guardarNuevaCategoria() {
     const nueva = document.getElementById('nueva-cat-input').value.trim();
