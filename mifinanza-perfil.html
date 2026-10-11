@@ -267,7 +267,8 @@
     const { data: { session } } = await dbClient.auth.getSession()
     const uid = session?.user?.id
     if (!uid) return
-    const { data: perfil } = await dbClient.from('perfil').select('*').eq('usuario_id', uid).maybeSingle()
+    const { data: rows } = await dbClient.from('perfil').select('*').eq('usuario_id', uid).limit(1)
+    const perfil = rows?.[0]
     const datos = perfil || { nombre: '', moneda: '$', color: '#58a6ff', categorias: CATS_DEFAULT }
     if (!perfil) {
       await dbClient.from('perfil')
@@ -397,15 +398,14 @@
 
     const payload = { nombre, moneda, color, categorias: cats }
 
-    const { data: actualizados, error: errUpdate } = await dbClient.from('perfil')
-      .update(payload)
-      .eq('usuario_id', uid)
-      .select('id')
+    const { data: rowsId } = await dbClient.from('perfil').select('id').eq('usuario_id', uid).limit(1)
+    const perfilId = rowsId?.[0]?.id
 
-    let error = errUpdate
-    if (!errUpdate && (!actualizados || actualizados.length === 0)) {
-      ;({ error } = await dbClient.from('perfil')
-        .insert({ usuario_id: uid, ...payload }))
+    let error
+    if (perfilId) {
+      ;({ error } = await dbClient.from('perfil').update(payload).eq('id', perfilId))
+    } else {
+      ;({ error } = await dbClient.from('perfil').insert({ usuario_id: uid, ...payload }))
     }
 
     btn.disabled = false
