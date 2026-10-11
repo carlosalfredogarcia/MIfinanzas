@@ -368,6 +368,13 @@
     transition: border-color 0.2s;
   }
   .var-input:focus { border-color: rgba(88,166,255,0.3); }
+  .var-spin-btns { display: none; align-items: center; gap: 4px; flex-shrink: 0; }
+  .btn-spin { width: 32px; height: 32px; border: 1px solid var(--border); border-radius: 8px; background: var(--card2); color: var(--subtext); font-size: 18px; line-height: 1; cursor: pointer; display: flex; align-items: center; justify-content: center; user-select: none; -webkit-user-select: none; touch-action: manipulation; transition: background 0.15s, color 0.15s; }
+  .btn-spin:active { background: rgba(88,166,255,0.15); color: #58a6ff; border-color: rgba(88,166,255,0.4); }
+  @media (max-width: 768px) {
+    .var-spin-btns { display: flex; }
+    .var-input { width: 80px; }
+  }
 
   .tipo-btns { display: flex; gap: 6px; margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.06); }
   .btn-tipo { flex: 1; background: none; border: 1px solid #30363d; border-radius: 8px; padding: 7px 4px; font-size: 12px; font-family: 'DM Sans', sans-serif; font-weight: 500; color: #8b949e; cursor: pointer; transition: all 0.15s; text-align: center; }
@@ -1787,7 +1794,15 @@
           </div>
           <div class="var-bottom">
             <span class="var-promedio">Últ. meses: ${fmt(gastosOriginal[cat])}</span>
-            <input class="var-input variable-input" type="number" inputmode="decimal" value="${valorInicial}">
+            <div style="display:flex;align-items:center;gap:6px;flex-shrink:0;">
+              <div class="var-spin-btns">
+                <button class="btn-spin btn-spin-minus" type="button" aria-label="Disminuir">−</button>
+              </div>
+              <input class="var-input variable-input" type="number" inputmode="decimal" value="${valorInicial}">
+              <div class="var-spin-btns">
+                <button class="btn-spin btn-spin-plus" type="button" aria-label="Aumentar">+</button>
+              </div>
+            </div>
           </div>
           <div class="tipo-btns">
             <button class="btn-tipo" data-tipo="necesario">🔒 Necesario</button>
@@ -2282,6 +2297,18 @@
     actualizarPlanificador()
     _focusedInput = e.target
     actualizarAnalisisFloat()
+  })
+  _contGastos.addEventListener('click', e => {
+    const btn = e.target.closest('.btn-spin')
+    if (!btn) return
+    const inp = btn.closest('.var-bottom')?.querySelector('.variable-input')
+    if (!inp) return
+    const step = parseFloat(inp.step) || 1
+    const cur  = parseFloat(inp.value) || 0
+    inp.value  = btn.classList.contains('btn-spin-plus')
+      ? (cur + step).toFixed(2)
+      : Math.max(0, cur - step).toFixed(2)
+    inp.dispatchEvent(new Event('input', { bubbles: true }))
   })
 </script>
 <script>
