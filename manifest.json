@@ -4,7 +4,7 @@
   "description": "Gestión de finanzas personales",
   "start_url": "/index.html",
   "scope": "/",
-  "display": "standalone",
+  "display": "fullscreen",
   "background_color": "#0f0f13",
   "theme_color": "#b8f564",
   "orientation": "portrait",

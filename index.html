@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>MiFinanza – Entrar</title>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
@@ -12,6 +12,7 @@
     --text: #f0f0f5; --subtext: #8888a0; --border: rgba(255,255,255,0.06);
   }
   * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { height: 100%; }
   body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; min-height: 100vh; display: flex; justify-content: center; }
   .phone { width: 390px; min-height: 100vh; background: var(--bg); display: flex; flex-direction: column; justify-content: center; padding: 40px 24px; position: relative; overflow: hidden; }
   .phone::before { content: ''; position: absolute; top: -100px; left: -60px; width: 350px; height: 350px; background: radial-gradient(circle, rgba(184,245,100,0.07) 0%, transparent 70%); pointer-events: none; }
@@ -51,6 +52,7 @@
 </style>
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="/icon-192.png">
+<meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="MiFinanza">
