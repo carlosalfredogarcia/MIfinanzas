@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>MiFinanza – Metas</title>
 <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="datepicker.js"></script>
 <style>
   :root {
     --bg: #0d1117;
@@ -889,7 +890,7 @@
     </div>
     <div class="input-group">
       <label>Fecha</label>
-      <input type="date" id="ecol-fecha">
+      <span class="dp-wrap"><input type="hidden" id="ecol-fecha" class="dp-real-input"><button type="button" class="inp dp-btn" data-dp-for="ecol-fecha" onclick="openDatePicker('ecol-fecha')"><span class="dp-txt" data-empty="true">Seleccionar fecha</span><svg class="dp-cal-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="16" height="15" rx="2"/><path d="M2 8h16M7 1v4M13 1v4"/></svg></button></span>
     </div>
     <div class="input-group">
       <label>Descripción</label>

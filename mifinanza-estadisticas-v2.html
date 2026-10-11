@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>MiFinanza – Estadísticas</title>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="datepicker.js"></script>
 <style>
   :root {
     --bg: #0f0f13; --card: #17171d; --card2: #1e1e27;
@@ -261,7 +262,7 @@
       <select id="em-cat-fijo" class="inp"></select>
     </div>
     <div class="fld"><label class="lbl">Monto</label><input type="number" id="em-monto" class="inp" placeholder="$0.00"></div>
-    <div class="fld" style="margin-bottom:18px" id="fld-em-fecha"><label class="lbl" id="lbl-em-fecha">Fecha</label><input type="date" id="em-fecha" class="inp"></div>
+    <div class="fld" style="margin-bottom:18px" id="fld-em-fecha"><label class="lbl" id="lbl-em-fecha">Fecha</label><span class="dp-wrap"><input type="hidden" id="em-fecha" class="dp-real-input"><button type="button" class="inp dp-btn" data-dp-for="em-fecha" onclick="openDatePicker('em-fecha')"><span class="dp-txt" data-empty="true">Seleccionar fecha</span><svg class="dp-cal-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="16" height="15" rx="2"/><path d="M2 8h16M7 1v4M13 1v4"/></svg></button></span></div>
     <button onclick="guardarEdicionItem()" class="btn-ok">Guardar cambios</button>
     <button onclick="cerrarEdicionItem()" class="btn-no">Cancelar</button>
   </div>

@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>MiFinanza – Viajes</title>
 <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="datepicker.js"></script>
 <style>
   :root {
     --bg: #0d1117;
@@ -225,7 +226,7 @@
     <div class="modal-title">Nuevo viaje</div>
     <div class="fld"><label class="lbl">Nombre</label><input type="text" id="v-nombre" class="inp" placeholder="Ej: Playa, Europa..."></div>
     <div class="fld"><label class="lbl">Emoji</label><input type="text" id="v-emoji" class="inp" placeholder="Ej: ✈️ 🏖️ 🗻" maxlength="2"></div>
-    <div class="fld" style="margin-bottom:18px"><label class="lbl">Fecha estimada</label><input type="date" id="v-fecha" class="inp"></div>
+    <div class="fld" style="margin-bottom:18px"><label class="lbl">Fecha estimada</label><span class="dp-wrap"><input type="hidden" id="v-fecha" class="dp-real-input"><button type="button" class="inp dp-btn" data-dp-for="v-fecha" onclick="openDatePicker('v-fecha')"><span class="dp-txt" data-empty="true">Seleccionar fecha</span><svg class="dp-cal-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="16" height="15" rx="2"/><path d="M2 8h16M7 1v4M13 1v4"/></svg></button></span></div>
     <button class="btn-ok" onclick="guardarViaje()">Guardar viaje</button>
     <button class="btn-no" onclick="cerrarModalViaje()">Cancelar</button>
   </div>

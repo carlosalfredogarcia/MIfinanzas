@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>MiFinanza – Gastos Fijos</title>
 <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="datepicker.js"></script>
 <style>
   :root {
     --bg: #0d1117;
@@ -229,10 +230,10 @@
     <div class="fld"><label class="lbl">Monto</label><input type="number" id="f-monto" class="inp" placeholder="$0.00"></div>
     <div class="fld">
       <label class="lbl">Fecha de inicio</label>
-      <input type="date" id="f-fecha" class="inp">
+      <span class="dp-wrap"><input type="hidden" id="f-fecha" class="dp-real-input"><button type="button" class="inp dp-btn" data-dp-for="f-fecha" onclick="openDatePicker('f-fecha')"><span class="dp-txt" data-empty="true">Seleccionar fecha</span><svg class="dp-cal-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="16" height="15" rx="2"/><path d="M2 8h16M7 1v4M13 1v4"/></svg></button></span>
       <span class="fld-error" id="f-fecha-error">La fecha de inicio es obligatoria</span>
     </div>
-    <div class="fld" style="margin-bottom:18px"><label class="lbl">Fecha fin</label><input type="date" id="fijo-fecha-fin" class="inp"></div>
+    <div class="fld" style="margin-bottom:18px"><label class="lbl">Fecha fin</label><span class="dp-wrap"><input type="hidden" id="fijo-fecha-fin" class="dp-real-input"><button type="button" class="inp dp-btn" data-dp-for="fijo-fecha-fin" onclick="openDatePicker('fijo-fecha-fin')"><span class="dp-txt" data-empty="true">Seleccionar fecha</span><svg class="dp-cal-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="16" height="15" rx="2"/><path d="M2 8h16M7 1v4M13 1v4"/></svg></button></span></div>
     <button class="btn-ok" style="background:var(--accent);color:#0d1117" onclick="guardarFijo()">Guardar gasto fijo</button>
     <button class="btn-no" onclick="cerrarModal()">Cancelar</button>
   </div>
@@ -246,7 +247,7 @@
     <p class="modal-sub">Vas a desactivar <strong id="nombre-fijo-confirm" style="color:var(--text)"></strong>. El historial anterior quedará guardado.</p>
     <div class="fld" style="margin-bottom:18px">
       <label class="lbl">¿Hasta qué fecha estuvo activo?</label>
-      <input type="date" id="fecha-fin-input" class="inp">
+      <span class="dp-wrap"><input type="hidden" id="fecha-fin-input" class="dp-real-input"><button type="button" class="inp dp-btn" data-dp-for="fecha-fin-input" onclick="openDatePicker('fecha-fin-input')"><span class="dp-txt" data-empty="true">Seleccionar fecha</span><svg class="dp-cal-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="16" height="15" rx="2"/><path d="M2 8h16M7 1v4M13 1v4"/></svg></button></span>
     </div>
     <button class="btn-ok" style="background:var(--accent);color:#0d1117" onclick="confirmarDesactivar()">Confirmar</button>
     <button class="btn-no" onclick="cancelarDesactivar()">Cancelar</button>
@@ -267,10 +268,10 @@
     <div class="fld"><label class="lbl">Monto</label><input type="number" id="e-monto" class="inp"></div>
     <div class="fld">
       <label class="lbl">Fecha de inicio</label>
-      <input type="date" id="e-fecha" class="inp">
+      <span class="dp-wrap"><input type="hidden" id="e-fecha" class="dp-real-input"><button type="button" class="inp dp-btn" data-dp-for="e-fecha" onclick="openDatePicker('e-fecha')"><span class="dp-txt" data-empty="true">Seleccionar fecha</span><svg class="dp-cal-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="16" height="15" rx="2"/><path d="M2 8h16M7 1v4M13 1v4"/></svg></button></span>
       <span class="fld-error" id="e-fecha-error">La fecha de inicio es obligatoria</span>
     </div>
-    <div class="fld" style="margin-bottom:18px"><label class="lbl">Fecha fin</label><input type="date" id="e-fecha-fin" class="inp"></div>
+    <div class="fld" style="margin-bottom:18px"><label class="lbl">Fecha fin</label><span class="dp-wrap"><input type="hidden" id="e-fecha-fin" class="dp-real-input"><button type="button" class="inp dp-btn" data-dp-for="e-fecha-fin" onclick="openDatePicker('e-fecha-fin')"><span class="dp-txt" data-empty="true">Seleccionar fecha</span><svg class="dp-cal-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="16" height="15" rx="2"/><path d="M2 8h16M7 1v4M13 1v4"/></svg></button></span></div>
     <button class="btn-ok" style="background:var(--accent);color:#0d1117" onclick="guardarEdicion()">Guardar cambios</button>
     <button class="btn-no" onclick="cerrarEditar()">Cancelar</button>
   </div>

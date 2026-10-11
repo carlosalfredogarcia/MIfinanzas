@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>MiFinanza – Movimientos</title>
 <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="datepicker.js"></script>
 <style>
   :root {
     --bg: #0d1117;
@@ -221,7 +222,7 @@
   <div class="modal-box">
     <div class="modal-handle"></div>
     <div class="modal-title">Nuevo gasto</div>
-    <div class="fld"><label class="lbl">Fecha</label><input type="date" id="g-fecha" class="inp"></div>
+    <div class="fld"><label class="lbl">Fecha</label><span class="dp-wrap"><input type="hidden" id="g-fecha" class="dp-real-input"><button type="button" class="inp dp-btn" data-dp-for="g-fecha" onclick="openDatePicker('g-fecha')"><span class="dp-txt" data-empty="true">Seleccionar fecha</span><svg class="dp-cal-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="16" height="15" rx="2"/><path d="M2 8h16M7 1v4M13 1v4"/></svg></button></span></div>
     <div class="fld"><label class="lbl">Descripción</label><input type="text" id="g-descripcion" class="inp" placeholder="Ej: Almuerzo, Gasolina..."></div>
     <div class="fld">
       <label class="lbl cat-lbl-row"><span>Categoría</span><span class="cat-add-btn" onclick="toggleNuevaCat('g-categoria')">+ Nueva</span></label>
@@ -267,7 +268,7 @@
   <div class="modal-box">
     <div class="modal-handle"></div>
     <div class="modal-title">Nuevo ingreso</div>
-    <div class="fld"><label class="lbl">Fecha</label><input type="date" id="i-fecha" class="inp"></div>
+    <div class="fld"><label class="lbl">Fecha</label><span class="dp-wrap"><input type="hidden" id="i-fecha" class="dp-real-input"><button type="button" class="inp dp-btn" data-dp-for="i-fecha" onclick="openDatePicker('i-fecha')"><span class="dp-txt" data-empty="true">Seleccionar fecha</span><svg class="dp-cal-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="16" height="15" rx="2"/><path d="M2 8h16M7 1v4M13 1v4"/></svg></button></span></div>
     <div class="fld"><label class="lbl">Concepto</label><input type="text" id="i-concepto" class="inp" placeholder="Ej: Nómina, Freelance..."></div>
     <div class="fld"><label class="lbl">Tipo</label>
       <select id="i-tipo" class="inp">
@@ -305,10 +306,10 @@
     <div class="fld"><label class="lbl">Monto</label><input type="number" id="f-monto" class="inp" placeholder="$0.00"></div>
     <div class="fld">
       <label class="lbl">Fecha de inicio</label>
-      <input type="date" id="f-fecha" class="inp">
+      <span class="dp-wrap"><input type="hidden" id="f-fecha" class="dp-real-input"><button type="button" class="inp dp-btn" data-dp-for="f-fecha" onclick="openDatePicker('f-fecha')"><span class="dp-txt" data-empty="true">Seleccionar fecha</span><svg class="dp-cal-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="16" height="15" rx="2"/><path d="M2 8h16M7 1v4M13 1v4"/></svg></button></span>
       <span class="fld-error" id="f-fecha-error">La fecha de inicio es obligatoria</span>
     </div>
-    <div class="fld" style="margin-bottom:18px"><label class="lbl">Fecha fin</label><input type="date" id="f-fecha-fin" class="inp"></div>
+    <div class="fld" style="margin-bottom:18px"><label class="lbl">Fecha fin</label><span class="dp-wrap"><input type="hidden" id="f-fecha-fin" class="dp-real-input"><button type="button" class="inp dp-btn" data-dp-for="f-fecha-fin" onclick="openDatePicker('f-fecha-fin')"><span class="dp-txt" data-empty="true">Seleccionar fecha</span><svg class="dp-cal-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="16" height="15" rx="2"/><path d="M2 8h16M7 1v4M13 1v4"/></svg></button></span></div>
     <button onclick="guardarFijo()" class="btn-ok" style="background:#58a6ff;color:#0d1117">Guardar gasto fijo</button>
     <button onclick="cerrarGastoFijo()" class="btn-no">Cancelar</button>
   </div>
@@ -320,7 +321,7 @@
     <div class="modal-title" id="edit-title">Editar movimiento</div>
     <div class="fld">
       <label class="lbl" id="lbl-e-fecha">Fecha</label>
-      <input type="date" id="e-fecha" class="inp">
+      <span class="dp-wrap"><input type="hidden" id="e-fecha" class="dp-real-input"><button type="button" class="inp dp-btn" data-dp-for="e-fecha" onclick="openDatePicker('e-fecha')"><span class="dp-txt" data-empty="true">Seleccionar fecha</span><svg class="dp-cal-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="16" height="15" rx="2"/><path d="M2 8h16M7 1v4M13 1v4"/></svg></button></span>
       <span class="fld-error" id="e-fecha-error">La fecha es obligatoria</span>
     </div>
     <div class="fld" id="fld-descripcion"><label class="lbl">Descripción</label><input type="text" id="e-descripcion" class="inp"></div>
@@ -341,7 +342,7 @@
         <option>🍔 Comida</option><option>🏠 Alquiler</option><option>💳 Crédito</option><option>📱 Línea</option><option>🏋️ Gym</option><option>⛽ Gasolina</option><option>💻 Tecnología</option><option>❤️ Salud</option><option>👕 Ropa</option><option>🎉 Salidas</option><option>🌍 Remesas</option><option>⚠️ Gastos Imprevistos</option><option>📋 Trámite</option><option>🚗 Vehículo</option><option>📦 Otros</option>
       </select>
     </div>
-    <div class="fld" id="fld-fecha-fin"><label class="lbl">Fecha fin</label><input type="date" id="e-fecha-fin" class="inp"></div>
+    <div class="fld" id="fld-fecha-fin"><label class="lbl">Fecha fin</label><span class="dp-wrap"><input type="hidden" id="e-fecha-fin" class="dp-real-input"><button type="button" class="inp dp-btn" data-dp-for="e-fecha-fin" onclick="openDatePicker('e-fecha-fin')"><span class="dp-txt" data-empty="true">Seleccionar fecha</span><svg class="dp-cal-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="16" height="15" rx="2"/><path d="M2 8h16M7 1v4M13 1v4"/></svg></button></span></div>
     <div class="fld" style="margin-bottom:18px"><label class="lbl">Monto</label><input type="number" id="e-monto" class="inp" placeholder="$0.00"></div>
     <button onclick="guardarEdicion()" class="btn-ok" id="edit-btn-ok" style="background:#58a6ff;color:#0d1117">Guardar cambios</button>
     <button onclick="eliminarMovimiento()" class="btn-del">Eliminar</button>
@@ -364,8 +365,8 @@
   <div class="modal-box">
     <div class="modal-handle"></div>
     <div class="modal-title">Descargar CSV</div>
-    <div class="fld"><label class="lbl">Desde</label><input type="date" id="csv-rango-desde" class="inp"></div>
-    <div class="fld"><label class="lbl">Hasta</label><input type="date" id="csv-rango-hasta" class="inp"></div>
+    <div class="fld"><label class="lbl">Desde</label><span class="dp-wrap"><input type="hidden" id="csv-rango-desde" class="dp-real-input"><button type="button" class="inp dp-btn" data-dp-for="csv-rango-desde" onclick="openDatePicker('csv-rango-desde')"><span class="dp-txt" data-empty="true">Seleccionar fecha</span><svg class="dp-cal-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="16" height="15" rx="2"/><path d="M2 8h16M7 1v4M13 1v4"/></svg></button></span></div>
+    <div class="fld"><label class="lbl">Hasta</label><span class="dp-wrap"><input type="hidden" id="csv-rango-hasta" class="dp-real-input"><button type="button" class="inp dp-btn" data-dp-for="csv-rango-hasta" onclick="openDatePicker('csv-rango-hasta')"><span class="dp-txt" data-empty="true">Seleccionar fecha</span><svg class="dp-cal-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="16" height="15" rx="2"/><path d="M2 8h16M7 1v4M13 1v4"/></svg></button></span></div>
     <button id="csv-rango-btn-ok" onclick="confirmarDescargaCSV()" class="btn-ok" style="background:#58a6ff;color:#0d1117">⬇ Descargar CSV</button>
     <button onclick="cerrarModalCSV()" class="btn-no">Cancelar</button>
   </div>
@@ -676,8 +677,10 @@
           <input type="number" class="rv-monto" style="${ci}width:68px;flex-shrink:0;" value="${g.monto ?? ''}" placeholder="0">
         </div>
         <div style="display:flex;gap:6px;align-items:center;">
-          <input type="date" class="rv-fecha" value="${g.fecha || hoy}"
-            style="${ci}width:115px;flex-shrink:0;cursor:pointer;color-scheme:dark;">
+          <span style="display:inline-flex;width:115px;flex-shrink:0;">
+            <input type="hidden" class="rv-fecha" value="${g.fecha || hoy}">
+            <button type="button" class="inp dp-btn" style="${ci}width:115px;padding:6px 8px;min-height:38px;font-size:13px;" onclick="openDatePickerEl(this.previousElementSibling)"><span class="dp-txt">${window._dpFmt ? window._dpFmt(g.fecha || hoy) : (g.fecha || hoy)}</span><svg class="dp-cal-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:13px;height:13px;"><rect x="2" y="3" width="16" height="15" rx="2"/><path d="M2 8h16M7 1v4M13 1v4"/></svg></button>
+          </span>
           <select class="rv-tipo" style="${ci}width:90px;flex-shrink:0;">
             <option value="gasto" ${!esIngreso ? 'selected' : ''}>Gasto</option>
             <option value="ingreso" ${esIngreso ? 'selected' : ''}>Ingreso</option>
