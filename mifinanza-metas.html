@@ -1679,6 +1679,8 @@
         return (orden[tA] ?? 2) - (orden[tB] ?? 2)
       })
       .forEach(r => cont.appendChild(r))
+    const btnCerrar = cont.querySelector('.btn-cerrar-gastos')
+    if (btnCerrar) cont.appendChild(btnCerrar)
   }
 
   function actualizarResumenTipos() {
