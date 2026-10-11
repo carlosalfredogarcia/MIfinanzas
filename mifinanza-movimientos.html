@@ -285,10 +285,22 @@
     <div class="modal-handle"></div>
     <div class="modal-title">Nuevo gasto fijo</div>
     <div class="fld"><label class="lbl">Nombre</label><input type="text" id="f-nombre" class="inp" placeholder="Ej: Alquiler, Netflix..."></div>
-    <div class="fld"><label class="lbl">Categoría</label>
+    <div class="fld">
+      <label class="lbl cat-lbl-row"><span>Categoría</span><span class="cat-add-btn" onclick="toggleNuevaCat('f-categoria', '-fijo')">+ Nueva</span></label>
       <select id="f-categoria" class="inp">
         <option>🍔 Comida</option><option>🏠 Alquiler</option><option>💳 Crédito</option><option>📱 Línea</option><option>🏋️ Gym</option><option>⛽ Gasolina</option><option>💻 Tecnología</option><option>❤️ Salud</option><option>👕 Ropa</option><option>🎉 Salidas</option><option>🌍 Remesas</option><option>⚠️ Gastos Imprevistos</option><option>📋 Trámite</option><option>🚗 Vehículo</option><option>📦 Otros</option>
       </select>
+      <div class="cat-nueva-panel" id="panel-nueva-cat-fijo" style="display:none">
+        <div class="cat-input-wrap">
+          <input type="text" id="nueva-cat-input-fijo" class="inp" placeholder="Ej: 🚗 Vehículo">
+          <button type="button" class="btn-emoji-picker" onclick="toggleEmojiPicker(event,'-fijo')" aria-label="Seleccionar emoji">😊</button>
+          <div class="emoji-picker-pop" id="emoji-picker-pop-fijo" style="display:none"></div>
+        </div>
+        <div class="cat-nueva-row">
+          <button type="button" class="btn-cat-add" onclick="guardarNuevaCategoria()">Añadir</button>
+          <button type="button" class="btn-cat-cancel" onclick="cerrarNuevaCat()">Cancelar</button>
+        </div>
+      </div>
     </div>
     <div class="fld"><label class="lbl">Monto</label><input type="number" id="f-monto" class="inp" placeholder="$0.00"></div>
     <div class="fld">
@@ -917,19 +929,21 @@
   }
 
   let nuevaCatTarget = null;
+  let _catPanelSuffix = '';
 
-  function toggleNuevaCat(targetId) {
+  function toggleNuevaCat(targetId, suffix) {
     nuevaCatTarget = targetId;
-    const panel = document.getElementById('panel-nueva-cat');
+    _catPanelSuffix = suffix || '';
+    const panel = document.getElementById('panel-nueva-cat' + _catPanelSuffix);
     panel.style.display = 'block';
-    document.getElementById('nueva-cat-input').value = '';
+    document.getElementById('nueva-cat-input' + _catPanelSuffix).value = '';
     cerrarEmojiPicker();
-    document.getElementById('nueva-cat-input').focus();
+    document.getElementById('nueva-cat-input' + _catPanelSuffix).focus();
   }
 
   function cerrarNuevaCat() {
-    document.getElementById('panel-nueva-cat').style.display = 'none';
-    document.getElementById('nueva-cat-input').value = '';
+    document.getElementById('panel-nueva-cat' + _catPanelSuffix).style.display = 'none';
+    document.getElementById('nueva-cat-input' + _catPanelSuffix).value = '';
     cerrarEmojiPicker();
   }
 
@@ -944,25 +958,29 @@
     '📋','🎁','🏦','✂️','📦','⚠️','🌍','🔑',
   ]
 
-  function toggleEmojiPicker(e) {
+  function toggleEmojiPicker(e, suffix) {
     e.stopPropagation()
-    const pop = document.getElementById('emoji-picker-pop')
+    const sfx = suffix !== undefined ? suffix : _catPanelSuffix
+    const pop = document.getElementById('emoji-picker-pop' + sfx)
     if (pop.style.display !== 'none') { cerrarEmojiPicker(); return }
     if (!pop.innerHTML) {
       pop.innerHTML = EMOJIS_PICKER.map(em =>
-        `<button type="button" onclick="seleccionarEmoji('${em}')">${em}</button>`
+        `<button type="button" onclick="seleccionarEmoji('${em}','${sfx}')">${em}</button>`
       ).join('')
     }
     pop.style.display = 'grid'
   }
 
   function cerrarEmojiPicker() {
-    const pop = document.getElementById('emoji-picker-pop')
-    if (pop) pop.style.display = 'none'
+    ['emoji-picker-pop', 'emoji-picker-pop-fijo'].forEach(id => {
+      const el = document.getElementById(id)
+      if (el) el.style.display = 'none'
+    })
   }
 
-  function seleccionarEmoji(emoji) {
-    const inp = document.getElementById('nueva-cat-input')
+  function seleccionarEmoji(emoji, suffix) {
+    const sfx = suffix !== undefined ? suffix : _catPanelSuffix
+    const inp = document.getElementById('nueva-cat-input' + sfx)
     const texto = inp.value.replace(/^\S+\s*/, '').trim()
     inp.value = emoji + (texto ? ' ' + texto : '')
     cerrarEmojiPicker()
@@ -974,7 +992,7 @@
   })
 
   async function guardarNuevaCategoria() {
-    const nueva = document.getElementById('nueva-cat-input').value.trim();
+    const nueva = document.getElementById('nueva-cat-input' + _catPanelSuffix).value.trim();
     if (!nueva) { alert('Escribe una categoría'); return; }
     const uid = window.currentUserId;
     if (!uid) return;
