@@ -1489,8 +1489,9 @@
     document.getElementById('modal-reset').classList.add('visible')
   }
   function confirmarReset() {
+    const cb = _pendingReset
     cerrarModalReset()
-    if (_pendingReset) { _pendingReset(); _pendingReset = null }
+    if (cb) cb()
   }
   function cerrarModalReset() {
     document.getElementById('modal-reset').classList.remove('visible')
