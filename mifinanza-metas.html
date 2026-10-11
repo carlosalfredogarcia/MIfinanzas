@@ -1466,28 +1466,32 @@
     if (!window.currentUserId) return
     const hoy = new Date()
     const inicioMes = `${hoy.getFullYear()}-${String(hoy.getMonth() + 1).padStart(2, '0')}-01`
-    const { data, error } = await dbClient
-      .from('ingresos')
-      .select('id, concepto, tipo, monto, fecha')
-      .eq('usuario_id', window.currentUserId)
-      .gte('fecha', inicioMes)
+    const [{ data, error }, { data: budgetRow }] = await Promise.all([
+      dbClient.from('ingresos').select('id, concepto, tipo, monto, fecha')
+        .eq('usuario_id', window.currentUserId).gte('fecha', inicioMes),
+      dbClient.from('user_budget_mode').select('ingresos_override')
+        .eq('user_id', window.currentUserId).maybeSingle()
+    ])
 
     if (error || !data) return
     ingresosOriginal = data
-    renderIngresos()
+    renderIngresos(budgetRow?.ingresos_override ?? null)
   }
 
-  function renderIngresos() {
+  function renderIngresos(ingresosOverride) {
     const inp = document.getElementById('p-ingresos-total')
-    const guardado = localStorage.getItem('planificador_ingresos_override')
-    if (guardado !== null) {
-      inp.value = guardado
+    if (ingresosOverride !== null && ingresosOverride !== undefined) {
+      inp.value = ingresosOverride
     } else {
       const suma = ingresosOriginal.reduce((s, r) => s + parseFloat(r.monto || 0), 0)
       inp.value = suma > 0 ? suma.toFixed(2) : ''
     }
     inp.addEventListener('input', () => {
-      localStorage.setItem('planificador_ingresos_override', inp.value)
+      const val = inp.value === '' ? null : parseFloat(inp.value)
+      dbClient.from('user_budget_mode').upsert(
+        { user_id: window.currentUserId, ingresos_override: val, updated_at: new Date().toISOString() },
+        { onConflict: 'user_id' }
+      )
       actualizarPlanificador()
     })
     inp.addEventListener('focus', function() { this.select() })
@@ -1511,7 +1515,10 @@
   document.getElementById('modal-reset').addEventListener('click', function(e) { if (e.target === this) cerrarModalReset() })
 
   function restablecerIngresos() {
-    localStorage.removeItem('planificador_ingresos_override')
+    dbClient.from('user_budget_mode').upsert(
+      { user_id: window.currentUserId, ingresos_override: null, updated_at: new Date().toISOString() },
+      { onConflict: 'user_id' }
+    )
     const inp = document.getElementById('p-ingresos-total')
     const suma = ingresosOriginal.reduce((s, r) => s + parseFloat(r.monto || 0), 0)
     inp.value = suma > 0 ? suma.toFixed(2) : ''
@@ -1631,6 +1638,7 @@
 
     console.log('[Planificador] gastosOriginal:', JSON.stringify(gastosOriginal))
 
+    await cargarGastosGuardados()
     renderGastos()
   }
 
@@ -1729,19 +1737,39 @@
     `
   }
 
+  let _gastosDebounceTimer = null
   function guardarGastosLocal() {
-    const datos = {}
-    document.querySelectorAll('.var-row').forEach(row => {
-      const inp = row.querySelector('.variable-input')
-      if (row._planCat && inp) datos[row._planCat] = inp.value
-    })
-    localStorage.setItem('planificador_gastos', JSON.stringify(datos))
+    clearTimeout(_gastosDebounceTimer)
+    _gastosDebounceTimer = setTimeout(() => {
+      if (!window.currentUserId) return
+      const rows = [...document.querySelectorAll('.var-row')]
+      const upserts = rows
+        .filter(r => r._planCat && r.querySelector('.variable-input'))
+        .map(r => ({
+          user_id:  window.currentUserId,
+          categoria: r._planCat,
+          monto:    parseFloat(r.querySelector('.variable-input').value) || 0,
+          updated_at: new Date().toISOString()
+        }))
+      if (upserts.length > 0) {
+        dbClient.from('user_gasto_plan').upsert(upserts, { onConflict: 'user_id,categoria' })
+      }
+    }, 300)
+  }
+
+  let _gastosGuardados = {}
+
+  async function cargarGastosGuardados() {
+    if (!window.currentUserId) return
+    const { data } = await dbClient.from('user_gasto_plan')
+      .select('categoria, monto').eq('user_id', window.currentUserId)
+    if (data) data.forEach(r => { _gastosGuardados[r.categoria] = r.monto })
   }
 
   function renderGastos() {
     const cont = document.getElementById('gastos-lista-plan')
     cont.innerHTML = ''
-    const guardado = JSON.parse(localStorage.getItem('planificador_gastos') || '{}')
+    const guardado = _gastosGuardados
     Object.keys(gastosOriginal)
       .sort((a, b) => gastosOriginal[b] - gastosOriginal[a])
       .forEach(cat => {
@@ -1788,7 +1816,10 @@
       const inp = row.querySelector('.variable-input')
       if (row._planCat && inp) inp.value = (gastosOriginal[row._planCat] ?? 0).toFixed(2)
     })
-    localStorage.removeItem('planificador_gastos')
+    _gastosGuardados = {}
+    if (window.currentUserId) {
+      dbClient.from('user_gasto_plan').delete().eq('user_id', window.currentUserId)
+    }
     actualizarPlanificador()
   }
 
@@ -2132,11 +2163,24 @@
     renderTablaComparativa()
   }
 
-  let seguimientoActivos = JSON.parse(localStorage.getItem('seguimiento_activos') || '{}')
+  let seguimientoActivos = {}
+
+  async function cargarSeguimientoActivos() {
+    if (!window.currentUserId) return
+    const { data } = await dbClient.from('user_preferences')
+      .select('seguimiento_activos').eq('user_id', window.currentUserId).maybeSingle()
+    if (data?.seguimiento_activos) seguimientoActivos = data.seguimiento_activos
+    renderTablaComparativa()
+  }
 
   function toggleSeguimiento(cat) {
     seguimientoActivos[cat] = seguimientoActivos[cat] === false ? true : false
-    localStorage.setItem('seguimiento_activos', JSON.stringify(seguimientoActivos))
+    if (window.currentUserId) {
+      dbClient.from('user_preferences').upsert(
+        { user_id: window.currentUserId, seguimiento_activos: seguimientoActivos, updated_at: new Date().toISOString() },
+        { onConflict: 'user_id' }
+      )
+    }
     renderTablaComparativa()
   }
 
@@ -2218,6 +2262,7 @@
   cargarGastosRealMes()
   cargarTipos()
   cargarBudgetMode()
+  cargarSeguimientoActivos()
   actualizarPlanificador()
 
   // Delegación de eventos en el contenedor estable de gastos
