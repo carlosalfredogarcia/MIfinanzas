@@ -333,7 +333,7 @@
   const MESES_LABELS  = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic']
   const MESES_NOMBRES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre']
 
-  const CATS_DEFAULT = '🏠 Alquiler,💳 Crédito,📱 Línea,🏋️ Gym,⛽ Gasolina,💻 Tecnología,❤️ Salud,👕 Ropa,🎉 Salidas,🌍 Remesas,⚠️ Gastos Imprevistos,📋 Trámite,🚗 Vehículo,📦 Otros,🛒 Supermercado,💧 Agua,🧴 Cuidado personal,📺 Suscripción,💡 Luz,🌐 Internet'
+  const CATS_DEFAULT = '🏠 Alquiler,💳 Crédito,📱 Línea,🏋️ Gym,⛽ Gasolina,💻 Tecnología,❤️ Salud,👕 Ropa,🎉 Salidas,🌍 Remesas,⚠️ Gastos Imprevistos,📋 Trámite,🚗 Vehículo,📦 Otros,🛒 Supermercado,💧 Agua,🧴 Cuidado personal,📺 Suscripción,💡 Luz,🌐 Internet,💼 Nómina'
 
   let datos           = []
   let modoActual      = 'mes'
@@ -813,18 +813,18 @@
   }
 
   async function cargarCategoriasPerfil() {
-    let uid = window.currentUserId
-    if (!uid) {
-      const { data: { session } } = await dbClient.auth.getSession()
-      uid = session?.user?.id
-    }
+    const uid = window.currentUserId
     if (!uid) return
-    const { data: perfil } = await dbClient.from('perfil').select('categorias').eq('usuario_id', uid).maybeSingle()
-    const catsStr = perfil?.categorias || CATS_DEFAULT
-    const cats = catsStr.split(',').map(c => c.trim()).filter(Boolean)
+    const { data: rows } = await dbClient.from('perfil').select('categorias').eq('usuario_id', uid).limit(1)
+    const catsStr = rows?.[0]?.categorias || CATS_DEFAULT
+    const cats = [...new Set(catsStr.split(',').map(c => c.trim()).filter(Boolean))]
+    const defaults = CATS_DEFAULT.split(',').map(c => c.trim())
+    const allCats = cats.concat(defaults.filter(d => !cats.includes(d)))
+    const sk = s => s.replace(/^[^\p{L}]+/u, '').toLowerCase()
+    allCats.sort((a, b) => sk(a).localeCompare(sk(b), 'es'))
     ;['em-categoria', 'em-cat-fijo'].forEach(id => {
       const sel = document.getElementById(id)
-      if (sel) sel.innerHTML = cats.map(c => `<option>${c}</option>`).join('')
+      if (sel) sel.innerHTML = allCats.map(c => `<option>${c}</option>`).join('')
     })
   }
 
