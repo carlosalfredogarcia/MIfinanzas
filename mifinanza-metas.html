@@ -1824,10 +1824,42 @@
   }
   const MODOS_ORDEN = ['basico', 'equilibrado', 'ahorrador']
   const MODOS_LABEL = { basico: 'Básico', equilibrado: 'Equilibrado', ahorrador: 'Ahorrador', personalizado: 'Personalizado' }
-  let modoAnalisis = localStorage.getItem('planificador_modo_analisis') || 'equilibrado'
-  if (modoAnalisis === 'ajustado') modoAnalisis = 'basico'
-  let modoPersonalizado = JSON.parse(localStorage.getItem('planificador_modo_personalizado') || 'null')
-  if (modoAnalisis === 'personalizado' && !modoPersonalizado) modoAnalisis = 'equilibrado'
+  let modoAnalisis     = 'equilibrado'
+  let modoPersonalizado = null
+
+  async function cargarBudgetMode() {
+    if (!window.currentUserId) {
+      await new Promise(resolve => {
+        const iv = setInterval(() => { if (window.currentUserId) { clearInterval(iv); resolve() } }, 50)
+        setTimeout(() => { clearInterval(iv); resolve() }, 5000)
+      })
+    }
+    if (!window.currentUserId) return
+    const { data } = await dbClient.from('user_budget_mode').select('modo,nec_pct,opc_pct,aho_pct').eq('user_id', window.currentUserId).maybeSingle()
+    if (!data) return
+    let modo = data.modo === 'ajustado' ? 'basico' : (data.modo || 'equilibrado')
+    if (modo === 'personalizado') {
+      modoPersonalizado = { nec: data.nec_pct ?? 60, opc: data.opc_pct ?? 30, aho: data.aho_pct ?? 10 }
+      modoAnalisis = 'personalizado'
+    } else {
+      modoAnalisis = MODOS_ANALISIS[modo] ? modo : 'equilibrado'
+      modoPersonalizado = null
+    }
+    actualizarAnalisis()
+  }
+
+  async function persistirBudgetMode() {
+    if (!window.currentUserId) return
+    const ideales = getIdeales()
+    await dbClient.from('user_budget_mode').upsert({
+      user_id:    window.currentUserId,
+      modo:       modoAnalisis,
+      nec_pct:    ideales.nec,
+      opc_pct:    ideales.opc,
+      aho_pct:    ideales.aho,
+      updated_at: new Date().toISOString()
+    }, { onConflict: 'user_id' })
+  }
 
   function getIdeales() {
     if (modoAnalisis === 'personalizado' && modoPersonalizado) return modoPersonalizado
@@ -1836,12 +1868,9 @@
 
   function setModoAnalisis(modo) {
     modoAnalisis = modo
-    localStorage.setItem('planificador_modo_analisis', modo)
-    if (modo !== 'personalizado') {
-      modoPersonalizado = null
-      localStorage.removeItem('planificador_modo_personalizado')
-    }
+    if (modo !== 'personalizado') modoPersonalizado = null
     actualizarAnalisis()
+    persistirBudgetMode()
   }
 
   function editarIdeal(key, td) {
@@ -1877,9 +1906,8 @@
     }
     modoPersonalizado = base
     modoAnalisis = 'personalizado'
-    localStorage.setItem('planificador_modo_personalizado', JSON.stringify(base))
-    localStorage.setItem('planificador_modo_analisis', 'personalizado')
     actualizarAnalisis()
+    persistirBudgetMode()
   }
 
   function toggleModoDropdown(e) {
@@ -2189,6 +2217,7 @@
   cargarGastos()
   cargarGastosRealMes()
   cargarTipos()
+  cargarBudgetMode()
   actualizarPlanificador()
 
   // Delegación de eventos en el contenedor estable de gastos
