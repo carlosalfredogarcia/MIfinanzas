@@ -507,8 +507,8 @@
   async function cargarCategoriasPerfil() {
     const uid = window.currentUserId;
     if (!uid) return;
-    const { data: perfil } = await dbClient.from('perfil').select('categorias').eq('usuario_id', uid).maybeSingle();
-    const catsStr = perfil?.categorias || CATS_DEFAULT;
+    const { data: rows } = await dbClient.from('perfil').select('categorias').eq('usuario_id', uid).limit(1);
+    const catsStr = rows?.[0]?.categorias || CATS_DEFAULT;
     const cats = [...new Set(catsStr.split(',').map(c => c.trim()).filter(Boolean))];
     const defaults = CATS_DEFAULT.split(',').map(c => c.trim());
     const allCats = cats.concat(defaults.filter(d => !cats.includes(d)));
@@ -590,15 +590,20 @@
     const uid = window.currentUserId;
     if (!uid) return;
 
-    const { data: perfil } = await dbClient.from('perfil').select('categorias').eq('usuario_id', uid).maybeSingle();
-    const catsStr = perfil?.categorias || CATS_DEFAULT;
+    const { data: rows } = await dbClient.from('perfil').select('id, categorias').eq('usuario_id', uid).limit(1);
+    const perfilRow = rows?.[0];
+    const catsStr = perfilRow?.categorias || CATS_DEFAULT;
     const cats = catsStr.split(',').map(c => c.trim()).filter(Boolean);
     if (cats.includes(nueva)) { alert('Esa categoría ya existe'); return; }
     cats.push(nueva);
     const nuevaLista = cats.join(',');
 
-    const { error } = await dbClient.from('perfil')
-      .upsert({ usuario_id: uid, categorias: nuevaLista }, { onConflict: 'usuario_id' });
+    let error;
+    if (perfilRow) {
+      ({ error } = await dbClient.from('perfil').update({ categorias: nuevaLista }).eq('id', perfilRow.id));
+    } else {
+      ({ error } = await dbClient.from('perfil').insert({ usuario_id: uid, categorias: nuevaLista }));
+    }
     if (error) { alert('Error: ' + error.message); return; }
 
     ['f-categoria', 'e-categoria'].forEach(id => {
