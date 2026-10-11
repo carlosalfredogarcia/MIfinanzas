@@ -978,20 +978,28 @@
     const nueva = document.getElementById('nueva-cat-input').value.trim();
     if (!nueva) { alert('Escribe una categoría'); return; }
     const uid = window.currentUserId;
-    if (!uid) return;
+    console.log('[DEBUG-cat] uid:', uid);
+    if (!uid) { console.error('[DEBUG-cat] uid es null, abortando'); return; }
 
-    const { data: perfil } = await dbClient.from('perfil').select('categorias').eq('usuario_id', uid).maybeSingle();
+    const { data: perfil, error: errLeer } = await dbClient.from('perfil').select('categorias').eq('usuario_id', uid).maybeSingle();
+    console.log('[DEBUG-cat] perfil leído:', perfil, '| error lectura:', errLeer);
     const catsStr = perfil?.categorias || CATS_DEFAULT;
+    console.log('[DEBUG-cat] catsStr:', catsStr);
     const cats = catsStr.split(',').map(c => c.trim()).filter(Boolean);
     if (cats.includes(nueva)) { alert('Esa categoría ya existe'); return; }
     cats.push(nueva);
     const nuevaLista = cats.join(',');
+    console.log('[DEBUG-cat] nuevaLista a guardar:', nuevaLista);
 
     const { data: actualizados, error: errUpdate } = await dbClient.from('perfil')
       .update({ categorias: nuevaLista }).eq('usuario_id', uid).select('id');
+    console.log('[DEBUG-cat] update → actualizados:', actualizados, '| error:', errUpdate);
     let error = errUpdate;
     if (!errUpdate && (!actualizados || actualizados.length === 0)) {
-      ({ error } = await dbClient.from('perfil').insert({ usuario_id: uid, categorias: nuevaLista }));
+      console.log('[DEBUG-cat] sin filas actualizadas, intentando INSERT');
+      const { error: errInsert } = await dbClient.from('perfil').insert({ usuario_id: uid, categorias: nuevaLista });
+      console.log('[DEBUG-cat] insert → error:', errInsert);
+      error = errInsert;
     }
     if (error) { alert('Error: ' + error.message); return; }
 
