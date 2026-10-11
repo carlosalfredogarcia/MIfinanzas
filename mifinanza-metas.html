@@ -1775,11 +1775,6 @@
       document.getElementById('chevron-gastos')?.closest('.bloque-card')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
     })
     cont.appendChild(btnCerrar)
-    document.querySelectorAll('.variable-input').forEach(inp => {
-      inp.addEventListener('input', function() { guardarGastosLocal(); actualizarPlanificador(); _focusedInput = this; actualizarAnalisisFloat() })
-      inp.addEventListener('focus', function() { this.select(); mostrarAnalisisFloat(this) })
-      inp.addEventListener('blur', ocultarAnalisisFloat)
-    })
     aplicarTiposUI()
     actualizarPlanificador()
   }
@@ -2136,6 +2131,25 @@
   cargarGastosRealMes()
   cargarTipos()
   actualizarPlanificador()
+
+  // Delegación de eventos en el contenedor estable de gastos
+  const _contGastos = document.getElementById('detalle-gastos')
+  _contGastos.addEventListener('focusin', e => {
+    if (!e.target.matches('.variable-input')) return
+    e.target.select()
+    mostrarAnalisisFloat(e.target)
+  })
+  _contGastos.addEventListener('focusout', e => {
+    if (!e.target.matches('.variable-input')) return
+    ocultarAnalisisFloat()
+  })
+  _contGastos.addEventListener('input', e => {
+    if (!e.target.matches('.variable-input')) return
+    guardarGastosLocal()
+    actualizarPlanificador()
+    _focusedInput = e.target
+    actualizarAnalisisFloat()
+  })
 </script>
 <script>
   if ('serviceWorker' in navigator) {
