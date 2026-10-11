@@ -400,15 +400,15 @@
   .analisis-cat { display: flex; align-items: center; gap: 6px; }
   .analisis-ideal { color: var(--subtext); }
   .analisis-msg { background: rgba(88,166,255,0.07); border: 1px solid rgba(88,166,255,0.18); border-radius: 10px; padding: 10px 12px; font-size: 12px; color: var(--subtext); line-height: 1.55; }
-  .analisis-float { position: fixed; left: 50%; transform: translateX(-50%); background: #1c2128; border: 1px solid #30363d; border-radius: 16px; padding: 14px 18px 12px; width: min(340px, 92vw); z-index: 500; box-shadow: 0 8px 32px rgba(0,0,0,0.6); opacity: 0; pointer-events: none; transition: opacity 0.18s; }
+  .analisis-float { position: fixed; left: 50%; transform: translateX(-50%); background: #1c2128; border: 1px solid #30363d; border-radius: 16px; padding: 14px 16px 12px; width: min(330px, 94vw); z-index: 500; box-shadow: 0 8px 32px rgba(0,0,0,0.6); opacity: 0; pointer-events: none; transition: opacity 0.18s; }
   .analisis-float.visible { opacity: 1; }
-  .af-title { font-size: 10px; font-weight: 700; letter-spacing: 0.08em; color: var(--subtext); margin-bottom: 12px; }
-  .af-cols { display: flex; justify-content: space-around; margin-bottom: 10px; }
-  .af-col { display: flex; flex-direction: column; align-items: center; gap: 2px; }
-  .af-label { font-size: 11px; color: var(--subtext); }
-  .af-val { font-size: 24px; font-weight: 700; }
-  .af-bar { display: flex; height: 5px; border-radius: 4px; overflow: hidden; gap: 2px; }
-  .af-bar-seg { border-radius: 4px; transition: width 0.2s; }
+  .af-title { font-size: 10px; font-weight: 700; letter-spacing: 0.08em; color: var(--subtext); margin-bottom: 10px; }
+  .af-head, .af-row { display: grid; grid-template-columns: 1fr 54px 54px 28px; align-items: center; gap: 2px; padding: 3px 0; }
+  .af-row.af-activo { background: rgba(255,255,255,0.05); border-radius: 8px; padding: 4px 6px; margin: 0 -6px; }
+  .af-cell-label { font-size: 12px; color: var(--text); }
+  .af-cell-val { font-size: 13px; font-weight: 600; text-align: right; }
+  .af-cell-est { font-size: 13px; text-align: center; }
+  .af-head .af-cell-val { font-size: 10px; font-weight: 700; letter-spacing: 0.05em; color: var(--subtext); }
   .amodo-dd { position: absolute; right: 0; top: 26px; background: #1c2128; border: 1px solid #30363d; border-radius: 10px; padding: 5px; z-index: 200; min-width: 158px; box-shadow: 0 6px 24px rgba(0,0,0,0.5); }
   .amodo-item { padding: 9px 12px; font-size: 13px; border-radius: 6px; cursor: pointer; color: var(--text); transition: background 0.12s; }
   .amodo-item:hover { background: rgba(255,255,255,0.07); }
@@ -1776,7 +1776,7 @@
     })
     cont.appendChild(btnCerrar)
     document.querySelectorAll('.variable-input').forEach(inp => {
-      inp.addEventListener('input', () => { guardarGastosLocal(); actualizarPlanificador(); actualizarAnalisisFloat() })
+      inp.addEventListener('input', function() { guardarGastosLocal(); actualizarPlanificador(); _focusedInput = this; actualizarAnalisisFloat() })
       inp.addEventListener('focus', function() { this.select(); mostrarAnalisisFloat(this) })
       inp.addEventListener('blur', ocultarAnalisisFloat)
     })
@@ -1854,6 +1854,8 @@
   }
 
   let _floatHideTimer = null
+  let _focusedInput   = null
+
   function actualizarAnalisisFloat() {
     const el = document.getElementById('analisis-float')
     if (!el) return
@@ -1865,42 +1867,54 @@
       const val  = parseFloat(row.querySelector('.variable-input')?.value) || 0
       if (tipo === 'necesario') necesario += val; else opcional += val
     })
-    const ahorro = Math.max(0, ingresos - totalGastos())
-    const pNec = Math.round(necesario / ingresos * 100)
-    const pOpc = Math.round(opcional  / ingresos * 100)
-    const pAho = Math.round(ahorro    / ingresos * 100)
+    const ahorro  = Math.max(0, ingresos - totalGastos())
+    const pNec    = Math.round(necesario / ingresos * 100)
+    const pOpc    = Math.round(opcional  / ingresos * 100)
+    const pAho    = Math.round(ahorro    / ingresos * 100)
+    const ideales = MODOS_ANALISIS[modoAnalisis] || MODOS_ANALISIS.equilibrado
+    const mLabel  = (MODOS_LABEL[modoAnalisis] || 'MODO').toUpperCase()
+
+    function est(v, id, inv) { const d = inv ? id - v : v - id; return d <= 0 ? '✅' : d <= 15 ? '⚠️' : '❌' }
+    function col(v, id, inv) { const d = inv ? id - v : v - id; return d <= 0 ? '#4ade80' : d <= 15 ? '#e3b341' : '#f85149' }
+
+    const activeTipo = _focusedInput
+      ? (categoriaTipos[_focusedInput.closest?.('.var-row')?._planCat] ?? 'opcional')
+      : null
+
+    const filas = [
+      { label: '🔒 Necesarios', v: pNec, id: ideales.nec, inv: false, key: 'necesario' },
+      { label: '🎯 Opcionales', v: pOpc, id: ideales.opc, inv: false, key: 'opcional'  },
+      { label: '💰 Ahorro',     v: pAho, id: ideales.aho, inv: true,  key: null        },
+    ]
+
     el.innerHTML = `
       <div class="af-title">📊 ANÁLISIS EN TIEMPO REAL</div>
-      <div class="af-cols">
-        <div class="af-col">
-          <span class="af-label">🔒 Necesarios</span>
-          <span class="af-val" style="color:#4ade80">${pNec}%</span>
-        </div>
-        <div class="af-col">
-          <span class="af-label">🎯 Opcionales</span>
-          <span class="af-val" style="color:#fb923c">${pOpc}%</span>
-        </div>
-        <div class="af-col">
-          <span class="af-label">💰 Ahorro</span>
-          <span class="af-val" style="color:#58a6ff">${pAho}%</span>
-        </div>
+      <div class="af-head">
+        <span class="af-cell-label"></span>
+        <span class="af-cell-val">TU CASO</span>
+        <span class="af-cell-val">${mLabel}</span>
+        <span class="af-cell-est"></span>
       </div>
-      <div class="af-bar">
-        <div class="af-bar-seg" style="width:${pNec}%;background:#4ade80"></div>
-        <div class="af-bar-seg" style="width:${pOpc}%;background:#fb923c"></div>
-        <div class="af-bar-seg" style="width:${pAho}%;background:#58a6ff"></div>
-      </div>`
+      ${filas.map(f => `
+      <div class="af-row${activeTipo && f.key === activeTipo ? ' af-activo' : ''}">
+        <span class="af-cell-label">${f.label}</span>
+        <span class="af-cell-val" style="color:${col(f.v, f.id, f.inv)}">${f.v}%</span>
+        <span class="af-cell-val" style="color:var(--subtext)">${f.id}%</span>
+        <span class="af-cell-est">${est(f.v, f.id, f.inv)}</span>
+      </div>`).join('')}`
   }
+
   function mostrarAnalisisFloat(inp) {
     clearTimeout(_floatHideTimer)
     if (document.getElementById('analisis-body')?.classList.contains('abierto')) return
+    _focusedInput = inp || null
     actualizarAnalisisFloat()
     const el = document.getElementById('analisis-float')
     if (!el) return
     if (inp) {
       const row  = inp.closest('.var-row')
       const rect = (row || inp).getBoundingClientRect()
-      const elH  = el.offsetHeight || 120
+      const elH  = el.offsetHeight || 130
       const topAbove = rect.top - elH - 10
       const topBelow = rect.bottom + 10
       el.style.top = (topAbove >= 8 ? topAbove : topBelow) + 'px'
