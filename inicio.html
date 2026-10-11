@@ -501,7 +501,7 @@
     const categoria   = document.getElementById('g-categoria').value
     const monto       = parseFloat(document.getElementById('g-monto').value)
     if (!descripcion || isNaN(monto)) { alert('Completa descripción y monto'); return }
-    const { error } = await dbClient.from('gastos').insert([{ fecha, descripcion, categoria, monto, usuario_id: window.currentUserId }])
+    const { error } = await dbClient.from('gastos').insert([{ fecha, descripcion, categoria, monto, usuario_id: window.currentUserId, origen: 'manual' }])
     if (error) { alert('Error: ' + error.message) }
     else { alert('✅ Gasto guardado'); cerrarGasto(); cargarDashboard() }
   }
@@ -512,7 +512,7 @@
     const tipo     = document.getElementById('i-tipo').value
     const monto    = parseFloat(document.getElementById('i-monto').value)
     if (!concepto || isNaN(monto)) { alert('Completa concepto y monto'); return }
-    const { error } = await dbClient.from('ingresos').insert([{ fecha, concepto, tipo, monto, usuario_id: window.currentUserId }])
+    const { error } = await dbClient.from('ingresos').insert([{ fecha, concepto, tipo, monto, usuario_id: window.currentUserId, origen: 'manual' }])
     if (error) { alert('Error: ' + error.message) }
     else { alert('✅ Ingreso guardado'); cerrarIngreso(); cargarDashboard() }
   }

@@ -372,6 +372,24 @@
   </div>
 </div>
 
+<!-- Modal límite de importación gratuita -->
+<div class="modal-base" id="modal-limite-premium" style="display:none">
+  <div class="modal-box" style="text-align:center;">
+    <div class="modal-handle"></div>
+    <div style="font-size:40px;margin:8px 0 14px;">🚫</div>
+    <div class="modal-title" style="margin-bottom:12px;">Límite alcanzado</div>
+    <p style="font-size:14px;color:var(--subtext);line-height:1.7;margin-bottom:24px;padding:0 4px;">
+      Has alcanzado el límite de 200 movimientos importados de la versión gratuita. Para continuar, contacta con nosotros:
+    </p>
+    <a href="https://wa.me/34640309239" target="_blank" rel="noopener noreferrer"
+       style="display:inline-flex;align-items:center;gap:8px;background:#4ade80;color:#0d1117;font-family:'DM Sans',sans-serif;font-weight:700;font-size:15px;padding:14px 28px;border-radius:14px;text-decoration:none;margin-bottom:20px;transition:opacity .15s;"
+       onmouseover="this.style.opacity='.88'" onmouseout="this.style.opacity='1'">
+      💬 Contactar por WhatsApp
+    </a>
+    <button onclick="document.getElementById('modal-limite-premium').style.display='none'" class="btn-no" style="display:block;width:100%;">Cerrar</button>
+  </div>
+</div>
+
 <!-- Modal borrar todo — paso 1 -->
 <div class="modal-base" id="modal-borrar-1" style="display:none">
   <div class="modal-box">
@@ -718,19 +736,47 @@
     const items = Array.from(document.querySelectorAll('#revision-voz-lista .revision-item'));
     if (!items.length) { alert('No hay movimientos para guardar'); return; }
 
+    const uid = window.currentUserId;
+
+    // ── Comprobar premium y límite de importación ──────────────────────────
+    const { data: perfilRows } = await dbClient.from('perfil').select('premium').eq('usuario_id', uid).limit(1);
+    const isPremium = perfilRows?.[0]?.premium === true;
+
+    let limiteRestante = Infinity;
+    if (!isPremium) {
+      const [resG, resI] = await Promise.all([
+        dbClient.from('gastos').select('*', { count: 'exact', head: true }).eq('usuario_id', uid).eq('origen', 'importado'),
+        dbClient.from('ingresos').select('*', { count: 'exact', head: true }).eq('usuario_id', uid).eq('origen', 'importado')
+      ]);
+      const totalImportados = (resG.count || 0) + (resI.count || 0);
+      if (totalImportados >= 200) {
+        document.getElementById('modal-limite-premium').style.display = 'flex';
+        return;
+      }
+      limiteRestante = 200 - totalImportados;
+    }
+
+    // ── Construir listas respetando el límite ──────────────────────────────
     const gastos = [], ingresos = [];
+    let contadorNuevos = 0;
+    let truncado = false;
+
     for (const item of items) {
-      const fecha = item.querySelector('.rv-fecha').value || hoy;
+      const fecha       = item.querySelector('.rv-fecha').value || hoy;
       const descripcion = item.querySelector('.rv-descripcion').value.trim();
-      const categoria = item.querySelector('.rv-categoria').value;
-      const monto = parseFloat(item.querySelector('.rv-monto').value);
-      const tipoSelect = item.querySelector('.rv-tipo');
-      const tipo = tipoSelect ? tipoSelect.value : 'gasto';
+      const categoria   = item.querySelector('.rv-categoria').value;
+      const monto       = parseFloat(item.querySelector('.rv-monto').value);
+      const tipoSelect  = item.querySelector('.rv-tipo');
+      const tipo        = tipoSelect ? tipoSelect.value : 'gasto';
       if (!descripcion || isNaN(monto)) continue;
+
+      if (contadorNuevos >= limiteRestante) { truncado = true; break; }
+      contadorNuevos++;
+
       if (tipo === 'ingreso') {
-        ingresos.push({ fecha, concepto: descripcion, tipo: categoria, monto, usuario_id: window.currentUserId });
+        ingresos.push({ fecha, concepto: descripcion, tipo: categoria, monto, usuario_id: uid, origen: 'importado' });
       } else {
-        gastos.push({ fecha, descripcion, categoria, monto, usuario_id: window.currentUserId });
+        gastos.push({ fecha, descripcion, categoria, monto, usuario_id: uid, origen: 'importado' });
       }
     }
 
@@ -750,6 +796,10 @@
     const total = gastos.length + ingresos.length;
     toast(`✅ ${total} movimiento${total === 1 ? '' : 's'} guardado${total === 1 ? '' : 's'}`);
     cargarMovimientos();
+
+    if (truncado) {
+      document.getElementById('modal-limite-premium').style.display = 'flex';
+    }
   }
 
   async function guardarGasto() {
@@ -758,7 +808,7 @@
     const categoria   = document.getElementById('g-categoria').value;
     const monto       = parseFloat(document.getElementById('g-monto').value);
     if (!descripcion || isNaN(monto)) { alert('Completa descripción y monto'); return; }
-    const { error } = await dbClient.from('gastos').insert([{ fecha, descripcion, categoria, monto, usuario_id: window.currentUserId }]);
+    const { error } = await dbClient.from('gastos').insert([{ fecha, descripcion, categoria, monto, usuario_id: window.currentUserId, origen: 'manual' }]);
     if (error) { alert('Error: ' + error.message); }
     else { alert('✅ Gasto guardado'); cerrarGasto(); cargarMovimientos(); }
   }
@@ -769,7 +819,7 @@
     const tipo     = document.getElementById('i-tipo').value;
     const monto    = parseFloat(document.getElementById('i-monto').value);
     if (!concepto || isNaN(monto)) { alert('Completa concepto y monto'); return; }
-    const { error } = await dbClient.from('ingresos').insert([{ fecha, concepto, tipo, monto, usuario_id: window.currentUserId }]);
+    const { error } = await dbClient.from('ingresos').insert([{ fecha, concepto, tipo, monto, usuario_id: window.currentUserId, origen: 'manual' }]);
     if (error) { alert('Error: ' + error.message); }
     else { alert('✅ Ingreso guardado'); cerrarIngreso(); cargarMovimientos(); }
   }
