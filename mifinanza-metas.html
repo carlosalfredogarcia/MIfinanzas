@@ -2295,8 +2295,7 @@
     if (!e.target.matches('.variable-input')) return
     guardarGastosLocal()
     actualizarPlanificador()
-    _focusedInput = e.target
-    actualizarAnalisisFloat()
+    mostrarAnalisisFloat(e.target)
   })
   _contGastos.addEventListener('click', e => {
     const btn = e.target.closest('.btn-spin')
