@@ -399,6 +399,10 @@
   .analisis-tabla td:not(:first-child) { text-align: right; font-family: 'Roboto', sans-serif; font-weight: 700; }
   .analisis-cat { display: flex; align-items: center; gap: 6px; }
   .analisis-ideal { color: var(--subtext); }
+  .analisis-ideal-edit { cursor: pointer; }
+  .analisis-ideal-edit:hover { color: #58a6ff; }
+  .analisis-ideal-edit input::-webkit-inner-spin-button,
+  .analisis-ideal-edit input::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
   .analisis-msg { background: rgba(88,166,255,0.07); border: 1px solid rgba(88,166,255,0.18); border-radius: 10px; padding: 10px 12px; font-size: 12px; color: var(--subtext); line-height: 1.55; }
   .analisis-float { position: fixed; left: 50%; transform: translateX(-50%); background: #1c2128; border: 1px solid #30363d; border-radius: 16px; padding: 14px 16px 12px; width: min(330px, 94vw); z-index: 500; box-shadow: 0 8px 32px rgba(0,0,0,0.6); opacity: 0; pointer-events: none; transition: opacity 0.18s; }
   .analisis-float.visible { opacity: 1; }
@@ -1819,13 +1823,62 @@
     ahorrador:   { nec: 50, opc: 30, aho: 20 },
   }
   const MODOS_ORDEN = ['basico', 'equilibrado', 'ahorrador']
-  const MODOS_LABEL = { basico: 'Básico', equilibrado: 'Equilibrado', ahorrador: 'Ahorrador' }
+  const MODOS_LABEL = { basico: 'Básico', equilibrado: 'Equilibrado', ahorrador: 'Ahorrador', personalizado: 'Personalizado' }
   let modoAnalisis = localStorage.getItem('planificador_modo_analisis') || 'equilibrado'
   if (modoAnalisis === 'ajustado') modoAnalisis = 'basico'
+  let modoPersonalizado = JSON.parse(localStorage.getItem('planificador_modo_personalizado') || 'null')
+  if (modoAnalisis === 'personalizado' && !modoPersonalizado) modoAnalisis = 'equilibrado'
+
+  function getIdeales() {
+    if (modoAnalisis === 'personalizado' && modoPersonalizado) return modoPersonalizado
+    return MODOS_ANALISIS[modoAnalisis] || MODOS_ANALISIS.equilibrado
+  }
 
   function setModoAnalisis(modo) {
     modoAnalisis = modo
     localStorage.setItem('planificador_modo_analisis', modo)
+    if (modo !== 'personalizado') {
+      modoPersonalizado = null
+      localStorage.removeItem('planificador_modo_personalizado')
+    }
+    actualizarAnalisis()
+  }
+
+  function editarIdeal(key, td) {
+    if (td.querySelector('input')) return
+    const val = parseInt(td.textContent) || 0
+    td.innerHTML = `<input type="number" min="0" max="100" value="${val}" style="width:38px;background:transparent;border:none;border-bottom:1px solid #58a6ff;color:#58a6ff;text-align:center;font-size:inherit;font-family:inherit;-moz-appearance:textfield;">`
+    const inp = td.querySelector('input')
+    inp.select()
+    inp.addEventListener('blur', () => guardarIdealPersonalizado(key, inp.value))
+    inp.addEventListener('keydown', e => { if (e.key === 'Enter') inp.blur() })
+  }
+
+  function guardarIdealPersonalizado(key, rawVal) {
+    const base   = modoPersonalizado || { ...getIdeales() }
+    const nuevo  = Math.max(0, Math.min(100, Math.round(parseFloat(rawVal) || 0)))
+    base[key]    = nuevo
+    const resto  = 100 - nuevo
+    const otros  = ['nec', 'opc', 'aho'].filter(k => k !== key)
+    const sumaOtros = otros.reduce((s, k) => s + base[k], 0)
+    if (resto <= 0) {
+      otros.forEach(k => { base[k] = 0 })
+      base[key] = 100
+    } else if (sumaOtros === 0) {
+      const mitad = Math.floor(resto / 2)
+      base[otros[0]] = mitad
+      base[otros[1]] = resto - mitad
+    } else {
+      let dist = 0
+      otros.forEach((k, i) => {
+        if (i === otros.length - 1) { base[k] = resto - dist }
+        else { const v = Math.round(base[k] / sumaOtros * resto); base[k] = v; dist += v }
+      })
+    }
+    modoPersonalizado = base
+    modoAnalisis = 'personalizado'
+    localStorage.setItem('planificador_modo_personalizado', JSON.stringify(base))
+    localStorage.setItem('planificador_modo_analisis', 'personalizado')
     actualizarAnalisis()
   }
 
@@ -1866,7 +1919,7 @@
     const pNec    = Math.round(necesario / ingresos * 100)
     const pOpc    = Math.round(opcional  / ingresos * 100)
     const pAho    = Math.round(ahorro    / ingresos * 100)
-    const ideales = MODOS_ANALISIS[modoAnalisis] || MODOS_ANALISIS.equilibrado
+    const ideales = getIdeales()
     const mLabel  = (MODOS_LABEL[modoAnalisis] || 'MODO').toUpperCase()
 
     function est(v, id, inv) { const d = inv ? id - v : v - id; return d <= 0 ? '✅' : d <= 15 ? '⚠️' : '❌' }
@@ -1939,7 +1992,7 @@
     const pNec    = necesario / ingresos * 100
     const pOpc    = opcional  / ingresos * 100
     const pAho    = ahorro    / ingresos * 100
-    const ideales = MODOS_ANALISIS[modoAnalisis] || MODOS_ANALISIS.equilibrado
+    const ideales = getIdeales()
 
     function estado(actual, ideal, inverso = false) {
       const diff = inverso ? ideal - actual : actual - ideal
@@ -1955,16 +2008,16 @@
     }
 
     const rows = [
-      { label: '🔒 Necesarios', val: pNec, ideal: ideales.nec, est: estado(pNec, ideales.nec),        col: colorPct(pNec, ideales.nec) },
-      { label: '🎯 Opcionales', val: pOpc, ideal: ideales.opc, est: estado(pOpc, ideales.opc),        col: colorPct(pOpc, ideales.opc) },
-      { label: '💰 Ahorro',     val: pAho, ideal: ideales.aho, est: estado(pAho, ideales.aho, true),  col: colorPct(pAho, ideales.aho, true) },
+      { label: '🔒 Necesarios', val: pNec, ideal: ideales.nec, ikey: 'nec', est: estado(pNec, ideales.nec),        col: colorPct(pNec, ideales.nec) },
+      { label: '🎯 Opcionales', val: pOpc, ideal: ideales.opc, ikey: 'opc', est: estado(pOpc, ideales.opc),        col: colorPct(pOpc, ideales.opc) },
+      { label: '💰 Ahorro',     val: pAho, ideal: ideales.aho, ikey: 'aho', est: estado(pAho, ideales.aho, true),  col: colorPct(pAho, ideales.aho, true) },
     ]
 
     const filas = rows.map(r => `
       <tr>
         <td><span class="analisis-cat">${r.label}</span></td>
         <td style="color:${r.col}">${r.val.toFixed(0)}%</td>
-        <td class="analisis-ideal">${r.ideal}%</td>
+        <td class="analisis-ideal analisis-ideal-edit" onclick="editarIdeal('${r.ikey}', this)" title="Toca para personalizar">${r.ideal}%</td>
         <td>${r.est}</td>
       </tr>`).join('')
 
@@ -1975,8 +2028,10 @@
     } else if (pAho < ideales.aho) {
       const falta = ingresos * (ideales.aho - pAho) / 100
       msg = `Tu ahorro es bajo. Redirigir ${fmt(falta)} al mes te acercaría al ${ideales.aho}% objetivo.`
+    } else if (modoAnalisis === 'personalizado') {
+      msg = `Usando valores personalizados. Toca los % de referencia para ajustarlos.`
     } else {
-      msg = `¡Buen equilibrio! Tu reparto sigue el perfil <strong>${modoAnalisis}</strong>.`
+      msg = `¡Buen equilibrio! Tu reparto sigue el perfil <strong>${MODOS_LABEL[modoAnalisis]}</strong>.`
     }
 
     const itemsDD = MODOS_ORDEN.map(m => {
@@ -1984,17 +2039,17 @@
       return `<div class="amodo-item${m === modoAnalisis ? ' activo' : ''}" onclick="seleccionarModo('${m}')">${iconos[m]} ${MODOS_LABEL[m]}</div>`
     }).join('')
 
+    const labelModo = modoAnalisis === 'personalizado'
+      ? `<span style="color:#58a6ff;font-size:11px;">✏️ Personalizado</span>`
+      : `<span onclick="toggleModoDropdown(event)" style="cursor:pointer;user-select:none;white-space:nowrap;">${MODOS_LABEL[modoAnalisis]}&nbsp;<span style="color:#58a6ff;">⌄</span></span>`
+
     cont.innerHTML = `
       <div style="position:relative;">
         <table class="analisis-tabla">
           <thead><tr>
             <th></th>
             <th>Tu caso</th>
-            <th>
-              <span onclick="toggleModoDropdown(event)" style="cursor:pointer;user-select:none;white-space:nowrap;">
-                ${MODOS_LABEL[modoAnalisis]}&nbsp;<span style="color:#58a6ff;">⌄</span>
-              </span>
-            </th>
+            <th>${labelModo}</th>
             <th></th>
           </tr></thead>
           <tbody>${filas}</tbody>
@@ -2004,6 +2059,10 @@
       <div class="analisis-msg">💡 ${msg}</div>
       <div style="height:12px"></div>
     `
+    if (modoAnalisis === 'personalizado') {
+      const th = cont.querySelector('thead th:nth-child(3)')
+      if (th) th.addEventListener('click', toggleModoDropdown)
+    }
   }
 
   let gastosRealMes = {}
