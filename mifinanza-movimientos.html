@@ -471,13 +471,27 @@
       const [{ data: gastos }, { data: ingresos }, { data: fijos }] = await Promise.all([
         dbClient.from('gastos').select('fecha,descripcion,categoria,monto').eq('usuario_id', uid).gte('fecha', desde).lte('fecha', hasta).order('fecha', { ascending: false }),
         dbClient.from('ingresos').select('fecha,concepto,tipo,monto').eq('usuario_id', uid).gte('fecha', desde).lte('fecha', hasta).order('fecha', { ascending: false }),
-        dbClient.from('gastos_fijos').select('fecha_inicio,nombre,categoria,monto').eq('usuario_id', uid).eq('activo', true).lte('fecha_inicio', hasta).or(`fecha_fin.gte.${desde},fecha_fin.is.null`)
+        dbClient.from('gastos_fijos').select('fecha_inicio,fecha_fin,nombre,categoria,monto,dia_del_mes').eq('usuario_id', uid).eq('activo', true).lte('fecha_inicio', hasta).or(`fecha_fin.gte.${desde},fecha_fin.is.null`)
       ])
 
       const filas = []
       for (const g of (gastos   || [])) filas.push([g.fecha, g.descripcion, g.categoria, g.monto, 'Gasto'])
       for (const i of (ingresos || [])) filas.push([i.fecha, i.concepto, i.tipo, i.monto, 'Ingreso'])
-      for (const f of (fijos    || [])) filas.push([f.fecha_inicio, f.nombre, f.categoria, f.monto, 'Fijo'])
+      for (const f of (fijos    || [])) {
+        const dia = f.dia_del_mes || 1
+        // Expand: one row per month in the range where the fijo is active
+        let cur = new Date(new Date(desde + 'T00:00:00').getFullYear(), new Date(desde + 'T00:00:00').getMonth(), 1)
+        const dEnd = new Date(hasta + 'T00:00:00')
+        while (cur <= dEnd) {
+          const lastDay  = new Date(cur.getFullYear(), cur.getMonth() + 1, 0).getDate()
+          const diaReal  = Math.min(dia, lastDay)
+          const fechaFijo = `${cur.getFullYear()}-${String(cur.getMonth()+1).padStart(2,'0')}-${String(diaReal).padStart(2,'0')}`
+          if (fechaFijo >= desde && fechaFijo <= hasta && fechaFijo >= f.fecha_inicio && (!f.fecha_fin || fechaFijo <= f.fecha_fin)) {
+            filas.push([fechaFijo, f.nombre, f.categoria, f.monto, 'Gasto fijo'])
+          }
+          cur.setMonth(cur.getMonth() + 1)
+        }
+      }
       filas.sort((a, b) => new Date(b[0]) - new Date(a[0]))
 
       const escape = v => '"' + String(v ?? '').replace(/"/g, '""') + '"'
