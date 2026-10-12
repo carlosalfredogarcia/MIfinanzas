@@ -124,20 +124,6 @@
   .eb-mes { font-size: 9px; color: var(--subtext); }
   .analisis-nota { font-size: 12px; color: var(--subtext); text-align: center; line-height: 1.4; margin-top: 4px; }
 
-  .alertas-card { margin: 0 24px 16px; background: var(--card); border-radius: 20px; padding: 18px; border: 1px solid var(--border); animation: fadeUp 0.4s 0.3s ease both; opacity: 0; }
-  .alertas-title { font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 12px; }
-
-  .alerta-item { display: flex; gap: 10px; align-items: flex-start; padding: 11px; border-radius: 12px; margin-bottom: 8px; border: 1px solid transparent; }
-  .alerta-item.roja  { background: rgba(255,107,107,0.07); border-color: rgba(255,107,107,0.15); }
-  .alerta-item.verde { background: rgba(184,245,100,0.07); border-color: rgba(184,245,100,0.15); }
-  .alerta-item.gold  { background: rgba(245,200,66,0.07);  border-color: rgba(245,200,66,0.15); }
-  .alerta-icon   { font-size: 18px; flex-shrink: 0; }
-  .alerta-titulo { font-size: 13px; font-weight: 600; margin-bottom: 2px; }
-  .alerta-desc   { font-size: 11px; color: var(--subtext); line-height: 1.4; }
-  .alerta-item.roja  .alerta-titulo { color: var(--danger); }
-  .alerta-item.verde .alerta-titulo { color: var(--accent); }
-  .alerta-item.gold  .alerta-titulo { color: var(--gold); }
-
   .loading-wrap { text-align: center; color: var(--subtext); font-size: 13px; padding: 40px 0; }
 
   /* NAVBAR */
@@ -239,10 +225,6 @@
       <div class="analisis-nota" id="analisis-nota"></div>
     </div>
 
-    <div class="alertas-card">
-      <div class="alertas-title">🔔 Análisis inteligente</div>
-      <div id="alertas-wrap"></div>
-    </div>
 
   </div>
 
@@ -511,7 +493,6 @@
       contador.textContent = 'Toca los meses que quieres comparar'
       setResumen('Prom. ingresos','—','','Prom. gastos','—','','Saldo real','—','', 0)
       document.getElementById('cats-wrap').innerHTML    = ''
-      document.getElementById('alertas-wrap').innerHTML = ''
       return
     }
 
@@ -537,7 +518,6 @@
 
     dibujarCats(slice, false)
     renderAnalisis()
-    renderAlertas([...slice])
   }
 
   function renderGridMeses() {
@@ -565,7 +545,6 @@
     if (mesSeleccionado !== null) renderMes(mesSeleccionado)
     else {
       document.getElementById('cats-wrap').innerHTML    = ''
-      document.getElementById('alertas-wrap').innerHTML = ''
       setResumen('Ingresos','—','','Gastos','—','','Ahorro','—','', 0)
     }
   }
@@ -588,28 +567,6 @@
     )
 
     dibujarCats([d], true)
-
-    const alertas = []
-    if (prev) {
-      Object.entries(d.cats).forEach(([cat, val]) => {
-        const vp  = prev.cats[cat] || 0
-        if (!vp) return
-        const pct = Math.round(((val - vp) / vp) * 100)
-        if (pct >= 15)  alertas.push({ tipo:'roja',  icon:'⚠️', titulo:`${cat} subió un ${pct}%`,              desc:`Pasaste de ${fmt(vp)} a ${fmt(val)} vs ${prev.mesNombre}.` })
-        if (pct <= -15) alertas.push({ tipo:'verde', icon:'✅', titulo:`Bajaste ${cat} un ${Math.abs(pct)}%`, desc:`De ${fmt(vp)} a ${fmt(val)} vs ${prev.mesNombre}. Buen trabajo.` })
-      })
-    }
-
-    if (aho > 0) alertas.push({ tipo:'verde', icon:'💚', titulo:`Ahorraste ${fmt(aho)} en ${d.mesNombre}`, desc:`El ${Math.round((aho / d.ingresos) * 100)}% de tus ingresos.` })
-    else         alertas.push({ tipo:'roja',  icon:'🚨', titulo:'Gastos superaron ingresos', desc:`Te fuiste ${fmt(Math.abs(aho))} en negativo en ${d.mesNombre}.` })
-
-    const catMax = Object.entries(d.cats).sort((a, b) => b[1] - a[1])[0]
-    if (catMax) {
-      const pctMax = Math.round((catMax[1] / d.gastos) * 100)
-      if (pctMax > 28) alertas.push({ tipo:'gold', icon:'💡', titulo:`${catMax[0]} fue tu mayor gasto`, desc:`Representó el ${pctMax}% de lo que gastaste en ${d.mesNombre} (${fmt(catMax[1])}).` })
-    }
-
-    mostrarAlertas(alertas)
   }
 
   function renderAnio() {
@@ -625,7 +582,6 @@
 
     dibujarCats(datos, false)
     renderAnalisis()
-    renderAlertas([...datos].reverse())
   }
 
   function fmt(n) {
@@ -773,45 +729,7 @@
     document.getElementById('analisis-nota').textContent = nota
   }
 
-  function renderAlertas(slice) {
-    const ult  = slice[slice.length - 1]
-    const prev = slice[slice.length - 2]
-    const alertas = []
 
-    if (prev) {
-      Object.entries(ult.cats).forEach(([cat, val]) => {
-        const vp  = prev.cats[cat] || 0
-        if (!vp) return
-        const pct = Math.round(((val - vp) / vp) * 100)
-        if (pct >= 15)  alertas.push({ tipo:'roja',  icon:'⚠️', titulo:`${cat} subió un ${pct}%`,              desc:`De ${fmt(vp)} a ${fmt(val)}. Este mes se te fue un poco la mano aquí.` })
-        if (pct <= -15) alertas.push({ tipo:'verde', icon:'✅', titulo:`Bajaste ${cat} un ${Math.abs(pct)}%`, desc:`De ${fmt(vp)} a ${fmt(val)}. Buen control este mes.` })
-      })
-    }
-
-    const aho = ult.ingresos - ult.gastos
-    if (aho > 0) alertas.push({ tipo:'verde', icon:'💚', titulo:`Ahorraste ${fmt(aho)} en ${ult.mesNombre}`, desc:`El ${Math.round((aho / ult.ingresos) * 100)}% de tus ingresos.` })
-    else         alertas.push({ tipo:'roja',  icon:'🚨', titulo:'Gastos superaron ingresos', desc:`Te fuiste ${fmt(Math.abs(aho))} en negativo en ${ult.mesNombre}.` })
-
-    const catMax = Object.entries(ult.cats).sort((a, b) => b[1] - a[1])[0]
-    if (catMax) {
-      const pctMax = Math.round((catMax[1] / ult.gastos) * 100)
-      if (pctMax > 28) alertas.push({ tipo:'gold', icon:'💡', titulo:`${catMax[0]} fue tu mayor gasto`, desc:`Representó el ${pctMax}% de lo que gastaste (${fmt(catMax[1])}).` })
-    }
-
-    mostrarAlertas(alertas)
-  }
-
-  function mostrarAlertas(alertas) {
-    const wrap = document.getElementById('alertas-wrap')
-    wrap.innerHTML = ''
-    if (!alertas.length) alertas.push({ tipo:'verde', icon:'✅', titulo:'Todo bajo control', desc:'Sin variaciones importantes en este período.' })
-    alertas.forEach(a => {
-      const div = document.createElement('div')
-      div.className = `alerta-item ${a.tipo}`
-      div.innerHTML = `<div class="alerta-icon">${a.icon}</div><div><div class="alerta-titulo">${a.titulo}</div><div class="alerta-desc">${a.desc}</div></div>`
-      wrap.appendChild(div)
-    })
-  }
 
   async function cargarCategoriasPerfil() {
     const uid = window.currentUserId
