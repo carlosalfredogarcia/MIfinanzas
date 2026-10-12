@@ -159,19 +159,24 @@ exports.handler = async (event) => {
   // ─── Tipo A: CSV propio de MiFinanza ─────────────────────────────────────
   if (cabeceraLimpia === CABECERA_PROPIA || cabeceraEsPropia(cabecera, sep0)) {
     const movimientos = []
+    const dbgTiposA = []
     for (let i = 1; i < lineas.length; i++) {
       const cols = parseCSVLinea(lineas[i], sep0).map(s => s.trim())
       if (cols.length < 5) continue
       const [fecha, concepto, categoria, importeStr, tipo] = cols
       const monto = parsearMonto(importeStr)
       if (!fecha || !concepto || isNaN(monto)) continue
-      if (tipo === 'Gasto' || tipo === 'Fijo' || tipo === 'Gasto fijo') {
+      if (dbgTiposA.length < 5) dbgTiposA.push(JSON.stringify(tipo))
+      const tipoLow = tipo.toLowerCase()
+      if (tipoLow === 'gasto' || tipoLow === 'fijo' || tipoLow === 'gasto fijo') {
         movimientos.push({ fecha, descripcion: concepto, categoria, monto, tipo: 'gasto' })
-      } else if (tipo === 'Ingreso') {
+      } else if (tipoLow === 'ingreso') {
         movimientos.push({ fecha, descripcion: concepto, categoria, monto, tipo: 'ingreso' })
+      } else {
+        movimientos.push({ fecha, descripcion: concepto, categoria, monto, tipo: 'gasto' })
       }
     }
-    return { statusCode: 200, headers: NO_CACHE, body: JSON.stringify({ tipo: 'mifinanza', movimientos }) }
+    return { statusCode: 200, headers: NO_CACHE, body: JSON.stringify({ tipo: 'mifinanza', movimientos, dbg: { cabecera_detectada: 'tipoA', primeros_tipos_raw: dbgTiposA } }) }
   }
 
   // ─── Tipo B: CSV de banco externo ────────────────────────────────────────
