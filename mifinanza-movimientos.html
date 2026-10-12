@@ -1195,6 +1195,32 @@
         document.getElementById('csv-btn-seleccionar').style.display = 'block';
         return;
       }
+      // ── Verificar límite ANTES de gastar tokens en la IA ──────────────────
+      const uid = window.currentUserId;
+      const { data: perfilCheck } = await dbClient.from('perfil').select('premium, codigos_usados, limite_importacion').eq('usuario_id', uid).limit(1);
+      const pc = perfilCheck?.[0] || {};
+      const esPremium = pc.premium === true;
+      if (!esPremium) {
+        // Contar filas del CSV (excluir cabecera y líneas vacías)
+        const filasCsv = csvText.split('\n').filter((l, i) => i > 0 && l.trim()).length;
+        const codigosArr = Array.isArray(pc.codigos_usados) ? pc.codigos_usados : (pc.codigos_usados ? pc.codigos_usados.split(',').filter(Boolean) : []);
+        const limiteBase = pc.limite_importacion ?? 200;
+        const limiteTotal = limiteBase + codigosArr.length * 200;
+        const [resG, resI] = await Promise.all([
+          dbClient.from('gastos').select('*', { count: 'exact', head: true }).eq('usuario_id', uid).eq('origen', 'importado'),
+          dbClient.from('ingresos').select('*', { count: 'exact', head: true }).eq('usuario_id', uid).eq('origen', 'importado')
+        ]);
+        const totalImportados = (resG.count ?? 0) + (resI.count ?? 0);
+        if (totalImportados + filasCsv > limiteTotal) {
+          document.getElementById('csv-btn-seleccionar').style.display = 'block';
+          document.getElementById('csv-estado').textContent = '';
+          cerrarCSV();
+          document.getElementById('modal-limite-premium').style.display = 'flex';
+          return;
+        }
+      }
+      // ───────────────────────────────────────────────────────────────────────
+
       await cargarCategoriasPerfil();
       const categorias = Array.from(document.getElementById('g-categoria').options).map(o => o.textContent);
       const resp = await fetch('/.netlify/functions/import-csv', {
