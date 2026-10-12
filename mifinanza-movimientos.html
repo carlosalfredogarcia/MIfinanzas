@@ -400,7 +400,11 @@
       </div>
       <div id="codigo-feedback" style="font-size:12px;min-height:18px;text-align:left;padding:0 2px;"></div>
     </div>
-    <button onclick="document.getElementById('modal-limite-premium').style.display='none'" class="btn-no" style="display:block;width:100%;">Cerrar</button>
+    <button id="btn-continuar-importacion" onclick="continuarImportacion()"
+            style="display:none;background:#4ade80;color:#0d1117;border:none;border-radius:12px;padding:13px 20px;font-family:'DM Sans',sans-serif;font-weight:700;font-size:15px;cursor:pointer;width:100%;margin-bottom:10px;">
+      ▶ Continuar importación
+    </button>
+    <button onclick="cerrarModalLimite()" class="btn-no" style="display:block;width:100%;">Cerrar</button>
   </div>
 </div>
 
@@ -770,6 +774,8 @@
     document.getElementById('modal-revision-voz').style.display = 'none';
   }
 
+  let _pendingCsvText = null;
+
   async function guardarRevisionVoz() {
     const items = Array.from(document.querySelectorAll('#revision-voz-lista .revision-item'));
     if (!items.length) { alert('No hay movimientos para guardar'); return; }
@@ -882,6 +888,59 @@
     input.value = '';
     feedback.style.color = '#4ade80';
     feedback.textContent = '¡Límite ampliado! Ya puedes importar 200 movimientos más';
+    if (_pendingCsvText) {
+      document.getElementById('btn-continuar-importacion').style.display = 'block';
+    }
+  }
+
+  function cerrarModalLimite() {
+    document.getElementById('modal-limite-premium').style.display = 'none';
+    document.getElementById('btn-continuar-importacion').style.display = 'none';
+    document.getElementById('codigo-feedback').textContent = '';
+    document.getElementById('codigo-input').value = '';
+  }
+
+  async function continuarImportacion() {
+    const csvText = _pendingCsvText;
+    _pendingCsvText = null;
+    document.getElementById('modal-limite-premium').style.display = 'none';
+    document.getElementById('btn-continuar-importacion').style.display = 'none';
+    document.getElementById('codigo-feedback').textContent = '';
+    document.getElementById('codigo-input').value = '';
+
+    try {
+      const { data: { session } } = await dbClient.auth.getSession();
+      const token = session?.access_token;
+      if (!token) { alert('Sesión expirada, vuelve a iniciar sesión.'); return; }
+
+      await cargarCategoriasPerfil();
+      const categorias = Array.from(document.getElementById('g-categoria').options).map(o => o.textContent);
+      const resp = await fetch('/.netlify/functions/import-csv', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', authorization: 'Bearer ' + token },
+        body: JSON.stringify({ csv: csvText, categorias })
+      });
+      let datos;
+      if (!resp.ok) {
+        datos = await resp.json().catch(() => ({}));
+        const dbgTxt = datos.dbg ? '\n\n─── DEBUG ───\n' + JSON.stringify(datos.dbg, null, 2) : '';
+        alert('❌ ' + (datos.error || 'Error del servidor') + dbgTxt);
+        return;
+      }
+      datos = await resp.json();
+      let movimientos = Array.isArray(datos.movimientos) && datos.movimientos.length
+        ? datos.movimientos
+        : Array.isArray(datos.gastos)
+          ? datos.gastos.map(g => ({ ...g, tipo: g.tipo || 'gasto' }))
+          : [];
+      if (!movimientos.length) {
+        alert('❌ No se encontraron movimientos en el archivo');
+        return;
+      }
+      abrirRevisionVoz(movimientos);
+    } catch (err) {
+      alert('❌ ' + err.message);
+    }
   }
 
   async function guardarGasto() {
@@ -1208,6 +1267,7 @@
         const totalImportados = (resGcsv.count ?? 0) + (resIcsv.count ?? 0);
         console.log('filasCsv:', filasCsv, 'totalImportados:', totalImportados, 'limiteTotal:', limiteTotalCSV);
         if (totalImportados + filasCsv > limiteTotalCSV) {
+          _pendingCsvText = csvText;
           document.getElementById('csv-btn-seleccionar').style.display = 'block';
           document.getElementById('csv-estado').textContent = '';
           cerrarCSV();
@@ -1223,32 +1283,6 @@
         document.getElementById('csv-btn-seleccionar').style.display = 'block';
         return;
       }
-      // ── Verificar límite ANTES de gastar tokens en la IA ──────────────────
-      const uid = window.currentUserId;
-      const { data: perfilCheck } = await dbClient.from('perfil').select('premium, codigos_usados, limite_importacion').eq('usuario_id', uid).limit(1);
-      const pc = perfilCheck?.[0] || {};
-      const esPremium = pc.premium === true;
-      if (!esPremium) {
-        // Contar filas del CSV (excluir cabecera y líneas vacías)
-        const filasCsv = csvText.split('\n').filter((l, i) => i > 0 && l.trim()).length;
-        const codigosArr = Array.isArray(pc.codigos_usados) ? pc.codigos_usados : (pc.codigos_usados ? pc.codigos_usados.split(',').filter(Boolean) : []);
-        const limiteBase = pc.limite_importacion ?? 200;
-        const limiteTotal = limiteBase + codigosArr.length * 200;
-        const [resG, resI] = await Promise.all([
-          dbClient.from('gastos').select('*', { count: 'exact', head: true }).eq('usuario_id', uid).eq('origen', 'importado'),
-          dbClient.from('ingresos').select('*', { count: 'exact', head: true }).eq('usuario_id', uid).eq('origen', 'importado')
-        ]);
-        const totalImportados = (resG.count ?? 0) + (resI.count ?? 0);
-        if (totalImportados + filasCsv > limiteTotal) {
-          document.getElementById('csv-btn-seleccionar').style.display = 'block';
-          document.getElementById('csv-estado').textContent = '';
-          cerrarCSV();
-          document.getElementById('modal-limite-premium').style.display = 'flex';
-          return;
-        }
-      }
-      // ───────────────────────────────────────────────────────────────────────
-
       await cargarCategoriasPerfil();
       const categorias = Array.from(document.getElementById('g-categoria').options).map(o => o.textContent);
       const resp = await fetch('/.netlify/functions/import-csv', {
