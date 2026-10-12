@@ -358,6 +358,15 @@
     <div class="modal-handle"></div>
     <div class="modal-title">Importar extracto bancario</div>
     <div id="csv-estado" style="text-align:left;padding:20px 8px;color:var(--subtext);font-size:13px;line-height:1.6;min-height:70px;white-space:pre-wrap;word-break:break-all;max-height:60vh;overflow-y:auto;">Selecciona el extracto de tu banco (CSV, XLS o XLSX). La app detectará los movimientos automáticamente — revisa las categorías antes de guardar.</div>
+    <div id="csv-uso-wrap" style="margin:0 0 14px;display:none;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+        <span style="font-size:12px;color:var(--subtext);">Movimientos importados</span>
+        <span id="csv-uso-texto" style="font-size:12px;font-weight:700;color:var(--text);">— / 200</span>
+      </div>
+      <div style="height:6px;background:var(--card2);border-radius:999px;overflow:hidden;">
+        <div id="csv-uso-barra" style="height:100%;width:0%;border-radius:999px;transition:width .3s,background .3s;"></div>
+      </div>
+    </div>
     <input type="file" id="csv-file" accept=".csv,.txt,.xls,.xlsx,text/csv,text/plain" style="display:none" onchange="procesarArchivoCSV(this)">
     <button id="csv-btn-seleccionar" onclick="document.getElementById('csv-file').click()" class="btn-ok" style="background:#58a6ff;color:#0d1117">📂 Seleccionar archivo</button>
     <button onclick="cerrarCSV()" class="btn-no">Cancelar</button>
@@ -1219,12 +1228,34 @@
     toast('✅ Categoría añadida');
   }
 
-  function abrirImportarCSV() {
+  async function abrirImportarCSV() {
     cerrarMenu();
     document.getElementById('csv-estado').textContent = 'Selecciona el extracto de tu banco (CSV, XLS o XLSX). La app detectará los movimientos automáticamente — revisa las categorías antes de guardar.';
     document.getElementById('csv-btn-seleccionar').style.display = 'block';
     document.getElementById('csv-file').value = '';
     document.getElementById('modal-csv').style.display = 'flex';
+
+    const wrap = document.getElementById('csv-uso-wrap');
+    const texto = document.getElementById('csv-uso-texto');
+    const barra = document.getElementById('csv-uso-barra');
+    wrap.style.display = 'none';
+    try {
+      const uid = window.currentUserId;
+      if (!uid) return;
+      const [resG, resI] = await Promise.all([
+        dbClient.from('gastos').select('*', { count: 'exact', head: true }).eq('usuario_id', uid).eq('origen', 'importado'),
+        dbClient.from('ingresos').select('*', { count: 'exact', head: true }).eq('usuario_id', uid).eq('origen', 'importado')
+      ]);
+      const total = (resG.count ?? 0) + (resI.count ?? 0);
+      const limite = 200;
+      const pct = Math.min((total / limite) * 100, 100);
+      const color = pct >= 90 ? '#f85149' : pct >= 75 ? '#f0a030' : '#4ade80';
+      texto.textContent = `${total} / ${limite}`;
+      texto.style.color = color;
+      barra.style.width = pct + '%';
+      barra.style.background = color;
+      wrap.style.display = 'block';
+    } catch (_) {}
   }
 
   function cerrarCSV() {
