@@ -398,7 +398,7 @@
        onmouseover="this.style.opacity='.88'" onmouseout="this.style.opacity='1'">
       💬 Contactar por WhatsApp
     </a>
-    <div style="border-top:1px solid var(--border);padding-top:16px;margin-bottom:8px;">
+    <div id="codigo-wrap" style="border-top:1px solid var(--border);padding-top:16px;margin-bottom:8px;">
       <div style="display:flex;gap:8px;margin-bottom:6px;">
         <input type="text" id="codigo-input" placeholder="¿Tienes un código?"
                style="flex:1;background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:10px 12px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;outline:none;min-width:0;">
@@ -912,11 +912,23 @@
         document.getElementById('btn-continuar-importacion').style.display = 'block';
       }
     }
+    actualizarModalLimite();
+  }
+
+  async function actualizarModalLimite() {
+    const uid = window.currentUserId;
+    if (!uid) return;
+    const TODOS_CODIGOS = ['CARLOS', 'CARLOS2', 'CARLOS3'];
+    const { data: perfilRows } = await dbClient.from('perfil').select('codigos_usados').eq('usuario_id', uid).limit(1);
+    const usados = parseCodigosUsados(perfilRows?.[0]?.codigos_usados);
+    const agotados = TODOS_CODIGOS.every(c => usados.includes(c));
+    document.getElementById('codigo-wrap').style.display = agotados ? 'none' : 'block';
   }
 
   function cerrarModalLimite() {
     document.getElementById('modal-limite-premium').style.display = 'none';
     document.getElementById('btn-continuar-importacion').style.display = 'none';
+    document.getElementById('codigo-wrap').style.display = 'block';
     document.getElementById('codigo-feedback').textContent = '';
     document.getElementById('codigo-input').value = '';
   }
@@ -1313,6 +1325,7 @@
           document.getElementById('csv-estado').textContent = '';
           cerrarCSV();
           document.getElementById('modal-limite-premium').style.display = 'flex';
+          actualizarModalLimite();
           return;
         }
       }
