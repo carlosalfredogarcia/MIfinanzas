@@ -382,13 +382,24 @@
     <div style="font-size:40px;margin:8px 0 14px;">🚫</div>
     <div class="modal-title" style="margin-bottom:12px;">Límite alcanzado</div>
     <p style="font-size:14px;color:var(--subtext);line-height:1.7;margin-bottom:24px;padding:0 4px;">
-      Has alcanzado el límite de 200 movimientos importados de la versión gratuita. Para continuar, contacta con nosotros:
+      Has alcanzado el límite de 200 movimientos importados. Para continuar, contacta con nosotros:
     </p>
     <a href="https://wa.me/34640309239" target="_blank" rel="noopener noreferrer"
-       style="display:inline-flex;align-items:center;gap:8px;background:#4ade80;color:#0d1117;font-family:'DM Sans',sans-serif;font-weight:700;font-size:15px;padding:14px 28px;border-radius:14px;text-decoration:none;margin-bottom:20px;transition:opacity .15s;"
+       style="display:inline-flex;align-items:center;gap:8px;background:#4ade80;color:#0d1117;font-family:'DM Sans',sans-serif;font-weight:700;font-size:15px;padding:14px 28px;border-radius:14px;text-decoration:none;margin-bottom:16px;transition:opacity .15s;"
        onmouseover="this.style.opacity='.88'" onmouseout="this.style.opacity='1'">
       💬 Contactar por WhatsApp
     </a>
+    <div style="border-top:1px solid var(--border);padding-top:16px;margin-bottom:8px;">
+      <div style="display:flex;gap:8px;margin-bottom:6px;">
+        <input type="text" id="codigo-input" placeholder="¿Tienes un código?"
+               style="flex:1;background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:10px 12px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;outline:none;min-width:0;">
+        <button onclick="aplicarCodigo()"
+                style="background:#4ade80;color:#0d1117;border:none;border-radius:10px;padding:10px 16px;font-family:'DM Sans',sans-serif;font-weight:700;font-size:14px;cursor:pointer;white-space:nowrap;">
+          Aplicar
+        </button>
+      </div>
+      <div id="codigo-feedback" style="font-size:12px;min-height:18px;text-align:left;padding:0 2px;"></div>
+    </div>
     <button onclick="document.getElementById('modal-limite-premium').style.display='none'" class="btn-no" style="display:block;width:100%;">Cerrar</button>
   </div>
 </div>
@@ -766,8 +777,15 @@
     const uid = window.currentUserId;
 
     // ── Comprobar premium y límite de importación ──────────────────────────
-    const { data: perfilRows } = await dbClient.from('perfil').select('premium').eq('usuario_id', uid).limit(1);
-    const isPremium = perfilRows?.[0]?.premium === true;
+    const { data: perfilRows } = await dbClient.from('perfil').select('premium, codigos_usados').eq('usuario_id', uid).limit(1);
+    const perfilRow    = perfilRows?.[0] || {};
+    const isPremium    = perfilRow.premium === true;
+    const codigosUsados = perfilRow.codigos_usados
+      ? perfilRow.codigos_usados.split(',').filter(Boolean)
+      : [];
+    // Límite base 200 + 200 por cada código de desbloqueo aplicado
+    const LIMITE_BASE  = 200;
+    const limiteTotal  = LIMITE_BASE + codigosUsados.length * 200;
 
     let limiteRestante = Infinity;
     if (!isPremium) {
@@ -775,12 +793,12 @@
         dbClient.from('gastos').select('*', { count: 'exact', head: true }).eq('usuario_id', uid).eq('origen', 'importado'),
         dbClient.from('ingresos').select('*', { count: 'exact', head: true }).eq('usuario_id', uid).eq('origen', 'importado')
       ]);
-      const totalImportados = (resG.count || 0) + (resI.count || 0);
-      if (totalImportados >= 200) {
+      const totalImportados = (resG.count ?? 0) + (resI.count ?? 0);
+      if (totalImportados >= limiteTotal) {
         document.getElementById('modal-limite-premium').style.display = 'flex';
         return;
       }
-      limiteRestante = 200 - totalImportados;
+      limiteRestante = limiteTotal - totalImportados;
     }
 
     // ── Construir listas respetando el límite ──────────────────────────────
@@ -827,6 +845,50 @@
     if (truncado) {
       document.getElementById('modal-limite-premium').style.display = 'flex';
     }
+  }
+
+  async function aplicarCodigo() {
+    const input    = document.getElementById('codigo-input');
+    const feedback = document.getElementById('codigo-feedback');
+    const codigo   = input.value.trim().toUpperCase();
+    feedback.textContent = '';
+
+    const CODIGOS_VALIDOS = ['CARLOS', 'CARLOS2', 'CARLOS3'];
+    if (!CODIGOS_VALIDOS.includes(codigo)) {
+      feedback.style.color = '#f85149';
+      feedback.textContent = 'Código no válido';
+      return;
+    }
+
+    const uid = window.currentUserId;
+    const { data: perfilRows } = await dbClient.from('perfil').select('id, codigos_usados').eq('usuario_id', uid).limit(1);
+    const perfilRow = perfilRows?.[0];
+    const usados = perfilRow?.codigos_usados
+      ? perfilRow.codigos_usados.split(',').filter(Boolean)
+      : [];
+
+    if (usados.includes(codigo)) {
+      feedback.style.color = '#f85149';
+      feedback.textContent = 'Este código ya fue utilizado';
+      return;
+    }
+
+    const nuevosUsados = [...usados, codigo].join(',');
+    let err;
+    if (perfilRow?.id) {
+      ({ error: err } = await dbClient.from('perfil').update({ codigos_usados: nuevosUsados }).eq('id', perfilRow.id));
+    } else {
+      ({ error: err } = await dbClient.from('perfil').insert({ usuario_id: uid, codigos_usados: nuevosUsados }));
+    }
+    if (err) {
+      feedback.style.color = '#f85149';
+      feedback.textContent = 'Error al guardar el código: ' + err.message;
+      return;
+    }
+
+    input.value = '';
+    feedback.style.color = '#4ade80';
+    feedback.textContent = '¡Límite ampliado! Ya puedes importar 200 movimientos más';
   }
 
   async function guardarGasto() {

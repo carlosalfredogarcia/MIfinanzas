@@ -18,6 +18,12 @@ ALTER TABLE ingresos
 ALTER TABLE perfil
   ADD COLUMN IF NOT EXISTS premium BOOLEAN NOT NULL DEFAULT false;
 
+-- 4. Columna 'codigos_usados' en perfil
+--    Almacena los códigos de desbloqueo ya aplicados por este usuario
+--    (separados por coma, p. ej. "CARLOS,CARLOS2")
+ALTER TABLE perfil
+  ADD COLUMN IF NOT EXISTS codigos_usados TEXT NOT NULL DEFAULT '';
+
 -- ─────────────────────────────────────────────────────────────────────────
 -- Opcional: índice para acelerar el conteo de importados por usuario
 -- ─────────────────────────────────────────────────────────────────────────
