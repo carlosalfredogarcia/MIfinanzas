@@ -899,8 +899,18 @@
     input.value = '';
     feedback.style.color = '#4ade80';
     feedback.textContent = '¡Límite ampliado! Ya puedes importar 200 movimientos más';
+
     if (_pendingCsvText) {
-      document.getElementById('btn-continuar-importacion').style.display = 'block';
+      const nuevoLimite = 200 + nuevosUsados.length * 200;
+      const filasCsv = _pendingCsvText.split('\n').filter((l, i) => i > 0 && l.trim()).length;
+      const [resG, resI] = await Promise.all([
+        dbClient.from('gastos').select('*', { count: 'exact', head: true }).eq('usuario_id', uid).eq('origen', 'importado'),
+        dbClient.from('ingresos').select('*', { count: 'exact', head: true }).eq('usuario_id', uid).eq('origen', 'importado')
+      ]);
+      const totalImportados = (resG.count ?? 0) + (resI.count ?? 0);
+      if (totalImportados + filasCsv <= nuevoLimite) {
+        document.getElementById('btn-continuar-importacion').style.display = 'block';
+      }
     }
   }
 
