@@ -133,7 +133,10 @@
 
   <div class="mes-selector">
     <button class="mes-btn" onclick="cambiarMes(-1)">‹</button>
-    <span class="mes-actual" id="mes-label">—</span>
+    <div style="text-align:center;line-height:1.3;">
+      <span class="mes-actual" id="mes-label">—</span>
+      <div id="mes-count" style="font-size:11px;color:var(--subtext);margin-top:2px;"></div>
+    </div>
     <button class="mes-btn" onclick="cambiarMes(1)">›</button>
   </div>
 
@@ -530,6 +533,8 @@
       return { ...f, tipo: 'fijo', descripcion: f.nombre, fecha: fechaFijo };
     });
     todosMovimientos = [...movGastos, ...movIngresos, ...movFijos].sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+    const n = todosMovimientos.length;
+    document.getElementById('mes-count').textContent = n + (n === 1 ? ' movimiento' : ' movimientos');
     const totalIng = movIngresos.reduce((s, i) => s + parseFloat(i.monto), 0);
     const totalGas = [...movGastos, ...movFijos].reduce((s, g) => s + parseFloat(g.monto), 0);
     document.getElementById('total-ingresos').textContent = window.moneda + totalIng.toLocaleString();
