@@ -375,6 +375,7 @@ Categorías: ${categorias.join(', ')}`
   // ── Parseo JS de todas las filas usando el esquema detectado ──────────────
   const movimientos       = []
   const dbg_filas_saltadas = []
+  const rawsValidos        = [] // para auto-corrección de tipo_signo
 
   for (let i = 0; i < filasEnviar.length; i++) {
     const linea = filasEnviar[i]
@@ -414,6 +415,7 @@ Categorías: ${categorias.join(', ')}`
         if (dbg_filas_saltadas.length < 5) dbg_filas_saltadas.push({ i, motivo: 'monto_invalido', val: cols[esquema.monto_col], raw })
         continue
       }
+      rawsValidos.push(raw)
       monto = Math.abs(raw)
       tipo  = raw === 0
         ? 'gasto'
@@ -431,8 +433,29 @@ Categorías: ${categorias.join(', ')}`
     })
   }
 
-  dbg.parseo_filas_saltadas   = dbg_filas_saltadas
-  dbg.movimientos_encontrados = movimientos.length
+  // ── Auto-corrección de tipo_signo si la IA lo detectó al revés ──────────
+  // Si hay ambos signos en los datos pero >98% salieron del mismo tipo, se invierte.
+  if (esquema.tipo_signo !== 'columnas_separadas' && movimientos.length > 5 && rawsValidos.length > 5) {
+    const nGastos   = movimientos.filter(m => m.tipo === 'gasto').length
+    const nIngresos = movimientos.filter(m => m.tipo === 'ingreso').length
+    const hayAmbosSig = rawsValidos.some(r => r > 0) && rawsValidos.some(r => r < 0)
+    if (hayAmbosSig && (nGastos / movimientos.length > 0.98 || nIngresos / movimientos.length > 0.98)) {
+      dbg.tipo_signo_autocorregido = true
+      dbg.tipo_signo_original      = esquema.tipo_signo
+      for (const mov of movimientos) {
+        mov.tipo = mov.tipo === 'gasto' ? 'ingreso' : 'gasto'
+      }
+    }
+  }
+
+  dbg.parseo_filas_saltadas      = dbg_filas_saltadas
+  dbg.movimientos_encontrados    = movimientos.length
+  dbg.tipo_signo_detectado       = esquema.tipo_signo
+  dbg.tipo_signo_autocorregido   = dbg.tipo_signo_autocorregido || false
+  dbg.monto_col                  = esquema.monto_col
+  dbg.debito_col                 = esquema.debito_col
+  dbg.credito_col                = esquema.credito_col
+  dbg.primeros_5_montos_raw      = filasEnviar.slice(0, 5).map(l => parseCSVLinea(l, sep)[esquema.monto_col])
 
   return {
     statusCode: 200,
