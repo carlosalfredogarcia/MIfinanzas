@@ -152,15 +152,28 @@ exports.handler = async (event) => {
     : CATS_DEFAULT
 
   const lineas = csv.split(/\r\n|\r|\n/).filter(l => l.trim())
-  const cabecera = lineas[0].trim()
+
+  // Buscar cabecera MiFinanza en las primeras 5 filas.
+  // XLSX exportado desde SheetJS puede tener filas vacías (,,,,) al inicio que pasan el filtro.
+  let tipoA_idx = -1
+  for (let i = 0; i < Math.min(5, lineas.length); i++) {
+    const sep = detectarSeparador(lineas[i])
+    const limpia = parseCSVLinea(lineas[i], sep).map(s => s.trim()).join(',')
+    if (limpia === CABECERA_PROPIA || cabeceraEsPropia(lineas[i], sep)) {
+      tipoA_idx = i
+      break
+    }
+  }
+
+  const cabecera = lineas[tipoA_idx >= 0 ? tipoA_idx : 0].trim()
   const sep0 = detectarSeparador(cabecera)
   const cabeceraLimpia = parseCSVLinea(cabecera, sep0).map(s => s.trim()).join(',')
 
   // ─── Tipo A: CSV propio de MiFinanza ─────────────────────────────────────
-  if (cabeceraLimpia === CABECERA_PROPIA || cabeceraEsPropia(cabecera, sep0)) {
+  if (tipoA_idx >= 0) {
     const movimientos = []
     const dbgTiposA = []
-    for (let i = 1; i < lineas.length; i++) {
+    for (let i = tipoA_idx + 1; i < lineas.length; i++) {
       const cols = parseCSVLinea(lineas[i], sep0).map(s => s.trim())
       if (cols.length < 5) continue
       const [fecha, concepto, categoria, importeStr, tipo] = cols
@@ -176,7 +189,7 @@ exports.handler = async (event) => {
         movimientos.push({ fecha, descripcion: concepto, categoria, monto, tipo: 'gasto' })
       }
     }
-    return { statusCode: 200, headers: NO_CACHE, body: JSON.stringify({ tipo: 'mifinanza', movimientos, dbg: { cabecera_detectada: 'tipoA', primeros_tipos_raw: dbgTiposA } }) }
+    return { statusCode: 200, headers: NO_CACHE, body: JSON.stringify({ tipo: 'mifinanza', movimientos, dbg: { cabecera_detectada: 'tipoA', header_row: tipoA_idx, primeros_tipos_raw: dbgTiposA } }) }
   }
 
   // ─── Tipo B: CSV de banco externo ────────────────────────────────────────
