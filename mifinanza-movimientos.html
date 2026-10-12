@@ -873,9 +873,10 @@
     }
 
     const uid = window.currentUserId;
-    const { data: perfilRows } = await dbClient.from('perfil').select('id, codigos_usados').eq('usuario_id', uid).limit(1);
+    const { data: perfilRows } = await dbClient.from('perfil').select('id, codigos_usados, limite_importacion').eq('usuario_id', uid).limit(1);
     const perfilRow = perfilRows?.[0];
     const usados = parseCodigosUsados(perfilRow?.codigos_usados);
+    const limiteBase = perfilRow?.limite_importacion ?? 200;
 
     if (usados.includes(codigo)) {
       feedback.style.color = '#f85149';
@@ -901,7 +902,7 @@
     feedback.textContent = '¡Límite ampliado! Ya puedes importar 200 movimientos más';
 
     if (_pendingCsvText) {
-      const nuevoLimite = 200 + nuevosUsados.length * 200;
+      const nuevoLimite = limiteBase + nuevosUsados.length * 200;
       const filasCsv = _pendingCsvText.split('\n').filter((l, i) => i > 0 && l.trim()).length;
       const [resG, resI] = await Promise.all([
         dbClient.from('gastos').select('*', { count: 'exact', head: true }).eq('usuario_id', uid).eq('origen', 'importado'),
@@ -1305,11 +1306,12 @@
 
       // ── Chequeo de límite antes de llamar a la IA ──────────────────────────
       const uid = window.currentUserId;
-      const { data: perfilRowsCSV } = await dbClient.from('perfil').select('premium, codigos_usados').eq('usuario_id', uid).limit(1);
+      const { data: perfilRowsCSV } = await dbClient.from('perfil').select('premium, codigos_usados, limite_importacion').eq('usuario_id', uid).limit(1);
       const perfilRowCSV   = perfilRowsCSV?.[0] || {};
       const isPremiumCSV   = perfilRowCSV.premium === true;
       const codigosCSV     = parseCodigosUsados(perfilRowCSV.codigos_usados);
-      const limiteTotalCSV = 200 + codigosCSV.length * 200;
+      const limiteBaseCSV  = perfilRowCSV.limite_importacion ?? 200;
+      const limiteTotalCSV = limiteBaseCSV + codigosCSV.length * 200;
 
       if (!isPremiumCSV) {
         const filasCsv = csvText.split('\n').filter((l, i) => i > 0 && l.trim()).length;
