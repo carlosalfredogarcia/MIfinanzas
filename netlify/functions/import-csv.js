@@ -193,7 +193,9 @@ exports.handler = async (event) => {
         movimientos.push({ fecha, descripcion: concepto, categoria, monto, tipo: 'gasto' })
       }
     }
-    return { statusCode: 200, headers: NO_CACHE, body: JSON.stringify({ tipo: 'mifinanza', movimientos, dbg: { cabecera_detectada: 'tipoA', header_row: tipoA_idx, cols: tipoA_cols, primeros_tipos_raw: dbgTiposA } }) }
+    const dbgPriCats = movimientos.slice(0, 3).map(m => m.categoria)
+    const dbgPriLineas = lineas.slice(tipoA_idx, tipoA_idx + 4).map(l => l.slice(0, 120))
+    return { statusCode: 200, headers: NO_CACHE, body: JSON.stringify({ tipo: 'mifinanza', movimientos, dbg: { cabecera_detectada: 'tipoA', header_row: tipoA_idx, cols: tipoA_cols, primeros_tipos_raw: dbgTiposA, primeras_cats: dbgPriCats, primeras_lineas: dbgPriLineas } }) }
   }
 
   // ─── Tipo B: CSV de banco externo ────────────────────────────────────────

@@ -1375,6 +1375,18 @@
         return;
       }
       cerrarCSV();
+      // DBG TEMPORAL: alert con info de detección de columnas
+      {
+        const d = datos.dbg || {};
+        const fmt = datos.tipo || '?';
+        const ng = movimientos.filter(m => m.tipo === 'gasto').length;
+        const ni = movimientos.filter(m => m.tipo === 'ingreso').length;
+        const colsStr = d.cols ? `cat=${d.cols.catCol} imp=${d.cols.importeCol} tipo=${d.cols.tipoCol}` : 'Tipo B (banco)';
+        const catsStr = (d.primeras_cats || []).join(' | ');
+        const tiposStr = (d.primeros_tipos_raw || []).join(', ');
+        const linea1 = d.primeras_lineas?.[0] || '—';
+        alert(`[DBG cols]\nfmt: ${fmt}  G:${ng} I:${ni}\ncols: ${colsStr}\ncats: ${catsStr}\ntipos: ${tiposStr}\nlinea0: ${linea1.slice(0,80)}`);
+      }
       abrirRevisionVoz(movimientos);
     } catch (err) {
       document.getElementById('csv-estado').textContent = '❌ ' + err.message + '\n\nRevisa que el archivo sea un CSV, XLS o XLSX válido.';
