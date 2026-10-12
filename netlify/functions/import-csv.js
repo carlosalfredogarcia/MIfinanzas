@@ -136,7 +136,7 @@ exports.handler = async (event) => {
     ? body.categorias
     : CATS_DEFAULT
 
-  const lineas = csv.split(/\r?\n/).filter(l => l.trim())
+  const lineas = csv.split(/\r\n|\r|\n/).filter(l => l.trim())
   const cabecera = lineas[0].trim()
   const sep0 = detectarSeparador(cabecera)
   const cabeceraLimpia = parseCSVLinea(cabecera, sep0).map(s => s.trim()).join(',')
@@ -166,7 +166,7 @@ exports.handler = async (event) => {
   }
 
   const hoy       = new Date().toISOString().slice(0, 10)
-  const MAX_FILAS = 400
+  const MAX_FILAS = 2000
 
   // Objeto de depuración — se incluye en todas las respuestas
   const dbg = { total_lineas: lineas.length }

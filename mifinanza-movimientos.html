@@ -903,7 +903,7 @@
 
     if (_pendingCsvText) {
       const nuevoLimite = limiteBase + nuevosUsados.length * 200;
-      const filasCsv = _pendingCsvText.split('\n').filter((l, i) => i > 0 && l.trim()).length;
+      const filasCsv = _pendingCsvText.split(/\r?\n/).filter((l, i) => i > 0 && l.trim()).length;
       const [resG, resI] = await Promise.all([
         dbClient.from('gastos').select('*', { count: 'exact', head: true }).eq('usuario_id', uid).eq('origen', 'importado'),
         dbClient.from('ingresos').select('*', { count: 'exact', head: true }).eq('usuario_id', uid).eq('origen', 'importado')
@@ -1314,7 +1314,7 @@
       const limiteTotalCSV = limiteBaseCSV + codigosCSV.length * 200;
 
       if (!isPremiumCSV) {
-        const filasCsv = csvText.split('\n').filter((l, i) => i > 0 && l.trim()).length;
+        const filasCsv = csvText.split(/\r?\n/).filter((l, i) => i > 0 && l.trim()).length;
         const [resGcsv, resIcsv] = await Promise.all([
           dbClient.from('gastos').select('*', { count: 'exact', head: true }).eq('usuario_id', uid).eq('origen', 'importado'),
           dbClient.from('ingresos').select('*', { count: 'exact', head: true }).eq('usuario_id', uid).eq('origen', 'importado')
