@@ -1355,6 +1355,7 @@
         return;
       }
       datos = await resp.json();
+      console.log('DBG importacion:', JSON.stringify(datos.dbg, null, 2));
       // Aceptar movimientos de Tipo A (mifinanza) y Tipo B (banco), más alias gastos
       let movimientos = Array.isArray(datos.movimientos) && datos.movimientos.length
         ? datos.movimientos

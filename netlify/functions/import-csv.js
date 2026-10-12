@@ -469,8 +469,13 @@ Categorías: ${categorias.join(', ')}`
     })
   }
 
-  dbg.parseo_filas_saltadas   = dbg_filas_saltadas
-  dbg.movimientos_encontrados = movimientos.length
+  dbg.parseo_filas_saltadas      = dbg_filas_saltadas
+  dbg.movimientos_encontrados    = movimientos.length
+  dbg.tipo_signo_detectado       = esquema.tipo_signo
+  dbg.monto_col                  = esquema.monto_col
+  dbg.debito_col                 = esquema.debito_col
+  dbg.credito_col                = esquema.credito_col
+  dbg.primeros_5_montos_raw      = filasEnviar.slice(0, 5).map(l => parseCSVLinea(l, sep)[esquema.monto_col])
 
   return {
     statusCode: 200,
