@@ -17,21 +17,21 @@ const CATS_DEFAULT = [
   '💼 Nómina'
 ]
 
-const CABECERA_PROPIA = 'Fecha,Concepto,Categoría,Importe,Tipo'
-
-// Detecta si una línea de cabecera corresponde al CSV propio de MiFinanza,
-// tolerando BOM, distintas codificaciones de "Categoría" y mayúsculas/minúsculas.
-function cabeceraEsPropia(linea, sep) {
+// Detecta si una línea es la cabecera MiFinanza y devuelve los índices de columna,
+// o null si no lo es. Tolera BOM, distintas codificaciones de "Categoría",
+// mayúsculas/minúsculas y orden de columnas diferente (p.ej. XLSX desde Numbers).
+function detectarCabeceraPropia(linea, sep) {
   const campos = parseCSVLinea(linea, sep).map(s => s.trim())
-  if (campos.length < 5) return false
-  const [f, c, cat, imp, tipo] = campos
-  // El primer campo puede llevar BOM (u+FEFF) o su decodificación Latin-1 (ï»¿),
-  // por eso se comprueba que TERMINE en "fecha" en vez de igualdad exacta.
-  return /fecha$/i.test(f) &&
-         /^concepto$/i.test(c) &&
-         /^categor/i.test(cat) &&   // acepta Categoría, CategorÃa, Categoria...
-         /^importe$/i.test(imp) &&
-         /^tipo$/i.test(tipo)
+  if (campos.length < 5) return null
+  const cl = campos.map(s => s.toLowerCase())
+  // 'fecha' puede llevar BOM (ï»¿fecha, ﻿fecha) → buscar que contenga 'fecha'
+  const fechaCol    = cl.findIndex(c => c.includes('fecha'))
+  const conceptoCol = cl.findIndex(c => c === 'concepto')
+  const catCol      = cl.findIndex(c => c.startsWith('categor'))
+  const importeCol  = cl.findIndex(c => c === 'importe')
+  const tipoCol     = cl.findIndex(c => c === 'tipo')
+  if (fechaCol === -1 || conceptoCol === -1 || importeCol === -1 || tipoCol === -1) return null
+  return { fechaCol, conceptoCol, catCol: catCol === -1 ? null : catCol, importeCol, tipoCol }
 }
 
 function detectarSeparador(linea) {
@@ -154,29 +154,33 @@ exports.handler = async (event) => {
   const lineas = csv.split(/\r\n|\r|\n/).filter(l => l.trim())
 
   // Buscar cabecera MiFinanza en las primeras 5 filas.
-  // XLSX exportado desde SheetJS puede tener filas vacías (,,,,) al inicio que pasan el filtro.
+  // XLSX exportado desde SheetJS puede tener filas vacías (,,,,) al inicio,
+  // o el orden de columnas puede diferir según Numbers/Excel.
   let tipoA_idx = -1
+  let tipoA_cols = null
   for (let i = 0; i < Math.min(5, lineas.length); i++) {
     const sep = detectarSeparador(lineas[i])
-    const limpia = parseCSVLinea(lineas[i], sep).map(s => s.trim()).join(',')
-    if (limpia === CABECERA_PROPIA || cabeceraEsPropia(lineas[i], sep)) {
-      tipoA_idx = i
-      break
-    }
+    const cols = detectarCabeceraPropia(lineas[i], sep)
+    if (cols) { tipoA_idx = i; tipoA_cols = cols; break }
   }
 
   const cabecera = lineas[tipoA_idx >= 0 ? tipoA_idx : 0].trim()
   const sep0 = detectarSeparador(cabecera)
-  const cabeceraLimpia = parseCSVLinea(cabecera, sep0).map(s => s.trim()).join(',')
 
   // ─── Tipo A: CSV propio de MiFinanza ─────────────────────────────────────
   if (tipoA_idx >= 0) {
+    const { fechaCol, conceptoCol, catCol, importeCol, tipoCol } = tipoA_cols
+    const minCols = Math.max(fechaCol, conceptoCol, importeCol, tipoCol) + 1
     const movimientos = []
     const dbgTiposA = []
     for (let i = tipoA_idx + 1; i < lineas.length; i++) {
       const cols = parseCSVLinea(lineas[i], sep0).map(s => s.trim())
-      if (cols.length < 5) continue
-      const [fecha, concepto, categoria, importeStr, tipo] = cols
+      if (cols.length < minCols) continue
+      const fecha      = cols[fechaCol]
+      const concepto   = cols[conceptoCol]
+      const categoria  = catCol !== null ? (cols[catCol] || '📦 Otros') : '📦 Otros'
+      const importeStr = cols[importeCol]
+      const tipo       = cols[tipoCol] || ''
       const monto = parsearMonto(importeStr)
       if (!fecha || !concepto || isNaN(monto)) continue
       if (dbgTiposA.length < 5) dbgTiposA.push(JSON.stringify(tipo))
@@ -189,7 +193,7 @@ exports.handler = async (event) => {
         movimientos.push({ fecha, descripcion: concepto, categoria, monto, tipo: 'gasto' })
       }
     }
-    return { statusCode: 200, headers: NO_CACHE, body: JSON.stringify({ tipo: 'mifinanza', movimientos, dbg: { cabecera_detectada: 'tipoA', header_row: tipoA_idx, primeros_tipos_raw: dbgTiposA } }) }
+    return { statusCode: 200, headers: NO_CACHE, body: JSON.stringify({ tipo: 'mifinanza', movimientos, dbg: { cabecera_detectada: 'tipoA', header_row: tipoA_idx, cols: tipoA_cols, primeros_tipos_raw: dbgTiposA } }) }
   }
 
   // ─── Tipo B: CSV de banco externo ────────────────────────────────────────
