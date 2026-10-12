@@ -150,7 +150,7 @@ exports.handler = async (event) => {
       const [fecha, concepto, categoria, importeStr, tipo] = cols
       const monto = parsearMonto(importeStr)
       if (!fecha || !concepto || isNaN(monto)) continue
-      if (tipo === 'Gasto' || tipo === 'Fijo') {
+      if (tipo === 'Gasto' || tipo === 'Fijo' || tipo === 'Gasto fijo') {
         movimientos.push({ fecha, descripcion: concepto, categoria, monto, tipo: 'gasto' })
       } else if (tipo === 'Ingreso') {
         movimientos.push({ fecha, descripcion: concepto, categoria, monto, tipo: 'ingreso' })

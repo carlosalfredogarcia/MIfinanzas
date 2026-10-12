@@ -442,6 +442,11 @@
   }
 
   function abrirModalCSV() {
+    // Ensure datepicker is initialized before programmatically setting values
+    if (window.initDatePickerField) {
+      initDatePickerField('csv-rango-desde')
+      initDatePickerField('csv-rango-hasta')
+    }
     const mm = String(mesActual + 1).padStart(2, '0')
     const ultimo = new Date(anioActual, mesActual + 1, 0).getDate()
     document.getElementById('csv-rango-desde').value = `${anioActual}-${mm}-01`
@@ -454,8 +459,11 @@
   }
 
   async function confirmarDescargaCSV() {
-    const desde = document.getElementById('csv-rango-desde').value
-    const hasta = document.getElementById('csv-rango-hasta').value
+    const elDesde = document.getElementById('csv-rango-desde')
+    const elHasta = document.getElementById('csv-rango-hasta')
+    // Read via getter (Object.defineProperty); fall back to native attribute if getter returns empty
+    const desde = elDesde.value || elDesde.getAttribute('value') || ''
+    const hasta = elHasta.value || elHasta.getAttribute('value') || ''
     if (!desde || !hasta) { alert('Selecciona ambas fechas'); return }
     if (desde > hasta) { alert('La fecha de inicio debe ser anterior al fin'); return }
 
@@ -471,7 +479,7 @@
       const [{ data: gastos }, { data: ingresos }, { data: fijos }] = await Promise.all([
         dbClient.from('gastos').select('fecha,descripcion,categoria,monto').eq('usuario_id', uid).gte('fecha', desde).lte('fecha', hasta).order('fecha', { ascending: false }),
         dbClient.from('ingresos').select('fecha,concepto,tipo,monto').eq('usuario_id', uid).gte('fecha', desde).lte('fecha', hasta).order('fecha', { ascending: false }),
-        dbClient.from('gastos_fijos').select('fecha_inicio,fecha_fin,nombre,categoria,monto,dia_del_mes').eq('usuario_id', uid).eq('activo', true).lte('fecha_inicio', hasta).or(`fecha_fin.gte.${desde},fecha_fin.is.null`)
+        dbClient.from('gastos_fijos').select('fecha_inicio,fecha_fin,nombre,categoria,monto,dia_del_mes').eq('usuario_id', uid).lte('fecha_inicio', hasta).or(`fecha_fin.gte.${desde},fecha_fin.is.null`)
       ])
 
       const filas = []
