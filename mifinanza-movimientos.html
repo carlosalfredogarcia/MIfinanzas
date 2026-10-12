@@ -836,6 +836,8 @@
     }
 
     const ops = [];
+    console.log('Insertando gastos:', JSON.stringify(gastos));
+    console.log('Insertando ingresos:', JSON.stringify(ingresos));
     if (gastos.length)   ops.push(dbClient.from('gastos').insert(gastos));
     if (ingresos.length) ops.push(dbClient.from('ingresos').insert(ingresos));
     const resultados = await Promise.all(ops);
