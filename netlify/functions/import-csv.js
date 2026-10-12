@@ -19,6 +19,21 @@ const CATS_DEFAULT = [
 
 const CABECERA_PROPIA = 'Fecha,Concepto,Categoría,Importe,Tipo'
 
+// Detecta si una línea de cabecera corresponde al CSV propio de MiFinanza,
+// tolerando BOM, distintas codificaciones de "Categoría" y mayúsculas/minúsculas.
+function cabeceraEsPropia(linea, sep) {
+  const campos = parseCSVLinea(linea, sep).map(s => s.trim())
+  if (campos.length < 5) return false
+  const [f, c, cat, imp, tipo] = campos
+  // El primer campo puede llevar BOM (u+FEFF) o su decodificación Latin-1 (ï»¿),
+  // por eso se comprueba que TERMINE en "fecha" en vez de igualdad exacta.
+  return /fecha$/i.test(f) &&
+         /^concepto$/i.test(c) &&
+         /^categor/i.test(cat) &&   // acepta Categoría, CategorÃa, Categoria...
+         /^importe$/i.test(imp) &&
+         /^tipo$/i.test(tipo)
+}
+
 function detectarSeparador(linea) {
   const tabs  = (linea.match(/\t/g) || []).length
   const puntos = (linea.match(/;/g) || []).length
@@ -142,7 +157,7 @@ exports.handler = async (event) => {
   const cabeceraLimpia = parseCSVLinea(cabecera, sep0).map(s => s.trim()).join(',')
 
   // ─── Tipo A: CSV propio de MiFinanza ─────────────────────────────────────
-  if (cabeceraLimpia === CABECERA_PROPIA) {
+  if (cabeceraLimpia === CABECERA_PROPIA || cabeceraEsPropia(cabecera, sep0)) {
     const movimientos = []
     for (let i = 1; i < lineas.length; i++) {
       const cols = parseCSVLinea(lineas[i], sep0).map(s => s.trim())
