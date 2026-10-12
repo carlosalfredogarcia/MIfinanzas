@@ -730,7 +730,8 @@
     const cont = document.getElementById('revision-voz-lista');
     cont.innerHTML = movimientos.map((g, i) => {
       const esIngreso = g.tipo === 'ingreso';
-      const opts = categorias.map(c => `<option ${c === g.categoria ? 'selected' : ''}>${escapeHtml(c)}</option>`).join('');
+      const catMatch = categorias.includes(g.categoria) ? g.categoria : '📦 Otros';
+      const opts = categorias.map(c => `<option ${c === catMatch ? 'selected' : ''}>${escapeHtml(c)}</option>`).join('');
       const sep = i < movimientos.length - 1 ? 'border-bottom:1px solid #30363d;' : '';
       const rowAccent = esIngreso ? 'border-left:3px solid #3fb950;padding-left:7px;' : 'border-left:3px solid #f85149;padding-left:7px;';
       return `<div class="revision-item" style="padding:10px 0;${sep}${rowAccent}display:flex;gap:8px;align-items:center;">
@@ -1290,13 +1291,45 @@
     document.getElementById('modal-csv').style.display = 'none';
   }
 
+  // Repara mojibake Windows-1252→UTF-8: ocurre cuando iOS Numbers abre un CSV
+  // UTF-8 con emoji y lo guarda como XLSX sin preservar la codificación.
+  // Si algún carácter no es mapeable o el resultado no es UTF-8 válido, devuelve null.
+  function fixarMojibake(str) {
+    const w2b = {
+      0x20AC:0x80,0x201A:0x82,0x0192:0x83,0x201E:0x84,0x2026:0x85,
+      0x2020:0x86,0x2021:0x87,0x02C6:0x88,0x2030:0x89,0x0160:0x8A,
+      0x2039:0x8B,0x0152:0x8C,0x017D:0x8E,0x2018:0x91,0x2019:0x92,
+      0x201C:0x93,0x201D:0x94,0x2022:0x95,0x2013:0x96,0x2014:0x97,
+      0x02DC:0x98,0x2122:0x99,0x0161:0x9A,0x203A:0x9B,0x0153:0x9C,
+      0x017E:0x9E,0x0178:0x9F
+    };
+    const bytes = new Uint8Array(str.length);
+    for (let i = 0; i < str.length; i++) {
+      const cp = str.charCodeAt(i);
+      if (cp <= 0xFF) { bytes[i] = cp; continue; }
+      const b = w2b[cp];
+      if (b !== undefined) { bytes[i] = b; continue; }
+      return null;
+    }
+    try {
+      return new TextDecoder('utf-8', { fatal: true }).decode(bytes);
+    } catch { return null; }
+  }
+
   async function fileToCSV(file) {
     const ext = file.name.split('.').pop().toLowerCase();
     if (ext === 'xls' || ext === 'xlsx') {
       const buffer = await file.arrayBuffer();
       const wb = XLSX.read(buffer, { type: 'array' });
       const ws = wb.Sheets[wb.SheetNames[0]];
-      return XLSX.utils.sheet_to_csv(ws);
+      let csv = XLSX.utils.sheet_to_csv(ws);
+      // Detectar mojibake por patrones típicos (BOM garbled, emoji garbled)
+      const primerLinea = csv.slice(0, 200);
+      if (/ï»¿|ðŸ|Ã[¡-ÿ]/.test(primerLinea)) {
+        const fixed = fixarMojibake(csv);
+        if (fixed) csv = fixed;
+      }
+      return csv;
     }
     return file.text();
   }
@@ -1375,18 +1408,6 @@
         return;
       }
       cerrarCSV();
-      // DBG TEMPORAL: alert con info de detección de columnas
-      {
-        const d = datos.dbg || {};
-        const fmt = datos.tipo || '?';
-        const ng = movimientos.filter(m => m.tipo === 'gasto').length;
-        const ni = movimientos.filter(m => m.tipo === 'ingreso').length;
-        const colsStr = d.cols ? `cat=${d.cols.catCol} imp=${d.cols.importeCol} tipo=${d.cols.tipoCol}` : 'Tipo B (banco)';
-        const catsStr = (d.primeras_cats || []).join(' | ');
-        const tiposStr = (d.primeros_tipos_raw || []).join(', ');
-        const linea1 = d.primeras_lineas?.[0] || '—';
-        alert(`[DBG cols]\nfmt: ${fmt}  G:${ng} I:${ni}\ncols: ${colsStr}\ncats: ${catsStr}\ntipos: ${tiposStr}\nlinea0: ${linea1.slice(0,80)}`);
-      }
       abrirRevisionVoz(movimientos);
     } catch (err) {
       document.getElementById('csv-estado').textContent = '❌ ' + err.message + '\n\nRevisa que el archivo sea un CSV, XLS o XLSX válido.';
