@@ -169,10 +169,7 @@ exports.handler = async (event) => {
   const MAX_FILAS = 2000
 
   // Objeto de depuración — se incluye en todas las respuestas
-  const dbg = {
-    total_lineas: lineas.length,
-    primeras_3_lineas_raw: csv.split(/\r\n|\r|\n/).slice(0, 3).map(l => JSON.stringify(l))
-  }
+  const dbg = { total_lineas: lineas.length }
 
   // ── Llamada 1: identificar cabecera real + esquema de columnas ────────────
   // Enviamos las primeras 20 filas numeradas para que Claude detecte:
@@ -239,16 +236,9 @@ exports.handler = async (event) => {
         tool_choice: { type: 'tool', name: 'detectar_esquema' },
         messages: [{
           role: 'user',
-          content: `Eres un experto en extractos bancarios. Analiza el siguiente extracto e identifica el esquema de columnas.
+          content: `Extracto bancario. Identifica la fila de cabecera real (puede haber metadata antes) y los índices de columna para fecha, descripción del movimiento, importe y tipo gasto/ingreso.
 
-REGLAS CRÍTICAS para tipo_signo:
-- Si hay DOS columnas separadas (una de débito/cargo y otra de crédito/abono), usa "columnas_separadas".
-- Si hay UNA columna de importe:
-  * En extractos bancarios españoles lo más habitual es que los CARGOS (gastos) sean NEGATIVOS y los ABONOS (ingresos) sean POSITIVOS → "negativo_es_gasto".
-  * Solo usa "positivo_es_gasto" si ves claramente en los datos que los cargos son positivos (muy raro).
-  * Mira los valores reales de las primeras filas para decidir.
-
-PRIMERAS ${Math.min(MUESTRA_N, lineas.length)} FILAS DEL ARCHIVO (con número de fila):
+PRIMERAS ${Math.min(MUESTRA_N, lineas.length)} FILAS DEL ARCHIVO:
 ${muestraNum}`
         }]
       })
@@ -284,36 +274,6 @@ ${muestraNum}`
   const sepLabel     = sep === '\t' ? 'tabulador' : sep === ';' ? 'punto y coma' : 'coma'
   dbg.separador         = sepLabel
   dbg.first_data_row    = firstDataRow
-
-  // ── Auto-corrección del tipo_signo basada en la cabecera real ──────────
-  // Si la IA devuelve tipo_signo incorrecto, lo corregimos mirando los nombres de columna
-  if (esquema.tipo_signo !== 'columnas_separadas' && esquema.monto_col != null) {
-    const cabeceraCols = parseCSVLinea(lineas[esquema.header_row] || lineas[0], sep).map(s => s.trim().toLowerCase())
-    const nombreColMonto = cabeceraCols[esquema.monto_col] || ''
-    // Columnas que en bancos españoles suelen ser negativo=gasto
-    const esConvencionNegativa = /importe|monto|saldo|movimiento|amount|cargo.abono|debe.haber/.test(nombreColMonto)
-    if (esConvencionNegativa && esquema.tipo_signo === 'positivo_es_gasto') {
-      esquema.tipo_signo = 'negativo_es_gasto'
-      dbg.tipo_signo_corregido = `'positivo_es_gasto' → 'negativo_es_gasto' por columna: "${nombreColMonto}"`
-    }
-    // También: si las primeras 5 filas de datos tienen más valores negativos que positivos,
-    // probablemente negativo=gasto (la mayoría son gastos cotidianos)
-    if (esquema.tipo_signo !== 'negativo_es_gasto') {
-      const muestraDatos = lineas.slice(firstDataRow, firstDataRow + 5)
-      let negativos = 0, positivos = 0
-      for (const fila of muestraDatos) {
-        const cols = parseCSVLinea(fila, sep)
-        const val = parsearMonto(cols[esquema.monto_col] || '')
-        if (!isNaN(val)) { if (val < 0) negativos++; else if (val > 0) positivos++ }
-      }
-      // Si hay negativos Y la IA dijo positivo_es_gasto → corregir a negativo_es_gasto
-      if (negativos > 0 && esquema.tipo_signo === 'positivo_es_gasto') {
-        esquema.tipo_signo = 'negativo_es_gasto'
-        dbg.tipo_signo_corregido_heuristica = `${negativos} negativos vs ${positivos} positivos en muestra → negativo_es_gasto`
-      }
-    }
-  }
-  dbg.tipo_signo_final = esquema.tipo_signo
 
   // Extraer filas de datos reales descartando toda la metadata
   const filasEnviar = lineas.slice(firstDataRow, firstDataRow + MAX_FILAS)
@@ -379,7 +339,7 @@ ${muestraNum}`
           tool_choice: { type: 'tool', name: 'simplificar_conceptos' },
           messages: [{
             role: 'user',
-            content: `Para cada concepto bancario devuelve nombre simplificado (1-3 palabras) y categoría.
+            content: `Para cada concepto bancario devuelve nombre simplificado (1-3 palabras) y categoría. Incluye TODOS los movimientos de la lista sin excepción, incluso los que tengan descripción genérica o vacía. No descartes ninguna fila — la lista de salida debe tener exactamente el mismo número de elementos que la lista de entrada.
 
 CONCEPTOS (lote ${ci + 1}/${chunks.length}):
 ${lista}
@@ -450,14 +410,16 @@ Categorías: ${categorias.join(', ')}`
         continue
       }
       const raw = parsearMonto(cols[esquema.monto_col] || '')
-      if (isNaN(raw) || raw === 0) {
+      if (isNaN(raw)) {
         if (dbg_filas_saltadas.length < 5) dbg_filas_saltadas.push({ i, motivo: 'monto_invalido', val: cols[esquema.monto_col], raw })
         continue
       }
       monto = Math.abs(raw)
-      tipo  = esquema.tipo_signo === 'negativo_es_gasto'
-        ? (raw < 0 ? 'gasto' : 'ingreso')
-        : (raw > 0 ? 'gasto' : 'ingreso')
+      tipo  = raw === 0
+        ? 'gasto'
+        : esquema.tipo_signo === 'negativo_es_gasto'
+          ? (raw < 0 ? 'gasto' : 'ingreso')
+          : (raw > 0 ? 'gasto' : 'ingreso')
     }
 
     movimientos.push({
@@ -469,13 +431,8 @@ Categorías: ${categorias.join(', ')}`
     })
   }
 
-  dbg.parseo_filas_saltadas      = dbg_filas_saltadas
-  dbg.movimientos_encontrados    = movimientos.length
-  dbg.tipo_signo_detectado       = esquema.tipo_signo
-  dbg.monto_col                  = esquema.monto_col
-  dbg.debito_col                 = esquema.debito_col
-  dbg.credito_col                = esquema.credito_col
-  dbg.primeros_5_montos_raw      = filasEnviar.slice(0, 5).map(l => parseCSVLinea(l, sep)[esquema.monto_col])
+  dbg.parseo_filas_saltadas   = dbg_filas_saltadas
+  dbg.movimientos_encontrados = movimientos.length
 
   return {
     statusCode: 200,
