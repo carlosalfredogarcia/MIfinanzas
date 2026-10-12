@@ -787,24 +787,8 @@
     const LIMITE_BASE  = 200;
     const limiteTotal  = LIMITE_BASE + codigosUsados.length * 200;
 
-    let limiteRestante = Infinity;
-    if (!isPremium) {
-      const [resG, resI] = await Promise.all([
-        dbClient.from('gastos').select('*', { count: 'exact', head: true }).eq('usuario_id', uid).eq('origen', 'importado'),
-        dbClient.from('ingresos').select('*', { count: 'exact', head: true }).eq('usuario_id', uid).eq('origen', 'importado')
-      ]);
-      const totalImportados = (resG.count ?? 0) + (resI.count ?? 0);
-      if (totalImportados >= limiteTotal) {
-        document.getElementById('modal-limite-premium').style.display = 'flex';
-        return;
-      }
-      limiteRestante = limiteTotal - totalImportados;
-    }
-
-    // ── Construir listas respetando el límite ──────────────────────────────
+    // ── Construir listas de movimientos válidos ────────────────────────────
     const gastos = [], ingresos = [];
-    let contadorNuevos = 0;
-    let truncado = false;
 
     for (const item of items) {
       const fecha       = item.querySelector('.rv-fecha').value || hoy;
@@ -814,9 +798,6 @@
       const tipoSelect  = item.querySelector('.rv-tipo');
       const tipo        = tipoSelect ? tipoSelect.value : 'gasto';
       if (!descripcion || isNaN(monto)) continue;
-
-      if (contadorNuevos >= limiteRestante) { truncado = true; break; }
-      contadorNuevos++;
 
       if (tipo === 'ingreso') {
         ingresos.push({ fecha, concepto: descripcion, tipo: categoria, monto, usuario_id: uid, origen: 'importado' });
@@ -830,6 +811,20 @@
       return;
     }
 
+    // ── Verificar si los nuevos superan el límite acumulado ────────────────
+    if (!isPremium) {
+      const totalNuevos = gastos.length + ingresos.length;
+      const [resG, resI] = await Promise.all([
+        dbClient.from('gastos').select('*', { count: 'exact', head: true }).eq('usuario_id', uid).eq('origen', 'importado'),
+        dbClient.from('ingresos').select('*', { count: 'exact', head: true }).eq('usuario_id', uid).eq('origen', 'importado')
+      ]);
+      const totalImportados = (resG.count ?? 0) + (resI.count ?? 0);
+      if (totalImportados + totalNuevos > limiteTotal) {
+        document.getElementById('modal-limite-premium').style.display = 'flex';
+        return;
+      }
+    }
+
     const ops = [];
     if (gastos.length)   ops.push(dbClient.from('gastos').insert(gastos));
     if (ingresos.length) ops.push(dbClient.from('ingresos').insert(ingresos));
@@ -841,10 +836,6 @@
     const total = gastos.length + ingresos.length;
     toast(`✅ ${total} movimiento${total === 1 ? '' : 's'} guardado${total === 1 ? '' : 's'}`);
     cargarMovimientos();
-
-    if (truncado) {
-      document.getElementById('modal-limite-premium').style.display = 'flex';
-    }
   }
 
   async function aplicarCodigo() {
