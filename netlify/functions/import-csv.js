@@ -169,7 +169,10 @@ exports.handler = async (event) => {
   const MAX_FILAS = 2000
 
   // Objeto de depuración — se incluye en todas las respuestas
-  const dbg = { total_lineas: lineas.length }
+  const dbg = {
+    total_lineas: lineas.length,
+    primeras_3_lineas_raw: csv.split(/\r\n|\r|\n/).slice(0, 3).map(l => JSON.stringify(l))
+  }
 
   // ── Llamada 1: identificar cabecera real + esquema de columnas ────────────
   // Enviamos las primeras 20 filas numeradas para que Claude detecte:
@@ -376,7 +379,7 @@ ${muestraNum}`
           tool_choice: { type: 'tool', name: 'simplificar_conceptos' },
           messages: [{
             role: 'user',
-            content: `Para cada concepto bancario devuelve nombre simplificado (1-3 palabras) y categoría. Incluye TODOS los movimientos de la lista sin excepción, incluso los que tengan descripción genérica o vacía. No descartes ninguna fila — la lista de salida debe tener exactamente el mismo número de elementos que la lista de entrada.
+            content: `Para cada concepto bancario devuelve nombre simplificado (1-3 palabras) y categoría.
 
 CONCEPTOS (lote ${ci + 1}/${chunks.length}):
 ${lista}
@@ -447,16 +450,14 @@ Categorías: ${categorias.join(', ')}`
         continue
       }
       const raw = parsearMonto(cols[esquema.monto_col] || '')
-      if (isNaN(raw)) {
+      if (isNaN(raw) || raw === 0) {
         if (dbg_filas_saltadas.length < 5) dbg_filas_saltadas.push({ i, motivo: 'monto_invalido', val: cols[esquema.monto_col], raw })
         continue
       }
       monto = Math.abs(raw)
-      tipo  = raw === 0
-        ? 'gasto'
-        : esquema.tipo_signo === 'negativo_es_gasto'
-          ? (raw < 0 ? 'gasto' : 'ingreso')
-          : (raw > 0 ? 'gasto' : 'ingreso')
+      tipo  = esquema.tipo_signo === 'negativo_es_gasto'
+        ? (raw < 0 ? 'gasto' : 'ingreso')
+        : (raw > 0 ? 'gasto' : 'ingreso')
     }
 
     movimientos.push({
