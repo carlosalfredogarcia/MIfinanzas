@@ -732,7 +732,8 @@
       const esIngreso = g.tipo === 'ingreso';
       const opts = categorias.map(c => `<option ${c === g.categoria ? 'selected' : ''}>${escapeHtml(c)}</option>`).join('');
       const sep = i < movimientos.length - 1 ? 'border-bottom:1px solid #30363d;' : '';
-      return `<div class="revision-item" style="padding:10px 0;${sep}display:flex;gap:8px;align-items:center;">
+      const rowAccent = esIngreso ? 'border-left:3px solid #3fb950;padding-left:7px;' : 'border-left:3px solid #f85149;padding-left:7px;';
+      return `<div class="revision-item" style="padding:10px 0;${sep}${rowAccent}display:flex;gap:8px;align-items:center;">
         <span style="flex-shrink:0;width:20px;font-size:13px;color:#484f58;text-align:right;line-height:1;">${i + 1}</span>
         <div style="flex:1;min-width:0;">
         <div style="display:flex;gap:6px;margin-bottom:6px;">
@@ -765,11 +766,12 @@
     const ingresosArr = movimientos.filter(m => m.tipo === 'ingreso');
     const sumGastos   = gastosArr.reduce((a, m) => a + (parseFloat(m.monto) || 0), 0);
     const sumIngresos = ingresosArr.reduce((a, m) => a + (parseFloat(m.monto) || 0), 0);
-    const partes = [];
-    if (gastosArr.length)   partes.push(`${gastosArr.length} gasto${gastosArr.length !== 1 ? 's' : ''} (${fmt(sumGastos)})`);
-    if (ingresosArr.length) partes.push(`${ingresosArr.length} ingreso${ingresosArr.length !== 1 ? 's' : ''} (${fmt(sumIngresos)})`);
-    document.getElementById('revision-resumen').textContent =
-      `Se encontraron ${movimientos.length} movimiento${movimientos.length !== 1 ? 's' : ''}: ${partes.join(' y ')}.`;
+    const resEl = document.getElementById('revision-resumen');
+    resEl.innerHTML = `Se encontraron <strong>${movimientos.length}</strong> movimiento${movimientos.length !== 1 ? 's' : ''}: ` +
+      (gastosArr.length   ? `<span style="color:#f85149;font-weight:600;">${gastosArr.length} gasto${gastosArr.length !== 1 ? 's' : ''} (${fmt(sumGastos)})</span>` : '') +
+      (gastosArr.length && ingresosArr.length ? ' y ' : '') +
+      (ingresosArr.length ? `<span style="color:#3fb950;font-weight:600;">${ingresosArr.length} ingreso${ingresosArr.length !== 1 ? 's' : ''} (${fmt(sumIngresos)})</span>` : '') +
+      '.';
     actualizarContadorRevision();
     document.getElementById('modal-revision-voz').style.display = 'flex';
   }
@@ -855,7 +857,10 @@
 
     cerrarRevisionVoz();
     const total = gastos.length + ingresos.length;
-    toast(`✅ ${total} movimiento${total === 1 ? '' : 's'} guardado${total === 1 ? '' : 's'}`);
+    const partesSaved = [];
+    if (gastos.length)   partesSaved.push(`${gastos.length} gasto${gastos.length !== 1 ? 's' : ''}`);
+    if (ingresos.length) partesSaved.push(`${ingresos.length} ingreso${ingresos.length !== 1 ? 's' : ''}`);
+    toast(`✅ Guardados: ${partesSaved.join(' + ')} (${total} total)`);
     cargarMovimientos();
   }
 
