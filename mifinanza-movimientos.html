@@ -777,14 +777,15 @@
     const uid = window.currentUserId;
 
     // ── Comprobar premium y límite de importación ──────────────────────────
-    const { data: perfilRows } = await dbClient.from('perfil').select('premium, codigos_usados').eq('usuario_id', uid).limit(1);
+    const { data: perfilRows } = await dbClient.from('perfil').select('premium, codigos_usados, limite_importacion').eq('usuario_id', uid).limit(1);
     const perfilRow    = perfilRows?.[0] || {};
     const isPremium    = perfilRow.premium === true;
-    const codigosUsados = perfilRow.codigos_usados
-      ? perfilRow.codigos_usados.split(',').filter(Boolean)
-      : [];
+    // codigos_usados es TEXT[] en Postgres — llega como array JS
+    const codigosUsados = Array.isArray(perfilRow.codigos_usados)
+      ? perfilRow.codigos_usados
+      : (perfilRow.codigos_usados ? perfilRow.codigos_usados.split(',').filter(Boolean) : []);
     // Límite base 200 + 200 por cada código de desbloqueo aplicado
-    const LIMITE_BASE  = 200;
+    const LIMITE_BASE  = perfilRow.limite_importacion ?? 200;
     const limiteTotal  = LIMITE_BASE + codigosUsados.length * 200;
 
     // ── Construir listas de movimientos válidos ────────────────────────────
@@ -854,9 +855,10 @@
     const uid = window.currentUserId;
     const { data: perfilRows } = await dbClient.from('perfil').select('id, codigos_usados').eq('usuario_id', uid).limit(1);
     const perfilRow = perfilRows?.[0];
-    const usados = perfilRow?.codigos_usados
-      ? perfilRow.codigos_usados.split(',').filter(Boolean)
-      : [];
+    // codigos_usados es TEXT[] en Postgres — llega como array JS
+    const usados = Array.isArray(perfilRow?.codigos_usados)
+      ? perfilRow.codigos_usados
+      : (perfilRow?.codigos_usados ? perfilRow.codigos_usados.split(',').filter(Boolean) : []);
 
     if (usados.includes(codigo)) {
       feedback.style.color = '#f85149';
@@ -864,7 +866,7 @@
       return;
     }
 
-    const nuevosUsados = [...usados, codigo].join(',');
+    const nuevosUsados = [...usados, codigo];
     let err;
     if (perfilRow?.id) {
       ({ error: err } = await dbClient.from('perfil').update({ codigos_usados: nuevosUsados }).eq('id', perfilRow.id));
