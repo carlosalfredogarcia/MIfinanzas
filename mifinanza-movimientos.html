@@ -1367,6 +1367,15 @@
         : Array.isArray(datos.gastos)
           ? datos.gastos.map(g => ({ ...g, tipo: g.tipo || 'gasto' }))
           : [];
+      // DBG TEMPORAL — alert visible en móvil sin devtools
+      {
+        const ng = movimientos.filter(m => m.tipo === 'gasto').length;
+        const ni = movimientos.filter(m => m.tipo === 'ingreso').length;
+        const primeros = movimientos.slice(0, 5).map(m => m.tipo).join(', ');
+        const rawTipos = datos.dbg?.primeros_tipos_raw ? datos.dbg.primeros_tipos_raw.join(', ') : '—';
+        const fmt = datos.tipo || '?';
+        alert(`[DBG importación]\nformato: ${fmt}\ngastos: ${ng}  ingresos: ${ni}\nprimeros tipos: ${primeros}\nraw CSV tipos: ${rawTipos}`);
+      }
       if (!movimientos.length) {
         const dbgTxt = datos.dbg ? '\n\n─── DEBUG ───\n' + JSON.stringify(datos.dbg, null, 2) : '';
         document.getElementById('csv-estado').textContent = '❌ No se encontraron movimientos en el archivo' + dbgTxt;
