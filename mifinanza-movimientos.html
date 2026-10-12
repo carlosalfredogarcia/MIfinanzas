@@ -1188,6 +1188,34 @@
     document.getElementById('csv-estado').textContent = `📄 ${file.name}\n\nAnalizando tus movimientos...`;
     try {
       const csvText = await fileToCSV(file);
+
+      // ── Chequeo de límite antes de llamar a la IA ──────────────────────────
+      const uid = window.currentUserId;
+      const { data: perfilRowsCSV } = await dbClient.from('perfil').select('premium, codigos_usados').eq('usuario_id', uid).limit(1);
+      const perfilRowCSV   = perfilRowsCSV?.[0] || {};
+      const isPremiumCSV   = perfilRowCSV.premium === true;
+      const codigosCSV     = perfilRowCSV.codigos_usados
+        ? perfilRowCSV.codigos_usados.split(',').filter(Boolean)
+        : [];
+      const limiteTotalCSV = 200 + codigosCSV.length * 200;
+
+      if (!isPremiumCSV) {
+        const filasCsv = csvText.split('\n').filter((l, i) => i > 0 && l.trim()).length;
+        const [resGcsv, resIcsv] = await Promise.all([
+          dbClient.from('gastos').select('*', { count: 'exact', head: true }).eq('usuario_id', uid).eq('origen', 'importado'),
+          dbClient.from('ingresos').select('*', { count: 'exact', head: true }).eq('usuario_id', uid).eq('origen', 'importado')
+        ]);
+        const totalImportados = (resGcsv.count ?? 0) + (resIcsv.count ?? 0);
+        console.log('filasCsv:', filasCsv, 'totalImportados:', totalImportados, 'limiteTotal:', limiteTotalCSV);
+        if (totalImportados + filasCsv > limiteTotalCSV) {
+          document.getElementById('csv-btn-seleccionar').style.display = 'block';
+          document.getElementById('csv-estado').textContent = '';
+          cerrarCSV();
+          document.getElementById('modal-limite-premium').style.display = 'flex';
+          return;
+        }
+      }
+
       const { data: { session } } = await dbClient.auth.getSession();
       const token = session?.access_token;
       if (!token) {
