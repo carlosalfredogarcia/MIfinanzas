@@ -236,9 +236,16 @@ exports.handler = async (event) => {
         tool_choice: { type: 'tool', name: 'detectar_esquema' },
         messages: [{
           role: 'user',
-          content: `Extracto bancario. Identifica la fila de cabecera real (puede haber metadata antes) y los índices de columna para fecha, descripción del movimiento, importe y tipo gasto/ingreso.
+          content: `Eres un experto en extractos bancarios. Analiza el siguiente extracto e identifica el esquema de columnas.
 
-PRIMERAS ${Math.min(MUESTRA_N, lineas.length)} FILAS DEL ARCHIVO:
+REGLAS CRÍTICAS para tipo_signo:
+- Si hay DOS columnas separadas (una de débito/cargo y otra de crédito/abono), usa "columnas_separadas".
+- Si hay UNA columna de importe:
+  * En extractos bancarios españoles lo más habitual es que los CARGOS (gastos) sean NEGATIVOS y los ABONOS (ingresos) sean POSITIVOS → "negativo_es_gasto".
+  * Solo usa "positivo_es_gasto" si ves claramente en los datos que los cargos son positivos (muy raro).
+  * Mira los valores reales de las primeras filas para decidir.
+
+PRIMERAS ${Math.min(MUESTRA_N, lineas.length)} FILAS DEL ARCHIVO (con número de fila):
 ${muestraNum}`
         }]
       })
@@ -274,6 +281,36 @@ ${muestraNum}`
   const sepLabel     = sep === '\t' ? 'tabulador' : sep === ';' ? 'punto y coma' : 'coma'
   dbg.separador         = sepLabel
   dbg.first_data_row    = firstDataRow
+
+  // ── Auto-corrección del tipo_signo basada en la cabecera real ──────────
+  // Si la IA devuelve tipo_signo incorrecto, lo corregimos mirando los nombres de columna
+  if (esquema.tipo_signo !== 'columnas_separadas' && esquema.monto_col != null) {
+    const cabeceraCols = parseCSVLinea(lineas[esquema.header_row] || lineas[0], sep).map(s => s.trim().toLowerCase())
+    const nombreColMonto = cabeceraCols[esquema.monto_col] || ''
+    // Columnas que en bancos españoles suelen ser negativo=gasto
+    const esConvencionNegativa = /importe|monto|saldo|movimiento|amount|cargo.abono|debe.haber/.test(nombreColMonto)
+    if (esConvencionNegativa && esquema.tipo_signo === 'positivo_es_gasto') {
+      esquema.tipo_signo = 'negativo_es_gasto'
+      dbg.tipo_signo_corregido = `'positivo_es_gasto' → 'negativo_es_gasto' por columna: "${nombreColMonto}"`
+    }
+    // También: si las primeras 5 filas de datos tienen más valores negativos que positivos,
+    // probablemente negativo=gasto (la mayoría son gastos cotidianos)
+    if (esquema.tipo_signo !== 'negativo_es_gasto') {
+      const muestraDatos = lineas.slice(firstDataRow, firstDataRow + 5)
+      let negativos = 0, positivos = 0
+      for (const fila of muestraDatos) {
+        const cols = parseCSVLinea(fila, sep)
+        const val = parsearMonto(cols[esquema.monto_col] || '')
+        if (!isNaN(val)) { if (val < 0) negativos++; else if (val > 0) positivos++ }
+      }
+      // Si hay negativos Y la IA dijo positivo_es_gasto → corregir a negativo_es_gasto
+      if (negativos > 0 && esquema.tipo_signo === 'positivo_es_gasto') {
+        esquema.tipo_signo = 'negativo_es_gasto'
+        dbg.tipo_signo_corregido_heuristica = `${negativos} negativos vs ${positivos} positivos en muestra → negativo_es_gasto`
+      }
+    }
+  }
+  dbg.tipo_signo_final = esquema.tipo_signo
 
   // Extraer filas de datos reales descartando toda la metadata
   const filasEnviar = lineas.slice(firstDataRow, firstDataRow + MAX_FILAS)
