@@ -436,25 +436,24 @@
   .sc-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
   .sc-cat { font-size: 13px; font-weight: 600; color: var(--text); }
   .sc-top-right { display: flex; align-items: center; gap: 8px; }
-  .sc-diff { font-family: 'Roboto', sans-serif; font-size: 12px; font-weight: 700; }
-  .sc-over  { color: var(--danger); }
-  .sc-under { color: var(--success); }
-  .sc-toggle { width: 32px; height: 18px; border-radius: 100px; border: 1px solid #30363d; background: #21262d; cursor: pointer; position: relative; transition: background 0.2s, border-color 0.2s; flex-shrink: 0; padding: 0; }
-  .sc-toggle::after { content: ''; position: absolute; top: 2px; left: 2px; width: 12px; height: 12px; border-radius: 50%; background: #8b949e; transition: transform 0.2s, background 0.2s; }
+  .sc-diff { font-family: monospace, sans-serif; font-size: 13px; font-weight: 700; font-variant-numeric: tabular-nums; flex-shrink: 0; }
+  .sc-over  { color: #f85149; }
+  .sc-under { color: #3fb950; }
+  .sc-toggle { width: 24px; height: 14px; border-radius: 100px; border: 1px solid #30363d; background: #21262d; cursor: pointer; position: relative; transition: background 0.2s, border-color 0.2s; flex-shrink: 0; padding: 0; }
+  .sc-toggle::after { content: ''; position: absolute; top: 3px; left: 3px; width: 8px; height: 8px; border-radius: 50%; background: #8b949e; transition: transform 0.2s, background 0.2s; }
   .sc-toggle.sc-on { background: rgba(63,185,80,0.15); border-color: rgba(63,185,80,0.45); }
-  .sc-toggle.sc-on::after { transform: translateX(14px); background: #3fb950; }
+  .sc-toggle.sc-on::after { transform: translateX(10px); background: #3fb950; }
   .sc-mid { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
   .sc-col { text-align: center; flex: 1; }
   .sc-lbl { font-size: 9px; color: var(--subtext); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 3px; }
   .sc-valor { font-family: 'Roboto', sans-serif; font-size: 14px; font-weight: 700; }
-  .sc-val-meta { color: #e3b341; }
+  .sc-val-meta    { color: #3fb950; }
+  .sc-val-gastado { color: #f85149; }
   .sc-val-ok   { color: var(--success); }
   .sc-val-over { color: var(--danger); }
   .sc-sep { font-size: 11px; color: var(--subtext); padding-top: 14px; flex-shrink: 0; }
   .sc-bar { height: 4px; background: var(--border2); border-radius: 100px; overflow: hidden; }
-  .sc-bar-fill { height: 100%; border-radius: 100px; transition: width 0.4s; }
-  .sc-bar-ok   { background: var(--success); }
-  .sc-bar-over { background: var(--danger); }
+  .sc-bar-fill { height: 100%; border-radius: 100px; transition: width 0.4s; background: linear-gradient(90deg, #39d353 0%, #f85149 100%); }
 
   .modal-overlay, .modal-abonar-overlay {
     position: fixed; inset: 0;
@@ -2240,7 +2239,6 @@
             <div class="sc-top">
               <span class="sc-cat">${emoji} ${nombre}</span>
               <div class="sc-top-right">
-                <span class="sc-diff ${over ? 'sc-over' : 'sc-under'}">${over ? '▲' : '▼'} ${diffFmt}</span>
                 <button class="sc-toggle${activo ? ' sc-on' : ''}" onclick="toggleSeguimiento('${catEsc}')"></button>
               </div>
             </div>
@@ -2249,14 +2247,14 @@
                 <div class="sc-lbl">Meta</div>
                 <div class="sc-valor sc-val-meta">${fmt(estimado)}</div>
               </div>
-              <div class="sc-sep">vs</div>
+              <span class="sc-diff ${over ? 'sc-over' : 'sc-under'}">${over ? '-' : '+'} ${diffFmt}</span>
               <div class="sc-col">
-                <div class="sc-lbl">Realidad</div>
-                <div class="sc-valor ${over ? 'sc-val-over' : 'sc-val-ok'}">${fmt(real)}</div>
+                <div class="sc-lbl">Gastado</div>
+                <div class="sc-valor sc-val-gastado">${fmt(real)}</div>
               </div>
             </div>
             <div class="sc-bar">
-              <div class="sc-bar-fill ${over ? 'sc-bar-over' : 'sc-bar-ok'}" style="width:${barPct}%"></div>
+              <div class="sc-bar-fill" style="width:${barPct}%"></div>
             </div>
           </div>`
       }
