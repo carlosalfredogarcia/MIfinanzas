@@ -455,6 +455,20 @@
   .sc-sep { font-size: 11px; color: var(--subtext); padding-top: 14px; flex-shrink: 0; }
   .sc-bar { height: 4px; background: var(--border2); border-radius: 100px; overflow: hidden; }
   .sc-bar-fill { height: 100%; border-radius: 100px; transition: width 0.4s; background: linear-gradient(90deg, #39d353 0%, #f85149 100%); }
+  .sc-card { cursor: pointer; }
+  .sc-movs-wrap { overflow: hidden; max-height: 0; transition: max-height 0.35s ease; }
+  .sc-movs-wrap.sc-abierto { max-height: 2400px; }
+  .sc-movs-inner { padding-top: 10px; border-top: 1px solid var(--border); margin-top: 10px; }
+  .cat-mov-item { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--border2); }
+  .cat-mov-item:last-child { border-bottom: none; }
+  .cat-mov-item:active { opacity: 0.6; }
+  .cm-icon { width: 32px; height: 32px; border-radius: 10px; background: var(--card2); display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; }
+  .cm-info { flex: 1; min-width: 0; }
+  .cm-nombre { font-size: 13px; color: var(--text); font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .cm-fecha  { font-size: 11px; color: var(--subtext); margin-top: 1px; }
+  .cm-monto  { font-size: 13px; font-weight: 700; color: var(--danger); flex-shrink: 0; }
+  .cm-edit   { font-size: 12px; color: #58a6ff; flex-shrink: 0; opacity: 0.8; }
+  .cat-movs-empty { font-size: 12px; color: var(--subtext); text-align: center; padding: 12px 0; }
 
   .modal-overlay, .modal-abonar-overlay {
     position: fixed; inset: 0;
@@ -947,6 +961,32 @@
 
 <div class="toast" id="toast"></div>
 
+<!-- Modal edición de gasto desde seguimiento de metas -->
+<div class="modal-overlay" id="modal-editar-gasto-seg">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="seg-edit-title">Editar gasto</div>
+    <div class="input-group" id="seg-fld-descripcion">
+      <label>Descripción</label>
+      <input type="text" id="seg-descripcion">
+    </div>
+    <div class="input-group" id="seg-fld-nombre">
+      <label>Nombre</label>
+      <input type="text" id="seg-nombre">
+    </div>
+    <div class="input-group">
+      <label>Monto</label>
+      <input type="number" id="seg-monto" placeholder="$0.00">
+    </div>
+    <div class="input-group" id="seg-fld-fecha">
+      <label id="seg-lbl-fecha">Fecha</label>
+      <span class="dp-wrap"><input type="hidden" id="seg-fecha" class="dp-real-input"><button type="button" class="inp dp-btn" data-dp-for="seg-fecha" onclick="openDatePicker('seg-fecha')"><span class="dp-txt" data-empty="true">Seleccionar fecha</span><svg class="dp-cal-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="16" height="15" rx="2"/><path d="M2 8h16M7 1v4M13 1v4"/></svg></button></span>
+    </div>
+    <button class="btn-guardar" onclick="guardarEdicionGastoSeg()">Guardar cambios</button>
+    <button class="btn-cancelar" onclick="cerrarEdicionGastoSeg()">Cancelar</button>
+  </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="auth.js"></script>
 <script>
@@ -1289,6 +1329,7 @@
 
   document.getElementById('modal').addEventListener('click', function(e) { if (e.target === this) cerrarModal() })
   document.getElementById('modal-abonar').addEventListener('click', function(e) { if (e.target === this) cerrarModalAbonar() })
+  document.getElementById('modal-editar-gasto-seg').addEventListener('click', function(e) { if (e.target === this) cerrarEdicionGastoSeg() })
 
   const MESES_ABR_COLCHON = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic']
 
@@ -2142,6 +2183,116 @@
     }
   }
 
+  const _MESES_SEG = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic']
+
+  function _iconMovSeg(esFijo, cat) {
+    const partes = (cat || '').trim().split(' ')
+    return partes[0] && /\p{Emoji}/u.test(partes[0]) ? partes[0] : (esFijo ? '📌' : '💸')
+  }
+
+  function _diaMesSeg(fecha) {
+    if (!fecha) return ''
+    const [, m, d] = fecha.split('-')
+    return `${parseInt(d)} ${_MESES_SEG[parseInt(m) - 1]}`
+  }
+
+  let movsRealMes = {}
+  let _segMovs = []
+  let segCardAbiertoIdx = null
+
+  function renderMovsSeg(cat) {
+    const movs = movsRealMes[cat] || []
+    if (movs.length === 0) return '<div class="cat-movs-empty">Sin transacciones este mes</div>'
+    return movs.map(m => {
+      const idx = _segMovs.length
+      _segMovs.push(m)
+      const esFijo = m.tipo === 'fijo'
+      const icono = _iconMovSeg(esFijo, m.categoria)
+      const nombre = (m.label || m.categoria || '').replace(/&/g,'&amp;').replace(/</g,'&lt;')
+      const fecha = _diaMesSeg(m.fecha)
+      const monto = '$' + m.monto.toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+      return `
+        <div class="cat-mov-item">
+          <div class="cm-icon">${icono}</div>
+          <div class="cm-info">
+            <div class="cm-nombre">${nombre}</div>
+            <div class="cm-fecha">${fecha}</div>
+          </div>
+          <div class="cm-monto">${monto}</div>
+          <div class="cm-edit" onclick="abrirEdicionGastoSeg(${idx})">✏️</div>
+        </div>`
+    }).join('')
+  }
+
+  function toggleCardMovsSeg(idx, event) {
+    if (event) {
+      if (event.target.closest('.sc-toggle')) return
+    }
+    const wrap = document.getElementById('sc-movs-' + idx)
+    if (!wrap) return
+    const yaAbierto = wrap.classList.contains('sc-abierto')
+    if (segCardAbiertoIdx !== null && segCardAbiertoIdx !== idx) {
+      const prev = document.getElementById('sc-movs-' + segCardAbiertoIdx)
+      if (prev) prev.classList.remove('sc-abierto')
+    }
+    if (yaAbierto) {
+      wrap.classList.remove('sc-abierto')
+      segCardAbiertoIdx = null
+    } else {
+      wrap.classList.add('sc-abierto')
+      segCardAbiertoIdx = idx
+    }
+  }
+
+  let _editandoSegItem = null
+
+  function abrirEdicionGastoSeg(idx) {
+    const m = _segMovs[idx]
+    if (!m) return
+    _editandoSegItem = m
+    const esFijo = m.tipo === 'fijo'
+    document.getElementById('seg-edit-title').textContent = esFijo ? 'Editar gasto fijo' : 'Editar gasto'
+    document.getElementById('seg-fld-descripcion').style.display = esFijo ? 'none' : ''
+    document.getElementById('seg-fld-nombre').style.display = esFijo ? '' : 'none'
+    document.getElementById('seg-fld-fecha').style.display = esFijo ? 'none' : ''
+    if (esFijo) {
+      document.getElementById('seg-nombre').value = m.label || ''
+    } else {
+      document.getElementById('seg-descripcion').value = m.label || ''
+      const dpBtn = document.querySelector('[data-dp-for="seg-fecha"]')
+      const dpTxt = dpBtn?.querySelector('.dp-txt')
+      document.getElementById('seg-fecha').value = m.fecha || ''
+      if (dpTxt) { dpTxt.textContent = m.fecha || ''; dpTxt.dataset.empty = m.fecha ? 'false' : 'true' }
+    }
+    document.getElementById('seg-monto').value = m.monto || ''
+    document.getElementById('modal-editar-gasto-seg').classList.add('visible')
+  }
+
+  function cerrarEdicionGastoSeg() {
+    document.getElementById('modal-editar-gasto-seg').classList.remove('visible')
+    _editandoSegItem = null
+  }
+
+  async function guardarEdicionGastoSeg() {
+    if (!_editandoSegItem) return
+    const m = _editandoSegItem
+    const monto = parseFloat(document.getElementById('seg-monto').value)
+    if (isNaN(monto) || monto <= 0) { toast('Monto inválido', 'err'); return }
+    if (m.tipo === 'fijo') {
+      const nombre = document.getElementById('seg-nombre').value.trim()
+      const { error } = await dbClient.from('gastos_fijos').update({ nombre, monto }).eq('id', m.id)
+      if (error) { toast('Error al guardar', 'err'); return }
+    } else {
+      const descripcion = document.getElementById('seg-descripcion').value.trim()
+      const fecha = document.getElementById('seg-fecha').value
+      const { error } = await dbClient.from('gastos').update({ descripcion, monto, fecha }).eq('id', m.id)
+      if (error) { toast('Error al guardar', 'err'); return }
+    }
+    cerrarEdicionGastoSeg()
+    toast('Guardado')
+    cargarGastosRealMes()
+  }
+
   let gastosRealMes = {}
 
   async function cargarGastosRealMes() {
@@ -2160,15 +2311,18 @@
     const inicioMes = `${mesActual}-01`
 
     const [{ data: gastosData, error: errG }, { data: fijosData, error: errF }] = await Promise.all([
-      dbClient.from('gastos').select('monto, categoria').eq('usuario_id', uid).gte('fecha', inicioMes),
-      dbClient.from('gastos_fijos').select('categoria, monto, fecha_inicio, fecha_fin').eq('usuario_id', uid)
+      dbClient.from('gastos').select('id, fecha, monto, categoria, descripcion').eq('usuario_id', uid).gte('fecha', inicioMes),
+      dbClient.from('gastos_fijos').select('id, categoria, monto, nombre, fecha_inicio, fecha_fin, dia_del_mes').eq('usuario_id', uid)
     ])
 
     if (errG || errF) return
     gastosRealMes = {}
+    movsRealMes = {}
     ;(gastosData || []).forEach(g => {
       const cat = g.categoria || 'Otros'
       gastosRealMes[cat] = (gastosRealMes[cat] || 0) + parseFloat(g.monto || 0)
+      if (!movsRealMes[cat]) movsRealMes[cat] = []
+      movsRealMes[cat].push({ id: g.id, tipo: 'gasto', label: g.descripcion || cat, fecha: g.fecha, monto: parseFloat(g.monto || 0), categoria: cat })
     })
     ;(fijosData || []).forEach(f => {
       const desde = f.fecha_inicio ? f.fecha_inicio.substring(0, 7) : null
@@ -2177,6 +2331,12 @@
       if (mesActual < desde || mesActual > hasta) return
       const cat = f.categoria || 'Otros'
       gastosRealMes[cat] = (gastosRealMes[cat] || 0) + parseFloat(f.monto || 0)
+      const [kAnio, kMes] = mesActual.split('-').map(Number)
+      const ultimoDia = new Date(kAnio, kMes, 0).getDate()
+      const dia = Math.min(f.dia_del_mes || 1, ultimoDia)
+      const fechaFijo = `${mesActual}-${String(dia).padStart(2, '0')}`
+      if (!movsRealMes[cat]) movsRealMes[cat] = []
+      movsRealMes[cat].push({ id: f.id, tipo: 'fijo', label: f.nombre || cat, fecha: fechaFijo, monto: parseFloat(f.monto || 0), categoria: cat })
     })
     renderTablaComparativa()
   }
@@ -2217,6 +2377,9 @@
     const dFin   = new Date(finMes.getFullYear(), finMes.getMonth(), finMes.getDate())
     const diasQuedan = Math.round((dFin - dHoy) / 86400000) + 1
 
+    _segMovs = []
+    let scIdx = 0
+
     const tarjetas = inputs.map(inp => {
       const cat      = inp.closest('.var-row')?._planCat || inp.dataset.cat
       if (!cat) return null
@@ -2232,11 +2395,13 @@
       const over    = diff > 0
       const diffFmt = '$' + Math.abs(diff).toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
       const barPct  = estimado > 0 ? Math.min(real / estimado * 100, 100) : (real > 0 ? 100 : 0)
+      const idx     = scIdx++
+      const movsHtml = renderMovsSeg(cat)
 
       return {
         activo, diff,
         html: `
-          <div class="sc-card${activo ? '' : ' sc-apagado'}">
+          <div class="sc-card${activo ? '' : ' sc-apagado'}" onclick="toggleCardMovsSeg(${idx}, event)">
             <div class="sc-top">
               <span class="sc-cat">${emoji} ${nombre}</span>
               <div class="sc-top-right">
@@ -2256,6 +2421,9 @@
             </div>
             <div class="sc-bar">
               <div class="sc-bar-fill" style="width:${barPct}%"></div>
+            </div>
+            <div class="sc-movs-wrap" id="sc-movs-${idx}">
+              <div class="sc-movs-inner">${movsHtml}</div>
             </div>
           </div>`
       }
