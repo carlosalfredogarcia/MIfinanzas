@@ -2480,7 +2480,9 @@
     const ahorroObjetivo = ingresos * ideales.aho / 100
 
     let msg = ''
-    if (necAlto && opcAlto) {
+    if (pAho >= ideales.aho) {
+      msg = `✅ Estás cumpliendo tu meta de ahorro.`
+    } else if (necAlto && opcAlto) {
       msg = `Si bajas Necesarios al ${ideales.nec}% y Opcionales al ${ideales.opc}%, podrías ahorrar ~${fmt(ahorroObjetivo)} al mes.`
     } else if (necAlto) {
       msg = `Tus necesarios están ${exNecPct <= 15 ? 'algo altos' : 'muy altos'}. Podrías ahorrar ~${fmt(ahorroObjetivo)} si los bajas al ${ideales.nec}%.`
