@@ -1957,7 +1957,9 @@
     const otrasAgrupadas = new Set(_planGrupos
       .filter(g => g.id !== idExistente)
       .flatMap(g => g.categorias))
-    const disponibles = Object.keys(gastosOriginal).filter(c => !otrasAgrupadas.has(c))
+    const disponibles = Object.keys(gastosOriginal)
+      .sort((a, b) => gastosOriginal[b] - gastosOriginal[a])
+      .filter(c => !otrasAgrupadas.has(c))
     catsList.innerHTML = disponibles.map(cat => {
       const checked = grupo?.categorias.includes(cat) ? 'checked' : ''
       const partes = cat.trim().split(' ')
