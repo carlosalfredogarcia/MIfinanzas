@@ -2171,10 +2171,18 @@
         <td>${r.est}</td>
       </tr>`).join('')
 
+    const exNec = pNec - ideales.nec
+    const exOpc = pOpc - ideales.opc
+    const ahorroNec = exNec > 0 ? ingresos * exNec / 100 : 0
+    const ahorroOpc = exOpc > 0 ? ingresos * exOpc / 100 : 0
+
     let msg = ''
-    if (pNec > ideales.nec) {
-      const exceso = pNec - ideales.nec
-      msg = `Tus necesarios están ${exceso <= 15 ? 'algo altos' : 'muy altos'}. Podrías ahorrar ~${fmt(ingresos * exceso / 100)} si los bajas al ${ideales.nec}%.`
+    if (exNec > 0 && exOpc > 0) {
+      msg = `Si bajas Necesarios al ${ideales.nec}% y Opcionales al ${ideales.opc}%, podrías ahorrar ~${fmt(ahorroNec + ahorroOpc)} al mes.`
+    } else if (exNec > 0) {
+      msg = `Tus necesarios están ${exNec <= 15 ? 'algo altos' : 'muy altos'}. Podrías ahorrar ~${fmt(ahorroNec)} si los bajas al ${ideales.nec}%.`
+    } else if (exOpc > 0) {
+      msg = `Tus opcionales están ${exOpc <= 15 ? 'algo altos' : 'muy altos'}. Podrías ahorrar ~${fmt(ahorroOpc)} si los bajas al ${ideales.opc}%.`
     } else if (pAho < ideales.aho) {
       const falta = ingresos * (ideales.aho - pAho) / 100
       msg = `Tu ahorro es bajo. Redirigir ${fmt(falta)} al mes te acercaría al ${ideales.aho}% objetivo.`
