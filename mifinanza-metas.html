@@ -388,15 +388,17 @@
   .var-group { background: var(--card2); border-radius: 12px; padding: 12px 14px; margin-bottom: 8px; border: 1px solid rgba(88,166,255,0.2); }
   .var-group.tipo-necesario { border-color: rgba(74,222,128,0.35); }
   .var-group.tipo-opcional  { border-color: rgba(251,146,60,0.3); }
-  .vg-header { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+  .vg-header { display: flex; align-items: center; gap: 8px; cursor: pointer; -webkit-user-select: none; user-select: none; }
   .vg-emoji { font-size: 18px; flex-shrink: 0; }
   .vg-nombre { font-size: 13px; font-weight: 600; color: var(--text); flex: 1; }
+  .vg-header-total { font-size: 14px; font-weight: 700; color: var(--text); flex-shrink: 0; }
   .vg-actions { display: flex; gap: 4px; }
   .btn-vg-edit, .btn-vg-delete { background: none; border: none; font-size: 14px; cursor: pointer; padding: 2px 6px; border-radius: 6px; color: var(--subtext); opacity: 0.55; transition: opacity 0.15s; }
   .btn-vg-edit:active, .btn-vg-delete:active { opacity: 1; background: rgba(255,255,255,0.06); }
-  .vg-total-bar { display: flex; justify-content: space-between; align-items: center; padding: 4px 0 10px; border-bottom: 1px solid rgba(139,148,158,0.12); margin-bottom: 10px; }
-  .vg-total-label { font-size: 12px; color: var(--subtext); }
-  .vg-total-valor { font-size: 15px; font-weight: 700; color: var(--text); }
+  .vg-chevron { width: 14px; height: 14px; flex-shrink: 0; opacity: 0.45; transition: transform 0.3s ease; color: var(--subtext); }
+  .var-group.vg-expanded .vg-chevron { transform: rotate(180deg); opacity: 0.75; }
+  .vg-rows-wrap { overflow: hidden; max-height: 0; transition: max-height 0.35s ease; }
+  .vg-rows-wrap.vg-open { max-height: 4000px; margin-top: 10px; }
   .var-group .var-row { border-radius: 8px; margin-bottom: 6px; }
   .var-group .var-row:last-of-type { margin-bottom: 0; }
   .btn-crear-grupo { width: 100%; background: none; border: 1px dashed rgba(88,166,255,0.3); border-radius: 12px; padding: 10px; font-size: 13px; color: rgba(88,166,255,0.7); cursor: pointer; font-family: 'DM Sans',sans-serif; transition: all 0.15s; margin-bottom: 8px; }
@@ -1978,6 +1980,16 @@
 
   function editarGrupo(id) { abrirModalGrupo(id) }
 
+  function toggleVarGroup(headerEl) {
+    const group = headerEl.closest('.var-group')
+    if (!group) return
+    const wrap = group.querySelector('.vg-rows-wrap')
+    if (!wrap) return
+    const nowOpen = !wrap.classList.contains('vg-open')
+    wrap.classList.toggle('vg-open', nowOpen)
+    group.classList.toggle('vg-expanded', nowOpen)
+  }
+
   function borrarGrupo(id) {
     _planGrupos = _planGrupos.filter(g => g.id !== id)
     guardarGruposPlan()
@@ -2051,22 +2063,22 @@
       el.className = 'var-group tipo-' + tipoGrupo
       el.dataset.grupoId = grupo.id
       el.innerHTML = `
-        <div class="vg-header">
+        <div class="vg-header" onclick="toggleVarGroup(this)">
           <span class="vg-emoji">${grupo.emoji}</span>
           <span class="vg-nombre">${grupo.nombre}</span>
-          <div class="vg-actions">
+          <span class="vg-header-total" id="vg-total-${grupo.id}">—</span>
+          <div class="vg-actions" onclick="event.stopPropagation()">
             <button class="btn-vg-edit" onclick="editarGrupo('${grupo.id}')">✏️</button>
             <button class="btn-vg-delete" onclick="borrarGrupo('${grupo.id}')">🗑️</button>
           </div>
+          <svg class="vg-chevron" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="2,4 7,10 12,4"/></svg>
         </div>
-        <div class="vg-total-bar">
-          <span class="vg-total-label">Total presupuestado</span>
-          <span class="vg-total-valor" id="vg-total-${grupo.id}">—</span>
-        </div>
+        <div class="vg-rows-wrap"></div>
       `
+      const rowsWrap = el.querySelector('.vg-rows-wrap')
       catsValidas
         .sort((a, b) => (gastosOriginal[b] || 0) - (gastosOriginal[a] || 0))
-        .forEach(cat => el.appendChild(_buildRow(cat)))
+        .forEach(cat => rowsWrap.appendChild(_buildRow(cat)))
 
       allItems.push({ tipo: tipoGrupo, el })
     })
@@ -2619,7 +2631,7 @@
       dbClient.from('user_preferences').upsert(
         { user_id: window.currentUserId, seguimiento_activos: seguimientoActivos, updated_at: new Date().toISOString() },
         { onConflict: 'user_id' }
-      )
+      ).then(() => {})
     }
     renderTablaComparativa()
   }
@@ -2642,9 +2654,13 @@
     _segMovs = []
     let scIdx = 0
 
+    // Categories that belong to a group → rendered as a combined group card
+    const enGruposSeg = new Set(_planGrupos.flatMap(g => g.categorias))
+
     const tarjetas = inputs.map(inp => {
       const cat      = inp.closest('.var-row')?._planCat || inp.dataset.cat
       if (!cat) return null
+      if (enGruposSeg.has(cat)) return null   // shown via group card below
       const estimado = parseFloat(inp.value) || 0
       const real     = gastosRealMes[cat] || 0
       const activo   = seguimientoActivos[cat] !== false
@@ -2692,7 +2708,88 @@
       }
     })
 
-    const tarjetasValidas = tarjetas.filter(Boolean)
+    // Group cards — combined real spending vs group budget
+    const tarjetasGrupos = _planGrupos.flatMap(grupo => {
+      const catsValidas = grupo.categorias.filter(c => Object.prototype.hasOwnProperty.call(gastosOriginal, c))
+      if (catsValidas.length === 0) return []
+
+      let estimado = 0
+      catsValidas.forEach(cat => {
+        const row = [...document.querySelectorAll('.var-row')].find(r => r._planCat === cat)
+        const inp = row?.querySelector('.variable-input')
+        if (inp) estimado += parseFloat(inp.value) || 0
+      })
+
+      const real      = catsValidas.reduce((s, cat) => s + (gastosRealMes[cat] || 0), 0)
+      const grupoKey  = '__grupo_' + grupo.id
+      const activo    = seguimientoActivos[grupoKey] !== false
+      const grupoKeyEsc = grupoKey.replace(/\\/g, '\\\\').replace(/'/g, "\\'")
+
+      const diff    = real - estimado
+      const over    = diff > 0
+      const diffFmt = '$' + Math.abs(diff).toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+      const barPct  = estimado > 0 ? Math.min(real / estimado * 100, 100) : (real > 0 ? 100 : 0)
+      const idx     = scIdx++
+
+      // Combined movements from all group categories, sorted newest first
+      const allMovs = catsValidas
+        .flatMap(cat => movsRealMes[cat] || [])
+        .sort((a, b) => (b.fecha || '').localeCompare(a.fecha || ''))
+      const movsHtml = allMovs.length === 0
+        ? '<div class="cat-movs-empty">Sin transacciones este mes</div>'
+        : allMovs.map(m => {
+            const mIdx  = _segMovs.length
+            _segMovs.push(m)
+            const esFijo = m.tipo === 'fijo'
+            const icono  = _iconMovSeg(esFijo, m.categoria)
+            const nombre = (m.label || m.categoria || '').replace(/&/g,'&amp;').replace(/</g,'&lt;')
+            const fecha  = _diaMesSeg(m.fecha)
+            const monto  = '$' + m.monto.toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+            return `
+              <div class="cat-mov-item">
+                <div class="cm-icon">${icono}</div>
+                <div class="cm-info">
+                  <div class="cm-nombre">${nombre}</div>
+                  <div class="cm-fecha">${fecha}</div>
+                </div>
+                <div class="cm-monto">${monto}</div>
+                <div class="cm-edit" onclick="abrirEdicionGastoSeg(${mIdx})">✏️</div>
+              </div>`
+          }).join('')
+
+      return [{
+        activo, diff,
+        html: `
+          <div class="sc-card${activo ? '' : ' sc-apagado'}" onclick="toggleCardMovsSeg(${idx}, event)">
+            <div class="sc-top">
+              <span class="sc-cat">${grupo.emoji} ${grupo.nombre}</span>
+              <div class="sc-top-right">
+                <svg class="sc-chevron" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="2,4 7,10 12,4"/></svg>
+                <button class="sc-toggle${activo ? ' sc-on' : ''}" onclick="toggleSeguimiento('${grupoKeyEsc}')"></button>
+              </div>
+            </div>
+            <div class="sc-mid">
+              <div class="sc-col">
+                <div class="sc-lbl">Gastado</div>
+                <div class="sc-valor sc-val-gastado">${fmt(real)}</div>
+              </div>
+              <span class="sc-diff ${over ? 'sc-over' : 'sc-under'}">${over ? '-' : '+'} ${diffFmt}</span>
+              <div class="sc-col">
+                <div class="sc-lbl">Meta</div>
+                <div class="sc-valor sc-val-meta">${fmt(estimado)}</div>
+              </div>
+            </div>
+            <div class="sc-bar">
+              <div class="sc-bar-fill" style="width:${barPct}%"></div>
+            </div>
+            <div class="sc-movs-wrap" id="sc-movs-${idx}">
+              <div class="sc-movs-inner">${movsHtml}</div>
+            </div>
+          </div>`
+      }]
+    })
+
+    const tarjetasValidas = [...tarjetas, ...tarjetasGrupos].filter(Boolean)
     tarjetasValidas.sort((a, b) => {
       if (a.activo !== b.activo) return a.activo ? -1 : 1
       return b.diff - a.diff
