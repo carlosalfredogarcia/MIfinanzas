@@ -1888,7 +1888,7 @@
           updated_at: new Date().toISOString()
         }))
       if (upserts.length > 0) {
-        dbClient.from('user_gasto_plan').upsert(upserts, { onConflict: 'user_id,categoria' })
+        dbClient.from('user_gasto_plan').upsert(upserts, { onConflict: 'user_id,categoria' }).then(() => {})
       }
     }, 300)
   }
@@ -1896,8 +1896,16 @@
   let _gastosGuardados = {}
   let _planGrupos = []
 
-  function cargarGruposPlan() {
+  async function cargarGruposPlan() {
     if (!window.currentUserId) return
+    // Supabase primary — cross-device, survives private browsing
+    const { data } = await dbClient.from('user_preferences')
+      .select('grupos_plan').eq('user_id', window.currentUserId).maybeSingle()
+    if (data?.grupos_plan) {
+      _planGrupos = Array.isArray(data.grupos_plan) ? data.grupos_plan : []
+      return
+    }
+    // localStorage fallback
     try {
       const raw = localStorage.getItem('mf_grupos_plan_' + window.currentUserId)
       if (raw) _planGrupos = JSON.parse(raw)
@@ -1906,9 +1914,14 @@
 
   function guardarGruposPlan() {
     if (!window.currentUserId) return
+    // localStorage (fast, immediate)
     try {
       localStorage.setItem('mf_grupos_plan_' + window.currentUserId, JSON.stringify(_planGrupos))
     } catch(e) {}
+    // Supabase (persistent, cross-device) — must call .then() to fire in supabase-js v2
+    dbClient.from('user_preferences')
+      .upsert({ user_id: window.currentUserId, grupos_plan: _planGrupos, updated_at: new Date().toISOString() }, { onConflict: 'user_id' })
+      .then(() => {})
   }
 
   let _editandoGrupoId = null
