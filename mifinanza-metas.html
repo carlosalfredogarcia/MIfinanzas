@@ -412,6 +412,10 @@
   .analisis-ideal-edit:hover { color: #58a6ff; }
   .analisis-ideal-edit input::-webkit-inner-spin-button,
   .analisis-ideal-edit input::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+  .ideal-stepper { display: inline-flex; align-items: center; gap: 4px; }
+  .ist-btn { background: #21262d; border: 1px solid #30363d; border-radius: 5px; color: #8b949e; width: 22px; height: 22px; font-size: 10px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; padding: 0; line-height: 1; flex-shrink: 0; }
+  .ist-btn:active { background: #30363d; color: #cdd9e5; }
+  .ist-val { color: #58a6ff; font-size: 12px; min-width: 30px; text-align: center; font-variant-numeric: tabular-nums; }
   .analisis-msg { background: rgba(88,166,255,0.07); border: 1px solid rgba(88,166,255,0.18); border-radius: 10px; padding: 10px 12px; font-size: 12px; color: var(--subtext); line-height: 1.55; }
   .analisis-float { position: fixed; left: 50%; transform: translateX(-50%); background: #1c2128; border: 1px solid #30363d; border-radius: 16px; padding: 14px 16px 12px; width: min(330px, 94vw); z-index: 500; box-shadow: 0 8px 32px rgba(0,0,0,0.6); opacity: 0; pointer-events: none; transition: opacity 0.18s; }
   .analisis-float.visible { opacity: 1; }
@@ -2032,6 +2036,10 @@
     persistirBudgetMode()
   }
 
+  function stepIdeal(key, delta) {
+    guardarIdealPersonalizado(key, (getIdeales()[key] || 0) + delta)
+  }
+
   function toggleModoDropdown(e) {
     e.stopPropagation()
     const dd = document.getElementById('modo-dropdown')
@@ -2163,13 +2171,18 @@
       { label: '💰 Ahorro',     val: pAho, ideal: ideales.aho, ikey: 'aho', est: estado(pAho, ideales.aho, true),  col: colorPct(pAho, ideales.aho, true) },
     ]
 
-    const filas = rows.map(r => `
-      <tr>
-        <td><span class="analisis-cat">${r.label}</span></td>
-        <td style="color:${r.col}">${r.val.toFixed(0)}%</td>
-        <td class="analisis-ideal analisis-ideal-edit" onclick="editarIdeal('${r.ikey}', this)" title="Toca para personalizar">${r.ideal}%</td>
-        <td>${r.est}</td>
-      </tr>`).join('')
+    const filas = rows.map(r => {
+      const idealTd = modoAnalisis === 'personalizado'
+        ? `<td class="analisis-ideal"><span class="ideal-stepper"><button class="ist-btn" onclick="stepIdeal('${r.ikey}',-1)">▼</button><span class="ist-val">${r.ideal}%</span><button class="ist-btn" onclick="stepIdeal('${r.ikey}',1)">▲</button></span></td>`
+        : `<td class="analisis-ideal analisis-ideal-edit" onclick="editarIdeal('${r.ikey}', this)" title="Toca para personalizar">${r.ideal}%</td>`
+      return `
+        <tr>
+          <td><span class="analisis-cat">${r.label}</span></td>
+          <td style="color:${r.col}">${r.val.toFixed(0)}%</td>
+          ${idealTd}
+          <td>${r.est}</td>
+        </tr>`
+    }).join('')
 
     const objetivoNec = ingresos * ideales.nec / 100
     const objetivoOpc = ingresos * ideales.opc / 100
