@@ -394,18 +394,13 @@
   .vg-actions { display: flex; gap: 4px; }
   .btn-vg-edit, .btn-vg-delete { background: none; border: none; font-size: 14px; cursor: pointer; padding: 2px 6px; border-radius: 6px; color: var(--subtext); opacity: 0.55; transition: opacity 0.15s; }
   .btn-vg-edit:active, .btn-vg-delete:active { opacity: 1; background: rgba(255,255,255,0.06); }
-  .vg-subcats { border-top: 1px solid rgba(139,148,158,0.12); padding-top: 7px; margin-top: 8px; display: flex; flex-direction: column; gap: 1px; }
-  .vg-subcat { display: flex; align-items: center; gap: 6px; padding: 4px 2px; }
-  .vg-subcat-emoji { font-size: 14px; flex-shrink: 0; }
-  .vg-subcat-nombre { font-size: 12px; color: var(--subtext); flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .vg-subcat-tipo { font-size: 11px; flex-shrink: 0; }
-  .vg-subcat-hist { font-size: 11px; color: var(--subtext); flex-shrink: 0; }
-  .vg-subcat-real { font-size: 12px; color: var(--text); font-weight: 500; min-width: 50px; text-align: right; flex-shrink: 0; }
+  .vg-total-bar { display: flex; justify-content: space-between; align-items: center; padding: 4px 0 10px; border-bottom: 1px solid rgba(139,148,158,0.12); margin-bottom: 10px; }
+  .vg-total-label { font-size: 12px; color: var(--subtext); }
+  .vg-total-valor { font-size: 15px; font-weight: 700; color: var(--text); }
+  .var-group .var-row { border-radius: 8px; margin-bottom: 6px; }
+  .var-group .var-row:last-of-type { margin-bottom: 0; }
   .btn-crear-grupo { width: 100%; background: none; border: 1px dashed rgba(88,166,255,0.3); border-radius: 12px; padding: 10px; font-size: 13px; color: rgba(88,166,255,0.7); cursor: pointer; font-family: 'DM Sans',sans-serif; transition: all 0.15s; margin-bottom: 8px; }
   .btn-crear-grupo:active { background: rgba(88,166,255,0.06); border-color: rgba(88,166,255,0.5); }
-  .vg-seg-cat-header { display: flex; justify-content: space-between; align-items: center; font-size: 11px; font-weight: 600; color: var(--subtext); padding: 6px 4px 2px; border-top: 1px solid rgba(139,148,158,0.1); margin-top: 4px; }
-  .vg-seg-cat-header:first-child { border-top: none; margin-top: 0; padding-top: 0; }
-
   .grupo-modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.65); z-index: 800; display: flex; align-items: flex-end; justify-content: center; }
   .grupo-modal { background: #1c2128; border-radius: 20px 20px 0 0; padding: 20px 18px 34px; width: 100%; max-width: 500px; max-height: 85vh; overflow-y: auto; }
   .grupo-modal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
@@ -1817,16 +1812,6 @@
       const tipoGrupo = necCount > catsValidas.length / 2 ? 'necesario' : 'opcional'
       el.classList.toggle('tipo-necesario', tipoGrupo === 'necesario')
       el.classList.toggle('tipo-opcional',  tipoGrupo === 'opcional')
-      el.querySelectorAll('.vg-subcat').forEach((subEl, i) => {
-        const cat = catsValidas[i]
-        if (!cat) return
-        const tipo = categoriaTipos[cat] ?? 'opcional'
-        const tipoSpan = subEl.querySelector('.vg-subcat-tipo')
-        if (tipoSpan) {
-          tipoSpan.textContent = tipo === 'necesario' ? '🔒' : '🎯'
-          tipoSpan.style.color = tipo === 'necesario' ? 'rgba(74,222,128,0.75)' : 'rgba(251,146,60,0.75)'
-        }
-      })
     })
     reordenarFilas()
     actualizarResumenTipos()
@@ -1844,12 +1829,12 @@
       const necCount = catsValidas.filter(c => (categoriaTipos[c] ?? 'opcional') === 'necesario').length
       return necCount > catsValidas.length / 2 ? 'necesario' : 'opcional'
     }
-    ;[...cont.querySelectorAll('.var-row, .var-group')]
+    ;[...cont.querySelectorAll(':scope > .var-row, :scope > .var-group')]
       .sort((a, b) => (orden[getTipoEl(a)] ?? 2) - (orden[getTipoEl(b)] ?? 2))
       .forEach(r => cont.appendChild(r))
-    const btnCrear = cont.querySelector('.btn-crear-grupo')
+    const btnCrear = cont.querySelector(':scope > .btn-crear-grupo')
     if (btnCrear) cont.appendChild(btnCrear)
-    const btnCerrar = cont.querySelector('.btn-cerrar-gastos')
+    const btnCerrar = cont.querySelector(':scope > .btn-cerrar-gastos')
     if (btnCerrar) cont.appendChild(btnCerrar)
   }
 
@@ -1864,10 +1849,6 @@
       const val  = parseFloat(inp.value) || 0
       if (tipo === 'necesario') necesario += val
       else if (tipo === 'opcional') opcional += val
-    })
-    _planGrupos.forEach(grupo => {
-      const { necesario: gNec, opcional: gOpc } = _distribuirPresupuestoGrupo(grupo)
-      necesario += gNec; opcional += gOpc
     })
     const total = necesario + opcional
     if (total === 0) { el.style.display = 'none'; return }
@@ -1930,29 +1911,6 @@
     } catch(e) {}
   }
 
-  function _distribuirPresupuestoGrupo(grupo) {
-    const gInput = document.querySelector('.variable-input[data-grupo-id="' + grupo.id + '"]')
-    const presupuesto = parseFloat(gInput?.value) ?? (grupo.presupuesto || 0)
-    if (presupuesto === 0) return { necesario: 0, opcional: 0 }
-    const catsValidas = grupo.categorias.filter(c => Object.prototype.hasOwnProperty.call(gastosOriginal, c))
-    if (catsValidas.length === 0) return { necesario: 0, opcional: 0 }
-    const histTotal = catsValidas.reduce((s, c) => s + (gastosOriginal[c] || 0), 0)
-    let nec = 0, opc = 0
-    if (histTotal === 0) {
-      const necCount = catsValidas.filter(c => (categoriaTipos[c] ?? 'opcional') === 'necesario').length
-      nec = presupuesto * necCount / catsValidas.length
-      opc = presupuesto * (catsValidas.length - necCount) / catsValidas.length
-    } else {
-      catsValidas.forEach(cat => {
-        const peso = (gastosOriginal[cat] || 0) / histTotal
-        const allocated = presupuesto * peso
-        if ((categoriaTipos[cat] ?? 'opcional') === 'necesario') nec += allocated
-        else opc += allocated
-      })
-    }
-    return { necesario: nec, opcional: opc }
-  }
-
   let _editandoGrupoId = null
 
   function abrirModalGrupo(idExistente) {
@@ -1998,7 +1956,7 @@
       const g = _planGrupos.find(x => x.id === _editandoGrupoId)
       if (g) { g.emoji = emoji; g.nombre = nombre; g.categorias = categorias }
     } else {
-      _planGrupos.push({ id: 'g' + Date.now(), emoji, nombre, presupuesto: 0, categorias })
+      _planGrupos.push({ id: 'g' + Date.now(), emoji, nombre, categorias })
     }
     guardarGruposPlan()
     cerrarModalGrupo()
@@ -2023,62 +1981,62 @@
   function renderGastos() {
     const cont = document.getElementById('gastos-lista-plan')
     cont.innerHTML = ''
-    const guardado = _gastosGuardados
-    const enGrupos = new Set(_planGrupos.flatMap(g => g.categorias))
-    const allItems = []
+    const guardado  = _gastosGuardados
+    const enGrupos  = new Set(_planGrupos.flatMap(g => g.categorias))
+    const allItems  = []
+
+    function _buildRow(cat) {
+      const partes = cat.trim().split(' ')
+      const emoji  = partes[0]
+      const nombre = partes.slice(1).join(' ') || cat
+      const val    = guardado[cat] !== undefined ? guardado[cat] : gastosOriginal[cat].toFixed(2)
+      const row    = document.createElement('div')
+      row.className = 'var-row'
+      row._planCat  = cat
+      row.innerHTML = `
+        <div class="var-nombre-top">
+          <span class="var-emoji">${emoji}</span>
+          <span>${nombre}</span>
+        </div>
+        <div class="var-bottom">
+          <span class="var-promedio">Últ. meses: ${fmt(gastosOriginal[cat])}</span>
+          <div style="display:flex;align-items:center;gap:6px;flex-shrink:0;">
+            <div class="var-spin-btns">
+              <button class="btn-spin btn-spin-minus" type="button" aria-label="Disminuir">−</button>
+            </div>
+            <input class="var-input variable-input" type="number" inputmode="decimal" value="${val}">
+            <div class="var-spin-btns">
+              <button class="btn-spin btn-spin-plus" type="button" aria-label="Aumentar">+</button>
+            </div>
+          </div>
+        </div>
+        <div class="tipo-btns">
+          <button class="btn-tipo" data-tipo="necesario">🔒 Necesario</button>
+          <button class="btn-tipo" data-tipo="opcional">🎯 Opcional</button>
+        </div>
+      `
+      row.querySelectorAll('.btn-tipo').forEach(btn => {
+        btn.addEventListener('click', () => setTipo(cat, btn.dataset.tipo))
+      })
+      return row
+    }
 
     Object.keys(gastosOriginal)
       .sort((a, b) => gastosOriginal[b] - gastosOriginal[a])
       .filter(cat => !enGrupos.has(cat))
       .forEach(cat => {
-        const partes  = cat.trim().split(' ')
-        const emoji   = partes[0]
-        const nombre  = partes.slice(1).join(' ') || cat
-        const valorInicial = guardado[cat] !== undefined ? guardado[cat] : gastosOriginal[cat].toFixed(2)
-        const row = document.createElement('div')
-        row.className = 'var-row'
-        row._planCat = cat
-        row.innerHTML = `
-          <div class="var-nombre-top">
-            <span class="var-emoji">${emoji}</span>
-            <span>${nombre}</span>
-          </div>
-          <div class="var-bottom">
-            <span class="var-promedio">Últ. meses: ${fmt(gastosOriginal[cat])}</span>
-            <div style="display:flex;align-items:center;gap:6px;flex-shrink:0;">
-              <div class="var-spin-btns">
-                <button class="btn-spin btn-spin-minus" type="button" aria-label="Disminuir">−</button>
-              </div>
-              <input class="var-input variable-input" type="number" inputmode="decimal" value="${valorInicial}">
-              <div class="var-spin-btns">
-                <button class="btn-spin btn-spin-plus" type="button" aria-label="Aumentar">+</button>
-              </div>
-            </div>
-          </div>
-          <div class="tipo-btns">
-            <button class="btn-tipo" data-tipo="necesario">🔒 Necesario</button>
-            <button class="btn-tipo" data-tipo="opcional">🎯 Opcional</button>
-          </div>
-        `
-        row.querySelectorAll('.btn-tipo').forEach(btn => {
-          btn.addEventListener('click', () => setTipo(cat, btn.dataset.tipo))
-        })
-        allItems.push({ tipo: categoriaTipos[cat] ?? 'opcional', el: row })
+        allItems.push({ tipo: categoriaTipos[cat] ?? 'opcional', el: _buildRow(cat) })
       })
 
     _planGrupos.forEach(grupo => {
       const catsValidas = grupo.categorias.filter(c => Object.prototype.hasOwnProperty.call(gastosOriginal, c))
       if (catsValidas.length === 0) return
-      const histTotal = catsValidas.reduce((s, c) => s + (gastosOriginal[c] || 0), 0)
-      const tiposArr = catsValidas.map(c => categoriaTipos[c] ?? 'opcional')
-      const necCount = tiposArr.filter(t => t === 'necesario').length
+      const necCount  = catsValidas.filter(c => (categoriaTipos[c] ?? 'opcional') === 'necesario').length
       const tipoGrupo = necCount > catsValidas.length / 2 ? 'necesario' : 'opcional'
-      const presupuesto = grupo.presupuesto != null ? grupo.presupuesto : histTotal.toFixed(2)
 
       const el = document.createElement('div')
       el.className = 'var-group tipo-' + tipoGrupo
       el.dataset.grupoId = grupo.id
-
       el.innerHTML = `
         <div class="vg-header">
           <span class="vg-emoji">${grupo.emoji}</span>
@@ -2088,37 +2046,15 @@
             <button class="btn-vg-delete" onclick="borrarGrupo('${grupo.id}')">🗑️</button>
           </div>
         </div>
-        <div class="var-bottom">
-          <span class="var-promedio">Últ. meses: ${fmt(histTotal)}</span>
-          <div style="display:flex;align-items:center;gap:6px;flex-shrink:0;">
-            <div class="var-spin-btns">
-              <button class="btn-spin btn-spin-minus" type="button" aria-label="Disminuir">−</button>
-            </div>
-            <input class="var-input variable-input" type="number" inputmode="decimal"
-                   value="${presupuesto}" data-grupo-id="${grupo.id}">
-            <div class="var-spin-btns">
-              <button class="btn-spin btn-spin-plus" type="button" aria-label="Aumentar">+</button>
-            </div>
-          </div>
-        </div>
-        <div class="vg-subcats">
-          ${catsValidas.map(cat => {
-            const partes = cat.trim().split(' ')
-            const emojiC = partes[0]
-            const nombreC = partes.slice(1).join(' ') || cat
-            const tipo = categoriaTipos[cat] ?? 'opcional'
-            const tipoLabel = tipo === 'necesario' ? '🔒' : '🎯'
-            const tipoColor = tipo === 'necesario' ? 'rgba(74,222,128,0.75)' : 'rgba(251,146,60,0.75)'
-            return `<div class="vg-subcat">
-              <span class="vg-subcat-emoji">${emojiC}</span>
-              <span class="vg-subcat-nombre">${nombreC}</span>
-              <span class="vg-subcat-tipo" style="color:${tipoColor}">${tipoLabel}</span>
-              <span class="vg-subcat-hist">${fmt(gastosOriginal[cat] || 0)}</span>
-              <span class="vg-subcat-real">${fmt(gastosRealMes[cat] || 0)}</span>
-            </div>`
-          }).join('')}
+        <div class="vg-total-bar">
+          <span class="vg-total-label">Total presupuestado</span>
+          <span class="vg-total-valor" id="vg-total-${grupo.id}">—</span>
         </div>
       `
+      catsValidas
+        .sort((a, b) => (gastosOriginal[b] || 0) - (gastosOriginal[a] || 0))
+        .forEach(cat => el.appendChild(_buildRow(cat)))
+
       allItems.push({ tipo: tipoGrupo, el })
     })
 
@@ -2160,6 +2096,17 @@
     return [...document.querySelectorAll('.variable-input')].reduce((s, inp) => s + (parseFloat(inp.value) || 0), 0)
   }
 
+  function actualizarTotalesGrupos() {
+    _planGrupos.forEach(grupo => {
+      const el = document.querySelector('.var-group[data-grupo-id="' + grupo.id + '"]')
+      if (!el) return
+      const total = [...el.querySelectorAll('.variable-input')]
+        .reduce((s, inp) => s + (parseFloat(inp.value) || 0), 0)
+      const span = document.getElementById('vg-total-' + grupo.id)
+      if (span) span.textContent = fmt(total)
+    })
+  }
+
   function actualizarPlanificador() {
     const ingresos = totalIngresos()
     const gastos   = totalGastos()
@@ -2168,6 +2115,7 @@
     const elDisponible = document.getElementById('p-disponible-header')
     elDisponible.textContent = fmt(disponible)
     elDisponible.classList.toggle('negativo', disponible < 0)
+    actualizarTotalesGrupos()
     renderTablaComparativa()
     actualizarResumenTipos()
     actualizarAnalisis()
@@ -2311,10 +2259,6 @@
       const val  = parseFloat(row.querySelector('.variable-input')?.value) || 0
       if (tipo === 'necesario') necesario += val; else opcional += val
     })
-    _planGrupos.forEach(grupo => {
-      const { necesario: gNec, opcional: gOpc } = _distribuirPresupuestoGrupo(grupo)
-      necesario += gNec; opcional += gOpc
-    })
     const ahorro  = Math.max(0, ingresos - totalGastos())
     const pNec    = Math.round(necesario / ingresos * 100)
     const pOpc    = Math.round(opcional  / ingresos * 100)
@@ -2391,10 +2335,6 @@
       const val  = parseFloat(row.querySelector('.variable-input')?.value) || 0
       if (tipo === 'necesario') necesario += val
       else opcional += val
-    })
-    _planGrupos.forEach(grupo => {
-      const { necesario: gNec, opcional: gOpc } = _distribuirPresupuestoGrupo(grupo)
-      necesario += gNec; opcional += gOpc
     })
     const ahorro  = Math.max(0, ingresos - totalGastos())
     const pNec    = necesario / ingresos * 100
@@ -2739,63 +2679,6 @@
       }
     })
 
-    _planGrupos.forEach(grupo => {
-      const catsValidas = grupo.categorias.filter(c => Object.prototype.hasOwnProperty.call(gastosOriginal, c))
-      if (catsValidas.length === 0) return
-      const gInput = document.querySelector('.variable-input[data-grupo-id="' + grupo.id + '"]')
-      const estimado = parseFloat(gInput?.value) ?? (grupo.presupuesto || 0)
-      const real = catsValidas.reduce((s, c) => s + (gastosRealMes[c] || 0), 0)
-      const activo = seguimientoActivos['__grp_' + grupo.id] !== false
-      const diff = real - estimado
-      const over = diff > 0
-      const diffFmt = '$' + Math.abs(diff).toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
-      const barPct = estimado > 0 ? Math.min(real / estimado * 100, 100) : (real > 0 ? 100 : 0)
-      const idx = scIdx++
-      const grpMovsHtml = catsValidas
-        .map(cat => {
-          const movs = movsRealMes[cat] || []
-          if (movs.length === 0) return ''
-          const partes = cat.trim().split(' ')
-          const em = partes[0]
-          const nb = partes.slice(1).join(' ') || cat
-          return `<div class="vg-seg-cat-header"><span>${em} ${nb}</span><span>${fmt(gastosRealMes[cat] || 0)}</span></div>` +
-            renderMovsSeg(cat)
-        })
-        .join('')
-      const movsInner = grpMovsHtml || '<div class="cat-movs-empty">Sin transacciones este mes</div>'
-      const grpKey = ('__grp_' + grupo.id).replace(/'/g, "\\'")
-      tarjetas.push({
-        activo, diff,
-        html: `
-          <div class="sc-card${activo ? '' : ' sc-apagado'}" onclick="toggleCardMovsSeg(${idx}, event)">
-            <div class="sc-top">
-              <span class="sc-cat">${grupo.emoji} ${grupo.nombre}</span>
-              <div class="sc-top-right">
-                <svg class="sc-chevron" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="2,4 7,10 12,4"/></svg>
-                <button class="sc-toggle${activo ? ' sc-on' : ''}" onclick="toggleSeguimiento('${grpKey}')"></button>
-              </div>
-            </div>
-            <div class="sc-mid">
-              <div class="sc-col">
-                <div class="sc-lbl">Gastado</div>
-                <div class="sc-valor sc-val-gastado">${fmt(real)}</div>
-              </div>
-              <span class="sc-diff ${over ? 'sc-over' : 'sc-under'}">${over ? '-' : '+'} ${diffFmt}</span>
-              <div class="sc-col">
-                <div class="sc-lbl">Meta</div>
-                <div class="sc-valor sc-val-meta">${fmt(estimado)}</div>
-              </div>
-            </div>
-            <div class="sc-bar">
-              <div class="sc-bar-fill" style="width:${barPct}%"></div>
-            </div>
-            <div class="sc-movs-wrap" id="sc-movs-${idx}">
-              <div class="sc-movs-inner">${movsInner}</div>
-            </div>
-          </div>`
-      })
-    })
-
     const tarjetasValidas = tarjetas.filter(Boolean)
     tarjetasValidas.sort((a, b) => {
       if (a.activo !== b.activo) return a.activo ? -1 : 1
@@ -2830,13 +2713,7 @@
   })
   _contGastos.addEventListener('input', e => {
     if (!e.target.matches('.variable-input')) return
-    const gid = e.target.dataset.grupoId
-    if (gid) {
-      const g = _planGrupos.find(x => x.id === gid)
-      if (g) { g.presupuesto = parseFloat(e.target.value) || 0; guardarGruposPlan() }
-    } else {
-      guardarGastosLocal()
-    }
+    guardarGastosLocal()
     actualizarPlanificador()
     mostrarAnalisisFloat(e.target)
   })
