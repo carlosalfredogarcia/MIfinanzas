@@ -1849,6 +1849,13 @@
     ;[...cont.querySelectorAll(':scope > .var-row, :scope > .var-group')]
       .sort((a, b) => (orden[getTipoEl(a)] ?? 2) - (orden[getTipoEl(b)] ?? 2))
       .forEach(r => cont.appendChild(r))
+    if (window.currentUserId) {
+      try {
+        const keys = [...cont.querySelectorAll(':scope > .var-row, :scope > .var-group')]
+          .map(el => el._planCat || ('__grupo_' + el.dataset.grupoId)).filter(Boolean)
+        localStorage.setItem('mf_orden_plan_' + window.currentUserId, JSON.stringify(keys))
+      } catch(e) {}
+    }
     const btnCrear = cont.querySelector(':scope > .btn-crear-grupo')
     if (btnCrear) cont.appendChild(btnCrear)
     const btnCerrar = cont.querySelector(':scope > .btn-cerrar-gastos')
@@ -2112,8 +2119,20 @@
       allItems.push({ tipo: tipoGrupo, el })
     })
 
-    const orden = { necesario: 0, opcional: 1 }
-    allItems.sort((a, b) => (orden[a.tipo] ?? 2) - (orden[b.tipo] ?? 2))
+    let _savedOrden = []
+    if (window.currentUserId) {
+      try { _savedOrden = JSON.parse(localStorage.getItem('mf_orden_plan_' + window.currentUserId) || '[]') } catch(e) {}
+    }
+    if (_savedOrden.length > 0) {
+      const _idx = Object.fromEntries(_savedOrden.map((k, i) => [k, i]))
+      allItems.sort((a, b) => {
+        const ka = a.el._planCat || ('__grupo_' + a.el.dataset.grupoId) || ''
+        const kb = b.el._planCat || ('__grupo_' + b.el.dataset.grupoId) || ''
+        return (_idx[ka] ?? 9999) - (_idx[kb] ?? 9999)
+      })
+    } else {
+      allItems.sort((a, b) => ({ necesario: 0, opcional: 1 }[a.tipo] ?? 2) - ({ necesario: 0, opcional: 1 }[b.tipo] ?? 2))
+    }
     allItems.forEach(item => cont.appendChild(item.el))
 
     const btnCrear = document.createElement('button')
