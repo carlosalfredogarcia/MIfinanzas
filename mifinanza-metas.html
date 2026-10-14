@@ -2774,7 +2774,8 @@
       if (enGruposSeg.has(cat)) return null   // shown via group card below
       const estimado = parseFloat(inp.value) || 0
       const real     = gastosRealMes[cat] || 0
-      const activo   = seguimientoActivos[cat] !== false
+      const esVacio  = estimado === 0 && real === 0
+      const activo   = esVacio ? false : (seguimientoActivos[cat] !== false)
       const partes   = cat.trim().split(' ')
       const emoji    = partes[0]
       const nombre   = partes.slice(1).join(' ') || cat
@@ -2788,7 +2789,7 @@
       const movsHtml = renderMovsSeg(cat)
 
       return {
-        activo, diff,
+        activo, esVacio, diff,
         html: `
           <div class="sc-card${activo ? '' : ' sc-apagado'}">
             <div class="sc-top">
@@ -2832,7 +2833,8 @@
 
       const real      = catsValidas.reduce((s, cat) => s + (gastosRealMes[cat] || 0), 0)
       const grupoKey  = '__grupo_' + grupo.id
-      const activo    = seguimientoActivos[grupoKey] !== false
+      const esVacio   = estimado === 0 && real === 0
+      const activo    = esVacio ? false : (seguimientoActivos[grupoKey] !== false)
       const grupoKeyEsc = grupoKey.replace(/\\/g, '\\\\').replace(/'/g, "\\'")
 
       const diff    = real - estimado
@@ -2868,7 +2870,7 @@
           }).join('')
 
       return [{
-        activo, diff,
+        activo, esVacio, diff,
         html: `
           <div class="sc-card${activo ? '' : ' sc-apagado'}">
             <div class="sc-top">
@@ -2900,6 +2902,7 @@
 
     const tarjetasValidas = [...tarjetas, ...tarjetasGrupos].filter(Boolean)
     tarjetasValidas.sort((a, b) => {
+      if (a.esVacio !== b.esVacio) return a.esVacio ? 1 : -1
       if (a.activo !== b.activo) return a.activo ? -1 : 1
       return b.diff - a.diff
     })
