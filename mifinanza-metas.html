@@ -1948,7 +1948,7 @@
     const grupo = idExistente ? _planGrupos.find(g => g.id === idExistente) : null
     titulo.textContent = idExistente ? 'Editar grupo' : 'Crear grupo'
     emojiInp.value = grupo?.emoji || ''
-    nombreInp.value = grupo?.nombre || ''
+    nombreInp.value = grupo?.nombre || 'Gastos Varios'
     const otrasAgrupadas = new Set(_planGrupos
       .filter(g => g.id !== idExistente)
       .flatMap(g => g.categorias))
