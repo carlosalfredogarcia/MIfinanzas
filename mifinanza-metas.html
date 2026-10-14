@@ -452,6 +452,10 @@
   .ideal-stepper { display: inline-flex; align-items: center; gap: 4px; }
   .ist-btn { background: #21262d; border: 1px solid #30363d; border-radius: 5px; color: #8b949e; width: 22px; height: 22px; font-size: 10px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; padding: 0; line-height: 1; flex-shrink: 0; }
   .ist-btn:active { background: #30363d; color: #cdd9e5; }
+  .pct-inp { width: 40px; background: rgba(88,166,255,0.08); border: 1px solid rgba(88,166,255,0.3); border-radius: 6px; color: #58a6ff; text-align: center; font-size: 13px; font-family: inherit; padding: 2px 4px; -moz-appearance: textfield; }
+  .pct-inp:focus { outline: none; border-color: #58a6ff; background: rgba(88,166,255,0.15); }
+  .pct-inp::-webkit-inner-spin-button, .pct-inp::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+  .pct-suma { font-size: 10px; color: #4ade80; display: block; text-align: right; margin-top: 2px; }
   .ist-val { color: #58a6ff; font-size: 12px; min-width: 30px; text-align: center; font-variant-numeric: tabular-nums; }
   .analisis-msg { background: rgba(88,166,255,0.07); border: 1px solid rgba(88,166,255,0.18); border-radius: 10px; padding: 10px 12px; font-size: 12px; color: var(--subtext); line-height: 1.55; }
   .analisis-float { position: fixed; left: 50%; transform: translateX(-50%); background: #1c2128; border: 1px solid #30363d; border-radius: 16px; padding: 14px 16px 12px; width: min(330px, 94vw); z-index: 500; box-shadow: 0 8px 32px rgba(0,0,0,0.6); opacity: 0; pointer-events: none; transition: opacity 0.18s; }
@@ -2269,6 +2273,50 @@
     guardarIdealPersonalizado(key, (getIdeales()[key] || 0) + delta)
   }
 
+  function onPctInput(key, rawVal) {
+    const nuevo = Math.max(0, Math.min(100, Math.round(parseFloat(rawVal) || 0)))
+    const base  = modoPersonalizado ? { ...modoPersonalizado } : { ...getIdeales() }
+    base[key]   = nuevo
+    const resto = 100 - nuevo
+    const otros = ['nec', 'opc', 'aho'].filter(k => k !== key)
+    const sumaOtros = otros.reduce((s, k) => s + base[k], 0)
+    if (resto <= 0) {
+      otros.forEach(k => { base[k] = 0 })
+      base[key] = 100
+    } else if (sumaOtros === 0) {
+      const mitad = Math.floor(resto / 2)
+      base[otros[0]] = mitad
+      base[otros[1]] = resto - mitad
+    } else {
+      let dist = 0
+      otros.forEach((k, i) => {
+        if (i === otros.length - 1) { base[k] = resto - dist }
+        else { const v = Math.round(base[k] / sumaOtros * resto); base[k] = v; dist += v }
+      })
+    }
+    modoPersonalizado = base
+    modoAnalisis = 'personalizado'
+    otros.forEach(k => {
+      const inp = document.getElementById('pct-' + k)
+      if (inp && document.activeElement !== inp) inp.value = base[k]
+    })
+    const suma   = base.nec + base.opc + base.aho
+    const sumaEl = document.getElementById('pct-suma')
+    if (sumaEl) {
+      sumaEl.textContent = suma === 100 ? '= 100% ✓' : `Suma: ${suma}% ⚠️`
+      sumaEl.style.color = suma === 100 ? '#4ade80' : '#f85149'
+    }
+  }
+
+  function onPctBlur() {
+    if (!modoPersonalizado) return
+    persistirBudgetMode()
+    setTimeout(() => {
+      const foco = ['pct-nec', 'pct-opc', 'pct-aho'].map(id => document.getElementById(id))
+      if (!foco.some(el => el === document.activeElement)) actualizarAnalisis()
+    }, 100)
+  }
+
   function toggleModoDropdown(e) {
     e.stopPropagation()
     const dd = document.getElementById('modo-dropdown')
@@ -2406,7 +2454,7 @@
 
     const filas = rows.map(r => {
       const idealTd = modoAnalisis === 'personalizado'
-        ? `<td class="analisis-ideal"><span class="ideal-stepper"><button class="ist-btn" onclick="stepIdeal('${r.ikey}',-1)">▼</button><span class="ist-val">${r.ideal}%</span><button class="ist-btn" onclick="stepIdeal('${r.ikey}',1)">▲</button></span></td>`
+        ? `<td class="analisis-ideal"><input class="pct-inp" id="pct-${r.ikey}" type="number" min="0" max="100" value="${r.ideal}" oninput="onPctInput('${r.ikey}',this.value)" onblur="onPctBlur()">%</td>`
         : `<td class="analisis-ideal analisis-ideal-edit" onclick="editarIdeal('${r.ikey}', this)" title="Toca para personalizar">${r.ideal}%</td>`
       return `
         <tr>
@@ -2416,6 +2464,9 @@
           <td>${r.est}</td>
         </tr>`
     }).join('')
+    const sumaRow = modoAnalisis === 'personalizado'
+      ? `<tr><td colspan="2"></td><td class="analisis-ideal"><span class="pct-suma" id="pct-suma">= 100% ✓</span></td><td></td></tr>`
+      : ''
 
     const objetivoNec = ingresos * ideales.nec / 100
     const objetivoOpc = ingresos * ideales.opc / 100
@@ -2439,7 +2490,7 @@
       const falta = ingresos * (ideales.aho - pAho) / 100
       msg = `Tu ahorro es bajo. Redirigir ${fmt(falta)} al mes te acercaría al ${ideales.aho}% objetivo.`
     } else if (modoAnalisis === 'personalizado') {
-      msg = `Usando valores personalizados. Toca los % de referencia para ajustarlos.`
+      msg = `Usando valores personalizados. Edita los % directamente — los demás se ajustan solos.`
     } else {
       msg = `¡Buen equilibrio! Tu reparto sigue el perfil <strong>${MODOS_LABEL[modoAnalisis]}</strong>.`
     }
@@ -2462,7 +2513,7 @@
             <th>${labelModo}</th>
             <th></th>
           </tr></thead>
-          <tbody>${filas}</tbody>
+          <tbody>${filas}${sumaRow}</tbody>
         </table>
         <div id="modo-dropdown" class="amodo-dd" style="display:none;">${itemsDD}</div>
       </div>
