@@ -388,19 +388,24 @@
   .var-group { background: var(--card2); border-radius: 12px; padding: 12px 14px; margin-bottom: 8px; border: 1px solid rgba(88,166,255,0.2); }
   .var-group.tipo-necesario { border-color: rgba(74,222,128,0.35); }
   .var-group.tipo-opcional  { border-color: rgba(251,146,60,0.3); }
-  .vg-header { display: flex; align-items: center; gap: 8px; cursor: pointer; -webkit-user-select: none; user-select: none; }
-  .vg-emoji { font-size: 18px; flex-shrink: 0; }
-  .vg-nombre { font-size: 13px; font-weight: 600; color: var(--text); flex: 1; }
-  .vg-header-total { font-size: 14px; font-weight: 700; color: var(--text); flex-shrink: 0; }
-  .vg-actions { display: flex; gap: 4px; }
-  .btn-vg-edit, .btn-vg-delete { background: none; border: none; font-size: 14px; cursor: pointer; padding: 2px 6px; border-radius: 6px; color: var(--subtext); opacity: 0.55; transition: opacity 0.15s; }
-  .btn-vg-edit:active, .btn-vg-delete:active { opacity: 1; background: rgba(255,255,255,0.06); }
-  .vg-chevron { width: 14px; height: 14px; flex-shrink: 0; opacity: 0.45; transition: transform 0.3s ease; color: var(--subtext); }
-  .var-group.vg-expanded .vg-chevron { transform: rotate(180deg); opacity: 0.75; }
-  .vg-rows-wrap { overflow: hidden; max-height: 0; transition: max-height 0.35s ease; }
-  .vg-rows-wrap.vg-open { max-height: 4000px; margin-top: 10px; }
-  .var-group .var-row { border-radius: 8px; margin-bottom: 6px; }
-  .var-group .var-row:last-of-type { margin-bottom: 0; }
+  .vg-header { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+  .vg-emoji { font-size: 20px; flex-shrink: 0; }
+  .vg-title-block { flex: 1; min-width: 0; }
+  .vg-nombre { font-size: 13px; font-weight: 600; color: var(--text); display: block; }
+  .vg-subtitle { font-size: 11px; color: var(--subtext); margin-top: 1px; display: block; }
+  .vg-total-pill { background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.13); border-radius: 9px; padding: 4px 12px; flex-shrink: 0; text-align: center; min-width: 52px; }
+  .vg-total-pill span { font-size: 15px; font-weight: 700; color: var(--text); }
+  .vg-sub-row { display: flex; align-items: center; gap: 8px; padding: 7px 0; border-bottom: 1px solid rgba(139,148,158,0.1); }
+  .vg-sub-emoji { font-size: 15px; flex-shrink: 0; }
+  .vg-sub-nombre { flex: 1; font-size: 13px; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .vg-sub-input { background: none; border: none; color: var(--text); font-size: 13px; font-weight: 600; text-align: right; width: 60px; padding: 0; font-family: 'DM Sans',sans-serif; }
+  .vg-sub-input:focus { outline: none; }
+  .vg-footer { display: flex; align-items: center; gap: 8px; margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(139,148,158,0.12); }
+  .btn-vg-edit-full { flex: 1; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.09); border-radius: 8px; padding: 6px 10px; font-size: 12px; color: var(--subtext); cursor: pointer; font-family: 'DM Sans',sans-serif; text-align: left; }
+  .btn-vg-edit-full:active { background: rgba(255,255,255,0.09); }
+  .vg-tipo-badge { padding: 5px 10px; border-radius: 8px; font-size: 12px; font-weight: 600; border: 1px solid; flex-shrink: 0; }
+  .vg-tipo-badge.tipo-necesario { background: rgba(74,222,128,0.1); border-color: rgba(74,222,128,0.35); color: rgb(74,222,128); }
+  .vg-tipo-badge.tipo-opcional  { background: rgba(251,146,60,0.1);  border-color: rgba(251,146,60,0.3);  color: rgb(251,146,60);  }
   .btn-crear-grupo { width: 100%; background: none; border: 1px dashed rgba(88,166,255,0.3); border-radius: 12px; padding: 10px; font-size: 13px; color: rgba(88,166,255,0.7); cursor: pointer; font-family: 'DM Sans',sans-serif; transition: all 0.15s; margin-bottom: 8px; }
   .btn-crear-grupo:active { background: rgba(88,166,255,0.06); border-color: rgba(88,166,255,0.5); }
   .grupo-modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.65); z-index: 800; display: flex; align-items: flex-end; justify-content: center; }
@@ -1980,16 +1985,6 @@
 
   function editarGrupo(id) { abrirModalGrupo(id) }
 
-  function toggleVarGroup(headerEl) {
-    const group = headerEl.closest('.var-group')
-    if (!group) return
-    const wrap = group.querySelector('.vg-rows-wrap')
-    if (!wrap) return
-    const nowOpen = !wrap.classList.contains('vg-open')
-    wrap.classList.toggle('vg-open', nowOpen)
-    group.classList.toggle('vg-expanded', nowOpen)
-  }
-
   function borrarGrupo(id) {
     _planGrupos = _planGrupos.filter(g => g.id !== id)
     guardarGruposPlan()
@@ -2046,6 +2041,22 @@
       return row
     }
 
+    function _buildGroupSubRow(cat, guardado, gastosOriginal) {
+      const partes = cat.trim().split(' ')
+      const emoji  = partes[0]
+      const nombre = partes.slice(1).join(' ') || cat
+      const val    = guardado[cat] !== undefined ? guardado[cat] : gastosOriginal[cat].toFixed(2)
+      const row    = document.createElement('div')
+      row.className = 'var-row vg-sub-row'
+      row._planCat  = cat
+      row.innerHTML = `
+        <span class="vg-sub-emoji">${emoji}</span>
+        <span class="vg-sub-nombre">${nombre}</span>
+        <input class="variable-input vg-sub-input" type="number" inputmode="decimal" value="${val}">
+      `
+      return row
+    }
+
     Object.keys(gastosOriginal)
       .sort((a, b) => gastosOriginal[b] - gastosOriginal[a])
       .filter(cat => !enGrupos.has(cat))
@@ -2059,26 +2070,33 @@
       const necCount  = catsValidas.filter(c => (categoriaTipos[c] ?? 'opcional') === 'necesario').length
       const tipoGrupo = necCount > catsValidas.length / 2 ? 'necesario' : 'opcional'
 
+      const historicoGrupo = catsValidas.reduce((s, c) => s + (gastosOriginal[c] || 0), 0)
+      const tipoLabel = tipoGrupo === 'necesario' ? '🔒 Necesario' : '🎯 Opcional'
+
       const el = document.createElement('div')
       el.className = 'var-group tipo-' + tipoGrupo
       el.dataset.grupoId = grupo.id
       el.innerHTML = `
-        <div class="vg-header" onclick="toggleVarGroup(this)">
+        <div class="vg-header">
           <span class="vg-emoji">${grupo.emoji}</span>
-          <span class="vg-nombre">${grupo.nombre}</span>
-          <span class="vg-header-total" id="vg-total-${grupo.id}">—</span>
-          <div class="vg-actions" onclick="event.stopPropagation()">
-            <button class="btn-vg-edit" onclick="editarGrupo('${grupo.id}')">✏️</button>
-            <button class="btn-vg-delete" onclick="borrarGrupo('${grupo.id}')">🗑️</button>
+          <div class="vg-title-block">
+            <span class="vg-nombre">${grupo.nombre}</span>
+            <span class="vg-subtitle">Suma de ${catsValidas.length} categoría${catsValidas.length !== 1 ? 's' : ''} · Últ. meses: ${fmt(historicoGrupo)}</span>
           </div>
-          <svg class="vg-chevron" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="2,4 7,10 12,4"/></svg>
+          <div class="vg-total-pill"><span id="vg-total-${grupo.id}">—</span></div>
         </div>
-        <div class="vg-rows-wrap"></div>
       `
-      const rowsWrap = el.querySelector('.vg-rows-wrap')
       catsValidas
         .sort((a, b) => (gastosOriginal[b] || 0) - (gastosOriginal[a] || 0))
-        .forEach(cat => rowsWrap.appendChild(_buildRow(cat)))
+        .forEach(cat => el.appendChild(_buildGroupSubRow(cat, guardado, gastosOriginal)))
+
+      const footer = document.createElement('div')
+      footer.className = 'vg-footer'
+      footer.innerHTML = `
+        <button class="btn-vg-edit-full" onclick="editarGrupo('${grupo.id}')">✏️ Editar grupo</button>
+        <span class="vg-tipo-badge tipo-${tipoGrupo}">${tipoLabel}</span>
+      `
+      el.appendChild(footer)
 
       allItems.push({ tipo: tipoGrupo, el })
     })
