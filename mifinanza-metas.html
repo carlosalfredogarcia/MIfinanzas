@@ -439,11 +439,11 @@
   .analisis-body { overflow: hidden; max-height: 0; transition: max-height 0.35s ease, opacity 0.25s ease; opacity: 0; }
   .analisis-body.abierto { max-height: 500px; opacity: 1; }
   .analisis-tabla { width: 100%; border-collapse: collapse; margin-bottom: 10px; table-layout: fixed; }
-  .analisis-tabla th { font-size: 10px; color: var(--subtext); text-transform: uppercase; letter-spacing: 0.08em; padding: 0 0 8px; font-weight: 600; }
+  .analisis-tabla th { font-size: 10px; color: var(--subtext); text-transform: uppercase; letter-spacing: 0.08em; padding: 0 0 8px; font-weight: 600; white-space: nowrap; overflow: hidden; }
   .analisis-tabla th:not(:first-child) { text-align: right; }
-  .analisis-tabla th:nth-child(2), .analisis-tabla td:nth-child(2) { width: 52px; }
-  .analisis-tabla th:nth-child(3), .analisis-tabla td:nth-child(3) { width: 76px; }
-  .analisis-tabla th:nth-child(4), .analisis-tabla td:nth-child(4) { width: 26px; }
+  .analisis-tabla th:nth-child(2), .analisis-tabla td:nth-child(2) { width: 56px; }
+  .analisis-tabla th:nth-child(3), .analisis-tabla td:nth-child(3) { width: 106px; padding-left: 8px; }
+  .analisis-tabla th:nth-child(4), .analisis-tabla td:nth-child(4) { width: 24px; }
   .analisis-tabla td { padding: 5px 0; font-size: 13px; vertical-align: middle; }
   .analisis-tabla td:not(:first-child) { text-align: right; font-family: 'Roboto', sans-serif; font-weight: 700; }
   .analisis-cat { display: flex; align-items: center; gap: 6px; }
