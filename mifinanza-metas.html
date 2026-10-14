@@ -385,9 +385,7 @@
   .var-row.tipo-necesario { border: 1px solid rgba(74,222,128,0.35); }
   .var-row.tipo-opcional  { border: 1px solid rgba(251,146,60,0.3); }
 
-  .var-group { background: var(--card2); border-radius: 12px; padding: 12px 14px; margin-bottom: 8px; border: 1px solid rgba(88,166,255,0.2); }
-  .var-group.tipo-necesario { border-color: rgba(74,222,128,0.35); }
-  .var-group.tipo-opcional  { border-color: rgba(251,146,60,0.3); }
+  .var-group { background: var(--card); border-radius: 12px; padding: 12px 14px; margin-bottom: 8px; border: 1px solid rgba(251,146,60,0.38); }
   .vg-header { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
   .vg-emoji { font-size: 20px; flex-shrink: 0; }
   .vg-title-block { flex: 1; min-width: 0; }
@@ -403,9 +401,8 @@
   .vg-footer { display: flex; align-items: center; gap: 8px; margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(139,148,158,0.12); }
   .btn-vg-edit-full { flex: 1; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.09); border-radius: 8px; padding: 6px 10px; font-size: 12px; color: var(--subtext); cursor: pointer; font-family: 'DM Sans',sans-serif; text-align: left; }
   .btn-vg-edit-full:active { background: rgba(255,255,255,0.09); }
-  .vg-tipo-badge { padding: 5px 10px; border-radius: 8px; font-size: 12px; font-weight: 600; border: 1px solid; flex-shrink: 0; }
-  .vg-tipo-badge.tipo-necesario { background: rgba(74,222,128,0.1); border-color: rgba(74,222,128,0.35); color: rgb(74,222,128); }
-  .vg-tipo-badge.tipo-opcional  { background: rgba(251,146,60,0.1);  border-color: rgba(251,146,60,0.3);  color: rgb(251,146,60);  }
+  .btn-vg-ungroup { background: none; border: 1px solid rgba(139,148,158,0.2); border-radius: 8px; padding: 6px 10px; font-size: 12px; color: var(--subtext); cursor: pointer; font-family: 'DM Sans',sans-serif; flex-shrink: 0; }
+  .btn-vg-ungroup:active { background: rgba(255,255,255,0.05); }
   .btn-crear-grupo { width: 100%; background: none; border: 1px dashed rgba(88,166,255,0.3); border-radius: 12px; padding: 10px; font-size: 13px; color: rgba(88,166,255,0.7); cursor: pointer; font-family: 'DM Sans',sans-serif; transition: all 0.15s; margin-bottom: 8px; }
   .btn-crear-grupo:active { background: rgba(88,166,255,0.06); border-color: rgba(88,166,255,0.5); }
   .grupo-modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.65); z-index: 800; display: flex; align-items: flex-end; justify-content: center; }
@@ -2075,7 +2072,6 @@
       const tipoGrupo = necCount > catsValidas.length / 2 ? 'necesario' : 'opcional'
 
       const historicoGrupo = catsValidas.reduce((s, c) => s + (gastosOriginal[c] || 0), 0)
-      const tipoLabel = tipoGrupo === 'necesario' ? '🔒 Necesario' : '🎯 Opcional'
 
       const el = document.createElement('div')
       el.className = 'var-group tipo-' + tipoGrupo
@@ -2098,7 +2094,7 @@
       footer.className = 'vg-footer'
       footer.innerHTML = `
         <button class="btn-vg-edit-full" onclick="editarGrupo('${grupo.id}')">✏️ Editar grupo</button>
-        <span class="vg-tipo-badge tipo-${tipoGrupo}">${tipoLabel}</span>
+        <button class="btn-vg-ungroup" onclick="borrarGrupo('${grupo.id}')">↑ Desagrupar</button>
       `
       el.appendChild(footer)
 
