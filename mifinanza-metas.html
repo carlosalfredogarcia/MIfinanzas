@@ -438,9 +438,12 @@
   .analisis-chevron.abierto { transform: rotate(90deg); }
   .analisis-body { overflow: hidden; max-height: 0; transition: max-height 0.35s ease, opacity 0.25s ease; opacity: 0; }
   .analisis-body.abierto { max-height: 500px; opacity: 1; }
-  .analisis-tabla { width: 100%; border-collapse: collapse; margin-bottom: 10px; }
+  .analisis-tabla { width: 100%; border-collapse: collapse; margin-bottom: 10px; table-layout: fixed; }
   .analisis-tabla th { font-size: 10px; color: var(--subtext); text-transform: uppercase; letter-spacing: 0.08em; padding: 0 0 8px; font-weight: 600; }
   .analisis-tabla th:not(:first-child) { text-align: right; }
+  .analisis-tabla th:nth-child(2), .analisis-tabla td:nth-child(2) { width: 52px; }
+  .analisis-tabla th:nth-child(3), .analisis-tabla td:nth-child(3) { width: 76px; }
+  .analisis-tabla th:nth-child(4), .analisis-tabla td:nth-child(4) { width: 26px; }
   .analisis-tabla td { padding: 5px 0; font-size: 13px; vertical-align: middle; }
   .analisis-tabla td:not(:first-child) { text-align: right; font-family: 'Roboto', sans-serif; font-weight: 700; }
   .analisis-cat { display: flex; align-items: center; gap: 6px; }
@@ -452,10 +455,12 @@
   .ideal-stepper { display: inline-flex; align-items: center; gap: 4px; }
   .ist-btn { background: #21262d; border: 1px solid #30363d; border-radius: 5px; color: #8b949e; width: 22px; height: 22px; font-size: 10px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; padding: 0; line-height: 1; flex-shrink: 0; }
   .ist-btn:active { background: #30363d; color: #cdd9e5; }
-  .pct-inp { width: 40px; background: rgba(88,166,255,0.08); border: 1px solid rgba(88,166,255,0.3); border-radius: 6px; color: #58a6ff; text-align: center; font-size: 13px; font-family: inherit; padding: 2px 4px; -moz-appearance: textfield; }
+  .pct-inp { width: 38px; min-width: 38px; box-sizing: border-box; background: rgba(88,166,255,0.08); border: 1px solid rgba(88,166,255,0.3); border-radius: 6px; color: #58a6ff; text-align: center; font-size: 13px; font-family: inherit; padding: 2px 4px; -moz-appearance: textfield; appearance: none; }
   .pct-inp:focus { outline: none; border-color: #58a6ff; background: rgba(88,166,255,0.15); }
-  .pct-inp::-webkit-inner-spin-button, .pct-inp::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+  .pct-inp::-webkit-inner-spin-button, .pct-inp::-webkit-outer-spin-button { -webkit-appearance: none; appearance: none; margin: 0; display: none; }
   .pct-suma { font-size: 10px; color: #4ade80; display: block; text-align: right; margin-top: 2px; }
+  .btn-pct-reset { background: none; border: none; color: #f85149; font-size: 12px; cursor: pointer; padding: 0 0 0 5px; margin: 0; font-family: inherit; vertical-align: middle; line-height: 1; opacity: 0.75; flex-shrink: 0; }
+  .btn-pct-reset:active { opacity: 1; }
   .ist-val { color: #58a6ff; font-size: 12px; min-width: 30px; text-align: center; font-variant-numeric: tabular-nums; }
   .analisis-msg { background: rgba(88,166,255,0.07); border: 1px solid rgba(88,166,255,0.18); border-radius: 10px; padding: 10px 12px; font-size: 12px; color: var(--subtext); line-height: 1.55; }
   .analisis-float { position: fixed; left: 50%; transform: translateX(-50%); background: #1c2128; border: 1px solid #30363d; border-radius: 16px; padding: 14px 16px 12px; width: min(330px, 94vw); z-index: 500; box-shadow: 0 8px 32px rgba(0,0,0,0.6); opacity: 0; pointer-events: none; transition: opacity 0.18s; }
@@ -2311,10 +2316,6 @@
   function onPctBlur() {
     if (!modoPersonalizado) return
     persistirBudgetMode()
-    setTimeout(() => {
-      const foco = ['pct-nec', 'pct-opc', 'pct-aho'].map(id => document.getElementById(id))
-      if (!foco.some(el => el === document.activeElement)) actualizarAnalisis()
-    }, 100)
   }
 
   function toggleModoDropdown(e) {
@@ -2501,7 +2502,7 @@
     }).join('')
 
     const labelModo = modoAnalisis === 'personalizado'
-      ? `<span style="color:#58a6ff;font-size:11px;">✏️ Personalizado</span>`
+      ? `<span style="color:#58a6ff;font-size:11px;display:inline-flex;align-items:center;white-space:nowrap;">✏️ Personalizado<button class="btn-pct-reset" onclick="seleccionarModo('equilibrado');event.stopPropagation()" title="Restablecer">✕</button></span>`
       : `<span onclick="toggleModoDropdown(event)" style="cursor:pointer;user-select:none;white-space:nowrap;">${MODOS_LABEL[modoAnalisis]}&nbsp;<span style="color:#58a6ff;">⌄</span></span>`
 
     cont.innerHTML = `
