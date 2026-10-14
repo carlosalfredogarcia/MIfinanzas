@@ -469,6 +469,7 @@
   .cm-nombre { font-size: 13px; color: var(--text); font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .cm-fecha  { font-size: 11px; color: var(--subtext); margin-top: 1px; }
   .cm-monto  { font-size: 13px; font-weight: 700; color: var(--danger); flex-shrink: 0; }
+  .cm-monto.cm-verde { color: #3fb950; }
   .cm-edit   { font-size: 12px; color: #58a6ff; flex-shrink: 0; opacity: 0.8; }
   .cat-movs-empty { font-size: 12px; color: var(--subtext); text-align: center; padding: 12px 0; }
 
@@ -704,12 +705,16 @@
     </div>
 
     <div class="bloque-acordeon">
-      <div class="bloque-card">
+      <div class="bloque-card clicable" onclick="toggleBloque('ingresos')">
         <div class="bloque-card-top">
           <span class="bloque-label">Ingresos</span>
+          <span class="bloque-chevron" id="chevron-ingresos">›</span>
         </div>
-        <input type="number" inputmode="decimal" id="p-ingresos-total" class="bloque-ing-input" placeholder="0">
-        <button class="btn-restablecer" onclick="pedirConfirmacionReset(restablecerIngresos)">Restablecer</button>
+        <input type="number" inputmode="decimal" id="p-ingresos-total" class="bloque-ing-input" placeholder="0" onclick="event.stopPropagation()">
+        <button class="btn-restablecer" onclick="event.stopPropagation();pedirConfirmacionReset(restablecerIngresos)">Restablecer</button>
+      </div>
+      <div class="bloque-detalle" id="detalle-ingresos" style="display:none">
+        <div id="ingresos-movs-lista"></div>
       </div>
     </div>
 
@@ -1549,6 +1554,31 @@
     })
     inp.addEventListener('focus', function() { this.select() })
     actualizarPlanificador()
+    renderIngresosMovs()
+  }
+
+  function renderIngresosMovs() {
+    const cont = document.getElementById('ingresos-movs-lista')
+    if (!cont) return
+    if (ingresosOriginal.length === 0) {
+      cont.innerHTML = '<div class="cat-movs-empty">Sin ingresos este mes</div>'
+      return
+    }
+    const sorted = [...ingresosOriginal].sort((a, b) => (b.fecha || '').localeCompare(a.fecha || ''))
+    cont.innerHTML = sorted.map(r => {
+      const nombre = (r.concepto || 'Ingreso').replace(/&/g,'&amp;').replace(/</g,'&lt;')
+      const fecha = _diaMesSeg(r.fecha)
+      const monto = '$' + parseFloat(r.monto || 0).toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+      return `
+        <div class="cat-mov-item">
+          <div class="cm-icon">💰</div>
+          <div class="cm-info">
+            <div class="cm-nombre">${nombre}</div>
+            <div class="cm-fecha">${fecha}</div>
+          </div>
+          <div class="cm-monto cm-verde">${monto}</div>
+        </div>`
+    }).join('')
   }
 
   let _pendingReset = null
