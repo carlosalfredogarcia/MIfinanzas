@@ -2176,6 +2176,24 @@
     const ahorroNec = exNec > 0 ? ingresos * exNec / 100 : 0
     const ahorroOpc = exOpc > 0 ? ingresos * exOpc / 100 : 0
 
+    console.log('[Análisis presupuesto]', {
+      ingresos,
+      necesario_abs: necesario,
+      opcional_abs: opcional,
+      ahorro_abs: ahorro,
+      pNec: pNec.toFixed(1) + '%',
+      pOpc: pOpc.toFixed(1) + '%',
+      pAho: pAho.toFixed(1) + '%',
+      objetivo_nec: ideales.nec + '%',
+      objetivo_opc: ideales.opc + '%',
+      objetivo_aho: ideales.aho + '%',
+      exNec: exNec.toFixed(1),
+      exOpc: exOpc.toFixed(1),
+      ahorroNec: ahorroNec.toFixed(2),
+      ahorroOpc: ahorroOpc.toFixed(2),
+      ahorroTotal: (ahorroNec + ahorroOpc).toFixed(2),
+    })
+
     let msg = ''
     if (exNec > 0 && exOpc > 0) {
       msg = `Si bajas Necesarios al ${ideales.nec}% y Opcionales al ${ideales.opc}%, podrías ahorrar ~${fmt(ahorroNec + ahorroOpc)} al mes.`
