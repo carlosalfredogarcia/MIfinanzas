@@ -2179,15 +2179,16 @@
     const necAlto = necesario > objetivoNec
     const opcAlto = opcional  > objetivoOpc
     const exNecPct = pNec - ideales.nec
+    const ahorroObjetivo = ingresos * ideales.aho / 100
 
     let msg = ''
     if (necAlto && opcAlto) {
-      msg = `Si bajas Necesarios al ${ideales.nec}% y Opcionales al ${ideales.opc}%, podrías ahorrar ~${fmt(ahorroNec + ahorroOpc)} al mes.`
+      msg = `Si bajas Necesarios al ${ideales.nec}% y Opcionales al ${ideales.opc}%, podrías ahorrar ~${fmt(ahorroObjetivo)} al mes.`
     } else if (necAlto) {
-      msg = `Tus necesarios están ${exNecPct <= 15 ? 'algo altos' : 'muy altos'}. Podrías ahorrar ~${fmt(ahorroNec)} si los bajas al ${ideales.nec}%.`
+      msg = `Tus necesarios están ${exNecPct <= 15 ? 'algo altos' : 'muy altos'}. Podrías ahorrar ~${fmt(ahorroObjetivo)} si los bajas al ${ideales.nec}%.`
     } else if (opcAlto) {
       const exOpcPct = pOpc - ideales.opc
-      msg = `Tus opcionales están ${exOpcPct <= 15 ? 'algo altos' : 'muy altos'}. Podrías ahorrar ~${fmt(ahorroOpc)} si los bajas al ${ideales.opc}%.`
+      msg = `Tus opcionales están ${exOpcPct <= 15 ? 'algo altos' : 'muy altos'}. Podrías ahorrar ~${fmt(ahorroObjetivo)} si los bajas al ${ideales.opc}%.`
     } else if (pAho < ideales.aho) {
       const falta = ingresos * (ideales.aho - pAho) / 100
       msg = `Tu ahorro es bajo. Redirigir ${fmt(falta)} al mes te acercaría al ${ideales.aho}% objetivo.`
