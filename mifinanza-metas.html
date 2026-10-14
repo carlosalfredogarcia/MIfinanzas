@@ -499,11 +499,15 @@
   .sc-sep { font-size: 11px; color: var(--subtext); padding-top: 14px; flex-shrink: 0; }
   .sc-bar { height: 4px; background: var(--border2); border-radius: 100px; overflow: hidden; }
   .sc-bar-fill { height: 100%; border-radius: 100px; transition: width 0.4s; background: linear-gradient(90deg, #39d353 0%, #f85149 100%); }
-  .sc-card { cursor: pointer; }
+  .sc-col-tap { cursor: pointer; }
+  .sc-col-tap:active { opacity: 0.7; }
+  .sc-lbl-link::after { content: ' ↗'; font-size: 8px; opacity: 0.6; }
   .sc-movs-wrap { overflow: hidden; max-height: 0; transition: max-height 0.35s ease; }
   .sc-movs-wrap.sc-abierto { max-height: 2400px; }
-  .sc-chevron { display: inline-block; width: 14px; height: 14px; flex-shrink: 0; opacity: 0.45; transition: transform 0.3s ease, opacity 0.2s; }
+  .sc-chevron { display: inline-block; width: 11px; height: 11px; flex-shrink: 0; opacity: 0.45; vertical-align: middle; margin-left: 3px; transition: transform 0.3s ease, opacity 0.2s; }
   .sc-card:has(.sc-movs-wrap.sc-abierto) .sc-chevron { transform: rotate(180deg); opacity: 0.75; }
+  @keyframes scHighlightPlan { 10% { box-shadow: 0 0 0 3px rgba(88,166,255,0.55); } 90% { box-shadow: 0 0 0 2px rgba(88,166,255,0.1); } }
+  .sc-highlight-plan { animation: scHighlightPlan 1.4s ease; }
   .sc-movs-inner { padding-top: 10px; border-top: 1px solid var(--border); margin-top: 10px; }
   .cat-mov-item { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--border2); }
   .cat-mov-item:last-child { border-bottom: none; }
@@ -2643,6 +2647,24 @@
     renderTablaComparativa()
   }
 
+  function irACategoriaPlanificador(key) {
+    const detalle = document.getElementById('detalle-gastos')
+    if (detalle && detalle.style.display !== 'block') toggleBloque('gastos')
+    setTimeout(() => {
+      let el
+      if (key.startsWith('__grupo_')) {
+        const gid = key.replace('__grupo_', '')
+        el = document.querySelector('.var-group[data-grupo-id="' + gid + '"]')
+      } else {
+        el = [...document.querySelectorAll('.var-row')].find(r => r._planCat === key)
+      }
+      if (!el) return
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+      el.classList.add('sc-highlight-plan')
+      setTimeout(() => el.classList.remove('sc-highlight-plan'), 1500)
+    }, 320)
+  }
+
   function toggleSeguimiento(cat) {
     seguimientoActivos[cat] = seguimientoActivos[cat] === false ? true : false
     if (window.currentUserId) {
@@ -2697,22 +2719,21 @@
       return {
         activo, diff,
         html: `
-          <div class="sc-card${activo ? '' : ' sc-apagado'}" onclick="toggleCardMovsSeg(${idx}, event)">
+          <div class="sc-card${activo ? '' : ' sc-apagado'}">
             <div class="sc-top">
               <span class="sc-cat">${emoji} ${nombre}</span>
               <div class="sc-top-right">
-                <svg class="sc-chevron" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="2,4 7,10 12,4"/></svg>
                 <button class="sc-toggle${activo ? ' sc-on' : ''}" onclick="toggleSeguimiento('${catEsc}')"></button>
               </div>
             </div>
             <div class="sc-mid">
-              <div class="sc-col">
-                <div class="sc-lbl">Gastado</div>
+              <div class="sc-col sc-col-tap" onclick="toggleCardMovsSeg(${idx}, event)">
+                <div class="sc-lbl">Gastado <svg class="sc-chevron" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="2,4 7,10 12,4"/></svg></div>
                 <div class="sc-valor sc-val-gastado">${fmt(real)}</div>
               </div>
               <span class="sc-diff ${over ? 'sc-over' : 'sc-under'}">${over ? '-' : '+'} ${diffFmt}</span>
-              <div class="sc-col">
-                <div class="sc-lbl">Meta</div>
+              <div class="sc-col sc-col-tap" onclick="irACategoriaPlanificador('${catEsc}');event.stopPropagation()">
+                <div class="sc-lbl sc-lbl-link">Meta</div>
                 <div class="sc-valor sc-val-meta">${fmt(estimado)}</div>
               </div>
             </div>
@@ -2778,22 +2799,21 @@
       return [{
         activo, diff,
         html: `
-          <div class="sc-card${activo ? '' : ' sc-apagado'}" onclick="toggleCardMovsSeg(${idx}, event)">
+          <div class="sc-card${activo ? '' : ' sc-apagado'}">
             <div class="sc-top">
               <span class="sc-cat">${grupo.emoji} ${grupo.nombre}</span>
               <div class="sc-top-right">
-                <svg class="sc-chevron" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="2,4 7,10 12,4"/></svg>
                 <button class="sc-toggle${activo ? ' sc-on' : ''}" onclick="toggleSeguimiento('${grupoKeyEsc}')"></button>
               </div>
             </div>
             <div class="sc-mid">
-              <div class="sc-col">
-                <div class="sc-lbl">Gastado</div>
+              <div class="sc-col sc-col-tap" onclick="toggleCardMovsSeg(${idx}, event)">
+                <div class="sc-lbl">Gastado <svg class="sc-chevron" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="2,4 7,10 12,4"/></svg></div>
                 <div class="sc-valor sc-val-gastado">${fmt(real)}</div>
               </div>
               <span class="sc-diff ${over ? 'sc-over' : 'sc-under'}">${over ? '-' : '+'} ${diffFmt}</span>
-              <div class="sc-col">
-                <div class="sc-lbl">Meta</div>
+              <div class="sc-col sc-col-tap" onclick="irACategoriaPlanificador('${grupoKeyEsc}');event.stopPropagation()">
+                <div class="sc-lbl sc-lbl-link">Meta</div>
                 <div class="sc-valor sc-val-meta">${fmt(estimado)}</div>
               </div>
             </div>
