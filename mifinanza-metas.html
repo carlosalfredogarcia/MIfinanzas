@@ -2080,8 +2080,8 @@
     const ideales = getIdeales()
     const mLabel  = (MODOS_LABEL[modoAnalisis] || 'MODO').toUpperCase()
 
-    function est(v, id, inv) { const d = inv ? id - v : v - id; return d <= 0 ? '✅' : d <= 15 ? '⚠️' : '❌' }
-    function col(v, id, inv) { const d = inv ? id - v : v - id; return d <= 0 ? '#4ade80' : d <= 15 ? '#e3b341' : '#f85149' }
+    function est(v, id, inv) { const d = inv ? id - v : v - id; return d <= 0.5 ? '✅' : d <= 15 ? '⚠️' : '❌' }
+    function col(v, id, inv) { const d = inv ? id - v : v - id; return d <= 0.5 ? '#4ade80' : d <= 15 ? '#e3b341' : '#f85149' }
 
     const activeTipo = _focusedInput
       ? (categoriaTipos[_focusedInput.closest?.('.var-row')?._planCat] ?? 'opcional')
@@ -2112,7 +2112,11 @@
 
   function mostrarAnalisisFloat(inp) {
     clearTimeout(_floatHideTimer)
-    if (document.getElementById('analisis-body')?.classList.contains('abierto')) return
+    const panelEl = document.getElementById('analisis-body')
+    if (panelEl?.classList.contains('abierto')) {
+      const r = panelEl.getBoundingClientRect()
+      if (r.top < window.innerHeight && r.bottom > 0) return
+    }
     _focusedInput = inp || null
     actualizarAnalisisFloat()
     const el = document.getElementById('analisis-float')
@@ -2154,14 +2158,14 @@
 
     function estado(actual, ideal, inverso = false) {
       const diff = inverso ? ideal - actual : actual - ideal
-      if (diff <= 0)  return '✅'
-      if (diff <= 15) return '⚠️'
+      if (diff <= 0.5) return '✅'
+      if (diff <= 15)  return '⚠️'
       return '❌'
     }
     function colorPct(actual, ideal, inverso = false) {
       const diff = inverso ? ideal - actual : actual - ideal
-      if (diff <= 0)  return '#4ade80'
-      if (diff <= 15) return '#e3b341'
+      if (diff <= 0.5) return '#4ade80'
+      if (diff <= 15)  return '#e3b341'
       return '#f85149'
     }
 
