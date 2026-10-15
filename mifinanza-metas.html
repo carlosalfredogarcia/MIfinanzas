@@ -2484,7 +2484,7 @@
 
     const filas = rows.map(r => {
       const idealTd = modoAnalisis === 'personalizado'
-        ? `<td class="analisis-ideal"><input class="pct-inp" id="pct-${r.ikey}" type="number" min="0" max="100" value="${r.ideal}" oninput="onPctInput('${r.ikey}',this.value)" onblur="onPctBlur()">%</td>`
+        ? `<td class="analisis-ideal"><input class="pct-inp" id="pct-${r.ikey}" type="number" inputmode="decimal" enterkeyhint="done" min="0" max="100" value="${r.ideal}" oninput="onPctInput('${r.ikey}',this.value)" onblur="onPctBlur()" onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur()}">%</td>`
         : `<td class="analisis-ideal analisis-ideal-edit" onclick="editarIdeal('${r.ikey}', this)" title="Toca para personalizar">${r.ideal}%</td>`
       return `
         <tr>
