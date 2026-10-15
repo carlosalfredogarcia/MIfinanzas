@@ -1807,6 +1807,7 @@
     if (categoriaTipos[cat] === tipo) return
     categoriaTipos[cat] = tipo
     aplicarTiposUI()
+    reordenarFilas(cat)
     actualizarAnalisis()
     if (!window.currentUserId) return
     await dbClient.from('categoria_tipo').upsert({ user_id: window.currentUserId, categoria: cat, tipo }, { onConflict: 'user_id,categoria' })
@@ -1836,14 +1837,13 @@
       el.classList.toggle('tipo-necesario', tipoGrupo === 'necesario')
       el.classList.toggle('tipo-opcional',  tipoGrupo === 'opcional')
     })
-    reordenarFilas()
     actualizarResumenTipos()
   }
 
-  function reordenarFilas() {
+  function reordenarFilas(catCambiada = null) {
     const cont = document.getElementById('gastos-lista-plan')
     if (!cont) return
-    const orden = { necesario: 0, opcional: 1 }
+    const tipoOrden = { necesario: 0, opcional: 1 }
     function getTipoEl(el) {
       if (el.classList.contains('var-row')) return categoriaTipos[el._planCat] ?? 'opcional'
       const grupo = _planGrupos.find(g => g.id === el.dataset.grupoId)
@@ -1852,13 +1852,23 @@
       const necCount = catsValidas.filter(c => (categoriaTipos[c] ?? 'opcional') === 'necesario').length
       return necCount > catsValidas.length / 2 ? 'necesario' : 'opcional'
     }
-    ;[...cont.querySelectorAll(':scope > .var-row, :scope > .var-group')]
-      .sort((a, b) => (orden[getTipoEl(a)] ?? 2) - (orden[getTipoEl(b)] ?? 2))
-      .forEach(r => cont.appendChild(r))
+    const items = [...cont.querySelectorAll(':scope > .var-row, :scope > .var-group')]
+    items.sort((a, b) => {
+      const tipoA = tipoOrden[getTipoEl(a)] ?? 2
+      const tipoB = tipoOrden[getTipoEl(b)] ?? 2
+      if (tipoA !== tipoB) return tipoA - tipoB
+      if (catCambiada !== null) {
+        const aChanged = a._planCat === catCambiada
+        const bChanged = b._planCat === catCambiada
+        if (aChanged && !bChanged) return 1
+        if (bChanged && !aChanged) return -1
+      }
+      return 0
+    })
+    items.forEach(r => cont.appendChild(r))
     if (window.currentUserId) {
       try {
-        const keys = [...cont.querySelectorAll(':scope > .var-row, :scope > .var-group')]
-          .map(el => el._planCat || ('__grupo_' + el.dataset.grupoId)).filter(Boolean)
+        const keys = items.map(el => el._planCat || ('__grupo_' + el.dataset.grupoId)).filter(Boolean)
         localStorage.setItem('mf_orden_plan_' + window.currentUserId, JSON.stringify(keys))
       } catch(e) {}
     }
