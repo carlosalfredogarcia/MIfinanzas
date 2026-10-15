@@ -2472,13 +2472,18 @@
     }
     actualizarAnalisis()
     if (!window.currentUserId) return
-    await dbClient.from('perfil').upsert(
-      { usuario_id: window.currentUserId, perfil_presupuesto: nombre },
-      { onConflict: 'usuario_id' }
-    )
+    await dbClient.from('perfil')
+      .update({ perfil_presupuesto: nombre })
+      .eq('usuario_id', window.currentUserId)
   }
 
   async function cargarPerfilAhorro() {
+    if (!window.currentUserId) {
+      await new Promise(resolve => {
+        const iv = setInterval(() => { if (window.currentUserId) { clearInterval(iv); resolve() } }, 50)
+        setTimeout(() => { clearInterval(iv); resolve() }, 5000)
+      })
+    }
     if (!window.currentUserId) return
     const { data } = await dbClient.from('perfil')
       .select('perfil_presupuesto')
@@ -2526,10 +2531,9 @@
     perfilAhorro = 'personalizado'
     if (window.currentUserId) {
       try { localStorage.setItem('mf_meta_ahorro_' + window.currentUserId, metaAhorro) } catch(e) {}
-      dbClient.from('perfil').upsert(
-        { usuario_id: window.currentUserId, perfil_presupuesto: 'personalizado' },
-        { onConflict: 'usuario_id' }
-      )
+      dbClient.from('perfil')
+        .update({ perfil_presupuesto: 'personalizado' })
+        .eq('usuario_id', window.currentUserId)
     }
     actualizarAnalisis()  // full re-render: input no longer focused
   }
