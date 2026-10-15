@@ -1859,37 +1859,7 @@
 
   function actualizarResumenTipos() {
     const el = document.getElementById('resumen-tipos')
-    if (!el) return
-    let necesario = 0, opcional = 0
-    document.querySelectorAll('.var-row').forEach(row => {
-      const inp  = row.querySelector('.variable-input')
-      if (!inp) return
-      const tipo = categoriaTipos[row._planCat] ?? 'opcional'
-      const val  = parseFloat(inp.value) || 0
-      if (tipo === 'necesario') necesario += val
-      else if (tipo === 'opcional') opcional += val
-    })
-    const total = necesario + opcional
-    if (total === 0) { el.style.display = 'none'; return }
-    const pctNec = Math.round(necesario / total * 100)
-    const pctOpc = 100 - pctNec
-    el.style.display = 'block'
-    el.innerHTML = `
-      <div class="resumen-tipos">
-        <div class="resumen-tipos-row">
-          <span class="resumen-tipos-label">🔒 Necesarios</span>
-          <span class="resumen-tipos-valor" style="color:#4ade80">${fmt(necesario)}</span>
-        </div>
-        <div class="resumen-tipos-row">
-          <span class="resumen-tipos-label">🎯 Opcionales</span>
-          <span class="resumen-tipos-valor" style="color:#fb923c">${fmt(opcional)}</span>
-        </div>
-        <div class="resumen-tipos-bar">
-          <div class="bar-necesario" style="width:${pctNec}%"></div>
-          <div class="bar-opcional"  style="width:${pctOpc}%"></div>
-        </div>
-      </div>
-    `
+    if (el) el.style.display = 'none'
   }
 
   let _gastosDebounceTimer = null
@@ -2315,6 +2285,10 @@
       <div class="asi-row2">${pGastos.toFixed(1)}% de tu ingreso en gastos · meta ahorro: ${metaAhorro}%</div>
     `
 
+    // Don't destroy the body while the user is typing in the meta input
+    const existingMetaInp = cont.querySelector('.asi-meta-inp')
+    if (existingMetaInp && document.activeElement === existingMetaInp) return
+
     const isEur = vistaAnalisis === 'eur'
     const pAhorroPos = Math.max(0, pAhorro)
 
@@ -2357,6 +2331,7 @@
                 <input class="asi-meta-inp" type="number" inputmode="decimal" enterkeyhint="done"
                   min="5" max="50" value="${metaAhorro}"
                   oninput="onMetaAhorroInput(this.value)"
+                  onblur="onMetaAhorroBlur(this)"
                   onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur()}"
                   onclick="event.stopPropagation()"
                 >${isEur ? '' : '%'}
@@ -2378,12 +2353,19 @@
   }
 
   function onMetaAhorroInput(val) {
-    const n = Math.max(5, Math.min(50, parseInt(val) || 5))
+    const n = parseInt(val)
+    if (!isNaN(n)) metaAhorro = n  // no clamping while typing
+    actualizarAnalisis()  // updates summary bar only (input has focus → body skipped)
+  }
+
+  function onMetaAhorroBlur(inp) {
+    const n = Math.max(5, Math.min(50, parseInt(inp.value) || 20))
     metaAhorro = n
+    inp.value = n
     if (window.currentUserId) {
       try { localStorage.setItem('mf_meta_ahorro_' + window.currentUserId, n) } catch(e) {}
     }
-    actualizarAnalisis()
+    actualizarAnalisis()  // full re-render: input no longer focused
   }
 
   const _MESES_SEG = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic']
