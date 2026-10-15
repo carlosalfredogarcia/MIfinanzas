@@ -486,6 +486,9 @@
   .sc-over    { color: #f85149; }
   .sc-under   { color: #3fb950; }
   .sc-en-meta { color: #e3b341; }
+  .sc-fijo-btn { background: none; border: none; cursor: pointer; padding: 2px 3px; font-size: 13px; line-height: 1; opacity: 0.25; transition: opacity 0.2s; flex-shrink: 0; }
+  .sc-fijo-btn:hover { opacity: 0.6; }
+  .sc-fijo-btn.sc-fijo-on { opacity: 1; filter: sepia(1) saturate(3) hue-rotate(10deg); }
   .sc-toggle { width: 24px; height: 14px; border-radius: 100px; border: 1px solid #30363d; background: #21262d; cursor: pointer; position: relative; transition: background 0.2s, border-color 0.2s; flex-shrink: 0; padding: 0; }
   .sc-toggle::after { content: ''; position: absolute; top: 3px; left: 3px; width: 8px; height: 8px; border-radius: 50%; background: #8b949e; transition: transform 0.2s, background 0.2s; }
   .sc-toggle.sc-on { background: rgba(63,185,80,0.15); border-color: rgba(63,185,80,0.45); }
@@ -1780,6 +1783,7 @@
   }
 
   let categoriaTipos = {}
+  let categoriaFijos = {}
 
   async function cargarTipos() {
     if (!window.currentUserId) {
@@ -1789,10 +1793,14 @@
       })
     }
     if (!window.currentUserId) return
-    const { data, error } = await dbClient.from('categoria_tipo').select('categoria, tipo').eq('user_id', window.currentUserId)
+    const { data, error } = await dbClient.from('categoria_tipo').select('categoria, tipo, es_fijo').eq('user_id', window.currentUserId)
     if (error) return
     categoriaTipos = {}
-    ;(data || []).forEach(r => { categoriaTipos[r.categoria] = r.tipo })
+    categoriaFijos = {}
+    ;(data || []).forEach(r => {
+      categoriaTipos[r.categoria] = r.tipo
+      if (r.es_fijo) categoriaFijos[r.categoria] = true
+    })
     aplicarTiposUI()
   }
 
@@ -1804,6 +1812,18 @@
     actualizarAnalisis()
     if (!window.currentUserId) return
     await dbClient.from('categoria_tipo').upsert({ user_id: window.currentUserId, categoria: cat, tipo }, { onConflict: 'user_id,categoria' })
+  }
+
+  async function toggleEsFijo(cat) {
+    const nuevoValor = !categoriaFijos[cat]
+    if (nuevoValor) categoriaFijos[cat] = true
+    else delete categoriaFijos[cat]
+    renderTablaComparativa()
+    if (!window.currentUserId) return
+    await dbClient.from('categoria_tipo').upsert(
+      { user_id: window.currentUserId, categoria: cat, tipo: categoriaTipos[cat] || 'opcional', es_fijo: nuevoValor },
+      { onConflict: 'user_id,categoria' }
+    )
   }
 
   function aplicarTipoRow(row) {
@@ -2613,13 +2633,15 @@
       const idx     = scIdx++
       const movsHtml = renderMovsSeg(cat)
 
+      const esFijo = !!categoriaFijos[cat]
       return {
-        activo, esVacio, diff, label: `${emoji} ${nombre}`,
+        activo, esVacio, diff, label: `${emoji} ${nombre}`, esFijo,
         html: `
           <div class="sc-card${activo ? '' : ' sc-apagado'}">
             <div class="sc-top">
               <span class="sc-cat">${emoji} ${nombre}</span>
               <div class="sc-top-right">
+                <button class="sc-fijo-btn${esFijo ? ' sc-fijo-on' : ''}" onclick="toggleEsFijo('${catEsc}');event.stopPropagation()" title="${esFijo ? 'Gasto fijo — excluido del consejo' : 'Marcar como gasto fijo'}">📌</button>
                 <button class="sc-toggle${activo ? ' sc-on' : ''}" onclick="toggleSeguimiento('${catEsc}')"></button>
               </div>
             </div>
@@ -2732,7 +2754,7 @@
       return b.diff - a.diff
     })
 
-    const activas   = tarjetasValidas.filter(t => t.activo && !t.esVacio)
+    const activas   = tarjetasValidas.filter(t => t.activo && !t.esVacio && !t.esFijo)
     const verdes    = activas.filter(t => t.diff < 0)
     const rojas     = activas.filter(t => t.diff > 0)
     const exceso    = rojas.reduce((s, t) => s + t.diff, 0)
