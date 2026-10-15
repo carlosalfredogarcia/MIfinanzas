@@ -775,7 +775,7 @@
     <div class="bloque-acordeon">
       <div class="bloque-card clicable" onclick="toggleBloque('gastos')">
         <div class="bloque-card-top">
-          <span class="bloque-label">Gastos</span>
+          <span class="bloque-label">Gastos Estimados</span>
           <span class="bloque-chevron" id="chevron-gastos">›</span>
         </div>
         <div class="bloque-total-grande txt-rojo" id="p-gastos-total">$0.00</div>
@@ -2043,7 +2043,7 @@
             <div class="var-spin-btns">
               <button class="btn-spin btn-spin-minus" type="button" aria-label="Disminuir">−</button>
             </div>
-            <input class="var-input variable-input" type="number" inputmode="decimal" value="${val}">
+            <input class="var-input variable-input" type="number" inputmode="decimal" enterkeyhint="done" value="${val}">
             <div class="var-spin-btns">
               <button class="btn-spin btn-spin-plus" type="button" aria-label="Aumentar">+</button>
             </div>
@@ -2071,7 +2071,7 @@
       row.innerHTML = `
         <span class="vg-sub-emoji">${emoji}</span>
         <span class="vg-sub-nombre">${nombre}</span>
-        <input class="variable-input vg-sub-input" type="number" inputmode="decimal" value="${val}">
+        <input class="variable-input vg-sub-input" type="number" inputmode="decimal" enterkeyhint="done" value="${val}">
       `
       return row
     }
@@ -2938,6 +2938,22 @@
     guardarGastosLocal()
     actualizarPlanificador()
     mostrarAnalisisFloat(e.target)
+  })
+  _contGastos.addEventListener('keydown', e => {
+    if (e.key !== 'Enter') return
+    if (!e.target.matches('.variable-input')) return
+    e.preventDefault()
+    guardarGastosLocal()
+    const allInputs = [...document.querySelectorAll('#detalle-gastos .variable-input')]
+      .filter(inp => inp.offsetParent !== null)
+    const idx = allInputs.indexOf(e.target)
+    if (idx >= 0 && idx < allInputs.length - 1) {
+      const next = allInputs[idx + 1]
+      next.focus()
+      next.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    } else {
+      e.target.blur()
+    }
   })
   _contGastos.addEventListener('click', e => {
     const btn = e.target.closest('.btn-spin')
