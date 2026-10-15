@@ -2603,7 +2603,7 @@
 
       const diff    = real - estimado
       const over    = diff > 0
-      const diffFmt = '$' + Math.abs(diff).toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+      const pillTxt = diff < 0 ? `+${fmt(Math.abs(diff))} libre` : `+${fmt(diff)} pasado`
       const barPct  = estimado > 0 ? Math.min(real / estimado * 100, 100) : (real > 0 ? 100 : 0)
       const idx     = scIdx++
       const movsHtml = renderMovsSeg(cat)
@@ -2623,7 +2623,7 @@
                 <div class="sc-lbl">Gastado <svg class="sc-chevron" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="2,4 7,10 12,4"/></svg></div>
                 <div class="sc-valor sc-val-gastado">${fmt(real)}</div>
               </div>
-              <span class="sc-diff ${diff > 0 ? 'sc-over' : diff < 0 ? 'sc-under' : 'sc-en-meta'}">${over ? '-' : '+'} ${diffFmt}</span>
+              <span class="sc-diff ${over ? 'sc-over' : 'sc-under'}"${diff === 0 ? ' style="display:none"' : ''}>${pillTxt}</span>
               <div class="sc-col sc-col-tap" onclick="irACategoriaPlanificador('${catEsc}');event.stopPropagation()">
                 <div class="sc-lbl sc-lbl-link">Meta</div>
                 <div class="sc-valor sc-val-meta">${fmt(estimado)}</div>
@@ -2659,7 +2659,7 @@
 
       const diff    = real - estimado
       const over    = diff > 0
-      const diffFmt = '$' + Math.abs(diff).toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+      const pillTxt = diff < 0 ? `+${fmt(Math.abs(diff))} libre` : `+${fmt(diff)} pasado`
       const barPct  = estimado > 0 ? Math.min(real / estimado * 100, 100) : (real > 0 ? 100 : 0)
       const idx     = scIdx++
 
@@ -2704,7 +2704,7 @@
                 <div class="sc-lbl">Gastado <svg class="sc-chevron" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="2,4 7,10 12,4"/></svg></div>
                 <div class="sc-valor sc-val-gastado">${fmt(real)}</div>
               </div>
-              <span class="sc-diff ${diff > 0 ? 'sc-over' : diff < 0 ? 'sc-under' : 'sc-en-meta'}">${over ? '-' : '+'} ${diffFmt}</span>
+              <span class="sc-diff ${over ? 'sc-over' : 'sc-under'}"${diff === 0 ? ' style="display:none"' : ''}>${pillTxt}</span>
               <div class="sc-col sc-col-tap" onclick="irACategoriaPlanificador('${grupoKeyEsc}');event.stopPropagation()">
                 <div class="sc-lbl sc-lbl-link">Meta</div>
                 <div class="sc-valor sc-val-meta">${fmt(estimado)}</div>
