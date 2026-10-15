@@ -384,12 +384,6 @@
     .var-input { width: 80px; }
   }
 
-  .tipo-btns { display: flex; gap: 6px; margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.06); }
-  .btn-tipo { flex: 1; background: none; border: 1px solid #30363d; border-radius: 8px; padding: 7px 4px; font-size: 12px; font-family: 'DM Sans', sans-serif; font-weight: 500; color: #8b949e; cursor: pointer; transition: all 0.15s; text-align: center; }
-  .btn-tipo.activo-necesario { background: rgba(74,222,128,0.12); border-color: rgba(74,222,128,0.4); color: #4ade80; }
-  .btn-tipo.activo-opcional  { background: rgba(251,146,60,0.12); border-color: rgba(251,146,60,0.35); color: #fb923c; }
-  .var-row.tipo-necesario { border: 1px solid rgba(74,222,128,0.35); }
-  .var-row.tipo-opcional  { border: 1px solid rgba(251,146,60,0.3); }
 
   .var-group { background: var(--card); border-radius: 12px; padding: 12px 14px; margin-bottom: 8px; border: 1px solid rgba(251,146,60,0.38); }
   .vg-header { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
@@ -437,37 +431,12 @@
   .bar-necesario { background: rgba(74,222,128,0.65); transition: width 0.3s; }
   .bar-opcional  { background: rgba(251,146,60,0.55); transition: width 0.3s; }
 
-  .analisis-header { display: flex; align-items: center; justify-content: space-between; cursor: pointer; padding: 14px 16px; background: #1c2128; border-radius: 14px; border: 1px solid var(--border2); user-select: none; transition: background 0.15s; margin-bottom: 10px; }
+  .analisis-header { display: flex; align-items: flex-start; justify-content: space-between; cursor: pointer; padding: 12px 14px; background: #1c2128; border-radius: 14px; border: 1px solid var(--border2); user-select: none; transition: background 0.15s; margin-bottom: 6px; }
   .analisis-header:active { background: #21262d; }
-  .analisis-header-left { display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 600; color: var(--text); }
-  .analisis-chevron { color: var(--subtext); font-size: 16px; transition: transform 0.25s; }
+  .analisis-chevron { color: var(--subtext); font-size: 16px; transition: transform 0.25s; flex-shrink: 0; margin-top: 2px; }
   .analisis-chevron.abierto { transform: rotate(90deg); }
   .analisis-body { overflow: hidden; max-height: 0; transition: max-height 0.35s ease, opacity 0.25s ease; opacity: 0; }
-  .analisis-body.abierto { max-height: 500px; opacity: 1; }
-  .analisis-tabla { width: 100%; border-collapse: collapse; margin-bottom: 10px; table-layout: fixed; }
-  .analisis-tabla th { font-size: 10px; color: var(--subtext); text-transform: uppercase; letter-spacing: 0.08em; padding: 0 0 8px; font-weight: 600; white-space: nowrap; overflow: hidden; }
-  .analisis-tabla th:not(:first-child) { text-align: right; }
-  .analisis-tabla th:nth-child(2), .analisis-tabla td:nth-child(2) { width: 56px; }
-  .analisis-tabla th:nth-child(3), .analisis-tabla td:nth-child(3) { width: 106px; padding-left: 8px; }
-  .analisis-tabla th:nth-child(4), .analisis-tabla td:nth-child(4) { width: 24px; }
-  .analisis-tabla td { padding: 5px 0; font-size: 13px; vertical-align: middle; }
-  .analisis-tabla td:not(:first-child) { text-align: right; font-family: 'Roboto', sans-serif; font-weight: 700; }
-  .analisis-cat { display: flex; align-items: center; gap: 6px; }
-  .analisis-ideal { color: var(--subtext); }
-  .analisis-ideal-edit { cursor: pointer; }
-  .analisis-ideal-edit:hover { color: #58a6ff; }
-  .analisis-ideal-edit input::-webkit-inner-spin-button,
-  .analisis-ideal-edit input::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
-  .ideal-stepper { display: inline-flex; align-items: center; gap: 4px; }
-  .ist-btn { background: #21262d; border: 1px solid #30363d; border-radius: 5px; color: #8b949e; width: 22px; height: 22px; font-size: 10px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; padding: 0; line-height: 1; flex-shrink: 0; }
-  .ist-btn:active { background: #30363d; color: #cdd9e5; }
-  .pct-inp { width: 38px; min-width: 38px; box-sizing: border-box; background: rgba(88,166,255,0.08); border: 1px solid rgba(88,166,255,0.3); border-radius: 6px; color: #58a6ff; text-align: center; font-size: 13px; font-family: inherit; padding: 2px 4px; -moz-appearance: textfield; appearance: none; }
-  .pct-inp:focus { outline: none; border-color: #58a6ff; background: rgba(88,166,255,0.15); }
-  .pct-inp::-webkit-inner-spin-button, .pct-inp::-webkit-outer-spin-button { -webkit-appearance: none; appearance: none; margin: 0; display: none; }
-  .pct-suma { font-size: 10px; color: #4ade80; display: block; text-align: right; margin-top: 2px; }
-  .btn-pct-reset { background: none; border: none; color: #f85149; font-size: 12px; cursor: pointer; padding: 0 0 0 5px; margin: 0; font-family: inherit; vertical-align: middle; line-height: 1; opacity: 0.75; flex-shrink: 0; }
-  .btn-pct-reset:active { opacity: 1; }
-  .ist-val { color: #58a6ff; font-size: 12px; min-width: 30px; text-align: center; font-variant-numeric: tabular-nums; }
+  .analisis-body.abierto { max-height: 420px; opacity: 1; }
   .analisis-msg { background: rgba(88,166,255,0.07); border: 1px solid rgba(88,166,255,0.18); border-radius: 10px; padding: 10px 12px; font-size: 12px; color: var(--subtext); line-height: 1.55; }
   .analisis-float { position: fixed; left: 50%; transform: translateX(-50%); background: #1c2128; border: 1px solid #30363d; border-radius: 16px; padding: 14px 16px 12px; width: min(330px, 94vw); z-index: 500; box-shadow: 0 8px 32px rgba(0,0,0,0.6); opacity: 0; pointer-events: none; transition: opacity 0.18s; }
   .analisis-float.visible { opacity: 1; }
@@ -478,10 +447,27 @@
   .af-cell-val { font-size: 13px; font-weight: 600; text-align: right; }
   .af-cell-est { font-size: 13px; text-align: center; }
   .af-head .af-cell-val { font-size: 10px; font-weight: 700; letter-spacing: 0.05em; color: var(--subtext); }
-  .amodo-dd { position: absolute; right: 0; top: 26px; background: #1c2128; border: 1px solid #30363d; border-radius: 10px; padding: 5px; z-index: 200; min-width: 158px; box-shadow: 0 6px 24px rgba(0,0,0,0.5); }
-  .amodo-item { padding: 9px 12px; font-size: 13px; border-radius: 6px; cursor: pointer; color: var(--text); transition: background 0.12s; }
-  .amodo-item:hover { background: rgba(255,255,255,0.07); }
-  .amodo-item.activo { color: #58a6ff; background: rgba(88,166,255,0.08); }
+  /* sticky bar summary */
+  .asi-summary { flex: 1; min-width: 0; padding-right: 8px; }
+  .asi-row1 { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+  .asi-ingreso { font-size: 12px; color: var(--subtext); }
+  .asi-saldo { font-size: 15px; font-weight: 700; font-family: 'Roboto', sans-serif; }
+  .asi-bar-wrap { height: 5px; background: rgba(255,255,255,0.08); border-radius: 3px; overflow: hidden; margin-bottom: 6px; }
+  .asi-bar-fill { height: 100%; border-radius: 3px; transition: width 0.4s ease, background 0.4s ease; }
+  .asi-row2 { font-size: 11px; color: var(--subtext); }
+  /* comparison table */
+  .asi-tabla-header { display: flex; justify-content: flex-end; margin-bottom: 8px; padding-top: 4px; }
+  .asi-toggle { background: rgba(88,166,255,0.1); border: 1px solid rgba(88,166,255,0.25); border-radius: 8px; color: #58a6ff; font-size: 12px; padding: 4px 10px; cursor: pointer; font-family: 'DM Sans', sans-serif; }
+  .asi-toggle:active { background: rgba(88,166,255,0.2); }
+  .asi-tabla { width: 100%; border-collapse: collapse; margin-bottom: 10px; }
+  .asi-tabla th { font-size: 10px; color: var(--subtext); text-transform: uppercase; letter-spacing: 0.07em; padding: 0 0 8px; font-weight: 600; }
+  .asi-tabla th:not(:first-child) { text-align: right; }
+  .asi-tabla td { padding: 8px 0; font-size: 13px; vertical-align: middle; border-top: 1px solid rgba(255,255,255,0.06); }
+  .asi-tabla td:not(:first-child) { text-align: right; font-family: 'Roboto', sans-serif; font-weight: 700; }
+  .asi-meta-inp { width: 42px; background: rgba(88,166,255,0.08); border: 1px solid rgba(88,166,255,0.3); border-radius: 6px; color: #58a6ff; text-align: center; font-size: 13px; font-family: 'Roboto', sans-serif; font-weight: 700; padding: 2px 3px; -moz-appearance: textfield; appearance: none; }
+  .asi-meta-inp:focus { outline: none; border-color: #58a6ff; background: rgba(88,166,255,0.15); }
+  .asi-meta-inp::-webkit-inner-spin-button, .asi-meta-inp::-webkit-outer-spin-button { -webkit-appearance: none; display: none; }
+  .asi-meta-sub { font-size: 10px; color: var(--subtext); margin-top: 3px; }
 
   .tabla-comparativa { background: none; border: none; padding: 0; }
   .tabla-comp-empty { text-align: center; color: var(--subtext); font-size: 12px; padding: 12px 0; }
@@ -756,7 +742,9 @@
 
     <div class="analisis-panel">
       <div class="analisis-header" onclick="toggleAnalisis()">
-        <span class="analisis-header-left">📊 Análisis de tu presupuesto</span>
+        <div class="asi-summary" id="analisis-summary">
+          <span style="font-size:13px;color:var(--subtext)">📊 Cargando análisis…</span>
+        </div>
         <span class="analisis-chevron" id="analisis-chevron">›</span>
       </div>
       <div class="analisis-body" id="analisis-body">
@@ -1814,16 +1802,7 @@
   }
 
   function aplicarTipoRow(row) {
-    const cat  = row._planCat
-    if (!cat) return
-    const tipo = categoriaTipos[cat] ?? 'opcional'
-    row.classList.toggle('tipo-necesario', tipo === 'necesario')
-    row.classList.toggle('tipo-opcional',  tipo === 'opcional')
-    const tipoActual = categoriaTipos[cat] ?? 'opcional'
-    row.querySelectorAll('.btn-tipo').forEach(b => {
-      b.classList.toggle('activo-necesario', b.dataset.tipo === 'necesario' && tipoActual === 'necesario')
-      b.classList.toggle('activo-opcional',  b.dataset.tipo === 'opcional'  && tipoActual === 'opcional')
-    })
+    /* tipo buttons removed; function kept for compatibility with aplicarTiposUI */
   }
 
   function aplicarTiposUI() {
@@ -2063,7 +2042,7 @@
           <span>${nombre}</span>
         </div>
         <div class="var-bottom">
-          <span class="var-promedio">Últ. meses: ${fmt(gastosOriginal[cat])}</span>
+          <span class="var-promedio">media: ${fmt(gastosOriginal[cat])}</span>
           <div style="display:flex;align-items:center;gap:6px;flex-shrink:0;">
             <div class="var-spin-btns">
               <button class="btn-spin btn-spin-minus" type="button" aria-label="Disminuir">−</button>
@@ -2074,14 +2053,7 @@
             </div>
           </div>
         </div>
-        <div class="tipo-btns">
-          <button class="btn-tipo" data-tipo="necesario">🔒 Necesario</button>
-          <button class="btn-tipo" data-tipo="opcional">🎯 Opcional</button>
-        </div>
       `
-      row.querySelectorAll('.btn-tipo').forEach(btn => {
-        btn.addEventListener('click', () => setTipo(cat, btn.dataset.tipo))
-      })
       return row
     }
 
@@ -2227,169 +2199,12 @@
     chevron.classList.toggle('abierto', abre)
   }
 
-  const MODOS_ANALISIS = {
-    basico:      { nec: 70, opc: 20, aho: 10 },
-    equilibrado: { nec: 65, opc: 20, aho: 15 },
-    ahorrador:   { nec: 50, opc: 30, aho: 20 },
-  }
-  const MODOS_ORDEN = ['basico', 'equilibrado', 'ahorrador']
-  const MODOS_LABEL = { basico: 'Básico', equilibrado: 'Equilibrado', ahorrador: 'Ahorrador', personalizado: 'Personalizado' }
-  let modoAnalisis     = 'equilibrado'
-  let modoPersonalizado = null
+  let metaAhorro       = 20
+  let vistaAnalisis    = 'pct'
+  let _metaAhorroLoad  = false
 
   async function cargarBudgetMode() {
-    if (!window.currentUserId) {
-      await new Promise(resolve => {
-        const iv = setInterval(() => { if (window.currentUserId) { clearInterval(iv); resolve() } }, 50)
-        setTimeout(() => { clearInterval(iv); resolve() }, 5000)
-      })
-    }
-    if (!window.currentUserId) return
-    const { data } = await dbClient.from('user_budget_mode').select('modo,nec_pct,opc_pct,aho_pct').eq('user_id', window.currentUserId).maybeSingle()
-    if (!data) return
-    let modo = data.modo === 'ajustado' ? 'basico' : (data.modo || 'equilibrado')
-    if (modo === 'personalizado') {
-      modoPersonalizado = { nec: data.nec_pct ?? 60, opc: data.opc_pct ?? 30, aho: data.aho_pct ?? 10 }
-      modoAnalisis = 'personalizado'
-    } else {
-      modoAnalisis = MODOS_ANALISIS[modo] ? modo : 'equilibrado'
-      modoPersonalizado = null
-    }
-    actualizarAnalisis()
-  }
-
-  async function persistirBudgetMode() {
-    if (!window.currentUserId) return
-    const ideales = getIdeales()
-    await dbClient.from('user_budget_mode').upsert({
-      user_id:    window.currentUserId,
-      modo:       modoAnalisis,
-      nec_pct:    ideales.nec,
-      opc_pct:    ideales.opc,
-      aho_pct:    ideales.aho,
-      updated_at: new Date().toISOString()
-    }, { onConflict: 'user_id' })
-  }
-
-  function getIdeales() {
-    if (modoAnalisis === 'personalizado' && modoPersonalizado) return modoPersonalizado
-    return MODOS_ANALISIS[modoAnalisis] || MODOS_ANALISIS.equilibrado
-  }
-
-  function setModoAnalisis(modo) {
-    modoAnalisis = modo
-    if (modo !== 'personalizado') modoPersonalizado = null
-    actualizarAnalisis()
-    persistirBudgetMode()
-  }
-
-  function editarIdeal(key, td) {
-    if (td.querySelector('input')) return
-    const val = parseInt(td.textContent) || 0
-    td.innerHTML = `<input type="number" min="0" max="100" value="${val}" style="width:38px;background:transparent;border:none;border-bottom:1px solid #58a6ff;color:#58a6ff;text-align:center;font-size:inherit;font-family:inherit;-moz-appearance:textfield;">`
-    const inp = td.querySelector('input')
-    inp.select()
-    inp.addEventListener('blur', () => guardarIdealPersonalizado(key, inp.value))
-    inp.addEventListener('keydown', e => { if (e.key === 'Enter') inp.blur() })
-  }
-
-  function guardarIdealPersonalizado(key, rawVal) {
-    const base   = modoPersonalizado || { ...getIdeales() }
-    const nuevo  = Math.max(0, Math.min(100, Math.round(parseFloat(rawVal) || 0)))
-    base[key]    = nuevo
-    const resto  = 100 - nuevo
-    const otros  = ['nec', 'opc', 'aho'].filter(k => k !== key)
-    const sumaOtros = otros.reduce((s, k) => s + base[k], 0)
-    if (resto <= 0) {
-      otros.forEach(k => { base[k] = 0 })
-      base[key] = 100
-    } else if (sumaOtros === 0) {
-      const mitad = Math.floor(resto / 2)
-      base[otros[0]] = mitad
-      base[otros[1]] = resto - mitad
-    } else {
-      let dist = 0
-      otros.forEach((k, i) => {
-        if (i === otros.length - 1) { base[k] = resto - dist }
-        else { const v = Math.round(base[k] / sumaOtros * resto); base[k] = v; dist += v }
-      })
-    }
-    modoPersonalizado = base
-    modoAnalisis = 'personalizado'
-    actualizarAnalisis()
-    persistirBudgetMode()
-  }
-
-  function stepIdeal(key, delta) {
-    guardarIdealPersonalizado(key, (getIdeales()[key] || 0) + delta)
-  }
-
-  function onPctInput(key, rawVal) {
-    const nuevo = Math.max(0, Math.min(100, Math.round(parseFloat(rawVal) || 0)))
-    const base  = modoPersonalizado ? { ...modoPersonalizado } : { ...getIdeales() }
-    base[key]   = nuevo
-
-    if (key === 'nec') {
-      // Necesarios cambia → redistribuir opc y aho proporcionalmente
-      const resto = Math.max(0, 100 - nuevo)
-      const suma2 = base.opc + base.aho
-      if (suma2 === 0) {
-        base.opc = Math.floor(resto / 2)
-        base.aho = resto - base.opc
-      } else {
-        const opc = Math.round(base.opc / suma2 * resto)
-        base.opc  = opc
-        base.aho  = resto - opc
-      }
-    } else if (key === 'opc') {
-      // Opcionales cambia → Necesarios queda fijo, Ahorro absorbe el resto
-      const maxDisp = Math.max(0, 100 - base.nec)
-      base.opc = Math.min(nuevo, maxDisp)
-      base.aho = maxDisp - base.opc
-    } else {
-      // Ahorro cambia → Necesarios queda fijo, Opcionales absorbe el resto
-      const maxDisp = Math.max(0, 100 - base.nec)
-      base.aho = Math.min(nuevo, maxDisp)
-      base.opc = maxDisp - base.aho
-    }
-
-    modoPersonalizado = base
-    modoAnalisis = 'personalizado'
-    const otros = ['nec', 'opc', 'aho'].filter(k => k !== key)
-    otros.forEach(k => {
-      const inp = document.getElementById('pct-' + k)
-      if (inp && document.activeElement !== inp) inp.value = base[k]
-    })
-    const suma   = base.nec + base.opc + base.aho
-    const sumaEl = document.getElementById('pct-suma')
-    if (sumaEl) {
-      sumaEl.textContent = suma === 100 ? '= 100% ✓' : `Suma: ${suma}% ⚠️`
-      sumaEl.style.color = suma === 100 ? '#4ade80' : '#f85149'
-    }
-  }
-
-  function onPctBlur() {
-    if (!modoPersonalizado) return
-    persistirBudgetMode()
-  }
-
-  function toggleModoDropdown(e) {
-    e.stopPropagation()
-    const dd = document.getElementById('modo-dropdown')
-    if (!dd) return
-    const abierto = dd.style.display !== 'none'
-    dd.style.display = abierto ? 'none' : 'block'
-    if (!abierto) setTimeout(() => document.addEventListener('click', cerrarModoDropdown, { once: true }), 0)
-  }
-
-  function cerrarModoDropdown() {
-    const dd = document.getElementById('modo-dropdown')
-    if (dd) dd.style.display = 'none'
-  }
-
-  function seleccionarModo(modo) {
-    cerrarModoDropdown()
-    setModoAnalisis(modo)
+    /* replaced by metaAhorro stored in localStorage */
   }
 
   let _floatHideTimer = null
@@ -2400,46 +2215,33 @@
     if (!el) return
     const ingresos = totalIngresos()
     if (ingresos <= 0) return
-    let necesario = 0, opcional = 0
-    document.querySelectorAll('.var-row').forEach(row => {
-      const tipo = categoriaTipos[row._planCat] ?? 'opcional'
-      const val  = parseFloat(row.querySelector('.variable-input')?.value) || 0
-      if (tipo === 'necesario') necesario += val; else opcional += val
-    })
-    const ahorro  = Math.max(0, ingresos - totalGastos())
-    const pNec    = Math.round(necesario / ingresos * 100)
-    const pOpc    = Math.round(opcional  / ingresos * 100)
-    const pAho    = Math.round(ahorro    / ingresos * 100)
-    const ideales = getIdeales()
-    const mLabel  = (MODOS_LABEL[modoAnalisis] || 'MODO').toUpperCase()
+    const gastos    = totalGastos()
+    const saldo     = ingresos - gastos
+    const pGastos   = Math.round(gastos / ingresos * 100)
+    const pAhorro   = Math.max(0, Math.round(saldo / ingresos * 100))
+    const metaGastos = 100 - metaAhorro
 
-    function est(v, id, inv) { const d = inv ? id - v : v - id; return d <= 0.5 ? '✅' : d <= 15 ? '⚠️' : '❌' }
-    function col(v, id, inv) { const d = inv ? id - v : v - id; return d <= 0.5 ? '#4ade80' : d <= 15 ? '#e3b341' : '#f85149' }
-
-    const activeTipo = _focusedInput
-      ? (categoriaTipos[_focusedInput.closest?.('.var-row')?._planCat] ?? 'opcional')
-      : null
+    function col(v, meta, inv) { const d = inv ? meta - v : v - meta; return d <= 0.5 ? '#4ade80' : d <= 15 ? '#e3b341' : '#f85149' }
+    function est(v, meta, inv) { const d = inv ? meta - v : v - meta; return d <= 0.5 ? '✅' : d <= 15 ? '⚠️' : '❌' }
 
     const filas = [
-      { label: '🔒 Necesarios', v: pNec, id: ideales.nec, inv: false, key: 'necesario' },
-      { label: '🎯 Opcionales', v: pOpc, id: ideales.opc, inv: false, key: 'opcional'  },
-      { label: '💰 Ahorro',     v: pAho, id: ideales.aho, inv: true,  key: null        },
+      { label: 'Gastos 💸',  v: pGastos, meta: metaGastos, inv: false },
+      { label: 'Ahorro 🏦',  v: pAhorro, meta: metaAhorro,  inv: true  },
     ]
-
     el.innerHTML = `
-      <div class="af-title">📊 ANÁLISIS EN TIEMPO REAL</div>
-      <div class="af-head">
+      <div class="af-title">📊 EN TIEMPO REAL</div>
+      <div class="af-head" style="grid-template-columns:1fr 54px 54px 28px;">
         <span class="af-cell-label"></span>
-        <span class="af-cell-val">TU CASO</span>
-        <span class="af-cell-val">${mLabel}</span>
+        <span class="af-cell-val">ACTUAL</span>
+        <span class="af-cell-val">META</span>
         <span class="af-cell-est"></span>
       </div>
       ${filas.map(f => `
-      <div class="af-row${activeTipo && f.key === activeTipo ? ' af-activo' : ''}">
+      <div class="af-row">
         <span class="af-cell-label">${f.label}</span>
-        <span class="af-cell-val" style="color:${col(f.v, f.id, f.inv)}">${f.v}%</span>
-        <span class="af-cell-val" style="color:var(--subtext)">${f.id}%</span>
-        <span class="af-cell-est">${est(f.v, f.id, f.inv)}</span>
+        <span class="af-cell-val" style="color:${col(f.v, f.meta, f.inv)}">${f.v}%</span>
+        <span class="af-cell-val" style="color:var(--subtext)">${f.meta}%</span>
+        <span class="af-cell-est">${est(f.v, f.meta, f.inv)}</span>
       </div>`).join('')}`
   }
 
@@ -2471,117 +2273,117 @@
   }
 
   function actualizarAnalisis() {
-    const cont = document.getElementById('analisis-contenido')
-    if (!cont) return
+    if (!_metaAhorroLoad && window.currentUserId) {
+      _metaAhorroLoad = true
+      try {
+        const s = localStorage.getItem('mf_meta_ahorro_' + window.currentUserId)
+        if (s !== null) metaAhorro = Math.max(5, Math.min(50, parseInt(s) || 20))
+      } catch(e) {}
+    }
+
+    const summaryEl = document.getElementById('analisis-summary')
+    const cont      = document.getElementById('analisis-contenido')
+    if (!summaryEl || !cont) return
+
     const ingresos = totalIngresos()
-    if (ingresos <= 0) { cont.innerHTML = '<p style="font-size:12px;color:var(--subtext);padding:0 2px 12px">Introduce tus ingresos para ver el análisis.</p>'; return }
-
-    let necesario = 0, opcional = 0
-    document.querySelectorAll('.var-row').forEach(row => {
-      const tipo = categoriaTipos[row._planCat] ?? 'opcional'
-      const val  = parseFloat(row.querySelector('.variable-input')?.value) || 0
-      if (tipo === 'necesario') necesario += val
-      else opcional += val
-    })
-    const ahorro  = Math.max(0, ingresos - totalGastos())
-    const pNec    = necesario / ingresos * 100
-    const pOpc    = opcional  / ingresos * 100
-    const pAho    = ahorro    / ingresos * 100
-    const ideales = getIdeales()
-
-    function estado(actual, ideal, inverso = false) {
-      const diff = inverso ? ideal - actual : actual - ideal
-      if (diff <= 0.5) return '✅'
-      if (diff <= 15)  return '⚠️'
-      return '❌'
-    }
-    function colorPct(actual, ideal, inverso = false) {
-      const diff = inverso ? ideal - actual : actual - ideal
-      if (diff <= 0.5) return '#4ade80'
-      if (diff <= 15)  return '#e3b341'
-      return '#f85149'
+    if (ingresos <= 0) {
+      summaryEl.innerHTML = '<span style="font-size:13px;color:var(--subtext)">📊 Introduce tus ingresos para ver el análisis</span>'
+      cont.innerHTML = ''
+      return
     }
 
-    const rows = [
-      { label: '🔒 Necesarios', val: pNec, ideal: ideales.nec, ikey: 'nec', est: estado(pNec, ideales.nec),        col: colorPct(pNec, ideales.nec) },
-      { label: '🎯 Opcionales', val: pOpc, ideal: ideales.opc, ikey: 'opc', est: estado(pOpc, ideales.opc),        col: colorPct(pOpc, ideales.opc) },
-      { label: '💰 Ahorro',     val: pAho, ideal: ideales.aho, ikey: 'aho', est: estado(pAho, ideales.aho, true),  col: colorPct(pAho, ideales.aho, true) },
-    ]
+    const gastos     = totalGastos()
+    const saldo      = ingresos - gastos
+    const pGastos    = gastos / ingresos * 100
+    const pAhorro    = saldo  / ingresos * 100
+    const metaGastos = 100 - metaAhorro
+    const metaAhorro_eur = ingresos * metaAhorro / 100
 
-    const filas = rows.map(r => {
-      const idealTd = modoAnalisis === 'personalizado'
-        ? `<td class="analisis-ideal"><input class="pct-inp" id="pct-${r.ikey}" type="number" inputmode="decimal" enterkeyhint="done" min="0" max="100" value="${r.ideal}" oninput="onPctInput('${r.ikey}',this.value)" onblur="onPctBlur()" onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur()}">%</td>`
-        : `<td class="analisis-ideal analisis-ideal-edit" onclick="editarIdeal('${r.ikey}', this)" title="Toca para personalizar">${r.ideal}%</td>`
-      return `
-        <tr>
-          <td><span class="analisis-cat">${r.label}</span></td>
-          <td style="color:${r.col}">${r.val.toFixed(0)}%</td>
-          ${idealTd}
-          <td>${r.est}</td>
-        </tr>`
-    }).join('')
-    const sumaRow = modoAnalisis === 'personalizado'
-      ? `<tr><td colspan="2"></td><td class="analisis-ideal"><span class="pct-suma" id="pct-suma">= 100% ✓</span></td><td></td></tr>`
-      : ''
+    const fillPct   = Math.min(100, pGastos / (metaGastos || 1) * 100)
+    const barColor  = pGastos <= metaGastos ? '#4ade80' : pGastos <= metaGastos + 10 ? '#e3b341' : '#f85149'
+    const saldoSign = saldo >= 0 ? '+' : ''
+    const saldoColor = saldo >= 0 ? '#4ade80' : '#f85149'
 
-    const objetivoNec = ingresos * ideales.nec / 100
-    const objetivoOpc = ingresos * ideales.opc / 100
-    const ahorroNec = necesario > objetivoNec ? necesario - objetivoNec : 0
-    const ahorroOpc = opcional  > objetivoOpc ? opcional  - objetivoOpc : 0
+    summaryEl.innerHTML = `
+      <div class="asi-row1">
+        <span class="asi-ingreso">💰 ${fmt(ingresos)}/mes</span>
+        <span class="asi-saldo" style="color:${saldoColor}">${saldoSign}${fmt(saldo)}</span>
+      </div>
+      <div class="asi-bar-wrap">
+        <div class="asi-bar-fill" style="width:${fillPct.toFixed(1)}%;background:${barColor}"></div>
+      </div>
+      <div class="asi-row2">${pGastos.toFixed(1)}% de tu ingreso en gastos · meta ahorro: ${metaAhorro}%</div>
+    `
 
-    const necAlto = necesario > objetivoNec
-    const opcAlto = opcional  > objetivoOpc
-    const exNecPct = pNec - ideales.nec
-    const ahorroObjetivo = ingresos * ideales.aho / 100
+    const isEur = vistaAnalisis === 'eur'
+    const pAhorroPos = Math.max(0, pAhorro)
 
-    let msg = ''
-    if (pAho >= ideales.aho) {
-      msg = `✅ Estás cumpliendo tu meta de ahorro.`
-    } else if (necAlto && opcAlto) {
-      msg = `Si bajas Necesarios al ${ideales.nec}% y Opcionales al ${ideales.opc}%, podrías ahorrar ~${fmt(ahorroObjetivo)} al mes.`
-    } else if (necAlto) {
-      msg = `Tus necesarios están ${exNecPct <= 15 ? 'algo altos' : 'muy altos'}. Podrías ahorrar ~${fmt(ahorroObjetivo)} si los bajas al ${ideales.nec}%.`
-    } else if (opcAlto) {
-      const exOpcPct = pOpc - ideales.opc
-      msg = `Tus opcionales están ${exOpcPct <= 15 ? 'algo altos' : 'muy altos'}. Podrías ahorrar ~${fmt(ahorroObjetivo)} si los bajas al ${ideales.opc}%.`
-    } else if (pAho < ideales.aho) {
-      const falta = ingresos * (ideales.aho - pAho) / 100
-      msg = `Tu ahorro es bajo. Redirigir ${fmt(falta)} al mes te acercaría al ${ideales.aho}% objetivo.`
-    } else if (modoAnalisis === 'personalizado') {
-      msg = `Usando valores personalizados. Edita los % directamente — los demás se ajustan solos.`
+    const tcasoGastos = isEur ? fmt(gastos) : pGastos.toFixed(1) + '%'
+    const tmetaGastos = isEur ? fmt(ingresos * metaGastos / 100) : metaGastos + '%'
+    const tcasoAhorro = isEur ? fmt(Math.max(0, saldo)) : pAhorroPos.toFixed(1) + '%'
+    const gColorClass = pGastos > metaGastos ? '#f85149' : '#4ade80'
+    const aColorClass = saldo >= 0 ? '#4ade80' : '#f85149'
+
+    let tipText
+    if (pGastos <= metaGastos) {
+      tipText = `✅ Estás cumpliendo tu meta de ahorro del ${metaAhorro}%. ¡Bien hecho!`
     } else {
-      msg = `¡Buen equilibrio! Tu reparto sigue el perfil <strong>${MODOS_LABEL[modoAnalisis]}</strong>.`
+      const Z = (pGastos - metaGastos) / 100 * ingresos
+      const W = Z * 12
+      tipText = `Ahora mismo gastas el ${pGastos.toFixed(1)}%. Si lo bajas al ${metaGastos}% podrías guardar ${fmt(Z)}/mes — unos ${fmt(W)} al año.`
     }
-
-    const itemsDD = MODOS_ORDEN.map(m => {
-      const iconos = { basico: '😮‍💨', equilibrado: '⚖️', ahorrador: '💪' }
-      return `<div class="amodo-item${m === modoAnalisis ? ' activo' : ''}" onclick="seleccionarModo('${m}')">${iconos[m]} ${MODOS_LABEL[m]}</div>`
-    }).join('')
-
-    const labelModo = modoAnalisis === 'personalizado'
-      ? `<span style="color:#58a6ff;font-size:11px;display:inline-flex;align-items:center;white-space:nowrap;">✏️ Personalizado<button class="btn-pct-reset" onclick="seleccionarModo('equilibrado');event.stopPropagation()" title="Restablecer">✕</button></span>`
-      : `<span onclick="toggleModoDropdown(event)" style="cursor:pointer;user-select:none;white-space:nowrap;">${MODOS_LABEL[modoAnalisis]}&nbsp;<span style="color:#58a6ff;">⌄</span></span>`
 
     cont.innerHTML = `
-      <div style="position:relative;">
-        <table class="analisis-tabla">
-          <thead><tr>
-            <th></th>
-            <th>Tu caso</th>
-            <th>${labelModo}</th>
-            <th></th>
-          </tr></thead>
-          <tbody>${filas}${sumaRow}</tbody>
-        </table>
-        <div id="modo-dropdown" class="amodo-dd" style="display:none;">${itemsDD}</div>
+      <div class="asi-tabla-header">
+        <button class="asi-toggle" onclick="toggleVistaAnalisis(event)">${isEur ? '€ → %' : '% → €'}</button>
       </div>
-      <div class="analisis-msg">💡 ${msg}</div>
-      <div style="height:12px"></div>
+      <table class="asi-tabla">
+        <thead><tr>
+          <th>Concepto</th>
+          <th>Tu caso</th>
+          <th>Tu meta</th>
+        </tr></thead>
+        <tbody>
+          <tr>
+            <td>Gastos 💸</td>
+            <td style="color:${gColorClass}">${tcasoGastos}</td>
+            <td>${tmetaGastos}</td>
+          </tr>
+          <tr>
+            <td>Ahorro 🏦</td>
+            <td style="color:${aColorClass}">${tcasoAhorro}</td>
+            <td>
+              <div style="display:flex;align-items:center;justify-content:flex-end;gap:2px;">
+                <input class="asi-meta-inp" type="number" inputmode="decimal" enterkeyhint="done"
+                  min="5" max="50" value="${metaAhorro}"
+                  oninput="onMetaAhorroInput(this.value)"
+                  onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur()}"
+                  onclick="event.stopPropagation()"
+                >${isEur ? '' : '%'}
+              </div>
+              ${isEur ? '' : `<div class="asi-meta-sub">${fmt(metaAhorro_eur)}/mes</div>`}
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="analisis-msg">💡 ${tipText}</div>
+      <div style="height:10px"></div>
     `
-    if (modoAnalisis === 'personalizado') {
-      const th = cont.querySelector('thead th:nth-child(3)')
-      if (th) th.addEventListener('click', toggleModoDropdown)
+  }
+
+  function toggleVistaAnalisis(e) {
+    e.stopPropagation()
+    vistaAnalisis = vistaAnalisis === 'pct' ? 'eur' : 'pct'
+    actualizarAnalisis()
+  }
+
+  function onMetaAhorroInput(val) {
+    const n = Math.max(5, Math.min(50, parseInt(val) || 5))
+    metaAhorro = n
+    if (window.currentUserId) {
+      try { localStorage.setItem('mf_meta_ahorro_' + window.currentUserId, n) } catch(e) {}
     }
+    actualizarAnalisis()
   }
 
   const _MESES_SEG = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic']
