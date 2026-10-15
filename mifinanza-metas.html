@@ -2303,7 +2303,7 @@
     } else {
       const Z = (pGastos - metaGastos) / 100 * ingresos
       const W = Z * 12
-      tipText = `Ahora mismo gastas el ${pGastos.toFixed(1)}%. Si lo bajas al ${metaGastos}% podrías guardar ${fmt(Z)}/mes — unos ${fmt(W)} al año.`
+      tipText = `Si bajas al ${metaGastos}% podrías guardar ${fmt(Z)}/mes — unos ${fmt(W)} al año.`
     }
 
     cont.innerHTML = `
@@ -2332,7 +2332,7 @@
                   onclick="event.stopPropagation()"
                 >${isEur ? '' : '%'}
               </div>
-              ${isEur ? '' : `<div class="asi-meta-sub">${fmt(metaAhorro_eur)}/mes</div>`}
+              <div class="asi-meta-sub">${fmt(metaAhorro_eur)}/mes</div>
             </td>
           </tr>
         </tbody>
