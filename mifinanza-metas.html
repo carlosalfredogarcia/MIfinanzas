@@ -2296,6 +2296,11 @@
     const tcasoAhorro = isEur ? fmt(Math.max(0, saldo)) : pAhorroPos.toFixed(1) + '%'
     const gColorClass = pGastos > metaGastos ? '#f85149' : '#4ade80'
     const aColorClass = saldo >= 0 ? '#4ade80' : '#f85149'
+    const inputVal     = isEur ? Math.round(metaAhorro_eur) : metaAhorro
+    const inputSymbol  = isEur ? '€' : '%'
+    const inputMin     = isEur ? Math.round(ingresos * 0.05) : 5
+    const inputMax     = isEur ? Math.round(ingresos * 0.50) : 50
+    const inputSubText = isEur ? `= ${Math.round(metaAhorro)}%` : `${fmt(metaAhorro_eur)}/mes`
 
     let tipText
     if (pGastos <= metaGastos) {
@@ -2325,14 +2330,14 @@
             <td>
               <div style="display:flex;align-items:center;justify-content:flex-end;gap:2px;">
                 <input class="asi-meta-inp" type="number" inputmode="decimal" enterkeyhint="done"
-                  min="5" max="50" value="${metaAhorro}"
+                  min="${inputMin}" max="${inputMax}" value="${inputVal}"
                   oninput="onMetaAhorroInput(this.value)"
                   onblur="onMetaAhorroBlur(this)"
                   onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur()}"
                   onclick="event.stopPropagation()"
-                >${isEur ? '' : '%'}
+                >${inputSymbol}
               </div>
-              <div class="asi-meta-sub">${fmt(metaAhorro_eur)}/mes</div>
+              <div class="asi-meta-sub">${inputSubText}</div>
             </td>
           </tr>
         </tbody>
@@ -2349,17 +2354,31 @@
   }
 
   function onMetaAhorroInput(val) {
-    const n = parseInt(val)
-    if (!isNaN(n)) metaAhorro = n  // no clamping while typing
+    const n = parseFloat(val)
+    if (!isNaN(n)) {
+      if (vistaAnalisis === 'eur') {
+        const ing = totalIngresos()
+        if (ing > 0) metaAhorro = n / ing * 100  // convert € → %, no clamping while typing
+      } else {
+        metaAhorro = n  // no clamping while typing
+      }
+    }
     actualizarAnalisis()  // updates summary bar only (input has focus → body skipped)
   }
 
   function onMetaAhorroBlur(inp) {
-    const n = Math.max(5, Math.min(50, parseInt(inp.value) || 20))
-    metaAhorro = n
-    inp.value = n
+    const raw = parseFloat(inp.value)
+    const ing = totalIngresos()
+    if (!isNaN(raw)) {
+      if (vistaAnalisis === 'eur' && ing > 0) {
+        const pct = raw / ing * 100
+        metaAhorro = Math.max(5, Math.min(50, pct))
+      } else {
+        metaAhorro = Math.max(5, Math.min(50, raw || 20))
+      }
+    }
     if (window.currentUserId) {
-      try { localStorage.setItem('mf_meta_ahorro_' + window.currentUserId, n) } catch(e) {}
+      try { localStorage.setItem('mf_meta_ahorro_' + window.currentUserId, metaAhorro) } catch(e) {}
     }
     actualizarAnalisis()  // full re-render: input no longer focused
   }
