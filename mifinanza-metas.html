@@ -2311,25 +2311,34 @@
     const nuevo = Math.max(0, Math.min(100, Math.round(parseFloat(rawVal) || 0)))
     const base  = modoPersonalizado ? { ...modoPersonalizado } : { ...getIdeales() }
     base[key]   = nuevo
-    const resto = 100 - nuevo
-    const otros = ['nec', 'opc', 'aho'].filter(k => k !== key)
-    const sumaOtros = otros.reduce((s, k) => s + base[k], 0)
-    if (resto <= 0) {
-      otros.forEach(k => { base[k] = 0 })
-      base[key] = 100
-    } else if (sumaOtros === 0) {
-      const mitad = Math.floor(resto / 2)
-      base[otros[0]] = mitad
-      base[otros[1]] = resto - mitad
+
+    if (key === 'nec') {
+      // Necesarios cambia → redistribuir opc y aho proporcionalmente
+      const resto = Math.max(0, 100 - nuevo)
+      const suma2 = base.opc + base.aho
+      if (suma2 === 0) {
+        base.opc = Math.floor(resto / 2)
+        base.aho = resto - base.opc
+      } else {
+        const opc = Math.round(base.opc / suma2 * resto)
+        base.opc  = opc
+        base.aho  = resto - opc
+      }
+    } else if (key === 'opc') {
+      // Opcionales cambia → Necesarios queda fijo, Ahorro absorbe el resto
+      const maxDisp = Math.max(0, 100 - base.nec)
+      base.opc = Math.min(nuevo, maxDisp)
+      base.aho = maxDisp - base.opc
     } else {
-      let dist = 0
-      otros.forEach((k, i) => {
-        if (i === otros.length - 1) { base[k] = resto - dist }
-        else { const v = Math.round(base[k] / sumaOtros * resto); base[k] = v; dist += v }
-      })
+      // Ahorro cambia → Necesarios queda fijo, Opcionales absorbe el resto
+      const maxDisp = Math.max(0, 100 - base.nec)
+      base.aho = Math.min(nuevo, maxDisp)
+      base.opc = maxDisp - base.aho
     }
+
     modoPersonalizado = base
     modoAnalisis = 'personalizado'
+    const otros = ['nec', 'opc', 'aho'].filter(k => k !== key)
     otros.forEach(k => {
       const inp = document.getElementById('pct-' + k)
       if (inp && document.activeElement !== inp) inp.value = base[k]
