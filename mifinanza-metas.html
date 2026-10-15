@@ -472,6 +472,11 @@
   .tabla-comp-empty { text-align: center; color: var(--subtext); font-size: 12px; padding: 12px 0; }
 
   .sc-dias { font-size: 12px; color: var(--subtext); margin-bottom: 12px; padding-left: 2px; }
+  .sc-resumen { background: #161b22; border: 1px solid #30363d; border-radius: 14px; padding: 14px 16px; margin-bottom: 12px; display: flex; flex-direction: column; gap: 8px; }
+  .sc-resumen-titulo { font-size: 14px; font-weight: 600; color: #e6edf3; }
+  .sc-resumen-dias { font-size: 12px; color: #7d8590; }
+  .sc-resumen-estado { display: flex; gap: 16px; font-size: 13px; color: #e6edf3; font-weight: 500; }
+  .sc-resumen-tip { font-size: 12px; color: #e3b341; line-height: 1.5; }
   .sc-card { background: #161b22; border-radius: 14px; padding: 12px 14px; margin-bottom: 8px; border: 1px solid var(--border); transition: opacity 0.3s, filter 0.3s; }
   .sc-card.sc-apagado { opacity: 0.3; filter: grayscale(0.8); }
   .sc-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
@@ -2609,7 +2614,7 @@
       const movsHtml = renderMovsSeg(cat)
 
       return {
-        activo, esVacio, diff,
+        activo, esVacio, diff, label: `${emoji} ${nombre}`,
         html: `
           <div class="sc-card${activo ? '' : ' sc-apagado'}">
             <div class="sc-top">
@@ -2690,7 +2695,7 @@
           }).join('')
 
       return [{
-        activo, esVacio, diff,
+        activo, esVacio, diff, label: `${grupo.emoji} ${grupo.nombre}`,
         html: `
           <div class="sc-card${activo ? '' : ' sc-apagado'}">
             <div class="sc-top">
@@ -2727,8 +2732,25 @@
       return b.diff - a.diff
     })
 
+    const activas   = tarjetasValidas.filter(t => t.activo && !t.esVacio)
+    const verdes    = activas.filter(t => t.diff < 0)
+    const rojas     = activas.filter(t => t.diff > 0)
+    const exceso    = rojas.reduce((s, t) => s + t.diff, 0)
+    const nomRojas  = rojas.map(t => t.label).join(', ')
+    const tipTxt    = rojas.length === 0
+      ? '✅ Todas las categorías activas están dentro del presupuesto.'
+      : `💡 Podrías ahorrar ~${fmt(exceso)} ajustando: ${nomRojas}`
+
     cont.innerHTML = `
-      <div class="sc-dias">📅 Quedan ${diasQuedan} día${diasQuedan === 1 ? '' : 's'} para cerrar el mes</div>
+      <div class="sc-resumen">
+        <div class="sc-resumen-titulo">📊 Resumen del mes</div>
+        <div class="sc-resumen-dias">📅 Quedan ${diasQuedan} día${diasQuedan === 1 ? '' : 's'} para cerrar el mes</div>
+        <div class="sc-resumen-estado">
+          <span>✅ ${verdes.length} en orden</span>
+          <span>⚠️ ${rojas.length} pasadas</span>
+        </div>
+        <div class="sc-resumen-tip">${tipTxt}</div>
+      </div>
       ${tarjetasValidas.map(t => t.html).join('')}
     `
   }
