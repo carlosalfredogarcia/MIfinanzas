@@ -483,10 +483,9 @@
   .asi-sub-row .asr-lbl { flex: 1; font-weight: 500; }
   .asi-sub-row .asr-val { min-width: 56px; text-align: right; font-family: 'Roboto', sans-serif; font-weight: 600; }
   .asi-sub-row .asr-meta { min-width: 56px; text-align: right; }
-  .asi-perfiles { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; }
-  .asi-perfil-btn { font-size: 11px; padding: 4px 10px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.04); color: var(--subtext); cursor: pointer; font-family: 'DM Sans', sans-serif; transition: border-color .15s, color .15s, background .15s; }
-  .asi-perfil-btn:hover { border-color: rgba(255,255,255,0.2); color: var(--text); }
-  .asi-perfil-btn.ap-on { border-color: rgba(88,166,255,0.6); background: rgba(88,166,255,0.1); color: #58a6ff; font-weight: 600; }
+  .asi-perfil-sel { background: transparent; border: none; color: var(--subtext); font-size: 10px; font-weight: 600; font-family: 'DM Sans', sans-serif; cursor: pointer; padding: 0; max-width: 88px; text-align: right; }
+  .asi-perfil-sel:focus { outline: none; }
+  .asi-perfil-sel option { background: #161b22; color: #e6edf3; font-weight: normal; }
 
   .tabla-comparativa { background: none; border: none; padding: 0; }
   .tabla-comp-empty { text-align: center; color: var(--subtext); font-size: 12px; padding: 12px 0; }
@@ -2396,17 +2395,16 @@
     }
 
     cont.innerHTML = `
-      <div class="asi-perfiles">
-        <button class="asi-perfil-btn${perfilAhorro==='basico'?' ap-on':''}" onclick="seleccionarPerfil('basico')">Básico</button>
-        <button class="asi-perfil-btn${perfilAhorro==='equilibrado'?' ap-on':''}" onclick="seleccionarPerfil('equilibrado')">Equilibrado</button>
-        <button class="asi-perfil-btn${perfilAhorro==='ahorrador'?' ap-on':''}" onclick="seleccionarPerfil('ahorrador')">Ahorrador</button>
-        <button class="asi-perfil-btn${perfilAhorro==='personalizado'?' ap-on':''}" onclick="seleccionarPerfil('personalizado')">Personalizado</button>
-      </div>
       <table class="asi-tabla">
         <thead><tr>
           <th><button class="asi-toggle" onclick="toggleVistaAnalisis(event)">${isEur ? '€ → %' : '% → €'}</button></th>
           <th>Tu caso</th>
-          <th>Tu meta</th>
+          <th><select class="asi-perfil-sel" onchange="seleccionarPerfil(this.value)" onclick="event.stopPropagation()">
+            <option value="basico"${perfilAhorro==='basico'?' selected':''}>Básico</option>
+            <option value="equilibrado"${perfilAhorro==='equilibrado'?' selected':''}>Equilibrado</option>
+            <option value="ahorrador"${perfilAhorro==='ahorrador'?' selected':''}>Ahorrador</option>
+            <option value="personalizado"${perfilAhorro==='personalizado'?' selected':''}>Personalizado</option>
+          </select></th>
         </tr></thead>
         <tbody>
           <tr class="asi-gastos-row" onclick="toggleAsiGastosSub()">
