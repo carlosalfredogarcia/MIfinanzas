@@ -456,7 +456,6 @@
   .asi-bar-fill { height: 100%; border-radius: 3px; transition: width 0.4s ease, background 0.4s ease; }
   .asi-row2 { font-size: 11px; color: var(--subtext); }
   /* comparison table */
-  .asi-tabla-header { display: flex; justify-content: flex-end; margin-bottom: 8px; padding-top: 4px; }
   .asi-toggle { background: rgba(88,166,255,0.1); border: 1px solid rgba(88,166,255,0.25); border-radius: 8px; color: #58a6ff; font-size: 12px; padding: 4px 10px; cursor: pointer; font-family: 'DM Sans', sans-serif; }
   .asi-toggle:active { background: rgba(88,166,255,0.2); }
   .asi-tabla { width: 100%; border-collapse: collapse; margin-bottom: 10px; }
@@ -2308,12 +2307,9 @@
     }
 
     cont.innerHTML = `
-      <div class="asi-tabla-header">
-        <button class="asi-toggle" onclick="toggleVistaAnalisis(event)">${isEur ? '€ → %' : '% → €'}</button>
-      </div>
       <table class="asi-tabla">
         <thead><tr>
-          <th>Concepto</th>
+          <th><button class="asi-toggle" onclick="toggleVistaAnalisis(event)">${isEur ? '€ → %' : '% → €'}</button></th>
           <th>Tu caso</th>
           <th>Tu meta</th>
         </tr></thead>
