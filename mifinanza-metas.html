@@ -32,7 +32,7 @@
     min-height: 100vh;
   }
 
-  .phone { width: 390px; min-height: 100vh; background: var(--bg); margin: 0 auto; }
+  .phone { width: 390px; min-height: 100vh; min-height: 100lvh; background: var(--bg); margin: 0 auto; }
 
   .header { padding: 52px 24px 20px; animation: fadeUp 0.4s ease both; }
 
@@ -640,7 +640,7 @@
     position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
     width: 390px; background: rgba(13,17,23,0.97);
     backdrop-filter: blur(20px); border-top: 1px solid var(--border);
-    padding: 10px 0 22px; display: flex; justify-content: space-around;
+    padding: 10px 0 max(22px, env(safe-area-inset-bottom)); display: flex; justify-content: space-around;
     align-items: center; z-index: 200;
   }
 
