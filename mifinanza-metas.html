@@ -2952,16 +2952,7 @@
     if (!e.target.matches('.variable-input')) return
     e.preventDefault()
     guardarGastosLocal()
-    const allInputs = [...document.querySelectorAll('#detalle-gastos .variable-input')]
-      .filter(inp => inp.offsetParent !== null)
-    const idx = allInputs.indexOf(e.target)
-    if (idx >= 0 && idx < allInputs.length - 1) {
-      const next = allInputs[idx + 1]
-      next.focus()
-      next.scrollIntoView({ behavior: 'smooth', block: 'center' })
-    } else {
-      e.target.blur()
-    }
+    e.target.blur()
   })
   _contGastos.addEventListener('click', e => {
     const btn = e.target.closest('.btn-spin')
