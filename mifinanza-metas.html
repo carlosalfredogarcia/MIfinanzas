@@ -2000,6 +2000,13 @@
     _editandoGrupoId = null
   }
 
+  function sincronizarGastosDeDOM() {
+    document.querySelectorAll('.var-row').forEach(row => {
+      const inp = row.querySelector('.variable-input')
+      if (row._planCat && inp) _gastosGuardados[row._planCat] = parseFloat(inp.value) || 0
+    })
+  }
+
   function guardarModalGrupo() {
     const emoji  = document.getElementById('gm-emoji').value.trim() || '🗂️'
     const nombre = document.getElementById('gm-nombre').value.trim()
@@ -2007,6 +2014,7 @@
     const categorias = [...document.querySelectorAll('#gm-cats-list input[type=checkbox]:checked')]
       .map(cb => cb.value)
     if (categorias.length === 0) return
+    sincronizarGastosDeDOM()
     if (_editandoGrupoId) {
       const g = _planGrupos.find(x => x.id === _editandoGrupoId)
       if (g) { g.emoji = emoji; g.nombre = nombre; g.categorias = categorias }
@@ -2021,6 +2029,7 @@
   function editarGrupo(id) { abrirModalGrupo(id) }
 
   function borrarGrupo(id) {
+    sincronizarGastosDeDOM()
     _planGrupos = _planGrupos.filter(g => g.id !== id)
     guardarGruposPlan()
     renderGastos()
