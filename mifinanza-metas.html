@@ -468,6 +468,15 @@
   .asi-meta-inp:focus { outline: none; border-bottom-color: rgba(255,255,255,0.7); }
   .asi-meta-inp::-webkit-inner-spin-button, .asi-meta-inp::-webkit-outer-spin-button { -webkit-appearance: none; display: none; }
   .asi-meta-sub { font-size: 10px; color: var(--subtext); margin-top: 3px; }
+  .asi-tabla tr.asi-gastos-row { cursor: pointer; }
+  .asi-tabla tr.asi-gastos-row:hover td:first-child { opacity: 0.8; }
+  .asi-gastos-chev { display: inline-block; font-size: 10px; margin-left: 4px; transition: transform .25s ease; vertical-align: middle; line-height: 1; }
+  .asi-sub-wrap { overflow: hidden; transition: max-height .25s ease; }
+  .asi-sub-td { padding: 0 !important; border-top: none !important; }
+  .asi-sub-row { display: flex; gap: 4px; font-size: 11px; color: var(--subtext); padding: 2px 0; }
+  .asi-sub-row .asr-lbl { flex: 1; font-weight: 500; }
+  .asi-sub-row .asr-val { min-width: 56px; text-align: right; font-family: 'Roboto', sans-serif; font-weight: 600; }
+  .asi-sub-row .asr-meta { min-width: 56px; text-align: right; }
 
   .tabla-comparativa { background: none; border: none; padding: 0; }
   .tabla-comp-empty { text-align: center; color: var(--subtext); font-size: 12px; padding: 12px 0; }
@@ -2203,6 +2212,7 @@
   let metaAhorro       = 20
   let vistaAnalisis    = 'pct'
   let _metaAhorroLoad  = false
+  let _asiGastosOpen   = false
 
   async function cargarBudgetMode() {
     /* replaced by metaAhorro stored in localStorage */
@@ -2308,6 +2318,19 @@
     const isEur = vistaAnalisis === 'eur'
     const pAhorroPos = Math.max(0, pAhorro)
 
+    let gastosNec = 0, gastosOpc = 0
+    document.querySelectorAll('.variable-input').forEach(inp => {
+      const row = inp.closest('.var-row')
+      const cat = row?._planCat
+      const val = parseFloat(inp.value) || 0
+      if (cat && (categoriaTipos[cat] ?? 'opcional') === 'necesario') gastosNec += val
+      else gastosOpc += val
+    })
+    const tcasoNec = isEur ? fmt(gastosNec) : (gastosNec / ingresos * 100).toFixed(1) + '%'
+    const tcasoOpc = isEur ? fmt(gastosOpc) : (gastosOpc / ingresos * 100).toFixed(1) + '%'
+    const chevRot       = _asiGastosOpen ? 'rotate(180deg)' : ''
+    const gastosSubMaxH = _asiGastosOpen ? '80px' : '0'
+
     const tcasoGastos = isEur ? fmt(gastos) : pGastos.toFixed(1) + '%'
     const tmetaGastos = isEur ? fmt(ingresos * metaGastos / 100) : metaGastos + '%'
     const tcasoAhorro = isEur ? fmt(Math.max(0, saldo)) : pAhorroPos.toFixed(1) + '%'
@@ -2337,10 +2360,20 @@
           <th>Tu meta</th>
         </tr></thead>
         <tbody>
-          <tr>
-            <td>Gastos 💸</td>
+          <tr class="asi-gastos-row" onclick="toggleAsiGastosSub()">
+            <td>Gastos 💸 <span class="asi-gastos-chev" id="asi-gastos-chev" style="transform:${chevRot}">▾</span></td>
             <td style="color:${gColorClass}">${tcasoGastos}</td>
             <td>${tmetaGastos}</td>
+          </tr>
+          <tr>
+            <td colspan="3" class="asi-sub-td">
+              <div class="asi-sub-wrap" id="asi-gastos-sub" style="max-height:${gastosSubMaxH}">
+                <div style="padding:2px 0 8px">
+                  <div class="asi-sub-row"><span class="asr-lbl">🔒 Necesarios</span><span class="asr-val">${tcasoNec}</span><span class="asr-meta">—</span></div>
+                  <div class="asi-sub-row"><span class="asr-lbl">✨ Opcionales</span><span class="asr-val">${tcasoOpc}</span><span class="asr-meta">—</span></div>
+                </div>
+              </div>
+            </td>
           </tr>
           <tr>
             <td>Ahorro 🏦</td>
@@ -2369,6 +2402,14 @@
     e.stopPropagation()
     vistaAnalisis = vistaAnalisis === 'pct' ? 'eur' : 'pct'
     actualizarAnalisis()
+  }
+
+  function toggleAsiGastosSub() {
+    _asiGastosOpen = !_asiGastosOpen
+    const wrap = document.getElementById('asi-gastos-sub')
+    const chev = document.getElementById('asi-gastos-chev')
+    if (wrap) wrap.style.maxHeight = _asiGastosOpen ? '80px' : '0'
+    if (chev) chev.style.transform = _asiGastosOpen ? 'rotate(180deg)' : ''
   }
 
   function onMetaAhorroInput(val) {
