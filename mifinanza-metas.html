@@ -363,26 +363,27 @@
 
   .disponible-card { margin-top: 4px; }
 
-  .var-row { background: var(--card2); border-radius: 12px; padding: 12px 14px; margin-bottom: 8px; }
-  .var-nombre-top { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text); margin-bottom: 8px; }
+  .var-row { background: #161b22; border-radius: 12px; padding: 12px 14px; margin-bottom: 8px; }
   .var-emoji { font-size: 16px; flex-shrink: 0; }
-  .var-bottom { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
-  .var-promedio { font-size: 12px; color: var(--subtext); }
-  .var-input {
-    width: 110px; flex-shrink: 0; background: var(--bg);
-    border: 1px solid var(--border); border-radius: 10px;
-    padding: 8px 10px; color: var(--text); text-align: right;
-    font-family: 'DM Sans', sans-serif; font-size: 14px; outline: none;
-    transition: border-color 0.2s;
-  }
-  .var-input:focus { border-color: rgba(88,166,255,0.3); }
+  .var-bottom { display: flex; align-items: flex-end; justify-content: space-between; gap: 10px; }
   .var-spin-btns { display: none; align-items: center; gap: 4px; flex-shrink: 0; }
   .btn-spin { width: 32px; height: 32px; border: 1px solid var(--border); border-radius: 8px; background: var(--card2); color: var(--subtext); font-size: 18px; line-height: 1; cursor: pointer; display: flex; align-items: center; justify-content: center; user-select: none; -webkit-user-select: none; touch-action: manipulation; transition: background 0.15s, color 0.15s; }
   .btn-spin:active { background: rgba(88,166,255,0.15); color: #58a6ff; border-color: rgba(88,166,255,0.4); }
-  @media (max-width: 768px) {
-    .var-spin-btns { display: flex; }
-    .var-input { width: 80px; }
-  }
+  @media (max-width: 768px) { .var-spin-btns { display: flex; } }
+  /* card redesign */
+  .vc-top { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+  .vc-nombre-txt { flex: 1; font-size: 13px; color: var(--text); }
+  .vc-meta-label { font-size: 11px; color: var(--subtext); flex-shrink: 0; }
+  .vc-col { display: flex; flex-direction: column; gap: 4px; }
+  .vc-col-meta { align-items: flex-end; }
+  .vc-lbl { font-size: 10px; color: #7d8590; text-transform: uppercase; letter-spacing: 0.05em; }
+  .vc-gastado-inp { background: transparent; border: none; border-bottom: 1px solid rgba(255,255,255,0.12); color: #3fb950; font-size: 18px; font-family: 'Roboto', sans-serif; font-weight: 700; width: 90px; padding: 2px 0; appearance: none; -moz-appearance: textfield; }
+  .vc-gastado-inp:focus { outline: none; border-bottom-color: rgba(255,255,255,0.35); }
+  .vc-gastado-inp::-webkit-inner-spin-button, .vc-gastado-inp::-webkit-outer-spin-button { -webkit-appearance: none; display: none; }
+  .vc-pill { border-radius: 20px; padding: 3px 9px; font-size: 11px; font-weight: 600; white-space: nowrap; align-self: center; }
+  .vc-meta-val { font-size: 18px; font-family: 'Roboto', sans-serif; font-weight: 700; color: #e6edf3; }
+  .vc-bar-wrap { height: 3px; background: rgba(255,255,255,0.07); border-radius: 2px; overflow: hidden; margin-top: 10px; }
+  .vc-bar-fill { height: 100%; border-radius: 2px; transition: width 0.3s ease, background 0.3s ease; }
 
 
   .var-group { background: var(--card); border-radius: 12px; padding: 12px 14px; margin-bottom: 8px; border: 1px solid rgba(251,146,60,0.38); }
@@ -1997,32 +1998,69 @@
     const enGrupos  = new Set(_planGrupos.flatMap(g => g.categorias))
     const allItems  = []
 
+    function _vcColor(pct) {
+      return pct < 85 ? '#3fb950' : pct <= 100 ? '#e3b341' : '#f85149'
+    }
+
+    function _vcActualizarRow(row) {
+      const inp     = row.querySelector('.variable-input')
+      const pillEl  = row.querySelector('.vc-pill')
+      const barEl   = row.querySelector('.vc-bar-fill')
+      if (!inp || !pillEl || !barEl) return
+      const val  = parseFloat(inp.value) || 0
+      const meta = parseFloat(gastosOriginal[row._planCat]) || 0
+      const pct  = meta > 0 ? val / meta * 100 : 0
+      const col  = _vcColor(pct)
+      const diff = Math.round(val - meta)
+      const pillTxt = diff < 0 ? `${Math.abs(diff)}€ libre` : diff > 0 ? `+${diff}€ pasado` : 'en meta'
+      inp.style.color           = col
+      pillEl.style.color        = col
+      pillEl.style.background   = col + '22'
+      pillEl.textContent        = pillTxt
+      barEl.style.width         = Math.min(100, Math.max(0, pct)).toFixed(1) + '%'
+      barEl.style.background    = col
+    }
+
     function _buildRow(cat) {
       const partes = cat.trim().split(' ')
       const emoji  = partes[0]
       const nombre = partes.slice(1).join(' ') || cat
       const val    = guardado[cat] !== undefined ? guardado[cat] : gastosOriginal[cat].toFixed(2)
+      const meta   = parseFloat(gastosOriginal[cat]) || 0
+      const pct0   = meta > 0 ? parseFloat(val) / meta * 100 : 0
+      const col0   = _vcColor(pct0)
+      const diff0  = Math.round(parseFloat(val) - meta)
+      const pill0  = diff0 < 0 ? `${Math.abs(diff0)}€ libre` : diff0 > 0 ? `+${diff0}€ pasado` : 'en meta'
+      const bar0   = Math.min(100, Math.max(0, pct0)).toFixed(1)
       const row    = document.createElement('div')
       row.className = 'var-row'
       row._planCat  = cat
       row.innerHTML = `
-        <div class="var-nombre-top">
+        <div class="vc-top">
           <span class="var-emoji">${emoji}</span>
-          <span>${nombre}</span>
+          <span class="vc-nombre-txt">${nombre}</span>
+          <span class="vc-meta-label">meta: ${fmt(meta)}</span>
         </div>
         <div class="var-bottom">
-          <span class="var-promedio">media: ${fmt(gastosOriginal[cat])}</span>
-          <div style="display:flex;align-items:center;gap:6px;flex-shrink:0;">
+          <div class="vc-col">
+            <span class="vc-lbl">GASTADO</span>
+            <input class="variable-input vc-gastado-inp" type="number" inputmode="decimal" enterkeyhint="done" value="${val}" style="color:${col0}">
             <div class="var-spin-btns">
               <button class="btn-spin btn-spin-minus" type="button" aria-label="Disminuir">−</button>
-            </div>
-            <input class="var-input variable-input" type="number" inputmode="decimal" enterkeyhint="done" value="${val}">
-            <div class="var-spin-btns">
               <button class="btn-spin btn-spin-plus" type="button" aria-label="Aumentar">+</button>
             </div>
           </div>
+          <span class="vc-pill" style="color:${col0};background:${col0}22">${pill0}</span>
+          <div class="vc-col vc-col-meta">
+            <span class="vc-lbl">META</span>
+            <span class="vc-meta-val">${fmt(meta)}</span>
+          </div>
+        </div>
+        <div class="vc-bar-wrap">
+          <div class="vc-bar-fill" style="width:${bar0}%;background:${col0}"></div>
         </div>
       `
+      row.querySelector('.variable-input').addEventListener('input', () => _vcActualizarRow(row))
       return row
     }
 
