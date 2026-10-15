@@ -483,6 +483,10 @@
   .asi-sub-row .asr-lbl { flex: 1; font-weight: 500; }
   .asi-sub-row .asr-val { min-width: 56px; text-align: right; font-family: 'Roboto', sans-serif; font-weight: 600; }
   .asi-sub-row .asr-meta { min-width: 56px; text-align: right; }
+  .asi-perfiles { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; }
+  .asi-perfil-btn { font-size: 11px; padding: 4px 10px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.04); color: var(--subtext); cursor: pointer; font-family: 'DM Sans', sans-serif; transition: border-color .15s, color .15s, background .15s; }
+  .asi-perfil-btn:hover { border-color: rgba(255,255,255,0.2); color: var(--text); }
+  .asi-perfil-btn.ap-on { border-color: rgba(88,166,255,0.6); background: rgba(88,166,255,0.1); color: #58a6ff; font-weight: 600; }
 
   .tabla-comparativa { background: none; border: none; padding: 0; }
   .tabla-comp-empty { text-align: center; color: var(--subtext); font-size: 12px; padding: 12px 0; }
@@ -2240,6 +2244,15 @@
   let vistaAnalisis    = 'pct'
   let _metaAhorroLoad  = false
   let _asiGastosOpen   = false
+  const PERFILES_AHORRO = {
+    basico:        { ahorro: 10, necesarios: 70, opcionales: 20 },
+    equilibrado:   { ahorro: 15, necesarios: 65, opcionales: 20 },
+    ahorrador:     { ahorro: 25, necesarios: 60, opcionales: 15 },
+    personalizado: null
+  }
+  let perfilAhorro   = 'personalizado'
+  let metaNecesarios = 70
+  let metaOpcionales = 20
 
   async function cargarBudgetMode() {
     /* replaced by metaAhorro stored in localStorage */
@@ -2355,6 +2368,9 @@
     })
     const tcasoNec = isEur ? fmt(gastosNec) : (gastosNec / ingresos * 100).toFixed(1) + '%'
     const tcasoOpc = isEur ? fmt(gastosOpc) : (gastosOpc / ingresos * 100).toFixed(1) + '%'
+    const esPersonalizado = perfilAhorro === 'personalizado'
+    const tmetaNec = esPersonalizado ? '—' : (isEur ? fmt(ingresos * metaNecesarios / 100) : metaNecesarios + '%')
+    const tmetaOpc = esPersonalizado ? '—' : (isEur ? fmt(ingresos * metaOpcionales / 100) : metaOpcionales + '%')
     const chevRot       = _asiGastosOpen ? 'rotate(180deg)' : ''
     const gastosSubMaxH = _asiGastosOpen ? '80px' : '0'
 
@@ -2380,6 +2396,12 @@
     }
 
     cont.innerHTML = `
+      <div class="asi-perfiles">
+        <button class="asi-perfil-btn${perfilAhorro==='basico'?' ap-on':''}" onclick="seleccionarPerfil('basico')">Básico</button>
+        <button class="asi-perfil-btn${perfilAhorro==='equilibrado'?' ap-on':''}" onclick="seleccionarPerfil('equilibrado')">Equilibrado</button>
+        <button class="asi-perfil-btn${perfilAhorro==='ahorrador'?' ap-on':''}" onclick="seleccionarPerfil('ahorrador')">Ahorrador</button>
+        <button class="asi-perfil-btn${perfilAhorro==='personalizado'?' ap-on':''}" onclick="seleccionarPerfil('personalizado')">Personalizado</button>
+      </div>
       <table class="asi-tabla">
         <thead><tr>
           <th><button class="asi-toggle" onclick="toggleVistaAnalisis(event)">${isEur ? '€ → %' : '% → €'}</button></th>
@@ -2396,8 +2418,8 @@
             <td colspan="3" class="asi-sub-td">
               <div class="asi-sub-wrap" id="asi-gastos-sub" style="max-height:${gastosSubMaxH}">
                 <div style="padding:2px 0 8px">
-                  <div class="asi-sub-row"><span class="asr-lbl">🔒 Necesarios</span><span class="asr-val">${tcasoNec}</span><span class="asr-meta">—</span></div>
-                  <div class="asi-sub-row"><span class="asr-lbl">✨ Opcionales</span><span class="asr-val">${tcasoOpc}</span><span class="asr-meta">—</span></div>
+                  <div class="asi-sub-row"><span class="asr-lbl">🔒 Necesarios</span><span class="asr-val">${tcasoNec}</span><span class="asr-meta">${tmetaNec}</span></div>
+                  <div class="asi-sub-row"><span class="asr-lbl">✨ Opcionales</span><span class="asr-val">${tcasoOpc}</span><span class="asr-meta">${tmetaOpc}</span></div>
                 </div>
               </div>
             </td>
@@ -2439,7 +2461,45 @@
     if (chev) chev.style.transform = _asiGastosOpen ? 'rotate(180deg)' : ''
   }
 
+  async function seleccionarPerfil(nombre) {
+    perfilAhorro = nombre
+    const p = PERFILES_AHORRO[nombre]
+    if (p) {
+      metaAhorro     = p.ahorro
+      metaNecesarios = p.necesarios
+      metaOpcionales = p.opcionales
+      try { localStorage.setItem('mf_meta_ahorro_' + window.currentUserId, metaAhorro) } catch(e) {}
+    }
+    actualizarAnalisis()
+    if (!window.currentUserId) return
+    await dbClient.from('perfil').upsert(
+      { usuario_id: window.currentUserId, perfil_presupuesto: nombre },
+      { onConflict: 'usuario_id' }
+    )
+  }
+
+  async function cargarPerfilAhorro() {
+    if (!window.currentUserId) return
+    const { data } = await dbClient.from('perfil')
+      .select('perfil_presupuesto')
+      .eq('usuario_id', window.currentUserId)
+      .limit(1)
+    const tipo = data?.[0]?.perfil_presupuesto
+    if (tipo && Object.prototype.hasOwnProperty.call(PERFILES_AHORRO, tipo)) {
+      perfilAhorro = tipo
+      const p = PERFILES_AHORRO[tipo]
+      if (p) {
+        metaAhorro     = p.ahorro
+        metaNecesarios = p.necesarios
+        metaOpcionales = p.opcionales
+        try { localStorage.setItem('mf_meta_ahorro_' + window.currentUserId, metaAhorro) } catch(e) {}
+      }
+      actualizarAnalisis()
+    }
+  }
+
   function onMetaAhorroInput(val) {
+    perfilAhorro = 'personalizado'
     const n = parseFloat(val)
     if (!isNaN(n)) {
       if (vistaAnalisis === 'eur') {
@@ -2463,8 +2523,13 @@
         metaAhorro = Math.max(5, Math.min(50, raw || 20))
       }
     }
+    perfilAhorro = 'personalizado'
     if (window.currentUserId) {
       try { localStorage.setItem('mf_meta_ahorro_' + window.currentUserId, metaAhorro) } catch(e) {}
+      dbClient.from('perfil').upsert(
+        { usuario_id: window.currentUserId, perfil_presupuesto: 'personalizado' },
+        { onConflict: 'usuario_id' }
+      )
     }
     actualizarAnalisis()  // full re-render: input no longer focused
   }
@@ -2863,6 +2928,7 @@
   cargarGastosRealMes()
   cargarTipos()
   cargarBudgetMode()
+  cargarPerfilAhorro()
   cargarSeguimientoActivos()
   actualizarPlanificador()
 
