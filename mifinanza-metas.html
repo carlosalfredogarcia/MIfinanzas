@@ -2302,13 +2302,14 @@
     const inputMax     = isEur ? Math.round(ingresos * 0.50) : 50
     const inputSubText = isEur ? `= ${Math.round(metaAhorro)}%` : `${fmt(metaAhorro_eur)}/mes`
 
+    const metaAhorroRnd = Math.round(metaAhorro)
+    const metaGastosRnd = 100 - metaAhorroRnd
     let tipText
     if (pGastos <= metaGastos) {
-      tipText = `✅ Estás cumpliendo tu meta de ahorro del ${metaAhorro}%. ¡Bien hecho!`
+      tipText = `✅ Estás cumpliendo tu meta de ahorro del ${metaAhorroRnd}%. ¡Bien hecho!`
     } else {
-      const Z = (pGastos - metaGastos) / 100 * ingresos
-      const W = Z * 12
-      tipText = `Si bajas al ${metaGastos}% podrías guardar ${fmt(Z)}/mes — unos ${fmt(W)} al año.`
+      const W = metaAhorro_eur * 12
+      tipText = `Si bajas al ${metaGastosRnd}% podrías guardar ${fmt(metaAhorro_eur)}/mes — unos ${fmt(W)} al año.`
     }
 
     cont.innerHTML = `
