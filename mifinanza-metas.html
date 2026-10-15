@@ -2254,9 +2254,10 @@
     const cont      = document.getElementById('analisis-contenido')
     if (!summaryEl || !cont) return
 
+    summaryEl.innerHTML = '<span style="font-size:14px;font-weight:600;">🧭 Plan Mensual</span>'
+
     const ingresos = totalIngresos()
     if (ingresos <= 0) {
-      summaryEl.innerHTML = '<span style="font-size:13px;color:var(--subtext)">📊 Introduce tus ingresos para ver el análisis</span>'
       cont.innerHTML = ''
       return
     }
@@ -2267,22 +2268,6 @@
     const pAhorro    = saldo  / ingresos * 100
     const metaGastos = 100 - metaAhorro
     const metaAhorro_eur = ingresos * metaAhorro / 100
-
-    const fillPct   = Math.min(100, pGastos / (metaGastos || 1) * 100)
-    const barColor  = pGastos <= metaGastos ? '#4ade80' : pGastos <= metaGastos + 10 ? '#e3b341' : '#f85149'
-    const saldoSign = saldo >= 0 ? '+' : ''
-    const saldoColor = saldo >= 0 ? '#4ade80' : '#f85149'
-
-    summaryEl.innerHTML = `
-      <div class="asi-row1">
-        <span class="asi-ingreso">💰 ${fmt(ingresos)}/mes</span>
-        <span class="asi-saldo" style="color:${saldoColor}">${saldoSign}${fmt(saldo)}</span>
-      </div>
-      <div class="asi-bar-wrap">
-        <div class="asi-bar-fill" style="width:${fillPct.toFixed(1)}%;background:${barColor}"></div>
-      </div>
-      <div class="asi-row2">${pGastos.toFixed(1)}% de tu ingreso en gastos · meta ahorro: ${metaAhorro}%</div>
-    `
 
     // Don't destroy the body while the user is typing in the meta input
     const existingMetaInp = cont.querySelector('.asi-meta-inp')
