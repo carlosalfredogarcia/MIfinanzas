@@ -575,6 +575,16 @@
   .rdist-progress-fill { height: 100%; background: #3fb950; border-radius: 5px; transition: width .2s ease; }
   .rdist-confirmar-btn { display: block; width: calc(100% - 36px); margin: 14px 18px 6px; background: #3fb950; border: none; border-radius: 14px; color: #080e17; font-size: 16px; font-weight: 700; padding: 17px; cursor: pointer; font-family: 'DM Sans', sans-serif; -webkit-tap-highlight-color: transparent; letter-spacing: 0.01em; }
   .rdist-confirmar-btn:active { background: #35a344; }
+  .rdist-confirm-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.55); z-index: 700; align-items: flex-end; justify-content: center; }
+  .rdist-confirm-overlay.rdist-confirm-open { display: flex; }
+  .rdist-confirm-sheet { background: #0d1117; border-radius: 20px 20px 0 0; width: 100%; max-width: 480px; padding: 26px 20px calc(22px + env(safe-area-inset-bottom, 0px)); }
+  .rdist-confirm-msg { font-size: 16px; font-weight: 700; color: #e6edf3; margin-bottom: 8px; }
+  .rdist-confirm-sub { font-size: 13px; color: #7d8590; margin-bottom: 24px; line-height: 1.5; }
+  .rdist-confirm-btns { display: flex; gap: 10px; }
+  .rdist-confirm-cancel { flex: 1; background: #21262d; border: none; border-radius: 13px; color: #e6edf3; font-size: 15px; font-weight: 600; padding: 15px; cursor: pointer; font-family: 'DM Sans', sans-serif; -webkit-tap-highlight-color: transparent; }
+  .rdist-confirm-cancel:active { background: #2d333b; }
+  .rdist-confirm-ok { flex: 1; background: #3fb950; border: none; border-radius: 13px; color: #080e17; font-size: 15px; font-weight: 700; padding: 15px; cursor: pointer; font-family: 'DM Sans', sans-serif; -webkit-tap-highlight-color: transparent; }
+  .rdist-confirm-ok:active { background: #35a344; }
   .sc-lista-pin { font-size: 11px; opacity: 0.22; cursor: pointer; -webkit-tap-highlight-color: transparent; transition: opacity .15s; flex-shrink: 0; user-select: none; margin-left: 8px; }
   .sc-lista-pin.sc-pin-on { opacity: 1; }
   .sc-lista-pin:active { opacity: 0.6; }
@@ -1159,6 +1169,17 @@
 <!-- Modal redistribución de presupuesto -->
 <div class="rdist-overlay" id="rdist-modal" onclick="if(event.target===this)cerrarRedistrib()">
   <div class="rdist-modal" id="rdist-modal-inner"></div>
+</div>
+<!-- Confirmación traspaso -->
+<div class="rdist-confirm-overlay" id="rdist-confirm-overlay" onclick="if(event.target===this)cerrarConfirmRedistrib()">
+  <div class="rdist-confirm-sheet">
+    <div class="rdist-confirm-msg">¿Confirmar el traspaso?</div>
+    <div class="rdist-confirm-sub">Se modificarán los gastos estimados de las categorías seleccionadas. Esta acción no se puede deshacer.</div>
+    <div class="rdist-confirm-btns">
+      <button class="rdist-confirm-cancel" onclick="cerrarConfirmRedistrib()">Cancelar</button>
+      <button class="rdist-confirm-ok" onclick="ejecutarConfirmRedistrib()">Sí, confirmar</button>
+    </div>
+  </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -1984,7 +2005,7 @@
         </div>
         <div class="rdist-progress-bar"><div class="rdist-progress-fill" id="rdist-prog-fill" style="width:0%"></div></div>
       </div>
-      <button class="rdist-confirmar-btn" onclick="confirmarRedistrib()">Confirmar traspaso</button>
+      <button class="rdist-confirmar-btn" onclick="pedirConfirmRedistrib()">Confirmar traspaso</button>
     `
     document.getElementById('rdist-modal').classList.add('rdist-open')
   }
@@ -2016,6 +2037,19 @@
     const fillEl = document.getElementById('rdist-prog-fill')
     if (numsEl) numsEl.textContent = fmt(total) + ' / ' + fmt(exceso)
     if (fillEl) fillEl.style.width = pct.toFixed(1) + '%'
+  }
+
+  function pedirConfirmRedistrib() {
+    document.getElementById('rdist-confirm-overlay').classList.add('rdist-confirm-open')
+  }
+
+  function cerrarConfirmRedistrib() {
+    document.getElementById('rdist-confirm-overlay').classList.remove('rdist-confirm-open')
+  }
+
+  async function ejecutarConfirmRedistrib() {
+    cerrarConfirmRedistrib()
+    await confirmarRedistrib()
   }
 
   async function confirmarRedistrib() {
