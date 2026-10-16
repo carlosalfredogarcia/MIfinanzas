@@ -553,7 +553,7 @@
   .rdist-progress-fill { height: 100%; background: #3fb950; border-radius: 5px; transition: width .2s ease; }
   .rdist-confirmar-btn { display: block; width: calc(100% - 36px); margin: 14px 18px 6px; background: #3fb950; border: none; border-radius: 14px; color: #080e17; font-size: 16px; font-weight: 700; padding: 17px; cursor: pointer; font-family: 'DM Sans', sans-serif; -webkit-tap-highlight-color: transparent; letter-spacing: 0.01em; }
   .rdist-confirmar-btn:active { background: #35a344; }
-  .sc-lista-pin { font-size: 13px; opacity: 0.22; cursor: pointer; -webkit-tap-highlight-color: transparent; transition: opacity .15s; flex-shrink: 0; user-select: none; }
+  .sc-lista-pin { font-size: 11px; opacity: 0.22; cursor: pointer; -webkit-tap-highlight-color: transparent; transition: opacity .15s; flex-shrink: 0; user-select: none; margin-left: 8px; }
   .sc-lista-pin.sc-pin-on { opacity: 1; }
   .sc-lista-pin:active { opacity: 0.6; }
   .sc-lista-oculto-toggle { display: flex; align-items: center; justify-content: space-between; padding: 9px 14px; cursor: pointer; -webkit-tap-highlight-color: transparent; }
@@ -3029,8 +3029,8 @@
       : `<div class="sc-resumen-alertas">${alertasHtml}</div>${verdes.length > 0 ? `<div class="sc-resumen-tip">💡 Podrías compensarlo reduciendo: ${verdes.map(t => t.label).join(', ')}</div>` : ''}`
 
     const pasadas = activasTodas.filter(t => !t.esFijo && t.diff > 0)
-    const margen  = activasTodas.filter(t => !t.esFijo && t.diff <= 0 && t.real > 0)
-    const ocultas = activasTodas.filter(t => t.esFijo || t.real === 0)
+    const margen  = activasTodas.filter(t => !t.esFijo && t.diff <= 0)
+    const ocultas = activasTodas.filter(t => t.esFijo)
 
     const _filaLista = t => {
       const pinClass = t.esFijo ? 'sc-lista-pin sc-pin-on' : 'sc-lista-pin'
