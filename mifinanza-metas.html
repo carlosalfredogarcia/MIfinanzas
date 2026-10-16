@@ -3117,7 +3117,7 @@
   _contGastos.addEventListener('click', e => {
     const btn = e.target.closest('.btn-spin')
     if (!btn) return
-    const inp = btn.closest('.var-bottom')?.querySelector('.variable-input')
+    const inp = btn.closest('.var-row')?.querySelector('.variable-input')
     if (!inp) return
     const step = parseFloat(inp.step) || 1
     const cur  = parseFloat(inp.value) || 0
