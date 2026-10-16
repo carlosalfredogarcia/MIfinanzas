@@ -466,6 +466,16 @@
   /* comparison table */
   .asi-toggle { background: rgba(125,133,144,0.1); border: 1px solid rgba(125,133,144,0.25); border-radius: 8px; color: #7d8590; font-size: 12px; padding: 4px 10px; cursor: pointer; font-family: 'DM Sans', sans-serif; }
   .asi-toggle:active { background: rgba(125,133,144,0.2); }
+  .asi-cols-header { display: flex; align-items: center; justify-content: space-between; padding: 0 0 12px; }
+  .asi-cols-tucaso { font-size: 11px; color: var(--subtext); text-transform: uppercase; letter-spacing: 0.07em; font-weight: 600; }
+  .asi-metric-row { display: grid; grid-template-columns: 1fr 70px 60px; align-items: center; padding: 9px 0; border-top: 1px solid rgba(255,255,255,0.06); font-size: 13px; }
+  .asi-metric-name { color: var(--text); line-height: 1.3; }
+  .asi-metric-real { font-family: 'Roboto', sans-serif; font-weight: 700; text-align: right; font-size: 13px; }
+  .asi-metric-meta { font-family: 'Roboto', sans-serif; font-weight: 700; text-align: right; font-size: 13px; color: var(--subtext); }
+  .asi-metric-row.asi-gastos-row { cursor: pointer; -webkit-tap-highlight-color: transparent; }
+  .asi-metric-row.asi-gastos-row:active { opacity: 0.8; }
+  .asi-sub-inner { padding: 5px 0 5px 6px !important; border-top: none !important; font-size: 12px; }
+  .asi-sub-inner .asi-metric-real, .asi-sub-inner .asi-metric-meta { font-size: 12px; }
   .asi-tabla { width: 100%; border-collapse: collapse; margin-bottom: 10px; }
   .asi-tabla th { font-size: 10px; color: var(--subtext); text-transform: uppercase; letter-spacing: 0.07em; padding: 0 0 8px; font-weight: 600; }
   .asi-tabla th:nth-child(2) { text-align: center; }
@@ -2637,60 +2647,56 @@
     }
 
     cont.innerHTML = `
-      <table class="asi-tabla">
-        <thead><tr>
-          <th><button class="asi-toggle" onclick="toggleVistaAnalisis(event)">${isEur ? '€ → %' : '% → €'}</button></th>
-          <th>Tu caso</th>
-          <th style="position:relative">
-            <div class="apd-wrap">
-              <button class="apd-btn" onclick="togglePerfilDrop(event)">
-                <span class="apd-dot"></span>
-                <span>${PERFILES_LABELS[perfilAhorro]}</span>
-                <span class="apd-chev" id="apd-chev">▾</span>
-              </button>
-              <div class="apd-menu" id="apd-menu">
-                <button class="apd-opt${perfilAhorro==='basico'?' apd-act':''}" onclick="seleccionarPerfil('basico');event.stopPropagation()"><span class="apd-dot"></span>Básico</button>
-                <button class="apd-opt${perfilAhorro==='equilibrado'?' apd-act':''}" onclick="seleccionarPerfil('equilibrado');event.stopPropagation()"><span class="apd-dot"></span>Equilibrado</button>
-                <button class="apd-opt${perfilAhorro==='ahorrador'?' apd-act':''}" onclick="seleccionarPerfil('ahorrador');event.stopPropagation()"><span class="apd-dot"></span>Ahorrador</button>
-                <button class="apd-opt${perfilAhorro==='personalizado'?' apd-act':''}" onclick="seleccionarPerfil('personalizado');event.stopPropagation()"><span class="apd-dot"></span>Personalizado</button>
-              </div>
-            </div>
-          </th>
-        </tr></thead>
-        <tbody>
-          <tr class="asi-gastos-row" onclick="toggleAsiGastosSub()">
-            <td>Gastos 💸 <span class="asi-gastos-chev" id="asi-gastos-chev" style="transform:${chevRot}">▾</span></td>
-            <td style="color:${gColorClass}">${tcasoGastos}</td>
-            <td>${tmetaGastos}</td>
-          </tr>
-          <tr>
-            <td colspan="3" class="asi-sub-td">
-              <div class="asi-sub-wrap" id="asi-gastos-sub" style="max-height:${gastosSubMaxH}">
-                <div style="padding:2px 0 8px">
-                  <div class="asi-sub-row"><span class="asr-lbl">🔒 Necesarios</span><span class="asr-val">${tcasoNec}</span><span class="asr-meta">${tmetaNec}</span></div>
-                  <div class="asi-sub-row"><span class="asr-lbl">✨ Opcionales</span><span class="asr-val">${tcasoOpc}</span><span class="asr-meta">${tmetaOpc}</span></div>
-                </div>
-              </div>
-            </td>
-          </tr>
-          <tr>
-            <td>Ahorro 🏦</td>
-            <td style="color:${aColorClass}">${tcasoAhorro}</td>
-            <td>
-              <div style="display:flex;align-items:center;justify-content:flex-end;gap:2px;">
-                <input class="asi-meta-inp" type="number" inputmode="decimal" enterkeyhint="done"
-                  min="${inputMin}" max="${inputMax}" value="${inputVal}"
-                  oninput="onMetaAhorroInput(this.value)"
-                  onblur="onMetaAhorroBlur(this)"
-                  onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur()}"
-                  onclick="event.stopPropagation()"
-                >${inputSymbol}
-              </div>
-              <div class="asi-meta-sub">${inputSubText}</div>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+      <div class="asi-cols-header">
+        <button class="asi-toggle" onclick="toggleVistaAnalisis(event)">${isEur ? '€ → %' : '% → €'}</button>
+        <span class="asi-cols-tucaso">TU CASO</span>
+        <div class="apd-wrap">
+          <button class="apd-btn" onclick="togglePerfilDrop(event)">
+            <span class="apd-dot"></span>
+            <span>${PERFILES_LABELS[perfilAhorro]}</span>
+            <span class="apd-chev" id="apd-chev">▾</span>
+          </button>
+          <div class="apd-menu" id="apd-menu">
+            <button class="apd-opt${perfilAhorro==='basico'?' apd-act':''}" onclick="seleccionarPerfil('basico');event.stopPropagation()"><span class="apd-dot"></span>Básico</button>
+            <button class="apd-opt${perfilAhorro==='equilibrado'?' apd-act':''}" onclick="seleccionarPerfil('equilibrado');event.stopPropagation()"><span class="apd-dot"></span>Equilibrado</button>
+            <button class="apd-opt${perfilAhorro==='ahorrador'?' apd-act':''}" onclick="seleccionarPerfil('ahorrador');event.stopPropagation()"><span class="apd-dot"></span>Ahorrador</button>
+            <button class="apd-opt${perfilAhorro==='personalizado'?' apd-act':''}" onclick="seleccionarPerfil('personalizado');event.stopPropagation()"><span class="apd-dot"></span>Personalizado</button>
+          </div>
+        </div>
+      </div>
+      <div class="asi-metric-row asi-gastos-row" onclick="toggleAsiGastosSub()">
+        <span class="asi-metric-name">Gastos 💸 <span class="asi-gastos-chev" id="asi-gastos-chev" style="transform:${chevRot}">▾</span></span>
+        <span class="asi-metric-real" style="color:${gColorClass}">${tcasoGastos}</span>
+        <span class="asi-metric-meta">${tmetaGastos}</span>
+      </div>
+      <div class="asi-sub-wrap" id="asi-gastos-sub" style="max-height:${gastosSubMaxH}">
+        <div class="asi-metric-row asi-sub-inner">
+          <span class="asi-metric-name" style="color:var(--subtext)">🔒 Necesarios</span>
+          <span class="asi-metric-real" style="color:var(--subtext);font-weight:600">${tcasoNec}</span>
+          <span class="asi-metric-meta">${tmetaNec}</span>
+        </div>
+        <div class="asi-metric-row asi-sub-inner">
+          <span class="asi-metric-name" style="color:var(--subtext)">✨ Opcionales</span>
+          <span class="asi-metric-real" style="color:var(--subtext);font-weight:600">${tcasoOpc}</span>
+          <span class="asi-metric-meta">${tmetaOpc}</span>
+        </div>
+      </div>
+      <div class="asi-metric-row">
+        <span class="asi-metric-name">Ahorro 🏦</span>
+        <span class="asi-metric-real" style="color:${aColorClass}">${tcasoAhorro}</span>
+        <div class="asi-metric-meta">
+          <div style="display:flex;align-items:center;justify-content:flex-end;gap:2px;">
+            <input class="asi-meta-inp" type="number" inputmode="decimal" enterkeyhint="done"
+              min="${inputMin}" max="${inputMax}" value="${inputVal}"
+              oninput="onMetaAhorroInput(this.value)"
+              onblur="onMetaAhorroBlur(this)"
+              onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur()}"
+              onclick="event.stopPropagation()"
+            >${inputSymbol}
+          </div>
+          <div class="asi-meta-sub">${inputSubText}</div>
+        </div>
+      </div>
       <div class="analisis-msg">💡 ${tipText}</div>
       <div style="height:10px"></div>
     `
