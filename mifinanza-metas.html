@@ -710,6 +710,28 @@
     padding: 12px; font-family: 'DM Sans', sans-serif;
   }
 
+  /* --- Modal Nueva Meta: fechas lado a lado y bloque cálculo --- */
+  .m-fechas-row { display: flex; gap: 10px; }
+  .m-fechas-row .input-group { flex: 1; min-width: 0; }
+  .m-calc-header { font-size: 10px; color: var(--subtext); text-transform: uppercase; letter-spacing: 0.1em; font-weight: 700; margin-bottom: 8px; }
+  .m-calc-cards { display: flex; gap: 10px; margin-bottom: 10px; }
+  .m-calc-card { flex: 1; border-radius: 12px; padding: 12px; }
+  .m-calc-verde { background: rgba(63,185,80,0.1); border: 1px solid rgba(63,185,80,0.2); }
+  .m-calc-azul  { background: rgba(88,166,255,0.1); border: 1px solid rgba(88,166,255,0.2); }
+  .m-calc-label { font-size: 9px; color: var(--subtext); text-transform: uppercase; letter-spacing: 0.1em; font-weight: 600; margin-bottom: 4px; }
+  .m-calc-valor { font-family: 'Roboto', sans-serif; font-size: 22px; font-weight: 700; line-height: 1.1; margin-bottom: 2px; }
+  .m-calc-verde .m-calc-valor { color: #3fb950; }
+  .m-calc-azul  .m-calc-valor { color: #58a6ff; }
+  .m-calc-sub { font-size: 10px; color: var(--subtext); }
+  .m-calc-texto { font-size: 11px; color: var(--subtext); line-height: 1.5; background: rgba(255,255,255,0.03); border-radius: 8px; padding: 8px 10px; }
+  .m-monto-wrap { position: relative; }
+  .m-monto-wrap input { width: 100%; box-sizing: border-box; padding-right: 118px; }
+  .m-sugerida-btn { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); background: rgba(88,166,255,0.12); border: 1px solid rgba(88,166,255,0.25); border-radius: 8px; color: #58a6ff; font-size: 10px; font-weight: 600; padding: 4px 8px; cursor: pointer; white-space: nowrap; font-family: 'DM Sans', sans-serif; -webkit-tap-highlight-color: transparent; }
+  .m-sugerida-btn:active { background: rgba(88,166,255,0.22); }
+  .m-emoji-grid { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
+  .m-emoji-btn { width: 40px; height: 40px; border-radius: 10px; border: 1px solid var(--border); background: var(--card2); font-size: 20px; display: flex; align-items: center; justify-content: center; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+  .m-emoji-btn.m-sel { border-color: rgba(88,166,255,0.55); background: rgba(88,166,255,0.1); }
+
   /* COLCHÓN DE AHORRO */
   .colchon-card { margin: 0 24px 16px; background: var(--card); border-radius: 20px; padding: 20px; border: 1px solid var(--border); text-align: center; animation: fadeUp 0.4s ease both; opacity: 0; }
   .colchon-label { font-size: 11px; color: var(--subtext); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 8px; }
@@ -1030,21 +1052,56 @@
       <label>Nombre de la meta</label>
       <input type="text" id="m-nombre" placeholder="Ej: Viaje, Carro, Fondo...">
     </div>
+    <div class="m-fechas-row">
+      <div class="input-group">
+        <label>Fecha inicio</label>
+        <input type="month" id="m-fecha-inicio" onchange="calcularSugerenciaMeta()">
+      </div>
+      <div class="input-group">
+        <label>Fecha fin</label>
+        <input type="month" id="m-fecha-fin" onchange="calcularSugerenciaMeta()">
+      </div>
+    </div>
+    <div id="m-calculo-bloque" style="display:none;margin-bottom:14px">
+      <div class="m-calc-header" id="m-calc-header">💡 CÁLCULO PARA — MESES</div>
+      <div class="m-calc-cards">
+        <div class="m-calc-card m-calc-verde">
+          <div class="m-calc-label">LO QUE LLEVAS</div>
+          <div class="m-calc-valor" id="m-calc-llevas">€0</div>
+          <div class="m-calc-sub">acumulado real</div>
+        </div>
+        <div class="m-calc-card m-calc-azul">
+          <div class="m-calc-label">DISPONIBLE</div>
+          <div class="m-calc-valor" id="m-calc-disponible">€0</div>
+          <div class="m-calc-sub" id="m-calc-disp-sub">€0/mes disponible</div>
+        </div>
+      </div>
+      <div class="m-calc-texto" id="m-calc-texto"></div>
+    </div>
     <div class="input-group">
       <label>Monto objetivo</label>
-      <input type="number" id="m-monto" placeholder="$0.00">
-    </div>
-    <div class="input-group">
-      <label>Fecha inicio</label>
-      <input type="month" id="m-fecha-inicio">
-    </div>
-    <div class="input-group">
-      <label>Fecha fin</label>
-      <input type="month" id="m-fecha-fin">
+      <div class="m-monto-wrap">
+        <input type="number" id="m-monto" placeholder="$0.00" oninput="_metaMontoEditado=true">
+        <button class="m-sugerida-btn" type="button" onclick="usarMontoSugerida()">↑ Usar sugerida</button>
+      </div>
     </div>
     <div class="input-group">
       <label>Emoji / Icono</label>
-      <input type="text" id="m-icon" placeholder="Ej: ✈️ 🚗 🏠 🎹" maxlength="2">
+      <div class="m-emoji-grid">
+        <button class="m-emoji-btn" type="button" onclick="selEmojiMeta(this,'✈️')">✈️</button>
+        <button class="m-emoji-btn" type="button" onclick="selEmojiMeta(this,'🚗')">🚗</button>
+        <button class="m-emoji-btn" type="button" onclick="selEmojiMeta(this,'🏠')">🏠</button>
+        <button class="m-emoji-btn" type="button" onclick="selEmojiMeta(this,'🎹')">🎹</button>
+        <button class="m-emoji-btn" type="button" onclick="selEmojiMeta(this,'💍')">💍</button>
+        <button class="m-emoji-btn" type="button" onclick="selEmojiMeta(this,'📅')">📅</button>
+        <button class="m-emoji-btn" type="button" onclick="selEmojiMeta(this,'🍸')">🍸</button>
+        <button class="m-emoji-btn" type="button" onclick="selEmojiMeta(this,'🎯')">🎯</button>
+        <button class="m-emoji-btn" type="button" onclick="selEmojiMeta(this,'💰')">💰</button>
+        <button class="m-emoji-btn" type="button" onclick="selEmojiMeta(this,'🏖️')">🏖️</button>
+        <button class="m-emoji-btn" type="button" onclick="selEmojiMeta(this,'📱')">📱</button>
+        <button class="m-emoji-btn" type="button" onclick="selEmojiMeta(this,'🎓')">🎓</button>
+      </div>
+      <input type="hidden" id="m-icon" value="">
     </div>
     <button class="btn-guardar" id="btn-guardar" onclick="guardarMeta()">Guardar meta</button>
     <button class="btn-cancelar" onclick="cerrarModal()">Cancelar</button>
@@ -1534,7 +1591,59 @@
   }
 
   function abrirModal()  { document.getElementById('modal').classList.add('visible') }
-  function cerrarModal() { document.getElementById('modal').classList.remove('visible') }
+  function cerrarModal() {
+    document.getElementById('modal').classList.remove('visible')
+    _metaMontoEditado = false
+    document.getElementById('m-calculo-bloque').style.display = 'none'
+    document.getElementById('m-monto').value = ''
+    document.getElementById('m-nombre').value = ''
+    document.getElementById('m-fecha-inicio').value = ''
+    document.getElementById('m-fecha-fin').value = ''
+    document.getElementById('m-icon').value = ''
+    document.querySelectorAll('.m-emoji-btn').forEach(b => b.classList.remove('m-sel'))
+  }
+
+  let _metaMontoEditado = false
+  let _metaMontoSugerido = 0
+
+  function calcularSugerenciaMeta() {
+    const inicio = document.getElementById('m-fecha-inicio').value
+    const fin    = document.getElementById('m-fecha-fin').value
+    const bloque = document.getElementById('m-calculo-bloque')
+    if (!inicio || !fin || inicio > fin) { bloque.style.display = 'none'; return }
+
+    const [iy, im] = inicio.split('-').map(Number)
+    const [fy, fm] = fin.split('-').map(Number)
+    const meses = (fy - iy) * 12 + (fm - im) + 1
+
+    const acumulado       = (todasMetasData || []).reduce((s, m) => s + parseFloat(m.monto_actual || 0), 0)
+    const dispMensual     = Math.max(0, totalIngresos() - totalGastos())
+    const dispTotal       = dispMensual * meses
+    _metaMontoSugerido    = dispTotal
+
+    bloque.style.display = 'block'
+    document.getElementById('m-calc-header').textContent      = `💡 CÁLCULO PARA ${meses} MES${meses === 1 ? '' : 'ES'}`
+    document.getElementById('m-calc-llevas').textContent      = fmt(acumulado)
+    document.getElementById('m-calc-disponible').textContent  = fmt(dispTotal)
+    document.getElementById('m-calc-disp-sub').textContent    = `${fmt(dispMensual)}/mes disponible`
+    document.getElementById('m-calc-texto').textContent       =
+      `Según tu Planificador te sobran ${fmt(dispMensual)}/mes. En ${meses} mes${meses === 1 ? '' : 'es'} eso suman ${fmt(dispTotal)}. Ya llevas acumulados ${fmt(acumulado)}.`
+
+    if (!_metaMontoEditado) {
+      document.getElementById('m-monto').value = dispTotal > 0 ? dispTotal.toFixed(2) : ''
+    }
+  }
+
+  function usarMontoSugerida() {
+    document.getElementById('m-monto').value = _metaMontoSugerido.toFixed(2)
+    _metaMontoEditado = false
+  }
+
+  function selEmojiMeta(btn, emoji) {
+    document.querySelectorAll('.m-emoji-btn').forEach(b => b.classList.remove('m-sel'))
+    btn.classList.add('m-sel')
+    document.getElementById('m-icon').value = emoji
+  }
 
   document.getElementById('modal').addEventListener('click', function(e) { if (e.target === this) cerrarModal() })
   document.getElementById('modal-abonar').addEventListener('click', function(e) { if (e.target === this) cerrarModalAbonar() })
