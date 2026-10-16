@@ -466,9 +466,10 @@
   /* comparison table */
   .asi-toggle { background: rgba(125,133,144,0.1); border: 1px solid rgba(125,133,144,0.25); border-radius: 8px; color: #7d8590; font-size: 12px; padding: 4px 10px; cursor: pointer; font-family: 'DM Sans', sans-serif; }
   .asi-toggle:active { background: rgba(125,133,144,0.2); }
-  .asi-cols-header { display: flex; align-items: center; justify-content: space-between; padding: 0 0 12px; }
-  .asi-cols-tucaso { font-size: 11px; color: var(--subtext); text-transform: uppercase; letter-spacing: 0.07em; font-weight: 600; }
-  .asi-metric-row { display: grid; grid-template-columns: 1fr 70px 60px; align-items: center; padding: 9px 0; border-top: 1px solid rgba(255,255,255,0.06); font-size: 13px; }
+  .asi-cols-header { display: grid; grid-template-columns: 1fr 1fr 1fr; align-items: center; padding: 0 0 12px; }
+  .asi-cols-tucaso { font-size: 11px; color: var(--subtext); text-transform: uppercase; letter-spacing: 0.07em; font-weight: 600; text-align: center; }
+  .asi-cols-header .apd-wrap { justify-self: end; }
+  .asi-metric-row { display: grid; grid-template-columns: 1fr 1fr 1fr; align-items: center; padding: 9px 0; border-top: 1px solid rgba(255,255,255,0.06); font-size: 13px; }
   .asi-metric-name { color: var(--text); line-height: 1.3; }
   .asi-metric-real { font-family: 'Roboto', sans-serif; font-weight: 700; text-align: right; font-size: 13px; }
   .asi-metric-meta { font-family: 'Roboto', sans-serif; font-weight: 700; text-align: right; font-size: 13px; color: var(--subtext); }
