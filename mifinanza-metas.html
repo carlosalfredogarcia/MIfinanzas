@@ -2535,14 +2535,14 @@
       <div class="af-title">📊 EN TIEMPO REAL</div>
       <div class="af-head" style="grid-template-columns:1fr 54px 54px 28px;">
         <span class="af-cell-label"></span>
-        <span class="af-cell-val">ACTUAL</span>
+        <span class="af-cell-val">TU CASO</span>
         <span class="af-cell-val">META</span>
         <span class="af-cell-est"></span>
       </div>
       ${filas.map(f => `
       <div class="af-row">
         <span class="af-cell-label">${f.label}</span>
-        <span class="af-cell-val" style="color:${col(f.v, f.meta, f.inv)}">${f.v}%</span>
+        <span class="af-cell-val" style="color:${col(f.v, f.meta, f.inv)}">${f.v.toFixed(2)}%</span>
         <span class="af-cell-val" style="color:var(--subtext)">${f.meta}%</span>
         <span class="af-cell-est">${est(f.v, f.meta, f.inv)}</span>
       </div>`).join('')}`
