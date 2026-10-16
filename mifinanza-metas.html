@@ -3081,11 +3081,11 @@
     const _filaLista = t => {
       const pinClass = t.esFijo ? 'sc-lista-pin sc-pin-on' : 'sc-lista-pin'
       const pin = t.catEsc ? `<span class="${pinClass}" onclick="event.stopPropagation();toggleEsFijo('${t.catEsc}')">📌</span>` : ''
-      const labelHtml = `<span class="sc-lista-label">${t.label}${pin}</span>`
+      const labelHtml = `<span class="sc-lista-label">${t.label}</span>`
       const idx = _redistribTodas.indexOf(t)
 
       if (!t.catEsc) {
-        // Group rows — no expandable detail
+        // Group rows — no pin, no expandable detail
         if (t.diff > 0) return `<div class="sc-lista-row">${labelHtml}<div class="sc-lista-row-right"><span class="sc-lista-pill sc-lista-pill-over">${fmt(Math.abs(t.diff))} pasado</span><button class="sc-lista-repartir" onclick="abrirRedistrib(${idx})">↻ Repartir</button></div></div>`
         return `<div class="sc-lista-row">${labelHtml}<span class="sc-lista-pill sc-lista-pill-free">${fmt(Math.abs(t.diff))} libre</span></div>`
       }
@@ -3099,11 +3099,11 @@
 
       let rightHtml
       if (t.esFijo) {
-        rightHtml = chev
+        rightHtml = `<div class="sc-lista-row-right">${chev}${pin}</div>`
       } else if (t.diff > 0) {
-        rightHtml = `<div class="sc-lista-row-right"><div style="display:flex;flex-direction:column;align-items:flex-end;gap:5px"><button class="sc-lista-repartir" onclick="event.stopPropagation();abrirRedistrib(${idx})">↻ Repartir</button><span class="sc-lista-pill sc-lista-pill-over">${fmt(Math.abs(t.diff))} pasado</span></div>${chev}</div>`
+        rightHtml = `<div class="sc-lista-row-right"><div style="display:flex;flex-direction:column;align-items:flex-end;gap:5px"><button class="sc-lista-repartir" onclick="event.stopPropagation();abrirRedistrib(${idx})">↻ Repartir</button><span class="sc-lista-pill sc-lista-pill-over">${fmt(Math.abs(t.diff))} pasado</span></div>${chev}${pin}</div>`
       } else {
-        rightHtml = `<div class="sc-lista-row-right"><span class="sc-lista-pill sc-lista-pill-free">${fmt(Math.abs(t.diff))} libre</span>${chev}</div>`
+        rightHtml = `<div class="sc-lista-row-right"><span class="sc-lista-pill sc-lista-pill-free">${fmt(Math.abs(t.diff))} libre</span>${chev}${pin}</div>`
       }
 
       return `<div class="sc-lista-row-wrap"><div class="sc-lista-row sc-lista-row-clickable" onclick="scToggleDetalle('${t.catEsc}',${t.estimado},${t.real})">${labelHtml}${rightHtml}</div><div class="sc-det-panel" id="sc-det-panel-${safeId}" style="max-height:${panelMaxH}" data-open="${isOpen?'1':'0'}">${panelContent}</div></div>`
