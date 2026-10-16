@@ -3020,7 +3020,13 @@
         </div>`)
     }
 
-    cont.innerHTML = gruposHtml.length ? `<div class="sc-lista-card">${gruposHtml.join('')}</div>` : ''
+    cont.innerHTML = `
+      <div class="sc-resumen">
+        <div class="sc-resumen-quedan${quedanClass}">${quedanTxt}</div>
+        ${cuerpoHtml}
+      </div>
+      ${gruposHtml.length ? `<div class="sc-lista-card">${gruposHtml.join('')}</div>` : ''}
+    `
   }
 
   cargarMetas()
