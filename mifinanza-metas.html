@@ -884,7 +884,7 @@
 
   <div class="bloque-acordeon" style="margin:16px 24px 0">
     <div class="bloque-card clicable" onclick="toggleBloque('metas')">
-      <div class="bloque-card-top" style="margin-bottom:0">
+      <div class="bloque-card-top">
         <span class="bloque-label">🧭 Seguimiento de metas</span>
         <span class="bloque-chevron chevron-metas" id="chevron-metas">▾</span>
       </div>
@@ -3038,7 +3038,7 @@
       const pin = t.catEsc ? `<span class="${pinClass}" onclick="event.stopPropagation();toggleEsFijo('${t.catEsc}')">📌</span>` : ''
       const labelHtml = `<span class="sc-lista-label">${t.label}${pin}</span>`
       const idx = _redistribTodas.indexOf(t)
-      if (t.esFijo) return `<div class="sc-lista-row">${labelHtml}<span class="sc-lista-pill sc-lista-pill-fijo">fijo</span></div>`
+      if (t.esFijo) return `<div class="sc-lista-row">${labelHtml}</div>`
       if (t.diff > 0) return `<div class="sc-lista-row">${labelHtml}<div class="sc-lista-row-right"><span class="sc-lista-pill sc-lista-pill-over">${fmt(Math.abs(t.diff))} pasado</span><button class="sc-lista-repartir" onclick="abrirRedistrib(${idx})">↻ Repartir</button></div></div>`
       return `<div class="sc-lista-row">${labelHtml}<span class="sc-lista-pill sc-lista-pill-free">${fmt(Math.abs(t.diff))} libre</span></div>`
     }
@@ -3056,7 +3056,7 @@
       gruposHtml.push(`
         <div>
           <div class="sc-lista-oculto-toggle" onclick="toggleListaOculto()">
-            <span class="sc-lista-oculto-label">📌 Fijos / sin gasto</span>
+            <span class="sc-lista-oculto-label">📌 Fijos</span>
             <span class="sc-lista-oculto-chev" id="sc-lista-oculto-chev" style="transform:${chevRot}">▾</span>
           </div>
           <div class="sc-lista-oculto-body" id="sc-lista-oculto-body" style="max-height:${maxH}">
@@ -3066,11 +3066,13 @@
     }
 
     cont.innerHTML = `
-      <div class="sc-resumen">
-        <div class="sc-resumen-quedan${quedanClass}">${quedanTxt}</div>
-        ${cuerpoHtml}
+      <div class="sc-lista-card">
+        <div class="sc-lista-grupo" style="padding-bottom:10px;">
+          <div class="sc-resumen-quedan${quedanClass}">${quedanTxt}</div>
+          ${cuerpoHtml}
+        </div>
+        ${gruposHtml.length ? '<div class="sc-lista-sep"></div>' + gruposHtml.join('') : ''}
       </div>
-      ${gruposHtml.length ? `<div class="sc-lista-card">${gruposHtml.join('')}</div>` : ''}
     `
   }
 
