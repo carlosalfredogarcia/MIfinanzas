@@ -3097,17 +3097,16 @@
       const panelMaxH = isOpen ? '600px' : '0'
       const chev = `<span class="sc-det-chev" id="sc-det-chev-${safeId}" style="transform:${chevRot}">▾</span>`
 
-      let rightHtml, rowStyle = ''
+      let rightHtml
       if (t.esFijo) {
         rightHtml = chev
       } else if (t.diff > 0) {
-        rowStyle = 'align-items:flex-start'
-        rightHtml = `<div class="sc-lista-row-right" style="align-items:flex-start"><div style="display:flex;flex-direction:column;align-items:flex-end;gap:5px"><span class="sc-lista-pill sc-lista-pill-over">${fmt(Math.abs(t.diff))} pasado</span><button class="sc-lista-repartir" onclick="event.stopPropagation();abrirRedistrib(${idx})">↻ Repartir</button></div>${chev}</div>`
+        rightHtml = `<div class="sc-lista-row-right"><div style="display:flex;flex-direction:column;align-items:flex-end;gap:5px"><button class="sc-lista-repartir" onclick="event.stopPropagation();abrirRedistrib(${idx})">↻ Repartir</button><span class="sc-lista-pill sc-lista-pill-over">${fmt(Math.abs(t.diff))} pasado</span></div>${chev}</div>`
       } else {
         rightHtml = `<div class="sc-lista-row-right"><span class="sc-lista-pill sc-lista-pill-free">${fmt(Math.abs(t.diff))} libre</span>${chev}</div>`
       }
 
-      return `<div class="sc-lista-row-wrap"><div class="sc-lista-row sc-lista-row-clickable" style="${rowStyle}" onclick="scToggleDetalle('${t.catEsc}',${t.estimado},${t.real})">${labelHtml}${rightHtml}</div><div class="sc-det-panel" id="sc-det-panel-${safeId}" style="max-height:${panelMaxH}" data-open="${isOpen?'1':'0'}">${panelContent}</div></div>`
+      return `<div class="sc-lista-row-wrap"><div class="sc-lista-row sc-lista-row-clickable" onclick="scToggleDetalle('${t.catEsc}',${t.estimado},${t.real})">${labelHtml}${rightHtml}</div><div class="sc-det-panel" id="sc-det-panel-${safeId}" style="max-height:${panelMaxH}" data-open="${isOpen?'1':'0'}">${panelContent}</div></div>`
     }
 
     const gruposHtml = []
