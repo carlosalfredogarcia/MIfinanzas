@@ -850,7 +850,7 @@
   <div class="bloque-acordeon" style="margin:16px 24px 0">
     <div class="bloque-card clicable" onclick="toggleBloque('metas')">
       <div class="bloque-card-top" style="margin-bottom:0">
-        <span class="bloque-label">Seguimiento de metas</span>
+        <span class="bloque-label">🧭 Seguimiento de metas</span>
         <span class="bloque-chevron chevron-metas" id="chevron-metas">▾</span>
       </div>
     </div>
@@ -2909,14 +2909,7 @@
         </div>`)
     }
 
-    cont.innerHTML = `
-      <div class="sc-resumen">
-        <div class="sc-resumen-titulo">📊 Resumen del mes</div>
-        <div class="sc-resumen-quedan${quedanClass}">${quedanTxt}</div>
-        ${cuerpoHtml}
-      </div>
-      ${gruposHtml.length ? `<div class="sc-lista-card">${gruposHtml.join('')}</div>` : ''}
-    `
+    cont.innerHTML = gruposHtml.length ? `<div class="sc-lista-card">${gruposHtml.join('')}</div>` : ''
   }
 
   cargarMetas()
