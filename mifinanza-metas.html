@@ -2618,17 +2618,17 @@
       if (cat && (categoriaTipos[cat] ?? 'opcional') === 'necesario') gastosNec += val
       else gastosOpc += val
     })
-    const tcasoNec = isEur ? fmt(gastosNec) : (gastosNec / ingresos * 100).toFixed(1) + '%'
-    const tcasoOpc = isEur ? fmt(gastosOpc) : (gastosOpc / ingresos * 100).toFixed(1) + '%'
+    const tcasoNec = isEur ? fmt(gastosNec) : (gastosNec / ingresos * 100).toFixed(2) + '%'
+    const tcasoOpc = isEur ? fmt(gastosOpc) : (gastosOpc / ingresos * 100).toFixed(2) + '%'
     const esPersonalizado = perfilAhorro === 'personalizado'
     const tmetaNec = esPersonalizado ? '—' : (isEur ? fmt(ingresos * metaNecesarios / 100) : metaNecesarios + '%')
     const tmetaOpc = esPersonalizado ? '—' : (isEur ? fmt(ingresos * metaOpcionales / 100) : metaOpcionales + '%')
     const chevRot       = _asiGastosOpen ? 'rotate(180deg)' : ''
     const gastosSubMaxH = _asiGastosOpen ? '80px' : '0'
 
-    const tcasoGastos = isEur ? fmt(gastos) : pGastos.toFixed(1) + '%'
+    const tcasoGastos = isEur ? fmt(gastos) : pGastos.toFixed(2) + '%'
     const tmetaGastos = isEur ? fmt(ingresos * metaGastos / 100) : metaGastos + '%'
-    const tcasoAhorro = isEur ? fmt(Math.max(0, saldo)) : pAhorroPos.toFixed(1) + '%'
+    const tcasoAhorro = isEur ? fmt(Math.max(0, saldo)) : pAhorroPos.toFixed(2) + '%'
     const gColorClass = pGastos > metaGastos ? '#f85149' : '#4ade80'
     const aColorClass = saldo >= 0 ? '#4ade80' : '#f85149'
     const inputVal     = isEur ? Math.round(metaAhorro_eur) : metaAhorro
