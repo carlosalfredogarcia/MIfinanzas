@@ -724,10 +724,6 @@
   .m-calc-azul  .m-calc-valor { color: #58a6ff; }
   .m-calc-sub { font-size: 10px; color: var(--subtext); }
   .m-calc-texto { font-size: 11px; color: var(--subtext); line-height: 1.5; background: rgba(255,255,255,0.03); border-radius: 8px; padding: 8px 10px; }
-  .m-monto-wrap { position: relative; }
-  .m-monto-wrap input { width: 100%; box-sizing: border-box; padding-right: 118px; }
-  .m-sugerida-btn { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); background: rgba(88,166,255,0.12); border: 1px solid rgba(88,166,255,0.25); border-radius: 8px; color: #58a6ff; font-size: 10px; font-weight: 600; padding: 4px 8px; cursor: pointer; white-space: nowrap; font-family: 'DM Sans', sans-serif; -webkit-tap-highlight-color: transparent; }
-  .m-sugerida-btn:active { background: rgba(88,166,255,0.22); }
   .m-emoji-grid { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
   .m-emoji-btn { width: 40px; height: 40px; border-radius: 10px; border: 1px solid var(--border); background: var(--card2); font-size: 20px; display: flex; align-items: center; justify-content: center; cursor: pointer; -webkit-tap-highlight-color: transparent; }
   .m-emoji-btn.m-sel { border-color: rgba(88,166,255,0.55); background: rgba(88,166,255,0.1); }
@@ -1080,10 +1076,7 @@
     </div>
     <div class="input-group">
       <label>Monto objetivo</label>
-      <div class="m-monto-wrap">
-        <input type="number" id="m-monto" placeholder="$0.00" oninput="_metaMontoEditado=true">
-        <button class="m-sugerida-btn" type="button" onclick="usarMontoSugerida()">↑ Usar sugerida</button>
-      </div>
+      <input type="number" id="m-monto" placeholder="$0.00" oninput="_metaMontoEditado=true">
     </div>
     <div class="input-group">
       <label>Emoji / Icono</label>
@@ -1612,31 +1605,52 @@
     const bloque = document.getElementById('m-calculo-bloque')
     if (!inicio || !fin || inicio > fin) { bloque.style.display = 'none'; return }
 
+    const now   = new Date()
+    const cyear = now.getFullYear()
+    const cmon  = now.getMonth() + 1   // 1-based
+
     const [iy, im] = inicio.split('-').map(Number)
     const [fy, fm] = fin.split('-').map(Number)
-    const meses = (fy - iy) * 12 + (fm - im) + 1
 
-    const acumulado       = (todasMetasData || []).reduce((s, m) => s + parseFloat(m.monto_actual || 0), 0)
-    const dispMensual     = Math.max(0, totalIngresos() - totalGastos())
-    const dispTotal       = dispMensual * meses
-    _metaMontoSugerido    = dispTotal
+    const totalMeses = (fy - iy) * 12 + (fm - im) + 1
+
+    // Meses restantes: desde el mes actual (inclusive) hasta fecha_fin
+    let mesesRest = (fy - cyear) * 12 + (fm - cmon) + 1
+    if (mesesRest < 0) mesesRest = 0
+
+    // Mes anterior al actual (para label "lo que llevas")
+    let prevY = cyear, prevM = cmon - 1
+    if (prevM === 0) { prevM = 12; prevY-- }
+
+    // Lo que llevas: si fecha_inicio es futura respecto al mes actual, mostrar 0
+    const MESES_CORTO = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic']
+    const fmtMes = (y, m) => `${MESES_CORTO[m - 1]} ${y}`
+    const inicioEnFuturo = iy > cyear || (iy === cyear && im > cmon)
+    const acumulado = inicioEnFuturo
+      ? 0
+      : (todasMetasData || []).reduce((s, m) => s + parseFloat(m.monto_actual || 0), 0)
+
+    const dispMensual  = Math.max(0, totalIngresos() - totalGastos())
+    const dispRestante = dispMensual * mesesRest
+    const sugerido     = acumulado + dispRestante
+    _metaMontoSugerido = sugerido
+
+    const mesInicio   = fmtMes(iy, im)
+    const mesAnterior = fmtMes(prevY, prevM)
+    const mesFin      = fmtMes(fy, fm)
+    const mesS        = n => n === 1 ? 'mes' : 'meses'
 
     bloque.style.display = 'block'
-    document.getElementById('m-calc-header').textContent      = `💡 CÁLCULO PARA ${meses} MES${meses === 1 ? '' : 'ES'}`
-    document.getElementById('m-calc-llevas').textContent      = fmt(acumulado)
-    document.getElementById('m-calc-disponible').textContent  = fmt(dispTotal)
-    document.getElementById('m-calc-disp-sub').textContent    = `${fmt(dispMensual)}/mes disponible`
-    document.getElementById('m-calc-texto').textContent       =
-      `Según tu Planificador te sobran ${fmt(dispMensual)}/mes. En ${meses} mes${meses === 1 ? '' : 'es'} eso suman ${fmt(dispTotal)}. Ya llevas acumulados ${fmt(acumulado)}.`
+    document.getElementById('m-calc-header').textContent     = `💡 CÁLCULO PARA ${totalMeses} ${mesS(totalMeses).toUpperCase()}`
+    document.getElementById('m-calc-llevas').textContent     = fmt(acumulado)
+    document.getElementById('m-calc-disponible').textContent = fmt(dispRestante)
+    document.getElementById('m-calc-disp-sub').textContent   = `${fmt(dispMensual)}/mes × ${mesesRest} ${mesS(mesesRest)}`
+    document.getElementById('m-calc-texto').textContent      =
+      `Llevas acumulado ${fmt(acumulado)} desde ${mesInicio} hasta ${mesAnterior}. Te quedan ${mesesRest} ${mesS(mesesRest)} hasta ${mesFin}, con ${fmt(dispMensual)}/mes disponible → ${fmt(dispRestante)} más posibles.`
 
     if (!_metaMontoEditado) {
-      document.getElementById('m-monto').value = dispTotal > 0 ? dispTotal.toFixed(2) : ''
+      document.getElementById('m-monto').value = sugerido > 0 ? sugerido.toFixed(2) : ''
     }
-  }
-
-  function usarMontoSugerida() {
-    document.getElementById('m-monto').value = _metaMontoSugerido.toFixed(2)
-    _metaMontoEditado = false
   }
 
   function selEmojiMeta(btn, emoji) {
