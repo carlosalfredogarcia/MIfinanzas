@@ -510,14 +510,22 @@
   .sc-resumen-tip { font-size: 12px; color: #e3b341; line-height: 1.5; }
   .sc-lista-card { background: #161b22; border: 1px solid #30363d; border-radius: 14px; padding: 4px 0; margin-bottom: 8px; }
   .sc-lista-grupo { padding: 8px 14px; }
-  .sc-lista-grupo-title { font-size: 10px; font-weight: 700; color: #7d8590; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; }
-  .sc-lista-row { display: flex; align-items: center; justify-content: space-between; padding: 5px 0; }
-  .sc-lista-label { font-size: 13px; color: #e6edf3; }
-  .sc-lista-pill { font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 20px; white-space: nowrap; }
+  .sc-lista-grupo-title { font-size: 11px; font-weight: 700; color: #7d8590; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; }
+  .sc-lista-row { display: flex; align-items: center; justify-content: space-between; padding: 7px 0; }
+  .sc-lista-label { font-size: 15px; color: #e6edf3; display: flex; align-items: center; gap: 6px; }
+  .sc-lista-pill { font-size: 13px; font-weight: 600; padding: 3px 10px; border-radius: 20px; white-space: nowrap; flex-shrink: 0; }
   .sc-lista-pill-over { background: rgba(248,81,73,0.15); color: #f85149; }
   .sc-lista-pill-free { background: rgba(63,185,80,0.15); color: #3fb950; }
   .sc-lista-pill-fijo { background: rgba(125,133,144,0.12); color: #7d8590; }
   .sc-lista-sep { height: 1px; background: #21262d; margin: 0 14px; }
+  .sc-lista-pin { font-size: 13px; opacity: 0.22; cursor: pointer; -webkit-tap-highlight-color: transparent; transition: opacity .15s; flex-shrink: 0; user-select: none; }
+  .sc-lista-pin.sc-pin-on { opacity: 1; }
+  .sc-lista-pin:active { opacity: 0.6; }
+  .sc-lista-oculto-toggle { display: flex; align-items: center; justify-content: space-between; padding: 9px 14px; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+  .sc-lista-oculto-toggle:active { opacity: 0.7; }
+  .sc-lista-oculto-label { font-size: 11px; font-weight: 700; color: #7d8590; text-transform: uppercase; letter-spacing: 0.05em; }
+  .sc-lista-oculto-chev { font-size: 11px; color: #7d8590; display: inline-block; transition: transform .2s ease; }
+  .sc-lista-oculto-body { overflow: hidden; transition: max-height .25s ease; }
   .sc-card { background: #161b22; border-radius: 14px; padding: 12px 14px; margin-bottom: 8px; border: 1px solid var(--border); transition: opacity 0.3s, filter 0.3s; }
   .sc-card.sc-apagado { opacity: 0.3; filter: grayscale(0.8); }
   .sc-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
@@ -1867,6 +1875,14 @@
     )
   }
 
+  function toggleListaOculto() {
+    _listaOcultoOpen = !_listaOcultoOpen
+    const body = document.getElementById('sc-lista-oculto-body')
+    const chev = document.getElementById('sc-lista-oculto-chev')
+    if (body) body.style.maxHeight = _listaOcultoOpen ? body.scrollHeight + 'px' : '0'
+    if (chev) chev.style.transform = _listaOcultoOpen ? 'rotate(180deg)' : ''
+  }
+
   async function toggleEsFijo(cat) {
     const nuevoValor = !categoriaFijos[cat]
     if (nuevoValor) categoriaFijos[cat] = true
@@ -2261,7 +2277,8 @@
   let metaAhorro       = 20
   let vistaAnalisis    = 'pct'
   let _metaAhorroLoad  = false
-  let _asiGastosOpen   = false
+  let _asiGastosOpen     = false
+  let _listaOcultoOpen   = false
   const PERFILES_LABELS = { basico: 'Básico', equilibrado: 'Equilibrado', ahorrador: 'Ahorrador', personalizado: 'Personalizado' }
   const PERFILES_AHORRO = {
     basico:        { ahorro: 10, necesarios: 70, opcionales: 20 },
@@ -2807,7 +2824,7 @@
 
       const diff   = real - estimado
       const esFijo = !!categoriaFijos[cat]
-      return { activo, esVacio, diff, estimado, real, label: `${emoji} ${nombre}`, esFijo }
+      return { activo, esVacio, diff, estimado, real, label: `${emoji} ${nombre}`, esFijo, cat, catEsc }
     })
 
     // Group cards — combined real spending vs group budget
@@ -2829,7 +2846,7 @@
       const grupoKeyEsc = grupoKey.replace(/\\/g, '\\\\').replace(/'/g, "\\'")
 
       const diff = real - estimado
-      return [{ activo, esVacio, diff, estimado, real, label: `${grupo.emoji} ${grupo.nombre}`, esFijo: false }]
+      return [{ activo, esVacio, diff, estimado, real, label: `${grupo.emoji} ${grupo.nombre}`, esFijo: false, cat: null, catEsc: null }]
     })
 
     const tarjetasValidas = [...tarjetas, ...tarjetasGrupos].filter(Boolean)
@@ -2858,13 +2875,16 @@
       : `<div class="sc-resumen-alertas">${alertasHtml}</div>${verdes.length > 0 ? `<div class="sc-resumen-tip">💡 Podrías compensarlo reduciendo: ${verdes.map(t => t.label).join(', ')}</div>` : ''}`
 
     const pasadas = activasTodas.filter(t => !t.esFijo && t.diff > 0)
-    const margen  = activasTodas.filter(t => !t.esFijo && t.diff <= 0)
-    const fijos   = activasTodas.filter(t => t.esFijo)
+    const margen  = activasTodas.filter(t => !t.esFijo && t.diff <= 0 && t.real > 0)
+    const ocultas = activasTodas.filter(t => t.esFijo || t.real === 0)
 
     const _filaLista = t => {
-      if (t.esFijo) return `<div class="sc-lista-row"><span class="sc-lista-label">${t.label}</span><span class="sc-lista-pill sc-lista-pill-fijo">fijo</span></div>`
-      if (t.diff > 0) return `<div class="sc-lista-row"><span class="sc-lista-label">${t.label}</span><span class="sc-lista-pill sc-lista-pill-over">${fmt(Math.abs(t.diff))} pasado</span></div>`
-      return `<div class="sc-lista-row"><span class="sc-lista-label">${t.label}</span><span class="sc-lista-pill sc-lista-pill-free">${fmt(Math.abs(t.diff))} libre</span></div>`
+      const pinClass = t.esFijo ? 'sc-lista-pin sc-pin-on' : 'sc-lista-pin'
+      const pin = t.catEsc ? `<span class="${pinClass}" onclick="event.stopPropagation();toggleEsFijo('${t.catEsc}')">📌</span>` : ''
+      const labelHtml = `<span class="sc-lista-label">${t.label}${pin}</span>`
+      if (t.esFijo) return `<div class="sc-lista-row">${labelHtml}<span class="sc-lista-pill sc-lista-pill-fijo">fijo</span></div>`
+      if (t.diff > 0) return `<div class="sc-lista-row">${labelHtml}<span class="sc-lista-pill sc-lista-pill-over">${fmt(Math.abs(t.diff))} pasado</span></div>`
+      return `<div class="sc-lista-row">${labelHtml}<span class="sc-lista-pill sc-lista-pill-free">${fmt(Math.abs(t.diff))} libre</span></div>`
     }
 
     const gruposHtml = []
@@ -2873,9 +2893,20 @@
       if (gruposHtml.length) gruposHtml.push('<div class="sc-lista-sep"></div>')
       gruposHtml.push(`<div class="sc-lista-grupo"><div class="sc-lista-grupo-title">✅ Con margen</div>${margen.map(_filaLista).join('')}</div>`)
     }
-    if (fijos.length > 0) {
+    if (ocultas.length > 0) {
       if (gruposHtml.length) gruposHtml.push('<div class="sc-lista-sep"></div>')
-      gruposHtml.push(`<div class="sc-lista-grupo"><div class="sc-lista-grupo-title">📌 Fijos</div>${fijos.map(_filaLista).join('')}</div>`)
+      const maxH = _listaOcultoOpen ? '2000px' : '0'
+      const chevRot = _listaOcultoOpen ? 'rotate(180deg)' : ''
+      gruposHtml.push(`
+        <div>
+          <div class="sc-lista-oculto-toggle" onclick="toggleListaOculto()">
+            <span class="sc-lista-oculto-label">📌 Fijos / sin gasto</span>
+            <span class="sc-lista-oculto-chev" id="sc-lista-oculto-chev" style="transform:${chevRot}">▾</span>
+          </div>
+          <div class="sc-lista-oculto-body" id="sc-lista-oculto-body" style="max-height:${maxH}">
+            <div class="sc-lista-grupo" style="padding-top:0">${ocultas.map(_filaLista).join('')}</div>
+          </div>
+        </div>`)
     }
 
     cont.innerHTML = `
