@@ -2011,14 +2011,14 @@
       if (!dest?.cat) continue
       const newMonto = Math.max(0, dest.estimado - amt)
       const destRow = [...document.querySelectorAll('.var-row')].find(r => r._planCat === dest.cat)
-      if (destRow) { const di = destRow.querySelector('.variable-input'); if (di) di.value = newMonto.toFixed(2) }
+      if (destRow) { const di = destRow.querySelector('.variable-input'); if (di) di.value = Math.round(newMonto) }
       upserts.push({ user_id: window.currentUserId, categoria: dest.cat, monto: newMonto, updated_at: new Date().toISOString() })
       totalTransferido += amt
     }
     if (totalTransferido > 0) {
       const newOrigenMonto = origen.estimado + totalTransferido
       const origenRow = [...document.querySelectorAll('.var-row')].find(r => r._planCat === origen.cat)
-      if (origenRow) { const oi = origenRow.querySelector('.variable-input'); if (oi) oi.value = newOrigenMonto.toFixed(2) }
+      if (origenRow) { const oi = origenRow.querySelector('.variable-input'); if (oi) oi.value = Math.round(newOrigenMonto) }
       upserts.push({ user_id: window.currentUserId, categoria: origen.cat, monto: newOrigenMonto, updated_at: new Date().toISOString() })
     }
     if (upserts.length > 0) {
@@ -2255,7 +2255,7 @@
       const partes  = cat.trim().split(' ')
       const emoji   = partes[0]
       const nombre  = partes.slice(1).join(' ') || cat
-      const val     = guardado[cat] !== undefined ? guardado[cat] : gastosOriginal[cat].toFixed(2)
+      const val     = guardado[cat] !== undefined ? Math.round(guardado[cat]) : Math.round(gastosOriginal[cat] || 0)
       const catEsc  = cat.replace(/'/g, "\\'")
       const row     = document.createElement('div')
       row.className = 'var-row'
@@ -2290,7 +2290,7 @@
       const partes = cat.trim().split(' ')
       const emoji  = partes[0]
       const nombre = partes.slice(1).join(' ') || cat
-      const val    = guardado[cat] !== undefined ? guardado[cat] : gastosOriginal[cat].toFixed(2)
+      const val    = guardado[cat] !== undefined ? Math.round(guardado[cat]) : Math.round(gastosOriginal[cat] || 0)
       const row    = document.createElement('div')
       row.className = 'var-row vg-sub-row'
       row._planCat  = cat
@@ -2382,7 +2382,7 @@
   function restablecerGastos() {
     document.querySelectorAll('.var-row').forEach(row => {
       const inp = row.querySelector('.variable-input')
-      if (row._planCat && inp) inp.value = (gastosOriginal[row._planCat] ?? 0).toFixed(2)
+      if (row._planCat && inp) inp.value = Math.round(gastosOriginal[row._planCat] ?? 0)
     })
     _gastosGuardados = {}
     if (window.currentUserId) {
@@ -3122,8 +3122,8 @@
     const step = parseFloat(inp.step) || 1
     const cur  = parseFloat(inp.value) || 0
     inp.value  = btn.classList.contains('btn-spin-plus')
-      ? (cur + step).toFixed(2)
-      : Math.max(0, cur - step).toFixed(2)
+      ? Math.round(cur + step)
+      : Math.max(0, Math.round(cur - step))
     inp.dispatchEvent(new Event('input', { bubbles: true }))
   })
 </script>
