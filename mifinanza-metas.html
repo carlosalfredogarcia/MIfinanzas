@@ -483,9 +483,18 @@
   .asi-sub-row .asr-lbl { flex: 1; font-weight: 500; }
   .asi-sub-row .asr-val { min-width: 56px; text-align: right; font-family: 'Roboto', sans-serif; font-weight: 600; }
   .asi-sub-row .asr-meta { min-width: 56px; text-align: right; }
-  .asi-perfil-sel { background: transparent; border: none; color: var(--subtext); font-size: 10px; font-weight: 600; font-family: 'DM Sans', sans-serif; cursor: pointer; padding: 0; max-width: 88px; text-align: right; }
-  .asi-perfil-sel:focus { outline: none; }
-  .asi-perfil-sel option { background: #161b22; color: #e6edf3; font-weight: normal; }
+  .apd-wrap { position: relative; display: inline-block; }
+  .apd-btn { display: inline-flex; align-items: center; gap: 4px; background: none; border: none; cursor: pointer; padding: 0; color: var(--subtext); font-size: 10px; font-weight: 600; font-family: 'DM Sans', sans-serif; white-space: nowrap; -webkit-tap-highlight-color: transparent; }
+  .apd-btn:hover { color: var(--text); }
+  .apd-dot { width: 5px; height: 5px; border-radius: 50%; background: #484f58; flex-shrink: 0; }
+  .apd-chev { font-size: 9px; transition: transform .15s; display: inline-block; line-height: 1; }
+  .apd-chev.apd-open { transform: rotate(180deg); }
+  .apd-menu { display: none; position: absolute; right: 0; top: calc(100% + 5px); background: #1c2128; border: 1px solid #30363d; border-radius: 8px; padding: 4px 0; min-width: 120px; z-index: 200; box-shadow: 0 4px 14px rgba(0,0,0,0.5); }
+  .apd-menu.apd-open { display: block; }
+  .apd-opt { display: flex; align-items: center; gap: 7px; width: 100%; background: none; border: none; color: #8b949e; font-size: 12px; font-family: 'DM Sans', sans-serif; padding: 7px 12px; cursor: pointer; text-align: left; white-space: nowrap; -webkit-tap-highlight-color: transparent; }
+  .apd-opt:hover, .apd-opt:active { background: rgba(255,255,255,0.06); color: #e6edf3; }
+  .apd-opt.apd-act { color: #e6edf3; }
+  .apd-opt.apd-act .apd-dot { background: #58a6ff; }
 
   .tabla-comparativa { background: none; border: none; padding: 0; }
   .tabla-comp-empty { text-align: center; color: var(--subtext); font-size: 12px; padding: 12px 0; }
@@ -2243,6 +2252,7 @@
   let vistaAnalisis    = 'pct'
   let _metaAhorroLoad  = false
   let _asiGastosOpen   = false
+  const PERFILES_LABELS = { basico: 'Básico', equilibrado: 'Equilibrado', ahorrador: 'Ahorrador', personalizado: 'Personalizado' }
   const PERFILES_AHORRO = {
     basico:        { ahorro: 10, necesarios: 70, opcionales: 20 },
     equilibrado:   { ahorro: 15, necesarios: 65, opcionales: 20 },
@@ -2399,12 +2409,21 @@
         <thead><tr>
           <th><button class="asi-toggle" onclick="toggleVistaAnalisis(event)">${isEur ? '€ → %' : '% → €'}</button></th>
           <th>Tu caso</th>
-          <th><select class="asi-perfil-sel" onchange="seleccionarPerfil(this.value)" onclick="event.stopPropagation()">
-            <option value="basico"${perfilAhorro==='basico'?' selected':''}>Básico</option>
-            <option value="equilibrado"${perfilAhorro==='equilibrado'?' selected':''}>Equilibrado</option>
-            <option value="ahorrador"${perfilAhorro==='ahorrador'?' selected':''}>Ahorrador</option>
-            <option value="personalizado"${perfilAhorro==='personalizado'?' selected':''}>Personalizado</option>
-          </select></th>
+          <th style="position:relative">
+            <div class="apd-wrap">
+              <button class="apd-btn" onclick="togglePerfilDrop(event)">
+                <span class="apd-dot"></span>
+                <span>${PERFILES_LABELS[perfilAhorro]}</span>
+                <span class="apd-chev" id="apd-chev">▾</span>
+              </button>
+              <div class="apd-menu" id="apd-menu">
+                <button class="apd-opt${perfilAhorro==='basico'?' apd-act':''}" onclick="seleccionarPerfil('basico');event.stopPropagation()"><span class="apd-dot"></span>Básico</button>
+                <button class="apd-opt${perfilAhorro==='equilibrado'?' apd-act':''}" onclick="seleccionarPerfil('equilibrado');event.stopPropagation()"><span class="apd-dot"></span>Equilibrado</button>
+                <button class="apd-opt${perfilAhorro==='ahorrador'?' apd-act':''}" onclick="seleccionarPerfil('ahorrador');event.stopPropagation()"><span class="apd-dot"></span>Ahorrador</button>
+                <button class="apd-opt${perfilAhorro==='personalizado'?' apd-act':''}" onclick="seleccionarPerfil('personalizado');event.stopPropagation()"><span class="apd-dot"></span>Personalizado</button>
+              </div>
+            </div>
+          </th>
         </tr></thead>
         <tbody>
           <tr class="asi-gastos-row" onclick="toggleAsiGastosSub()">
@@ -2457,6 +2476,15 @@
     const chev = document.getElementById('asi-gastos-chev')
     if (wrap) wrap.style.maxHeight = _asiGastosOpen ? '80px' : '0'
     if (chev) chev.style.transform = _asiGastosOpen ? 'rotate(180deg)' : ''
+  }
+
+  function togglePerfilDrop(e) {
+    e.stopPropagation()
+    const menu = document.getElementById('apd-menu')
+    const chev = document.getElementById('apd-chev')
+    if (!menu) return
+    const open = menu.classList.toggle('apd-open')
+    if (chev) chev.classList.toggle('apd-open', open)
   }
 
   async function seleccionarPerfil(nombre) {
@@ -2932,6 +2960,10 @@
   cargarBudgetMode()
   cargarPerfilAhorro()
   cargarSeguimientoActivos()
+  document.addEventListener('click', () => {
+    document.getElementById('apd-menu')?.classList.remove('apd-open')
+    document.getElementById('apd-chev')?.classList.remove('apd-open')
+  })
   actualizarPlanificador()
 
   // Delegación de eventos en el contenedor estable de gastos
