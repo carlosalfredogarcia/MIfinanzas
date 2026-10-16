@@ -521,28 +521,38 @@
   .sc-lista-row-right { display: flex; align-items: center; gap: 7px; flex-shrink: 0; }
   .sc-lista-repartir { background: rgba(88,166,255,0.1); border: 1px solid rgba(88,166,255,0.25); border-radius: 20px; color: #58a6ff; font-size: 11px; font-weight: 600; padding: 3px 9px; cursor: pointer; white-space: nowrap; font-family: 'DM Sans', sans-serif; -webkit-tap-highlight-color: transparent; }
   .sc-lista-repartir:active { background: rgba(88,166,255,0.22); }
-  .rdist-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.72); z-index: 600; align-items: flex-end; justify-content: center; }
+  .rdist-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 600; align-items: flex-end; justify-content: center; }
   .rdist-overlay.rdist-open { display: flex; }
-  .rdist-modal { background: #161b22; border: 1px solid #30363d; border-radius: 18px 18px 0 0; padding: 20px 18px 32px; width: 100%; max-width: 480px; max-height: 82vh; overflow-y: auto; }
-  .rdist-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
-  .rdist-titulo { font-size: 15px; font-weight: 700; color: #e6edf3; }
-  .rdist-cerrar { background: none; border: none; color: #7d8590; font-size: 17px; cursor: pointer; padding: 2px 6px; line-height: 1; }
-  .rdist-origen { display: flex; align-items: center; gap: 10px; background: rgba(248,81,73,0.07); border: 1px solid rgba(248,81,73,0.2); border-radius: 12px; padding: 11px 14px; margin-bottom: 16px; }
-  .rdist-origen-nombre { flex: 1; font-size: 14px; color: #e6edf3; font-weight: 500; }
-  .rdist-origen-pill { font-size: 12px; font-weight: 700; color: #f85149; background: rgba(248,81,73,0.15); padding: 3px 9px; border-radius: 20px; white-space: nowrap; }
-  .rdist-subtitulo { font-size: 11px; font-weight: 700; color: #7d8590; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; }
-  .rdist-fila { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px solid #21262d; }
-  .rdist-fila:last-child { border-bottom: none; }
-  .rdist-fila-info { flex: 1; min-width: 0; }
-  .rdist-fila-label { display: block; font-size: 14px; color: #e6edf3; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .rdist-fila-disponible { display: block; font-size: 11px; color: #3fb950; margin-top: 1px; }
-  .rdist-input { width: 82px; background: #0d1117; border: 1px solid #30363d; border-radius: 8px; color: #e6edf3; font-size: 14px; padding: 7px 10px; text-align: right; font-family: 'Roboto Mono', monospace; flex-shrink: 0; }
-  .rdist-input:focus { outline: none; border-color: #58a6ff; }
-  .rdist-empty { font-size: 13px; color: #7d8590; padding: 14px 0; text-align: center; }
-  .rdist-footer { display: flex; gap: 10px; margin-top: 18px; }
-  .rdist-cancelar { flex: 1; background: none; border: 1px solid #30363d; border-radius: 10px; color: #7d8590; font-size: 14px; padding: 11px; cursor: pointer; font-family: 'DM Sans', sans-serif; }
-  .rdist-confirmar { flex: 2; background: #1f6feb; border: none; border-radius: 10px; color: #fff; font-size: 14px; font-weight: 600; padding: 11px; cursor: pointer; font-family: 'DM Sans', sans-serif; }
-  .rdist-confirmar:active { background: #1158c7; }
+  .rdist-modal { background: #090e17; border-radius: 20px 20px 0 0; width: 100%; max-width: 480px; max-height: 88vh; overflow-y: auto; padding-bottom: env(safe-area-inset-bottom, 12px); }
+  .rdist-top-row { display: flex; align-items: center; justify-content: space-between; padding: 18px 18px 14px; border-bottom: 1px solid #1c2230; }
+  .rdist-top-cat { font-size: 16px; font-weight: 700; color: #e6edf3; }
+  .rdist-top-pill { font-size: 13px; font-weight: 700; color: #e6edf3; background: rgba(248,81,73,0.28); border: 1px solid rgba(248,81,73,0.35); padding: 5px 13px; border-radius: 20px; white-space: nowrap; }
+  .rdist-section-lbl { font-size: 10px; font-weight: 700; color: #3d4656; text-transform: uppercase; letter-spacing: 0.1em; padding: 14px 18px 6px; }
+  .rdist-origen-row { display: flex; align-items: center; gap: 11px; padding: 8px 18px 14px; }
+  .rdist-origen-icon { font-size: 22px; flex-shrink: 0; }
+  .rdist-origen-name { flex: 1; font-size: 15px; font-weight: 700; color: #e6edf3; }
+  .rdist-origen-exc { font-size: 14px; font-weight: 700; color: #f85149; }
+  .rdist-sep { height: 1px; background: #1c2230; }
+  .rdist-dest-row { display: flex; align-items: center; gap: 12px; padding: 13px 18px; border-bottom: 1px solid #1c2230; }
+  .rdist-dest-row:last-child { border-bottom: none; }
+  .rdist-dest-icon { font-size: 22px; flex-shrink: 0; }
+  .rdist-dest-info { flex: 1; min-width: 0; }
+  .rdist-dest-name { font-size: 15px; font-weight: 700; color: #e6edf3; }
+  .rdist-dest-libre { font-size: 12px; color: #3fb950; margin-top: 2px; transition: color .15s; }
+  .rdist-dest-libre.rdist-agotado { color: #f85149; }
+  .rdist-dest-inputwrap { display: flex; align-items: center; gap: 5px; flex-shrink: 0; }
+  .rdist-input { width: 72px; background: #141b27; border: 1.5px solid #252e3f; border-radius: 9px; color: #e6edf3; font-size: 15px; font-weight: 600; padding: 9px 10px; text-align: right; font-family: 'Roboto', sans-serif; -webkit-appearance: none; }
+  .rdist-input:focus { outline: none; border-color: #3fb950; }
+  .rdist-euro { font-size: 14px; color: #5a6478; font-weight: 600; }
+  .rdist-empty { font-size: 13px; color: #5a6478; padding: 22px 18px; text-align: center; }
+  .rdist-progress-wrap { padding: 13px 18px 10px; }
+  .rdist-progress-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 7px; }
+  .rdist-progress-lbl { font-size: 12px; color: #5a6478; }
+  .rdist-progress-nums { font-size: 12px; font-weight: 700; color: #e6edf3; }
+  .rdist-progress-bar { height: 5px; background: #1c2230; border-radius: 5px; overflow: hidden; }
+  .rdist-progress-fill { height: 100%; background: #3fb950; border-radius: 5px; transition: width .2s ease; }
+  .rdist-confirmar-btn { display: block; width: calc(100% - 36px); margin: 14px 18px 6px; background: #3fb950; border: none; border-radius: 14px; color: #080e17; font-size: 16px; font-weight: 700; padding: 17px; cursor: pointer; font-family: 'DM Sans', sans-serif; -webkit-tap-highlight-color: transparent; letter-spacing: 0.01em; }
+  .rdist-confirmar-btn:active { background: #35a344; }
   .sc-lista-pin { font-size: 13px; opacity: 0.22; cursor: pointer; -webkit-tap-highlight-color: transparent; transition: opacity .15s; flex-shrink: 0; user-select: none; }
   .sc-lista-pin.sc-pin-on { opacity: 1; }
   .sc-lista-pin:active { opacity: 0.6; }
@@ -1126,22 +1136,7 @@
 
 <!-- Modal redistribución de presupuesto -->
 <div class="rdist-overlay" id="rdist-modal" onclick="if(event.target===this)cerrarRedistrib()">
-  <div class="rdist-modal">
-    <div class="rdist-header">
-      <span class="rdist-titulo">↻ Redistribuir presupuesto</span>
-      <button class="rdist-cerrar" onclick="cerrarRedistrib()">✕</button>
-    </div>
-    <div class="rdist-origen">
-      <span class="rdist-origen-nombre" id="rdist-origen-nombre"></span>
-      <span class="rdist-origen-pill" id="rdist-origen-pasado"></span>
-    </div>
-    <div class="rdist-subtitulo">Recortar de estas categorías:</div>
-    <div id="rdist-filas"></div>
-    <div class="rdist-footer">
-      <button class="rdist-cancelar" onclick="cerrarRedistrib()">Cancelar</button>
-      <button class="rdist-confirmar" onclick="confirmarRedistrib()">Confirmar traspaso</button>
-    </div>
-  </div>
+  <div class="rdist-modal" id="rdist-modal-inner"></div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -1927,30 +1922,79 @@
     _redistribOrigenIdx = idx
     const origen = _redistribTodas[idx]
     if (!origen) return
-    const margenItems = _redistribTodas.filter(t => !t.esFijo && t.diff < 0 && t !== origen && t.cat)
-    const filas = margenItems.length === 0
+    const destinos = _redistribTodas.filter(t => !t.esFijo && t.diff < 0 && t !== origen && t.cat)
+    const destFilas = destinos.length === 0
       ? '<div class="rdist-empty">Sin categorías con margen disponible</div>'
-      : margenItems.map(t => {
+      : destinos.map(t => {
           const tIdx = _redistribTodas.indexOf(t)
-          return `
-            <div class="rdist-fila">
-              <div class="rdist-fila-info">
-                <span class="rdist-fila-label">${t.label}</span>
-                <span class="rdist-fila-disponible">${fmt(Math.abs(t.diff))} disponible</span>
-              </div>
-              <input class="rdist-input" type="number" inputmode="decimal" min="0"
-                     max="${Math.abs(t.diff).toFixed(2)}" step="0.01" placeholder="0.00"
-                     data-rdist-idx="${tIdx}">`
+          const libre = Math.abs(t.diff)
+          return `<div class="rdist-dest-row">
+            <span class="rdist-dest-icon">📂</span>
+            <div class="rdist-dest-info">
+              <div class="rdist-dest-name">${t.label}</div>
+              <div class="rdist-dest-libre" id="rdist-libre-${tIdx}" data-base="${libre.toFixed(2)}">${fmt(libre)} libre</div>
+            </div>
+            <div class="rdist-dest-inputwrap">
+              <input class="rdist-input" type="number" inputmode="decimal" min="0" step="0.01" placeholder="0.00"
+                     data-rdist-idx="${tIdx}" oninput="rdistActualizarMargen()">
+              <span class="rdist-euro">€</span>
+            </div>
+          </div>`
         }).join('')
-    document.getElementById('rdist-origen-nombre').textContent = origen.label
-    document.getElementById('rdist-origen-pasado').textContent = fmt(origen.diff) + ' pasado'
-    document.getElementById('rdist-filas').innerHTML = filas
+    const exceso = Math.abs(origen.diff)
+    document.getElementById('rdist-modal-inner').innerHTML = `
+      <div class="rdist-top-row">
+        <span class="rdist-top-cat">${origen.label}</span>
+        <span class="rdist-top-pill">+${fmt(exceso)} pasado</span>
+      </div>
+      <div class="rdist-section-lbl">Repartir exceso en</div>
+      <div class="rdist-origen-row">
+        <span class="rdist-origen-icon">📌</span>
+        <span class="rdist-origen-name">${origen.label}</span>
+        <span class="rdist-origen-exc">${fmt(exceso)} de exceso</span>
+      </div>
+      <div class="rdist-sep"></div>
+      <div class="rdist-section-lbl">¿Dónde lo absorbes?</div>
+      ${destFilas}
+      <div class="rdist-progress-wrap">
+        <div class="rdist-progress-top">
+          <span class="rdist-progress-lbl">Repartido</span>
+          <span class="rdist-progress-nums" id="rdist-prog-nums">${fmt(0)} / ${fmt(exceso)}</span>
+        </div>
+        <div class="rdist-progress-bar"><div class="rdist-progress-fill" id="rdist-prog-fill" style="width:0%"></div></div>
+      </div>
+      <button class="rdist-confirmar-btn" onclick="confirmarRedistrib()">Confirmar traspaso</button>
+    `
     document.getElementById('rdist-modal').classList.add('rdist-open')
   }
 
   function cerrarRedistrib() {
     document.getElementById('rdist-modal').classList.remove('rdist-open')
     _redistribOrigenIdx = -1
+  }
+
+  function rdistActualizarMargen() {
+    const origen = _redistribTodas[_redistribOrigenIdx]
+    if (!origen) return
+    let total = 0
+    document.querySelectorAll('.rdist-input').forEach(inp => {
+      const amt = parseFloat(inp.value) || 0
+      const tIdx = parseInt(inp.dataset.rdistIdx)
+      const libreEl = document.getElementById('rdist-libre-' + tIdx)
+      if (libreEl) {
+        const base = parseFloat(libreEl.dataset.base || '0')
+        const restante = base - amt
+        libreEl.textContent = fmt(Math.abs(restante)) + (restante < 0 ? ' excedido' : ' libre')
+        libreEl.classList.toggle('rdist-agotado', restante < 0)
+      }
+      total += amt
+    })
+    const exceso = Math.abs(origen.diff)
+    const pct = exceso > 0 ? Math.min(100, (total / exceso) * 100) : 0
+    const numsEl = document.getElementById('rdist-prog-nums')
+    const fillEl = document.getElementById('rdist-prog-fill')
+    if (numsEl) numsEl.textContent = fmt(total) + ' / ' + fmt(exceso)
+    if (fillEl) fillEl.style.width = pct.toFixed(1) + '%'
   }
 
   async function confirmarRedistrib() {
