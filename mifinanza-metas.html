@@ -1051,11 +1051,23 @@
     <div class="m-fechas-row">
       <div class="input-group">
         <label>Fecha inicio</label>
-        <input type="month" id="m-fecha-inicio" onchange="calcularSugerenciaMeta()">
+        <span class="dp-wrap">
+          <input type="hidden" id="m-fecha-inicio" class="dp-real-input" onchange="calcularSugerenciaMeta()">
+          <button type="button" class="inp dp-btn" data-mp-for="m-fecha-inicio" onclick="openMonthPicker('m-fecha-inicio')">
+            <span class="dp-txt" data-empty="true">Seleccionar mes</span>
+            <svg class="dp-cal-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="16" height="15" rx="2"/><path d="M2 8h16M7 1v4M13 1v4"/></svg>
+          </button>
+        </span>
       </div>
       <div class="input-group">
         <label>Fecha fin</label>
-        <input type="month" id="m-fecha-fin" onchange="calcularSugerenciaMeta()">
+        <span class="dp-wrap">
+          <input type="hidden" id="m-fecha-fin" class="dp-real-input" onchange="calcularSugerenciaMeta()">
+          <button type="button" class="inp dp-btn" data-mp-for="m-fecha-fin" onclick="openMonthPicker('m-fecha-fin')">
+            <span class="dp-txt" data-empty="true">Seleccionar mes</span>
+            <svg class="dp-cal-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="16" height="15" rx="2"/><path d="M2 8h16M7 1v4M13 1v4"/></svg>
+          </button>
+        </span>
       </div>
     </div>
     <div id="m-calculo-bloque" style="display:none;margin-bottom:14px">
@@ -1594,6 +1606,10 @@
     document.getElementById('m-fecha-fin').value = ''
     document.getElementById('m-icon').value = ''
     document.querySelectorAll('.m-emoji-btn').forEach(b => b.classList.remove('m-sel'))
+    ;['m-fecha-inicio','m-fecha-fin'].forEach(id => {
+      const btn = document.querySelector(`[data-mp-for="${id}"]`)
+      if (btn) { const t = btn.querySelector('.dp-txt'); if (t) { t.textContent = 'Seleccionar mes'; t.dataset.empty = 'true' } }
+    })
   }
 
   let _metaMontoEditado = false

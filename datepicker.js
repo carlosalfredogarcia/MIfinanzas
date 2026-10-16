@@ -405,3 +405,162 @@
     autoInit()
   }
 })()
+
+/* ─────────────────────────────────────────────────
+   Month Picker  –  openMonthPicker(id)
+   Hidden input stores "YYYY-MM".
+   Button uses data-mp-for="<id>" to find its input.
+───────────────────────────────────────────────── */
+;(function () {
+  'use strict'
+
+  const MOS = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic']
+
+  let mpEl   = null   // active hidden input
+  let mpYear = 0
+
+  /* ── CSS (injected once) ── */
+  function injectMpStyles () {
+    if (document.getElementById('mp-styles')) return
+    const s = document.createElement('style')
+    s.id = 'mp-styles'
+    s.textContent = `
+#mp-modal {
+  display: none; position: fixed; inset: 0; z-index: 9999;
+  align-items: flex-end; justify-content: center;
+}
+#mp-overlay { position: absolute; inset: 0; background: rgba(0,0,0,.55); }
+#mp-panel {
+  position: relative; z-index: 1;
+  background: #1a1d27; border: 1px solid #2a2e3a;
+  border-radius: 20px 20px 0 0; width: 100%; max-width: 400px;
+  padding: 20px 20px 32px;
+  box-shadow: 0 -6px 32px rgba(0,0,0,.5);
+  animation: dpSlideUp .22s cubic-bezier(.22,.68,0,1.2) both;
+}
+#mp-header {
+  display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px;
+}
+#mp-year-label { font-size: 18px; font-weight: 700; color: #e6edf3; letter-spacing: .02em; }
+#mp-grid {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 20px;
+}
+.mp-month-btn {
+  background: rgba(255,255,255,0.04); border: 1px solid #2a2e3a; border-radius: 10px;
+  color: #e6edf3; font-size: 14px; font-family: inherit; font-weight: 500;
+  padding: 12px 4px; text-align: center; cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: background .12s, border-color .12s, color .12s;
+}
+.mp-month-btn:hover { background: #2a2e3a; border-color: #4ade80; }
+.mp-month-btn.mp-now { border-color: #4ade80; color: #4ade80; font-weight: 700; }
+.mp-month-btn.mp-sel {
+  background: #4ade80 !important; border-color: #4ade80 !important;
+  color: #0d1117 !important; font-weight: 700;
+}
+#mp-footer {
+  display: flex; justify-content: space-between; padding-top: 4px; border-top: 1px solid #2a2e3a;
+}
+.mp-footer-btn {
+  background: none; border: none; cursor: pointer; font-size: 14px; font-family: inherit;
+  padding: 8px 4px; -webkit-tap-highlight-color: transparent; color: #8b949e;
+}
+.mp-footer-today { color: #4ade80; font-weight: 600; }
+    `
+    document.head.appendChild(s)
+  }
+
+  /* ── Build modal DOM (once) ── */
+  function ensureMpModal () {
+    if (document.getElementById('mp-modal')) return
+    injectMpStyles()
+    const el = document.createElement('div')
+    el.id = 'mp-modal'
+    el.innerHTML = `
+      <div id="mp-overlay"></div>
+      <div id="mp-panel">
+        <div id="mp-header">
+          <button type="button" class="dp-nav-btn" id="mp-prev">&#8249;</button>
+          <span id="mp-year-label"></span>
+          <button type="button" class="dp-nav-btn" id="mp-next">&#8250;</button>
+        </div>
+        <div id="mp-grid"></div>
+        <div id="mp-footer">
+          <button type="button" class="mp-footer-btn" id="mp-clear">Borrar</button>
+          <button type="button" class="mp-footer-btn mp-footer-today" id="mp-this">Este mes</button>
+        </div>
+      </div>
+    `
+    document.body.appendChild(el)
+    document.getElementById('mp-overlay').addEventListener('click', window.closeMonthPicker)
+    document.getElementById('mp-prev').addEventListener('click', () => { mpYear--; renderMpGrid() })
+    document.getElementById('mp-next').addEventListener('click', () => { mpYear++; renderMpGrid() })
+    document.getElementById('mp-clear').addEventListener('click', () => { mpCommit(''); window.closeMonthPicker() })
+    document.getElementById('mp-this').addEventListener('click', () => {
+      const n = new Date()
+      mpCommit(`${n.getFullYear()}-${String(n.getMonth()+1).padStart(2,'0')}`)
+      window.closeMonthPicker()
+    })
+    document.getElementById('mp-grid').addEventListener('click', function (e) {
+      const btn = e.target.closest('.mp-month-btn')
+      if (btn) { mpCommit(btn.dataset.val); window.closeMonthPicker() }
+    })
+  }
+
+  function renderMpGrid () {
+    document.getElementById('mp-year-label').textContent = mpYear
+    const now    = new Date()
+    const curVal = mpEl ? mpEl.value : ''
+    document.getElementById('mp-grid').innerHTML = MOS.map((name, i) => {
+      const val = `${mpYear}-${String(i+1).padStart(2,'0')}`
+      let cls = 'mp-month-btn'
+      if (val === curVal) cls += ' mp-sel'
+      if (mpYear === now.getFullYear() && i === now.getMonth()) cls += ' mp-now'
+      return `<button type="button" class="${cls}" data-val="${val}">${name}</button>`
+    }).join('')
+  }
+
+  function mpCommit (val) {
+    if (!mpEl) return
+    mpEl.value = val
+    /* update display button */
+    const id  = mpEl.id
+    const btn = document.querySelector(`[data-mp-for="${id}"]`)
+    if (btn) {
+      const txt = btn.querySelector('.dp-txt')
+      if (txt) {
+        if (val) {
+          const [y, m] = val.split('-').map(Number)
+          txt.textContent = `${MOS[m-1]} de ${y}`
+          txt.removeAttribute('data-empty')
+        } else {
+          txt.textContent = 'Seleccionar mes'
+          txt.dataset.empty = 'true'
+        }
+      }
+    }
+    mpEl.dispatchEvent(new Event('input',  { bubbles: true }))
+    mpEl.dispatchEvent(new Event('change', { bubbles: true }))
+  }
+
+  /* ── Public API ── */
+  window.openMonthPicker = function (id) {
+    const inp = document.getElementById(id)
+    if (!inp) return
+    mpEl = inp
+    ensureMpModal()
+    const val = inp.value
+    mpYear = (val && /^\d{4}-\d{2}$/.test(val))
+      ? parseInt(val, 10)
+      : new Date().getFullYear()
+    renderMpGrid()
+    document.getElementById('mp-modal').style.display = 'flex'
+  }
+
+  window.closeMonthPicker = function () {
+    const m = document.getElementById('mp-modal')
+    if (m) m.style.display = 'none'
+    mpEl = null
+  }
+})()
+
