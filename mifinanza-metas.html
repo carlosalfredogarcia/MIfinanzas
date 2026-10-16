@@ -521,6 +521,28 @@
   .sc-lista-row-right { display: flex; align-items: center; gap: 7px; flex-shrink: 0; }
   .sc-lista-repartir { background: rgba(88,166,255,0.1); border: 1px solid rgba(88,166,255,0.25); border-radius: 20px; color: #58a6ff; font-size: 11px; font-weight: 600; padding: 3px 9px; cursor: pointer; white-space: nowrap; font-family: 'DM Sans', sans-serif; -webkit-tap-highlight-color: transparent; }
   .sc-lista-repartir:active { background: rgba(88,166,255,0.22); }
+  .sc-lista-row-wrap { }
+  .sc-lista-row-clickable { cursor: pointer; -webkit-tap-highlight-color: transparent; }
+  .sc-lista-row-clickable:active { opacity: 0.7; }
+  .sc-det-chev { font-size: 12px; color: #7d8590; transition: transform 0.2s ease; flex-shrink: 0; margin-left: 4px; display: inline-block; line-height: 1; }
+  .sc-det-panel { max-height: 0; overflow: hidden; transition: max-height 0.3s ease; }
+  .sc-det-inner { padding: 12px 0 4px; border-top: 1px solid #21262d; margin-top: 4px; }
+  .sc-det-summary { display: flex; justify-content: space-between; align-items: flex-start; padding: 0 2px 14px; }
+  .sc-det-col { display: flex; flex-direction: column; gap: 3px; }
+  .sc-det-lbl { font-size: 11px; color: #7d8590; text-transform: uppercase; letter-spacing: 0.06em; font-weight: 600; }
+  .sc-det-amt { font-size: 22px; font-weight: 700; }
+  .sc-det-bar-wrap { margin-bottom: 14px; }
+  .sc-det-bar { height: 6px; background: #21262d; border-radius: 6px; overflow: hidden; margin-bottom: 5px; }
+  .sc-det-bar-fill { height: 100%; border-radius: 6px; }
+  .sc-det-bar-nums { display: flex; justify-content: space-between; font-size: 11px; }
+  .sc-det-movs { display: flex; flex-direction: column; }
+  .sc-det-mov { display: flex; justify-content: space-between; align-items: flex-start; padding: 9px 0; border-bottom: 1px solid #1c2230; }
+  .sc-det-mov:last-child { border-bottom: none; }
+  .sc-det-mov-info { display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0; }
+  .sc-det-mov-name { font-size: 14px; color: #e6edf3; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .sc-det-mov-date { font-size: 11px; color: #7d8590; }
+  .sc-det-mov-amount { font-size: 14px; font-weight: 600; color: #f85149; flex-shrink: 0; margin-left: 10px; }
+  .sc-det-empty { font-size: 13px; color: #7d8590; padding: 10px 0; text-align: center; }
   .rdist-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 600; align-items: flex-end; justify-content: center; }
   .rdist-overlay.rdist-open { display: flex; }
   .rdist-modal { background: #090e17; border-radius: 20px 20px 0 0; width: 100%; max-width: 480px; max-height: 88vh; overflow-y: auto; padding-bottom: env(safe-area-inset-bottom, 12px); }
@@ -2753,6 +2775,7 @@
   let movsRealMes = {}
   let _segMovs = []
   let segCardAbiertoIdx = null
+  let _scDetalleOpenCat = null
 
   function renderMovsSeg(cat) {
     const movs = movsRealMes[cat] || []
@@ -2776,6 +2799,41 @@
           <div class="cm-edit" onclick="abrirEdicionGastoSeg(${idx})">✏️</div>
         </div>`
     }).join('')
+  }
+
+  function _buildDetalleHtml(cat, estimado, real) {
+    const overBudget = real > estimado
+    const pct = estimado > 0 ? Math.min(100, (real / estimado) * 100) : (real > 0 ? 100 : 0)
+    const barColor = overBudget ? '#f85149' : '#3fb950'
+    const gastadoColor = overBudget ? '#f85149' : '#3fb950'
+    const movs = (movsRealMes[cat] || []).slice().sort((a, b) => (b.fecha || '').localeCompare(a.fecha || ''))
+    const movsHtml = movs.length === 0
+      ? '<div class="sc-det-empty">Sin movimientos este mes</div>'
+      : movs.map(m => {
+          const nombre = (m.label || cat).replace(/&/g, '&amp;').replace(/</g, '&lt;')
+          return `<div class="sc-det-mov"><div class="sc-det-mov-info"><span class="sc-det-mov-name">${nombre}</span><span class="sc-det-mov-date">${_diaMesSeg(m.fecha)}</span></div><span class="sc-det-mov-amount">${fmt(m.monto)}</span></div>`
+        }).join('')
+    return `<div class="sc-det-inner"><div class="sc-det-summary"><div class="sc-det-col"><div class="sc-det-lbl">Gastado</div><div class="sc-det-amt" style="color:${gastadoColor}">${fmt(real)}</div></div><div class="sc-det-col" style="text-align:right"><div class="sc-det-lbl">Meta</div><div class="sc-det-amt" style="color:#e6edf3">${fmt(estimado)}</div></div></div><div class="sc-det-bar-wrap"><div class="sc-det-bar"><div class="sc-det-bar-fill" style="width:${pct.toFixed(1)}%;background:${barColor}"></div></div><div class="sc-det-bar-nums"><span style="color:${gastadoColor}">${fmt(real)}</span><span style="color:#7d8590">${fmt(estimado)}</span></div></div><div class="sc-det-movs">${movsHtml}</div></div>`
+  }
+
+  function scToggleDetalle(cat, estimado, real) {
+    const safeId = cat.replace(/[^a-zA-Z0-9]/g, '_')
+    const panelEl = document.getElementById('sc-det-panel-' + safeId)
+    const chevEl  = document.getElementById('sc-det-chev-' + safeId)
+    if (!panelEl) return
+    const isOpen = panelEl.dataset.open === '1'
+    if (isOpen) {
+      panelEl.style.maxHeight = '0'
+      panelEl.dataset.open = '0'
+      if (chevEl) chevEl.style.transform = 'rotate(0deg)'
+      _scDetalleOpenCat = null
+    } else {
+      if (!panelEl.innerHTML.trim()) panelEl.innerHTML = _buildDetalleHtml(cat, estimado, real)
+      panelEl.style.maxHeight = '600px'
+      panelEl.dataset.open = '1'
+      if (chevEl) chevEl.style.transform = 'rotate(180deg)'
+      _scDetalleOpenCat = cat
+    }
   }
 
   function toggleCardMovsSeg(idx, event) {
@@ -3025,9 +3083,30 @@
       const pin = t.catEsc ? `<span class="${pinClass}" onclick="event.stopPropagation();toggleEsFijo('${t.catEsc}')">📌</span>` : ''
       const labelHtml = `<span class="sc-lista-label">${t.label}${pin}</span>`
       const idx = _redistribTodas.indexOf(t)
-      if (t.esFijo) return `<div class="sc-lista-row">${labelHtml}</div>`
-      if (t.diff > 0) return `<div class="sc-lista-row">${labelHtml}<div class="sc-lista-row-right"><span class="sc-lista-pill sc-lista-pill-over">${fmt(Math.abs(t.diff))} pasado</span><button class="sc-lista-repartir" onclick="abrirRedistrib(${idx})">↻ Repartir</button></div></div>`
-      return `<div class="sc-lista-row">${labelHtml}<span class="sc-lista-pill sc-lista-pill-free">${fmt(Math.abs(t.diff))} libre</span></div>`
+
+      if (!t.catEsc) {
+        // Group rows — no expandable detail
+        if (t.diff > 0) return `<div class="sc-lista-row">${labelHtml}<div class="sc-lista-row-right"><span class="sc-lista-pill sc-lista-pill-over">${fmt(Math.abs(t.diff))} pasado</span><button class="sc-lista-repartir" onclick="abrirRedistrib(${idx})">↻ Repartir</button></div></div>`
+        return `<div class="sc-lista-row">${labelHtml}<span class="sc-lista-pill sc-lista-pill-free">${fmt(Math.abs(t.diff))} libre</span></div>`
+      }
+
+      const safeId = t.cat.replace(/[^a-zA-Z0-9]/g, '_')
+      const isOpen = t.cat === _scDetalleOpenCat
+      const chevRot = isOpen ? 'rotate(180deg)' : 'rotate(0deg)'
+      const panelContent = isOpen ? _buildDetalleHtml(t.cat, t.estimado, t.real) : ''
+      const panelMaxH = isOpen ? '600px' : '0'
+      const chev = `<span class="sc-det-chev" id="sc-det-chev-${safeId}" style="transform:${chevRot}">▾</span>`
+
+      let rightHtml
+      if (t.esFijo) {
+        rightHtml = chev
+      } else if (t.diff > 0) {
+        rightHtml = `<div class="sc-lista-row-right"><span class="sc-lista-pill sc-lista-pill-over">${fmt(Math.abs(t.diff))} pasado</span><button class="sc-lista-repartir" onclick="event.stopPropagation();abrirRedistrib(${idx})">↻ Repartir</button>${chev}</div>`
+      } else {
+        rightHtml = `<div class="sc-lista-row-right"><span class="sc-lista-pill sc-lista-pill-free">${fmt(Math.abs(t.diff))} libre</span>${chev}</div>`
+      }
+
+      return `<div class="sc-lista-row-wrap"><div class="sc-lista-row sc-lista-row-clickable" onclick="scToggleDetalle('${t.catEsc}',${t.estimado},${t.real})">${labelHtml}${rightHtml}</div><div class="sc-det-panel" id="sc-det-panel-${safeId}" style="max-height:${panelMaxH}" data-open="${isOpen?'1':'0'}">${panelContent}</div></div>`
     }
 
     const gruposHtml = []
