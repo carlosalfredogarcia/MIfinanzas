@@ -3011,15 +3011,10 @@
     const verdes         = activas.filter(t => t.diff < 0)
     const rojas          = activas.filter(t => t.diff > 0)
 
-    const alertasHtml = rojas.map(t => `⚠️ ${t.label}: ${fmt(Math.abs(t.diff))} pasado`).join('<br>')
     const quedanClass = teQuedan < 0 ? ' sc-resumen-over' : ''
     const quedanTxt   = teQuedan >= 0
       ? `Te quedan ${fmt(teQuedan)} para los próximos ${diasQuedan} día${diasQuedan === 1 ? '' : 's'}`
       : `Te has pasado ${fmt(Math.abs(teQuedan))} del total estimado`
-
-    const cuerpoHtml = rojas.length === 0
-      ? `<div class="sc-resumen-tip">✅ Todo en orden. ¡Buen trabajo!</div>`
-      : `<div class="sc-resumen-alertas">${alertasHtml}</div>${verdes.length > 0 ? `<div class="sc-resumen-tip">💡 Podrías compensarlo reduciendo: ${verdes.map(t => t.label).join(', ')}</div>` : ''}`
 
     const pasadas = activasTodas.filter(t => !t.esFijo && t.diff > 0)
     const margen  = activasTodas.filter(t => !t.esFijo && t.diff <= 0)
@@ -3061,7 +3056,6 @@
       <div class="sc-lista-card">
         <div class="sc-lista-grupo" style="padding-bottom:10px;">
           <div class="sc-resumen-quedan${quedanClass}">${quedanTxt}</div>
-          ${cuerpoHtml}
         </div>
         ${gruposHtml.length ? '<div class="sc-lista-sep"></div>' + gruposHtml.join('') : ''}
       </div>
