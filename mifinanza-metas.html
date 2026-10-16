@@ -518,6 +518,31 @@
   .sc-lista-pill-free { background: rgba(63,185,80,0.15); color: #3fb950; }
   .sc-lista-pill-fijo { background: rgba(125,133,144,0.12); color: #7d8590; }
   .sc-lista-sep { height: 1px; background: #21262d; margin: 0 14px; }
+  .sc-lista-row-right { display: flex; align-items: center; gap: 7px; flex-shrink: 0; }
+  .sc-lista-repartir { background: rgba(88,166,255,0.1); border: 1px solid rgba(88,166,255,0.25); border-radius: 20px; color: #58a6ff; font-size: 11px; font-weight: 600; padding: 3px 9px; cursor: pointer; white-space: nowrap; font-family: 'DM Sans', sans-serif; -webkit-tap-highlight-color: transparent; }
+  .sc-lista-repartir:active { background: rgba(88,166,255,0.22); }
+  .rdist-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.72); z-index: 600; align-items: flex-end; justify-content: center; }
+  .rdist-overlay.rdist-open { display: flex; }
+  .rdist-modal { background: #161b22; border: 1px solid #30363d; border-radius: 18px 18px 0 0; padding: 20px 18px 32px; width: 100%; max-width: 480px; max-height: 82vh; overflow-y: auto; }
+  .rdist-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+  .rdist-titulo { font-size: 15px; font-weight: 700; color: #e6edf3; }
+  .rdist-cerrar { background: none; border: none; color: #7d8590; font-size: 17px; cursor: pointer; padding: 2px 6px; line-height: 1; }
+  .rdist-origen { display: flex; align-items: center; gap: 10px; background: rgba(248,81,73,0.07); border: 1px solid rgba(248,81,73,0.2); border-radius: 12px; padding: 11px 14px; margin-bottom: 16px; }
+  .rdist-origen-nombre { flex: 1; font-size: 14px; color: #e6edf3; font-weight: 500; }
+  .rdist-origen-pill { font-size: 12px; font-weight: 700; color: #f85149; background: rgba(248,81,73,0.15); padding: 3px 9px; border-radius: 20px; white-space: nowrap; }
+  .rdist-subtitulo { font-size: 11px; font-weight: 700; color: #7d8590; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; }
+  .rdist-fila { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px solid #21262d; }
+  .rdist-fila:last-child { border-bottom: none; }
+  .rdist-fila-info { flex: 1; min-width: 0; }
+  .rdist-fila-label { display: block; font-size: 14px; color: #e6edf3; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .rdist-fila-disponible { display: block; font-size: 11px; color: #3fb950; margin-top: 1px; }
+  .rdist-input { width: 82px; background: #0d1117; border: 1px solid #30363d; border-radius: 8px; color: #e6edf3; font-size: 14px; padding: 7px 10px; text-align: right; font-family: 'Roboto Mono', monospace; flex-shrink: 0; }
+  .rdist-input:focus { outline: none; border-color: #58a6ff; }
+  .rdist-empty { font-size: 13px; color: #7d8590; padding: 14px 0; text-align: center; }
+  .rdist-footer { display: flex; gap: 10px; margin-top: 18px; }
+  .rdist-cancelar { flex: 1; background: none; border: 1px solid #30363d; border-radius: 10px; color: #7d8590; font-size: 14px; padding: 11px; cursor: pointer; font-family: 'DM Sans', sans-serif; }
+  .rdist-confirmar { flex: 2; background: #1f6feb; border: none; border-radius: 10px; color: #fff; font-size: 14px; font-weight: 600; padding: 11px; cursor: pointer; font-family: 'DM Sans', sans-serif; }
+  .rdist-confirmar:active { background: #1158c7; }
   .sc-lista-pin { font-size: 13px; opacity: 0.22; cursor: pointer; -webkit-tap-highlight-color: transparent; transition: opacity .15s; flex-shrink: 0; user-select: none; }
   .sc-lista-pin.sc-pin-on { opacity: 1; }
   .sc-lista-pin:active { opacity: 0.6; }
@@ -1096,6 +1121,26 @@
     </div>
     <button class="btn-guardar" onclick="guardarEdicionGastoSeg()">Guardar cambios</button>
     <button class="btn-cancelar" onclick="cerrarEdicionGastoSeg()">Cancelar</button>
+  </div>
+</div>
+
+<!-- Modal redistribución de presupuesto -->
+<div class="rdist-overlay" id="rdist-modal" onclick="if(event.target===this)cerrarRedistrib()">
+  <div class="rdist-modal">
+    <div class="rdist-header">
+      <span class="rdist-titulo">↻ Redistribuir presupuesto</span>
+      <button class="rdist-cerrar" onclick="cerrarRedistrib()">✕</button>
+    </div>
+    <div class="rdist-origen">
+      <span class="rdist-origen-nombre" id="rdist-origen-nombre"></span>
+      <span class="rdist-origen-pill" id="rdist-origen-pasado"></span>
+    </div>
+    <div class="rdist-subtitulo">Recortar de estas categorías:</div>
+    <div id="rdist-filas"></div>
+    <div class="rdist-footer">
+      <button class="rdist-cancelar" onclick="cerrarRedistrib()">Cancelar</button>
+      <button class="rdist-confirmar" onclick="confirmarRedistrib()">Confirmar traspaso</button>
+    </div>
   </div>
 </div>
 
@@ -1873,6 +1918,70 @@
       { user_id: window.currentUserId, categoria: cat, tipo: nuevoTipo, es_fijo: !!categoriaFijos[cat] },
       { onConflict: 'user_id,categoria' }
     )
+  }
+
+  let _redistribTodas     = []
+  let _redistribOrigenIdx = -1
+
+  function abrirRedistrib(idx) {
+    _redistribOrigenIdx = idx
+    const origen = _redistribTodas[idx]
+    if (!origen) return
+    const margenItems = _redistribTodas.filter(t => !t.esFijo && t.diff < 0 && t !== origen && t.cat)
+    const filas = margenItems.length === 0
+      ? '<div class="rdist-empty">Sin categorías con margen disponible</div>'
+      : margenItems.map(t => {
+          const tIdx = _redistribTodas.indexOf(t)
+          return `
+            <div class="rdist-fila">
+              <div class="rdist-fila-info">
+                <span class="rdist-fila-label">${t.label}</span>
+                <span class="rdist-fila-disponible">${fmt(Math.abs(t.diff))} disponible</span>
+              </div>
+              <input class="rdist-input" type="number" inputmode="decimal" min="0"
+                     max="${Math.abs(t.diff).toFixed(2)}" step="0.01" placeholder="0.00"
+                     data-rdist-idx="${tIdx}">`
+        }).join('')
+    document.getElementById('rdist-origen-nombre').textContent = origen.label
+    document.getElementById('rdist-origen-pasado').textContent = fmt(origen.diff) + ' pasado'
+    document.getElementById('rdist-filas').innerHTML = filas
+    document.getElementById('rdist-modal').classList.add('rdist-open')
+  }
+
+  function cerrarRedistrib() {
+    document.getElementById('rdist-modal').classList.remove('rdist-open')
+    _redistribOrigenIdx = -1
+  }
+
+  async function confirmarRedistrib() {
+    if (!window.currentUserId || _redistribOrigenIdx < 0) return
+    const origen = _redistribTodas[_redistribOrigenIdx]
+    if (!origen || !origen.cat) return
+    const inputs = [...document.querySelectorAll('.rdist-input')]
+    let totalTransferido = 0
+    const upserts = []
+    for (const inp of inputs) {
+      const amt = parseFloat(inp.value) || 0
+      if (amt <= 0) continue
+      const dest = _redistribTodas[parseInt(inp.dataset.rdistIdx)]
+      if (!dest?.cat) continue
+      const newMonto = Math.max(0, dest.estimado - amt)
+      const destRow = [...document.querySelectorAll('.var-row')].find(r => r._planCat === dest.cat)
+      if (destRow) { const di = destRow.querySelector('.variable-input'); if (di) di.value = newMonto.toFixed(2) }
+      upserts.push({ user_id: window.currentUserId, categoria: dest.cat, monto: newMonto, updated_at: new Date().toISOString() })
+      totalTransferido += amt
+    }
+    if (totalTransferido > 0) {
+      const newOrigenMonto = origen.estimado + totalTransferido
+      const origenRow = [...document.querySelectorAll('.var-row')].find(r => r._planCat === origen.cat)
+      if (origenRow) { const oi = origenRow.querySelector('.variable-input'); if (oi) oi.value = newOrigenMonto.toFixed(2) }
+      upserts.push({ user_id: window.currentUserId, categoria: origen.cat, monto: newOrigenMonto, updated_at: new Date().toISOString() })
+    }
+    if (upserts.length > 0) {
+      await dbClient.from('user_gasto_plan').upsert(upserts, { onConflict: 'user_id,categoria' })
+    }
+    cerrarRedistrib()
+    actualizarPlanificador()
   }
 
   function toggleListaOculto() {
@@ -2857,6 +2966,7 @@
     })
 
     const activasTodas   = tarjetasValidas.filter(t => t.activo && !t.esVacio)
+    _redistribTodas = activasTodas
     const activas        = activasTodas.filter(t => !t.esFijo)
     const totalEstimado  = activasTodas.reduce((s, t) => s + t.estimado, 0)
     const totalGastado   = activasTodas.reduce((s, t) => s + t.real, 0)
@@ -2882,8 +2992,9 @@
       const pinClass = t.esFijo ? 'sc-lista-pin sc-pin-on' : 'sc-lista-pin'
       const pin = t.catEsc ? `<span class="${pinClass}" onclick="event.stopPropagation();toggleEsFijo('${t.catEsc}')">📌</span>` : ''
       const labelHtml = `<span class="sc-lista-label">${t.label}${pin}</span>`
+      const idx = _redistribTodas.indexOf(t)
       if (t.esFijo) return `<div class="sc-lista-row">${labelHtml}<span class="sc-lista-pill sc-lista-pill-fijo">fijo</span></div>`
-      if (t.diff > 0) return `<div class="sc-lista-row">${labelHtml}<span class="sc-lista-pill sc-lista-pill-over">${fmt(Math.abs(t.diff))} pasado</span></div>`
+      if (t.diff > 0) return `<div class="sc-lista-row">${labelHtml}<div class="sc-lista-row-right"><span class="sc-lista-pill sc-lista-pill-over">${fmt(Math.abs(t.diff))} pasado</span><button class="sc-lista-repartir" onclick="abrirRedistrib(${idx})">↻ Repartir</button></div></div>`
       return `<div class="sc-lista-row">${labelHtml}<span class="sc-lista-pill sc-lista-pill-free">${fmt(Math.abs(t.diff))} libre</span></div>`
     }
 
