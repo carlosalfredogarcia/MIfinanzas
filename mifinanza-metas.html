@@ -1170,11 +1170,11 @@
   let todasMetasData = []
   let idMetaEditar = null
 
-  function toast(msg, tipo = 'ok') {
+  function toast(msg, tipo = 'ok', ms = 2800) {
     const t = document.getElementById('toast')
     t.textContent = msg
     t.className = `toast ${tipo} show`
-    setTimeout(() => { t.className = 'toast' }, 2800)
+    setTimeout(() => { t.className = 'toast' }, ms)
   }
 
   function fmt(n) {
@@ -1951,7 +1951,6 @@
           const tIdx = _redistribTodas.indexOf(t)
           const libre = Math.abs(t.diff)
           return `<div class="rdist-dest-row">
-            <span class="rdist-dest-icon">📂</span>
             <div class="rdist-dest-info">
               <div class="rdist-dest-name">${t.label}</div>
               <div class="rdist-dest-libre" id="rdist-libre-${tIdx}" data-base="${libre.toFixed(2)}">${fmt(libre)} libre</div>
@@ -2048,6 +2047,7 @@
     }
     cerrarRedistrib()
     actualizarPlanificador()
+    toast('Gastos estimados actualizados', 'ok', 3000)
   }
 
   function toggleListaOculto() {
