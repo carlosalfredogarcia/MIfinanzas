@@ -2923,9 +2923,10 @@
       return b.diff - a.diff
     })
 
-    const activas        = tarjetasValidas.filter(t => t.activo && !t.esVacio && !t.esFijo)
-    const totalEstimado  = activas.reduce((s, t) => s + t.estimado, 0)
-    const totalGastado   = activas.reduce((s, t) => s + t.real, 0)
+    const activasTodas   = tarjetasValidas.filter(t => t.activo && !t.esVacio)
+    const activas        = activasTodas.filter(t => !t.esFijo)
+    const totalEstimado  = activasTodas.reduce((s, t) => s + t.estimado, 0)
+    const totalGastado   = activasTodas.reduce((s, t) => s + t.real, 0)
     const teQuedan       = totalEstimado - totalGastado
     const verdes         = activas.filter(t => t.diff < 0)
     const rojas          = activas.filter(t => t.diff > 0)
