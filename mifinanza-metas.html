@@ -2262,13 +2262,13 @@
       row._planCat  = cat
       const mediaStr = '$' + Math.round(gastosOriginal[cat] || 0).toLocaleString('es-MX')
       row.innerHTML = `
-        <div class="var-nombre-top">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:5px;">
           <span class="var-emoji">${emoji}</span>
-          <div style="flex:1 1 0;min-width:0;overflow:hidden;">
-            <div style="font-size:13px;font-weight:500;color:var(--text);white-space:nowrap;">${nombre}</div>
-            <div class="var-promedio" style="font-size:11px;margin-top:1px;">media ${mediaStr}</div>
-          </div>
-          <label class="vn-toggle-wrap" style="flex-shrink:1;min-width:0;" onclick="event.stopPropagation();toggleNecesario('${catEsc}')">
+          <span style="font-size:13px;font-weight:500;color:var(--text);">${nombre}</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span class="var-promedio" style="flex:1;font-size:11px;">media ${mediaStr}</span>
+          <label class="vn-toggle-wrap" onclick="event.stopPropagation();toggleNecesario('${catEsc}')">
             <span class="vn-toggle-label">Necesario</span>
             <span class="vn-toggle-sw"><span class="vn-toggle-knob"></span></span>
           </label>
