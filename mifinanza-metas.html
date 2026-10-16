@@ -2520,8 +2520,8 @@
     if (ingresos <= 0) return
     const gastos    = totalGastos()
     const saldo     = ingresos - gastos
-    const pGastos   = Math.round(gastos / ingresos * 100)
-    const pAhorro   = Math.max(0, Math.round(saldo / ingresos * 100))
+    const pGastos   = gastos / ingresos * 100
+    const pAhorro   = Math.max(0, saldo / ingresos * 100)
     const metaGastos = 100 - metaAhorro
 
     function col(v, meta, inv) { const d = inv ? meta - v : v - meta; return d <= 0.5 ? '#4ade80' : d <= 15 ? '#e3b341' : '#f85149' }
