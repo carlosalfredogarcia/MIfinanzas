@@ -363,6 +363,22 @@
 
   .disponible-card { margin-top: 4px; }
 
+  .plan-triple-card { background: #1c2128; border-radius: 16px; overflow: hidden; }
+  .ptc-row { display: flex; align-items: center; justify-content: space-between; padding: 14px 18px; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+  .ptc-row:active { background: rgba(255,255,255,0.03); }
+  .ptc-lbl { font-size: 11px; color: var(--subtext); text-transform: uppercase; letter-spacing: 0.06em; font-weight: 700; }
+  .ptc-right { display: flex; align-items: center; gap: 10px; }
+  .ptc-ing-val { background: none; border: none; border-bottom: 1px solid rgba(255,255,255,0.08); font-family: 'Roboto', sans-serif; font-size: 22px; font-weight: 700; color: var(--success); width: 110px; text-align: right; padding: 0; outline: none; -moz-appearance: textfield; appearance: none; transition: border-color 0.2s; }
+  .ptc-ing-val:focus { border-bottom-color: var(--accent); }
+  .ptc-ing-val::placeholder { color: rgba(63,185,80,0.3); }
+  .ptc-ing-val::-webkit-inner-spin-button, .ptc-ing-val::-webkit-outer-spin-button { -webkit-appearance: none; }
+  .ptc-reset-btn { background: rgba(125,133,144,0.1); border: none; border-radius: 100px; color: var(--subtext); font-size: 11px; font-weight: 600; padding: 5px 10px; cursor: pointer; font-family: 'DM Sans', sans-serif; -webkit-tap-highlight-color: transparent; white-space: nowrap; }
+  .ptc-reset-btn:active { background: rgba(125,133,144,0.2); }
+  .ptc-sep { height: 1px; background: rgba(255,255,255,0.06); margin: 0 18px; }
+  .ptc-disponible { display: flex; align-items: center; justify-content: space-between; padding: 14px 18px; }
+  .plan-triple-card .bloque-detalle { padding: 2px 18px 14px; }
+  .plan-triple-card .bloque-total-grande { font-size: 22px; }
+
   .var-row { background: var(--card2); border-radius: 12px; padding: 9px 14px; margin-bottom: 6px; }
   .var-nombre-top { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text); margin-bottom: 0; }
   .vn-toggle-wrap { display: flex; align-items: center; gap: 4px; cursor: pointer; user-select: none; flex-shrink: 0; -webkit-tap-highlight-color: transparent; }
@@ -467,9 +483,11 @@
   .asi-toggle:active { background: rgba(125,133,144,0.2); }
   .asi-tabla { width: 100%; border-collapse: collapse; margin-bottom: 10px; }
   .asi-tabla th { font-size: 10px; color: var(--subtext); text-transform: uppercase; letter-spacing: 0.07em; padding: 0 0 8px; font-weight: 600; }
-  .asi-tabla th:not(:first-child) { text-align: right; }
+  .asi-tabla th:nth-child(2) { text-align: center; }
+  .asi-tabla th:nth-child(3) { text-align: right; }
   .asi-tabla td { padding: 8px 0; font-size: 13px; vertical-align: middle; border-top: 1px solid rgba(255,255,255,0.06); }
-  .asi-tabla td:not(:first-child) { text-align: right; font-family: 'Roboto', sans-serif; font-weight: 700; }
+  .asi-tabla td:nth-child(2) { text-align: center; font-family: 'Roboto', sans-serif; font-weight: 700; }
+  .asi-tabla td:nth-child(3) { text-align: right; font-family: 'Roboto', sans-serif; font-weight: 700; }
   .asi-meta-inp { width: 52px; background: transparent; border: none; border-bottom: 1px solid rgba(255,255,255,0.25); border-radius: 0; color: inherit; text-align: right; font-size: 13px; font-family: 'Roboto', sans-serif; font-weight: 700; padding: 1px 0; -moz-appearance: textfield; appearance: none; }
   .asi-meta-inp:focus { outline: none; border-bottom-color: rgba(255,255,255,0.7); }
   .asi-meta-inp::-webkit-inner-spin-button, .asi-meta-inp::-webkit-outer-spin-button { -webkit-appearance: none; display: none; }
@@ -484,8 +502,8 @@
   .asi-sub-row .asr-val { min-width: 56px; text-align: right; font-family: 'Roboto', sans-serif; font-weight: 600; }
   .asi-sub-row .asr-meta { min-width: 56px; text-align: right; }
   .apd-wrap { position: relative; display: inline-block; }
-  .apd-btn { display: inline-flex; align-items: center; gap: 4px; background: none; border: none; cursor: pointer; padding: 0; color: var(--subtext); font-size: 10px; font-weight: 600; font-family: 'DM Sans', sans-serif; white-space: nowrap; -webkit-tap-highlight-color: transparent; }
-  .apd-btn:hover { color: var(--text); }
+  .apd-btn { display: inline-flex; align-items: center; gap: 5px; background: rgba(125,133,144,0.1); border: 1px solid rgba(125,133,144,0.25); border-radius: 20px; padding: 4px 10px; cursor: pointer; color: var(--subtext); font-size: 10px; font-weight: 600; font-family: 'DM Sans', sans-serif; white-space: nowrap; -webkit-tap-highlight-color: transparent; }
+  .apd-btn:active { background: rgba(125,133,144,0.2); }
   .apd-dot { width: 5px; height: 5px; border-radius: 50%; background: #484f58; flex-shrink: 0; }
   .apd-chev { font-size: 9px; transition: transform .15s; display: inline-block; line-height: 1; }
   .apd-chev.apd-open { transform: rotate(180deg); }
@@ -876,41 +894,37 @@
       </div>
     </div>
 
-    <div class="bloque-acordeon">
-      <div class="bloque-card clicable" onclick="toggleBloque('ingresos')">
-        <div class="bloque-card-top">
-          <span class="bloque-label">Ingresos</span>
+    <div class="plan-triple-card">
+      <div class="ptc-row" onclick="toggleBloque('ingresos')">
+        <span class="ptc-lbl">Ingresos</span>
+        <div class="ptc-right">
+          <input type="number" inputmode="decimal" id="p-ingresos-total" class="ptc-ing-val" placeholder="0" onclick="event.stopPropagation()">
+          <button class="ptc-reset-btn" onclick="event.stopPropagation();pedirConfirmacionReset(restablecerIngresos)">Restablecer</button>
           <span class="bloque-chevron" id="chevron-ingresos">›</span>
         </div>
-        <input type="number" inputmode="decimal" id="p-ingresos-total" class="bloque-ing-input" placeholder="0" onclick="event.stopPropagation()">
-        <button class="btn-restablecer" onclick="event.stopPropagation();pedirConfirmacionReset(restablecerIngresos)">Restablecer</button>
       </div>
       <div class="bloque-detalle" id="detalle-ingresos" style="display:none">
         <div id="ingresos-movs-lista"></div>
       </div>
-    </div>
-
-    <div class="bloque-acordeon">
-      <div class="bloque-card clicable" onclick="toggleBloque('gastos')">
-        <div class="bloque-card-top">
-          <span class="bloque-label">Gastos Estimados</span>
+      <div class="ptc-sep"></div>
+      <div class="ptc-row" onclick="toggleBloque('gastos')">
+        <span class="ptc-lbl">Gastos Estimados</span>
+        <div class="ptc-right">
+          <div class="bloque-total-grande txt-rojo" id="p-gastos-total">$0.00</div>
+          <button class="ptc-reset-btn" onclick="event.stopPropagation();pedirConfirmacionReset(restablecerGastos)">Restablecer</button>
           <span class="bloque-chevron" id="chevron-gastos">›</span>
         </div>
-        <div class="bloque-total-grande txt-rojo" id="p-gastos-total">$0.00</div>
-        <button class="btn-restablecer" onclick="event.stopPropagation();pedirConfirmacionReset(restablecerGastos)">Restablecer</button>
       </div>
       <div class="bloque-detalle" id="detalle-gastos" style="display:none">
         <div id="resumen-tipos" style="display:none"></div>
         <div class="variables-sub">Basado en meses cerrados</div>
         <div id="gastos-lista-plan"></div>
       </div>
-    </div>
-
-    <div class="bloque-card disponible-card" id="disponible-card">
-      <div class="bloque-card-top">
-        <span class="bloque-label">Disponible</span>
+      <div class="ptc-sep"></div>
+      <div class="ptc-disponible" id="disponible-card">
+        <span class="ptc-lbl">Disponible</span>
+        <div class="bloque-total-grande" id="p-disponible-header">$0.00</div>
       </div>
-      <div class="bloque-total-grande" id="p-disponible-header">$0.00</div>
     </div>
   </div>
 
