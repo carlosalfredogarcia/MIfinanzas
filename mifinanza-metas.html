@@ -508,6 +508,16 @@
   .sc-resumen-quedan.sc-resumen-over { color: #f85149; }
   .sc-resumen-alertas { font-size: 12px; color: #f85149; line-height: 1.7; }
   .sc-resumen-tip { font-size: 12px; color: #e3b341; line-height: 1.5; }
+  .sc-lista-card { background: #161b22; border: 1px solid #30363d; border-radius: 14px; padding: 4px 0; margin-bottom: 8px; }
+  .sc-lista-grupo { padding: 8px 14px; }
+  .sc-lista-grupo-title { font-size: 10px; font-weight: 700; color: #7d8590; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; }
+  .sc-lista-row { display: flex; align-items: center; justify-content: space-between; padding: 5px 0; }
+  .sc-lista-label { font-size: 13px; color: #e6edf3; }
+  .sc-lista-pill { font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 20px; white-space: nowrap; }
+  .sc-lista-pill-over { background: rgba(248,81,73,0.15); color: #f85149; }
+  .sc-lista-pill-free { background: rgba(63,185,80,0.15); color: #3fb950; }
+  .sc-lista-pill-fijo { background: rgba(125,133,144,0.12); color: #7d8590; }
+  .sc-lista-sep { height: 1px; background: #21262d; margin: 0 14px; }
   .sc-card { background: #161b22; border-radius: 14px; padding: 12px 14px; margin-bottom: 8px; border: 1px solid var(--border); transition: opacity 0.3s, filter 0.3s; }
   .sc-card.sc-apagado { opacity: 0.3; filter: grayscale(0.8); }
   .sc-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
@@ -2795,44 +2805,9 @@
       const nombre   = partes.slice(1).join(' ') || cat
       const catEsc   = cat.replace(/\\/g, '\\\\').replace(/'/g, "\\'")
 
-      const diff    = real - estimado
-      const over    = diff > 0
-      const pillTxt = diff < 0 ? `+${fmt(Math.abs(diff))} libre` : `+${fmt(diff)} pasado`
-      const barPct  = estimado > 0 ? Math.min(real / estimado * 100, 100) : (real > 0 ? 100 : 0)
-      const idx     = scIdx++
-      const movsHtml = renderMovsSeg(cat)
-
+      const diff   = real - estimado
       const esFijo = !!categoriaFijos[cat]
-      return {
-        activo, esVacio, diff, estimado, real, label: `${emoji} ${nombre}`, esFijo,
-        html: `
-          <div class="sc-card${activo ? '' : ' sc-apagado'}">
-            <div class="sc-top">
-              <span class="sc-cat">${emoji} ${nombre}</span>
-              <div class="sc-top-right">
-                <button class="sc-fijo-btn${esFijo ? ' sc-fijo-on' : ''}" onclick="toggleEsFijo('${catEsc}');event.stopPropagation()" title="${esFijo ? 'Gasto fijo — excluido del consejo' : 'Marcar como gasto fijo'}">📌</button>
-                <button class="sc-toggle${activo ? ' sc-on' : ''}" onclick="toggleSeguimiento('${catEsc}')"></button>
-              </div>
-            </div>
-            <div class="sc-mid">
-              <div class="sc-col sc-col-tap" onclick="toggleCardMovsSeg(${idx}, event)">
-                <div class="sc-lbl">Gastado <svg class="sc-chevron" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="2,4 7,10 12,4"/></svg></div>
-                <div class="sc-valor sc-val-gastado">${fmt(real)}</div>
-              </div>
-              <span class="sc-diff ${over ? 'sc-over' : 'sc-under'}"${diff === 0 ? ' style="display:none"' : ''}>${pillTxt}</span>
-              <div class="sc-col sc-col-tap" onclick="irACategoriaPlanificador('${catEsc}');event.stopPropagation()">
-                <div class="sc-lbl sc-lbl-link">Meta</div>
-                <div class="sc-valor sc-val-meta">${fmt(estimado)}</div>
-              </div>
-            </div>
-            <div class="sc-bar">
-              <div class="sc-bar-fill" style="width:${barPct}%"></div>
-            </div>
-            <div class="sc-movs-wrap" id="sc-movs-${idx}">
-              <div class="sc-movs-inner">${movsHtml}</div>
-            </div>
-          </div>`
-      }
+      return { activo, esVacio, diff, estimado, real, label: `${emoji} ${nombre}`, esFijo }
     })
 
     // Group cards — combined real spending vs group budget
@@ -2853,67 +2828,8 @@
       const activo    = esVacio ? false : (seguimientoActivos[grupoKey] !== false)
       const grupoKeyEsc = grupoKey.replace(/\\/g, '\\\\').replace(/'/g, "\\'")
 
-      const diff    = real - estimado
-      const over    = diff > 0
-      const pillTxt = diff < 0 ? `+${fmt(Math.abs(diff))} libre` : `+${fmt(diff)} pasado`
-      const barPct  = estimado > 0 ? Math.min(real / estimado * 100, 100) : (real > 0 ? 100 : 0)
-      const idx     = scIdx++
-
-      // Combined movements from all group categories, sorted newest first
-      const allMovs = catsValidas
-        .flatMap(cat => movsRealMes[cat] || [])
-        .sort((a, b) => (b.fecha || '').localeCompare(a.fecha || ''))
-      const movsHtml = allMovs.length === 0
-        ? '<div class="cat-movs-empty">Sin transacciones este mes</div>'
-        : allMovs.map(m => {
-            const mIdx  = _segMovs.length
-            _segMovs.push(m)
-            const esFijo = m.tipo === 'fijo'
-            const icono  = _iconMovSeg(esFijo, m.categoria)
-            const nombre = (m.label || m.categoria || '').replace(/&/g,'&amp;').replace(/</g,'&lt;')
-            const fecha  = _diaMesSeg(m.fecha)
-            const monto  = '$' + m.monto.toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
-            return `
-              <div class="cat-mov-item">
-                <div class="cm-icon">${icono}</div>
-                <div class="cm-info">
-                  <div class="cm-nombre">${nombre}</div>
-                  <div class="cm-fecha">${fecha}</div>
-                </div>
-                <div class="cm-monto">${monto}</div>
-                <div class="cm-edit" onclick="abrirEdicionGastoSeg(${mIdx})">✏️</div>
-              </div>`
-          }).join('')
-
-      return [{
-        activo, esVacio, diff, estimado, real, label: `${grupo.emoji} ${grupo.nombre}`, esFijo: false,
-        html: `
-          <div class="sc-card${activo ? '' : ' sc-apagado'}">
-            <div class="sc-top">
-              <span class="sc-cat">${grupo.emoji} ${grupo.nombre}</span>
-              <div class="sc-top-right">
-                <button class="sc-toggle${activo ? ' sc-on' : ''}" onclick="toggleSeguimiento('${grupoKeyEsc}')"></button>
-              </div>
-            </div>
-            <div class="sc-mid">
-              <div class="sc-col sc-col-tap" onclick="toggleCardMovsSeg(${idx}, event)">
-                <div class="sc-lbl">Gastado <svg class="sc-chevron" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="2,4 7,10 12,4"/></svg></div>
-                <div class="sc-valor sc-val-gastado">${fmt(real)}</div>
-              </div>
-              <span class="sc-diff ${over ? 'sc-over' : 'sc-under'}"${diff === 0 ? ' style="display:none"' : ''}>${pillTxt}</span>
-              <div class="sc-col sc-col-tap" onclick="irACategoriaPlanificador('${grupoKeyEsc}');event.stopPropagation()">
-                <div class="sc-lbl sc-lbl-link">Meta</div>
-                <div class="sc-valor sc-val-meta">${fmt(estimado)}</div>
-              </div>
-            </div>
-            <div class="sc-bar">
-              <div class="sc-bar-fill" style="width:${barPct}%"></div>
-            </div>
-            <div class="sc-movs-wrap" id="sc-movs-${idx}">
-              <div class="sc-movs-inner">${movsHtml}</div>
-            </div>
-          </div>`
-      }]
+      const diff = real - estimado
+      return [{ activo, esVacio, diff, estimado, real, label: `${grupo.emoji} ${grupo.nombre}`, esFijo: false }]
     })
 
     const tarjetasValidas = [...tarjetas, ...tarjetasGrupos].filter(Boolean)
@@ -2941,13 +2857,34 @@
       ? `<div class="sc-resumen-tip">✅ Todo en orden. ¡Buen trabajo!</div>`
       : `<div class="sc-resumen-alertas">${alertasHtml}</div>${verdes.length > 0 ? `<div class="sc-resumen-tip">💡 Podrías compensarlo reduciendo: ${verdes.map(t => t.label).join(', ')}</div>` : ''}`
 
+    const pasadas = activasTodas.filter(t => !t.esFijo && t.diff > 0)
+    const margen  = activasTodas.filter(t => !t.esFijo && t.diff <= 0)
+    const fijos   = activasTodas.filter(t => t.esFijo)
+
+    const _filaLista = t => {
+      if (t.esFijo) return `<div class="sc-lista-row"><span class="sc-lista-label">${t.label}</span><span class="sc-lista-pill sc-lista-pill-fijo">fijo</span></div>`
+      if (t.diff > 0) return `<div class="sc-lista-row"><span class="sc-lista-label">${t.label}</span><span class="sc-lista-pill sc-lista-pill-over">${fmt(Math.abs(t.diff))} pasado</span></div>`
+      return `<div class="sc-lista-row"><span class="sc-lista-label">${t.label}</span><span class="sc-lista-pill sc-lista-pill-free">${fmt(Math.abs(t.diff))} libre</span></div>`
+    }
+
+    const gruposHtml = []
+    if (pasadas.length > 0) gruposHtml.push(`<div class="sc-lista-grupo"><div class="sc-lista-grupo-title">⚠️ Pasadas</div>${pasadas.map(_filaLista).join('')}</div>`)
+    if (margen.length > 0) {
+      if (gruposHtml.length) gruposHtml.push('<div class="sc-lista-sep"></div>')
+      gruposHtml.push(`<div class="sc-lista-grupo"><div class="sc-lista-grupo-title">✅ Con margen</div>${margen.map(_filaLista).join('')}</div>`)
+    }
+    if (fijos.length > 0) {
+      if (gruposHtml.length) gruposHtml.push('<div class="sc-lista-sep"></div>')
+      gruposHtml.push(`<div class="sc-lista-grupo"><div class="sc-lista-grupo-title">📌 Fijos</div>${fijos.map(_filaLista).join('')}</div>`)
+    }
+
     cont.innerHTML = `
       <div class="sc-resumen">
         <div class="sc-resumen-titulo">📊 Resumen del mes</div>
         <div class="sc-resumen-quedan${quedanClass}">${quedanTxt}</div>
         ${cuerpoHtml}
       </div>
-      ${tarjetasValidas.map(t => t.html).join('')}
+      ${gruposHtml.length ? `<div class="sc-lista-card">${gruposHtml.join('')}</div>` : ''}
     `
   }
 
