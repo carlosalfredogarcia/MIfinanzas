@@ -154,11 +154,10 @@
     .ss-tab { background: transparent; border: 2px solid var(--border); color: var(--sub); padding: 7px 14px; border-radius: 20px; cursor: pointer; font-size: 13px; font-weight: 600; font-family: inherit; transition: all 0.2s; white-space: nowrap; flex-shrink: 0; }
     .ss-tab:hover { border-color: var(--green); color: var(--green); }
     .ss-tab-active { background: var(--green); border-color: var(--green); color: #0d1117; }
-    .ss-panel { max-width: 640px; margin: 0 auto; display: flex; align-items: center; gap: 20px; text-align: left; padding: 16px; background: var(--card); border: 1px solid var(--border); border-radius: 20px; }
-    .ss-panel .screenshot-phone { flex: 0 0 150px; border-radius: 12px; overflow: hidden; box-shadow: 0 8px 24px rgba(0,0,0,0.4); }
-    .ss-panel .screenshot-phone img { border-radius: 12px; }
-    .ss-panel .ss-text { flex: 1; }
-    .ss-panel .ss-desc { font-size: 14px; color: var(--sub); line-height: 1.6; margin: 0; }
+    .ss-panel { max-width: 340px; margin: 0 auto; text-align: center; }
+    .ss-panel .screenshot-phone { border-radius: 16px; overflow: hidden; box-shadow: 0 8px 32px rgba(0,0,0,0.5); margin-bottom: 20px; }
+    .ss-panel .screenshot-phone img { border-radius: 16px; }
+    .ss-panel .ss-desc { font-size: 15px; color: var(--sub); line-height: 1.6; margin: 0; }
     .ss-panel .ss-tab-name { font-size: 18px; font-weight: 700; color: var(--text); margin: 0 0 8px; }
     .ss-desc { color: var(--sub); font-size: 15px; line-height: 1.6; max-width: 480px; margin: 0 auto; }
 
@@ -333,10 +332,9 @@
       .screenshots-section .section-sub { font-size: 13px; margin-bottom: 16px; }
       .ss-tabs { margin-bottom: 16px; gap: 4px; }
       .ss-tab { font-size: 11px; padding: 5px 10px; }
-      .ss-panel { gap: 12px; padding: 12px; }
-      .ss-panel .screenshot-phone { flex: 0 0 110px; }
-      .ss-panel .ss-desc { font-size: 12px; }
-      .ss-panel .ss-tab-name { font-size: 15px; }
+      .ss-panel { max-width: 280px; }
+      .ss-panel .ss-desc { font-size: 13px; }
+      .ss-panel .ss-tab-name { font-size: 16px; }
     }
 
   </style>
