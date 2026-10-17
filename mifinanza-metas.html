@@ -170,17 +170,10 @@
   .detalle-val-blue  { color: var(--accent); font-family: 'Roboto', sans-serif; font-weight: 700; font-size: 13px; }
 
   .ahorro-nota {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    background: rgba(255,193,7,0.12);
-    border: 1px solid rgba(255,193,7,0.3);
-    border-radius: 12px;
-    padding: 10px 14px;
+    font-size: 11px;
+    color: var(--subtext);
     margin-bottom: 10px;
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--text);
+    padding: 2px 2px;
     font-family: 'DM Sans', sans-serif;
   }
 
@@ -1452,7 +1445,7 @@
     document.getElementById('d-ahorro').textContent   = fmt(ahorroReal)
 
     const notaEl = document.getElementById('ahorro-nota')
-    notaEl.textContent = `ℹ️ No incluye ${fmtFecha(hoyDate.toISOString())} (mes en curso)`
+    notaEl.textContent = `No incluye ${fmtFecha(hoyDate.toISOString())} (mes en curso)`
     notaEl.style.display = 'block'
 
     const actualPositivo = Math.max(0, ahorroReal)
