@@ -433,32 +433,31 @@
     </div>
     <script>
       (function(){
-        var tabs = document.querySelectorAll('.ss-tab');
-        var panels = document.querySelectorAll('.ss-panel');
-        var track = document.querySelector('.ss-track');
-        var names = ['Inicio','Metas','Movimientos','Estadísticas'];
+        var wrapper = document.querySelector('.screenshots-new-wrapper');
+        var tabs = wrapper.querySelectorAll('.ss-tab');
+        var panels = wrapper.querySelectorAll('.ss-panel');
+        var track = wrapper.querySelector('.ss-track');
         var current = 0;
 
-        function goTo(idx) {
-          current = idx;
+        function goTo(i) {
+          current = i;
           tabs.forEach(function(t){ t.classList.remove('ss-tab-active'); });
           panels.forEach(function(p){ p.style.display='none'; });
-          tabs[idx].classList.add('ss-tab-active');
-          panels[idx].style.display='block';
-          tabs[idx].scrollIntoView({behavior:'smooth', block:'nearest', inline:'center'});
+          tabs[i].classList.add('ss-tab-active');
+          panels[i].style.display='block';
+          tabs[i].scrollIntoView({behavior:'smooth', block:'nearest', inline:'center'});
         }
 
         tabs.forEach(function(tab, i){
           tab.addEventListener('click', function(){ goTo(i); });
         });
 
-        // Swipe en el track
         var startX = 0;
         track.addEventListener('touchstart', function(e){ startX = e.touches[0].clientX; }, {passive:true});
         track.addEventListener('touchend', function(e){
           var dx = e.changedTouches[0].clientX - startX;
           if(Math.abs(dx) > 40) {
-            if(dx < 0 && current < names.length-1) goTo(current+1);
+            if(dx < 0 && current < panels.length-1) goTo(current+1);
             else if(dx > 0 && current > 0) goTo(current-1);
           }
         }, {passive:true});
