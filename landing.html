@@ -154,7 +154,9 @@
     .ss-tab { background: transparent; border: 2px solid var(--border); color: var(--sub); padding: 7px 14px; border-radius: 20px; cursor: pointer; font-size: 13px; font-weight: 600; font-family: inherit; transition: all 0.2s; white-space: nowrap; flex-shrink: 0; }
     .ss-tab:hover { border-color: var(--green); color: var(--green); }
     .ss-tab-active { background: var(--green); border-color: var(--green); color: #0d1117; }
-    .ss-panel { max-width: 260px; margin: 0 auto; }
+    .ss-panel { max-width: 700px; margin: 0 auto; display: flex; align-items: center; gap: 32px; text-align: left; padding: 0 20px; }
+    .ss-panel .screenshot-phone { flex: 0 0 200px; }
+    .ss-panel .ss-desc { font-size: 15px; flex: 1; }
     .ss-desc { color: var(--sub); font-size: 15px; line-height: 1.6; max-width: 480px; margin: 0 auto; }
 
     .screenshots-section {
@@ -328,8 +330,9 @@
       .screenshots-section .section-sub { font-size: 13px; margin-bottom: 16px; }
       .ss-tabs { margin-bottom: 16px; gap: 4px; }
       .ss-tab { font-size: 11px; padding: 5px 10px; }
-      .ss-panel { max-width: 180px; }
-      .ss-desc { font-size: 12px; margin-top: 10px; }
+      .ss-panel { gap: 16px; padding: 0 12px; }
+      .ss-panel .screenshot-phone { flex: 0 0 140px; }
+      .ss-panel .ss-desc { font-size: 13px; }
     }
 
   </style>
