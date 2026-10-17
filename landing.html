@@ -253,7 +253,14 @@
     }
     .cta-section .section-title { max-width: 16ch; margin: 0 auto 20px; }
     .cta-section .section-sub { margin-bottom: 40px; }
-    .cta-buttons { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
+
+    .store-group { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+    .store-label { font-size: 12px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--sub); margin: 0; }
+    .btn-disabled { opacity: 0.5; cursor: default; pointer-events: none; }
+    .iphone-hint { font-size: 13px; color: var(--sub); margin: 4px 0 0; line-height: 1.5; }
+    .cta-buttons { display: flex; gap: 24px; justify-content: center; flex-wrap: wrap; align-items: flex-start; }
+
+    .cta-buttons-old { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
     .btn-large {
       background: #3fb950; color: #0d1117;
       font-weight: 700; font-size: 1rem;
@@ -320,7 +327,6 @@
     </div>
     <div class="nav-links">
       <a href="#capturas">Capturas</a>
-      <a href="#funciones">Funciones</a>
       <a href="https://mifinanzas.netlify.app" target="_blank" class="btn-primary">Únete gratis</a>
     </div>
   </div>
@@ -426,16 +432,20 @@
   <div style="position:relative;z-index:1;">
     <p class="section-label">Empieza hoy</p>
     <h2 class="section-title">Tu dinero, finalmente bajo control</h2>
-    <p class="section-sub">Gratis. Sin tarjeta. Sin banco conectado. Solo tú y tus números.</p>
+    <p class="section-sub">Gratis. Sin suscripciones.</p>
     <div class="cta-buttons">
-      <a href="https://play.google.com/store" target="_blank" class="btn-large">
-        <span>▶</span> Google Play
-      </a>
-      <a href="https://mifinanzas.netlify.app" target="_blank" class="btn-outline">
-        <span>🌐</span> Abrir en el navegador
-      </a>
+      <div class="store-group">
+        <p class="store-label">Android</p>
+        <a href="https://play.google.com/store/apps/details?id=com.mifinanzas" target="_blank" class="btn-large">
+          <span>▶</span> Google Play
+        </a>
+      </div>
+      <div class="store-group">
+        <p class="store-label">iPhone</p>
+        <span class="btn-large btn-disabled">🍎 Próximamente</span>
+        <p class="iphone-hint">Mientras tanto, abre la web en Safari<br>y pulsa <strong>"Añadir a inicio"</strong> 📱</p>
+      </div>
     </div>
-    <p class="cta-note">Para iPhone: abre la web en Safari y pulsa "Añadir a inicio" 📱</p>
 
     <div class="qr-section" style="margin-top:60px;">
       <canvas id="qr-canvas" width="132" height="132"></canvas>
