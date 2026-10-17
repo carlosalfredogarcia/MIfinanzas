@@ -150,6 +150,34 @@
     /* SCREENSHOTS */
 
     .screenshots-new-wrapper { text-align: center; padding: 0; position: relative; }
+    .ss-arrow {
+      display: none;
+      position: absolute;
+      top: 45%;
+      transform: translateY(-50%);
+      z-index: 10;
+      background: rgba(22,27,34,0.85);
+      border: 1px solid #30363d;
+      color: #e6edf3;
+      width: 52px; height: 52px;
+      border-radius: 50%;
+      font-size: 22px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      backdrop-filter: blur(8px);
+    }
+    .ss-arrow:hover {
+      background: #3fb950;
+      border-color: #3fb950;
+      color: #000;
+      transform: translateY(-50%) scale(1.1);
+      box-shadow: 0 0 20px rgba(63,185,80,0.5);
+    }
+    .ss-arrow-left { left: 12px; }
+    .ss-arrow-right { right: 12px; }
+    @media (min-width: 769px) {
+      .ss-arrow { display: flex; align-items: center; justify-content: center; }
+    }
     .ss-desc {
       color: var(--sub);
       font-size: 15px;
@@ -501,6 +529,8 @@
   <h2 class="section-title">Esto es lo que verás<br>dentro de la app</h2>
   
   <div class="screenshots-new-wrapper">
+  <button class="ss-arrow ss-arrow-left" onclick="document.querySelector('.ss-carousel').scrollBy({left:-window.innerWidth,behavior:'smooth'})">&#8592;</button>
+  <button class="ss-arrow ss-arrow-right" onclick="document.querySelector('.ss-carousel').scrollBy({left:window.innerWidth,behavior:'smooth'})">&#8594;</button>
   <div class="ss-carousel">
     <div class="ss-slide">
       <div class="phone-mockup">
