@@ -150,8 +150,8 @@
     /* SCREENSHOTS */
 
     .screenshots-new-wrapper { text-align: center; padding: 0 20px; }
-    .ss-tabs { display: flex; justify-content: center; gap: 8px; margin-bottom: 28px; flex-wrap: wrap; }
-    .ss-tab { background: transparent; border: 2px solid var(--border); color: var(--sub); padding: 8px 20px; border-radius: 20px; cursor: pointer; font-size: 14px; font-weight: 600; font-family: inherit; transition: all 0.2s; }
+    .ss-tabs { display: flex; justify-content: center; gap: 6px; margin-bottom: 28px; flex-wrap: nowrap; overflow-x: auto; padding: 0 16px; scrollbar-width: none; }
+    .ss-tab { background: transparent; border: 2px solid var(--border); color: var(--sub); padding: 7px 14px; border-radius: 20px; cursor: pointer; font-size: 13px; font-weight: 600; font-family: inherit; transition: all 0.2s; white-space: nowrap; flex-shrink: 0; }
     .ss-tab:hover { border-color: var(--green); color: var(--green); }
     .ss-tab-active { background: var(--green); border-color: var(--green); color: #0d1117; }
     .ss-panel { max-width: 320px; margin: 0 auto; }
