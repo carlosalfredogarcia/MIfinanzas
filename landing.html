@@ -398,8 +398,8 @@
 <section class="screenshots-section" id="capturas">
   <p class="section-label">La app en acción</p>
   <h2 class="section-title">Esto es lo que verás<br>dentro de la app</h2>
-  <p class="section-sub">Estas son las principales vistas. Dentro hay mucho más.</p>
-  <div class="screenshots-new-wrapper">
+  
+  <div class="screenshots-new-wrapper"><div class="ss-track">
 <div class="ss-tabs">
       <button class="ss-tab ss-tab-active" data-tab="Inicio">Inicio</button>
       <button class="ss-tab" data-tab="Metas">Metas</button>
@@ -430,17 +430,38 @@
       </div>
       <div class="ss-text"><p class="ss-tab-name">Estadísticas</p><p class="ss-desc">Ve en qué categoría gastas más, analiza tus patrones y sigue la evolución mes a mes.</p></div>
     </div>
+    </div>
     <script>
       (function(){
         var tabs = document.querySelectorAll('.ss-tab');
-        tabs.forEach(function(tab){
-          tab.addEventListener('click', function(){
-            tabs.forEach(function(t){ t.classList.remove('ss-tab-active'); });
-            document.querySelectorAll('.ss-panel').forEach(function(p){ p.style.display='none'; });
-            tab.classList.add('ss-tab-active');
-            document.querySelector('.ss-panel[data-panel="'+tab.dataset.tab+'"]').style.display='block';
-          });
+        var panels = document.querySelectorAll('.ss-panel');
+        var track = document.querySelector('.ss-track');
+        var names = ['Inicio','Metas','Movimientos','Estadísticas'];
+        var current = 0;
+
+        function goTo(idx) {
+          current = idx;
+          tabs.forEach(function(t){ t.classList.remove('ss-tab-active'); });
+          panels.forEach(function(p){ p.style.display='none'; });
+          tabs[idx].classList.add('ss-tab-active');
+          panels[idx].style.display='block';
+          tabs[idx].scrollIntoView({behavior:'smooth', block:'nearest', inline:'center'});
+        }
+
+        tabs.forEach(function(tab, i){
+          tab.addEventListener('click', function(){ goTo(i); });
         });
+
+        // Swipe en el track
+        var startX = 0;
+        track.addEventListener('touchstart', function(e){ startX = e.touches[0].clientX; }, {passive:true});
+        track.addEventListener('touchend', function(e){
+          var dx = e.changedTouches[0].clientX - startX;
+          if(Math.abs(dx) > 40) {
+            if(dx < 0 && current < names.length-1) goTo(current+1);
+            else if(dx > 0 && current > 0) goTo(current-1);
+          }
+        }, {passive:true});
       })();
     </script>
   </div>
