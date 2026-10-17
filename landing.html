@@ -149,16 +149,22 @@
 
     /* SCREENSHOTS */
 
-    .screenshots-new-wrapper { text-align: center; padding: 0 20px; }
-    
-    
-    
-    
-    
-    
-    
-    
-    
+    .screenshots-new-wrapper { text-align: center; padding: 0; position: relative; }
+    .ss-slide-title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: clamp(2rem, 6vw, 3.4rem);
+      font-weight: 800;
+      letter-spacing: -.02em;
+      line-height: 1.15;
+      color: var(--text);
+      text-wrap: balance;
+      margin: 0 auto 0;
+      padding: 0 20px;
+      max-width: 600px;
+      position: relative;
+      z-index: 1;
+      pointer-events: none;
+    }
     .ss-desc { color: var(--sub); font-size: 15px; line-height: 1.6; max-width: 480px; margin: 0 auto; }
 
     .screenshots-section {
@@ -498,11 +504,11 @@
 <!-- SCREENSHOTS -->
 <section class="screenshots-section" id="capturas">
   <p class="section-label">La app en acción</p>
-  <h2 class="section-title">Esto es lo que verás<br>dentro de la app</h2>
   
   <div class="screenshots-new-wrapper">
   <div class="ss-carousel">
     <div class="ss-slide">
+      <div class="ss-slide-title">Esto es lo que verás<br>dentro de la app</div>
       <div class="phone-mockup">
         <div class="phone-frame">
           <div class="phone-notch"></div>
