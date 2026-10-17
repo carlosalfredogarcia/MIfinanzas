@@ -150,22 +150,15 @@
     /* SCREENSHOTS */
 
     .screenshots-new-wrapper { text-align: center; padding: 0; position: relative; }
-    .ss-slide-title {
-      font-family: 'Space Grotesk', sans-serif;
-      font-size: clamp(2rem, 6vw, 3.4rem);
-      font-weight: 800;
-      letter-spacing: -.02em;
-      line-height: 1.15;
-      color: var(--text);
-      text-wrap: balance;
-      margin: 0 auto 0;
-      padding: 0 20px;
-      max-width: 600px;
+    .ss-desc {
+      color: var(--sub);
+      font-size: 15px;
+      line-height: 1.6;
+      max-width: 320px;
+      margin: 0 auto;
       position: relative;
-      z-index: 1;
-      pointer-events: none;
+      z-index: 3;
     }
-    .ss-desc { color: var(--sub); font-size: 15px; line-height: 1.6; max-width: 480px; margin: 0 auto; }
 
     .screenshots-section {
       padding: 100px 0;
@@ -358,11 +351,21 @@
       flex: 0 0 100%;
       scroll-snap-align: center;
       text-align: center;
-      padding: 0 20px;
+      padding: 0 20px 40px;
       box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
     }
     .ss-hint { text-align: center; color: var(--sub); font-size: 12px; margin-top: 8px; opacity: 0.6; }
-    .ss-tab-name { font-size: 18px; font-weight: 700; color: var(--text); margin: 0 0 8px; }
+    .ss-tab-name {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--text);
+      margin: 0 0 8px;
+      position: relative;
+      z-index: 3;
+    }
     .ss-desc { font-size: 14px; color: var(--sub); line-height: 1.6; max-width: 320px; margin: 0 auto; }
 
   
@@ -504,11 +507,11 @@
 <!-- SCREENSHOTS -->
 <section class="screenshots-section" id="capturas">
   <p class="section-label">La app en acción</p>
+  <h2 class="section-title">Esto es lo que verás<br>dentro de la app</h2>
   
   <div class="screenshots-new-wrapper">
   <div class="ss-carousel">
     <div class="ss-slide">
-      <div class="ss-slide-title">Esto es lo que verás<br>dentro de la app</div>
       <div class="phone-mockup">
         <div class="phone-frame">
           <div class="phone-notch"></div>
