@@ -511,13 +511,11 @@
     const { data: rows } = await dbClient.from('perfil').select('categorias').eq('usuario_id', uid).limit(1);
     const catsStr = rows?.[0]?.categorias || CATS_DEFAULT;
     const cats = [...new Set(catsStr.split(',').map(c => c.trim()).filter(Boolean))];
-    const defaults = CATS_DEFAULT.split(',').map(c => c.trim());
-    const allCats = cats.concat(defaults.filter(d => !cats.includes(d)));
     const sk = s => s.replace(/^[^\p{L}]+/u, '').toLowerCase();
-    allCats.sort((a, b) => sk(a).localeCompare(sk(b), 'es'));
+    cats.sort((a, b) => sk(a).localeCompare(sk(b), 'es'));
     ['f-categoria', 'e-categoria'].forEach(id => {
       const sel = document.getElementById(id);
-      if (sel) sel.innerHTML = allCats.map(c => `<option>${c}</option>`).join('');
+      if (sel) sel.innerHTML = cats.map(c => `<option>${c}</option>`).join('');
     });
   }
 
