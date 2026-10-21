@@ -1,15 +1,17 @@
 // nav.js — barra de navegación y botón + compartidos por todas las pantallas.
 // Se carga al final del <body>. Sustituye la .navbar y el .fab propios de cada página
-// y añade el menú de acciones rápidas (Gasto, Ingreso, Fijo, Importar CSV).
+// y añade dos menús rápidos que no se confunden entre sí:
+//  - el botón + (columna de botones a la derecha): Gasto, Ingreso, Gasto fijo, Importar CSV;
+//  - la pestaña Menú (panel de casillas sobre la barra): Metas, Gastos fijos, Préstamos, Perfil.
 ;(function () {
   const pagina = (location.pathname.split('/').pop() || 'inicio.html').replace('.html', '')
   const MOV = 'mifinanza-movimientos.html'
 
-  // Pestaña activa: Inicio, Movimientos, Estadísticas o Más (el resto de pantallas viven en Más).
+  // Pestaña activa: Inicio, Movimientos, Estadísticas o Menú (el resto de pantallas viven en Menú).
   const activa = pagina === 'inicio' ? 'inicio'
     : pagina === 'mifinanza-movimientos' ? 'movimientos'
     : pagina === 'mifinanza-estadisticas-v2' ? 'estadisticas'
-    : 'mas'
+    : 'menu'
 
   // Si la función existe en esta página se usa; si no, se abre Movimientos con esa acción.
   const local = (fn, accion) => () => (typeof window[fn] === 'function' ? window[fn]() : ir(accion))
@@ -31,11 +33,23 @@
   // En Gastos fijos, "Gasto fijo" abre el formulario de esa misma pantalla.
   if (pagina === 'mifinanza-fijos' && typeof window.abrirModal === 'function') ACCIONES.fijo.run = () => window.abrirModal()
 
+  // Pantallas del Menú (Viajes sigue oculto, como en el panel antiguo).
+  const SECCIONES = [
+    { label: 'Metas', href: 'mifinanza-metas.html', icono: 'metas' },
+    { label: 'Gastos fijos', href: 'mifinanza-fijos.html', icono: 'fijos' },
+    { label: 'Préstamos', href: 'mifinanza-prestamos.html', icono: 'prestamos' },
+    { label: 'Perfil', href: 'mifinanza-perfil.html', icono: 'perfil' },
+  ]
+
   const ICONOS = {
     inicio: '<path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1Z"/>',
     movimientos: '<path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/>',
     estadisticas: '<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>',
-    mas: '<circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/>',
+    menu: '<rect x="3.5" y="3.5" width="7" height="7" rx="2"/><rect x="13.5" y="3.5" width="7" height="7" rx="2"/><rect x="3.5" y="13.5" width="7" height="7" rx="2"/><rect x="13.5" y="13.5" width="7" height="7" rx="2"/>',
+    metas: '<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.5"/>',
+    fijos: '<path d="M21 12a9 9 0 1 1-3-6.7L21 8"/><path d="M21 3v5h-5"/>',
+    prestamos: '<path d="M7 10h13l-4-4M17 14H4l4 4"/>',
+    perfil: '<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>',
     estrella: '<path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1 6.2-5.5-2.9-5.5 2.9 1-6.2L3 9.6l6.2-.9Z"/>',
     papelera: '<path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/>',
   }
@@ -102,16 +116,43 @@
   .mf-acc-ico svg { width: 24px; height: 24px; }
   .mf-acc.mf-peligro .mf-acc-txt { color: #fca5a5; font-size: 13px; font-weight: 700; }
   .mf-acc.mf-peligro .mf-acc-ico { width: 44px; height: 44px; border-radius: 14px; margin-right: 6px; }
+  .mf-menu {
+    position: fixed; z-index: 151; left: max(12px, env(safe-area-inset-left, 0px)); right: calc(max(12px, env(safe-area-inset-right, 0px)) + 64px);
+    bottom: calc(14px + 64px + 12px + env(safe-area-inset-bottom, 0px));
+    max-width: 400px; margin: 0 auto; padding: 14px; border-radius: 24px;
+    display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px;
+    background: rgba(17,24,39,.9); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255,255,255,.1); box-shadow: 0 20px 44px rgba(0,0,0,.55);
+    font-family: Manrope, 'DM Sans', system-ui, sans-serif;
+    opacity: 0; transform: translateY(16px) scale(.97); transform-origin: 80% 100%; pointer-events: none;
+    transition: opacity .25s, transform .4s cubic-bezier(.16,1,.3,1);
+  }
+  .mf-menu-titulo { grid-column: 1 / -1; font-size: 11px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; color: #94a3b8; padding: 2px 4px 0; }
+  .mf-casilla {
+    display: flex; flex-direction: column; align-items: flex-start; gap: 10px; padding: 14px; min-height: 92px;
+    border-radius: 18px; background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.06);
+    color: #e5e7eb; font-size: 14px; font-weight: 800; text-decoration: none; -webkit-tap-highlight-color: transparent;
+    transition: background .2s, border-color .2s;
+  }
+  .mf-casilla:hover { background: rgba(99,102,241,.12); border-color: rgba(99,102,241,.35); }
+  .mf-casilla[aria-current="page"] { background: rgba(16,185,129,.12); border-color: rgba(16,185,129,.4); }
+  .mf-casilla:focus-visible { outline: 2px solid #a5b4fc; outline-offset: 2px; }
+  .mf-casilla-ico { width: 40px; height: 40px; border-radius: 12px; display: grid; place-items: center; background: rgba(99,102,241,.16); color: #a5b4fc; }
+  .mf-casilla[aria-current="page"] .mf-casilla-ico { background: rgba(16,185,129,.16); color: #34d399; }
+  .mf-casilla-ico svg { width: 22px; height: 22px; }
+  .mf-menu-abierto .mf-velo { opacity: 1; pointer-events: auto; }
+  .mf-menu-abierto .mf-menu { opacity: 1; transform: none; pointer-events: auto; }
+  .mf-menu-abierto .mf-tab[data-menu] { background: rgba(99,102,241,.2); color: #c7d2fe; }
   @media (prefers-reduced-motion: reduce) {
-    .mf-acc, .mf-plus, .mf-plus svg, .mf-velo, .mf-tab { transition: none; }
+    .mf-acc, .mf-plus, .mf-plus svg, .mf-velo, .mf-tab, .mf-menu { transition: none; }
   }`
 
   function montar() {
     if (document.querySelector('.mf-bar')) return
     const st = document.createElement('style'); st.textContent = css; document.head.appendChild(st)
 
-    const tab = (id, label, href) => id === 'mas'
-      ? `<button type="button" class="mf-tab" data-mas ${activa === 'mas' ? 'aria-current="page"' : ''}>${svg(ICONOS.mas)}${label}</button>`
+    const tab = (id, label, href) => id === 'menu'
+      ? `<button type="button" class="mf-tab" data-menu aria-haspopup="true" aria-expanded="false" aria-controls="mf-menu" ${activa === 'menu' ? 'aria-current="page"' : ''}>${svg(ICONOS.menu)}${label}</button>`
       : `<a class="mf-tab" href="${href}" ${activa === id ? 'aria-current="page"' : ''}>${svg(ICONOS[id])}${label}</a>`
 
     const propia = PROPIAS[pagina] && typeof window[PROPIAS[pagina].fn] === 'function' ? PROPIAS[pagina] : null
@@ -134,33 +175,50 @@
             <span class="mf-acc-ico" style="background:${a.fondo};border:1px solid ${a.color}55;color:${a.color}">${svg(a.icono, 2.2)}</span>
           </button>`).join('')}
       </div>
+      <div class="mf-menu" id="mf-menu" aria-label="Menú">
+        <div class="mf-menu-titulo">Menú</div>
+        ${SECCIONES.map(x => `<a class="mf-casilla" href="${x.href}" tabindex="-1" ${pagina + '.html' === x.href ? 'aria-current="page"' : ''}>
+          <span class="mf-casilla-ico">${svg(ICONOS[x.icono])}</span>${x.label}</a>`).join('')}
+      </div>
       <div class="mf-bar">
         <nav class="mf-nav" aria-label="Secciones">
           ${tab('inicio', 'Inicio', 'inicio.html')}
           ${tab('movimientos', 'Movim.', MOV)}
           ${tab('estadisticas', 'Estadíst.', 'mifinanza-estadisticas-v2.html')}
-          ${tab('mas', 'Más')}
+          ${tab('menu', 'Menú')}
         </nav>
         <button type="button" class="mf-plus" aria-label="Añadir" aria-haspopup="menu" aria-expanded="false" aria-controls="mf-acciones">${svg('<path d="M12 5v14M5 12h14"/>', 2.6)}</button>
       </div>`
     document.body.appendChild(raiz)
 
     const plus = raiz.querySelector('.mf-plus')
+    const tabMenu = raiz.querySelector('[data-menu]')
     const botones = [...raiz.querySelectorAll('.mf-acc')]
-    const abrir = si => {
-      raiz.classList.toggle('mf-abierto', si)
-      plus.setAttribute('aria-expanded', String(si))
-      plus.setAttribute('aria-label', si ? 'Cerrar' : 'Añadir')
-      botones.forEach(b => { b.tabIndex = si ? 0 : -1 })
-      if (si) { if (navigator.vibrate) navigator.vibrate(8); botones[botones.length - 1].focus({ preventScroll: true }) }
+    const casillas = [...raiz.querySelectorAll('.mf-casilla')]
+    // Solo un menú abierto a la vez: 'mas' (botón +), 'menu' (pestaña Menú) o null.
+    let abierto = null
+    const abrir = cual => {
+      abierto = cual
+      raiz.classList.toggle('mf-abierto', cual === 'mas')
+      raiz.classList.toggle('mf-menu-abierto', cual === 'menu')
+      plus.setAttribute('aria-expanded', String(cual === 'mas'))
+      plus.setAttribute('aria-label', cual === 'mas' ? 'Cerrar' : 'Añadir')
+      tabMenu.setAttribute('aria-expanded', String(cual === 'menu'))
+      botones.forEach(b => { b.tabIndex = cual === 'mas' ? 0 : -1 })
+      casillas.forEach(c => { c.tabIndex = cual === 'menu' ? 0 : -1 })
+      if (cual && navigator.vibrate) navigator.vibrate(8)
+      if (cual === 'mas') botones[botones.length - 1].focus({ preventScroll: true })
+      if (cual === 'menu') casillas[0].focus({ preventScroll: true })
     }
-    plus.addEventListener('click', () => abrir(!raiz.classList.contains('mf-abierto')))
-    raiz.querySelector('[data-cerrar]').addEventListener('click', () => abrir(false))
-    document.addEventListener('keydown', e => { if (e.key === 'Escape' && raiz.classList.contains('mf-abierto')) { abrir(false); plus.focus() } })
-    botones.forEach(b => b.addEventListener('click', () => { abrir(false); items[+b.dataset.i].run() }))
-    raiz.querySelector('[data-mas]').addEventListener('click', () => {
-      if (typeof window.abrirPanelMas === 'function') window.abrirPanelMas()
+    plus.addEventListener('click', () => abrir(abierto === 'mas' ? null : 'mas'))
+    tabMenu.addEventListener('click', () => abrir(abierto === 'menu' ? null : 'menu'))
+    raiz.querySelector('[data-cerrar]').addEventListener('click', () => abrir(null))
+    document.addEventListener('keydown', e => {
+      if (e.key !== 'Escape' || !abierto) return
+      const volver = abierto === 'mas' ? plus : tabMenu
+      abrir(null); volver.focus()
     })
+    botones.forEach(b => b.addEventListener('click', () => { abrir(null); items[+b.dataset.i].run() }))
   }
 
   // Llegada desde otra pantalla con ?accion=gasto|ingreso|fijo|csv: se abre en cuanto hay sesión.
