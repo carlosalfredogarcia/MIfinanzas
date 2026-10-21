@@ -1,7 +1,7 @@
 // nav.js — barra de navegación y botón + compartidos por todas las pantallas.
 // Se carga al final del <body>. Sustituye la .navbar y el .fab propios de cada página
 // y añade dos menús rápidos que no se confunden entre sí:
-//  - el botón + (columna de botones a la derecha): Gasto, Ingreso, Gasto fijo, Importar CSV;
+//  - el botón + (flota sobre la barra, a la derecha; abre una columna de botones): Gasto, Ingreso, Gasto fijo, Importar CSV;
 //  - la pestaña Menú (panel de casillas sobre la barra): Metas, Gastos fijos, Préstamos, Perfil.
 ;(function () {
   const pagina = (location.pathname.split('/').pop() || 'inicio.html').replace('.html', '')
@@ -79,13 +79,18 @@
   .mf-tab svg { width: 22px; height: 22px; }
   .mf-tab[aria-current="page"] { background: rgba(16,185,129,.16); color: #34d399; font-weight: 800; }
   .mf-tab:focus-visible, .mf-plus:focus-visible, .mf-acc:focus-visible { outline: 2px solid #a5b4fc; outline-offset: 2px; }
+  body { padding-bottom: calc(170px + env(safe-area-inset-bottom, 0px)); }
   .mf-plus {
-    flex: none; width: 56px; height: 56px; border-radius: 20px; cursor: pointer;
+    position: fixed; z-index: 152; right: max(16px, env(safe-area-inset-right, 0px));
+    bottom: calc(14px + 64px + 14px + env(safe-area-inset-bottom, 0px));
+    width: 56px; height: 56px; border-radius: 50%; cursor: pointer;
     display: grid; place-items: center; color: #34d399;
-    background: rgba(17,24,39,.82); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-    border: 1px solid rgba(16,185,129,.4); box-shadow: 0 16px 36px rgba(0,0,0,.5);
-    transition: transform .35s cubic-bezier(.16,1,.3,1), background .25s, color .25s; -webkit-tap-highlight-color: transparent;
+    background: rgba(17,24,39,.85); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(16,185,129,.45); box-shadow: 0 14px 32px rgba(0,0,0,.5), 0 0 0 5px rgba(16,185,129,.08);
+    transition: transform .35s cubic-bezier(.16,1,.3,1), opacity .25s, background .25s, color .25s; -webkit-tap-highlight-color: transparent;
   }
+  /* Al bajar por la pantalla el + se aparta para no tapar contenido; vuelve al subir. */
+  .mf-plus.mf-oculto { transform: translateY(24px) scale(.6); opacity: 0; pointer-events: none; }
   .mf-plus svg { width: 26px; height: 26px; transition: transform .35s cubic-bezier(.16,1,.3,1); }
   .mf-abierto .mf-plus { background: #1f2937; color: #e5e7eb; border-color: rgba(255,255,255,.12); }
   .mf-abierto .mf-plus svg { transform: rotate(45deg); }
@@ -97,7 +102,7 @@
   .mf-abierto .mf-velo { opacity: 1; pointer-events: auto; }
   .mf-acciones {
     position: fixed; z-index: 151; right: max(12px, env(safe-area-inset-right, 0px));
-    bottom: calc(14px + 64px + 14px + env(safe-area-inset-bottom, 0px));
+    bottom: calc(14px + 64px + 14px + 56px + 14px + env(safe-area-inset-bottom, 0px));
     display: flex; flex-direction: column; align-items: flex-end; gap: 10px; pointer-events: none;
     font-family: Manrope, 'DM Sans', system-ui, sans-serif;
   }
@@ -117,14 +122,14 @@
   .mf-acc.mf-peligro .mf-acc-txt { color: #fca5a5; font-size: 13px; font-weight: 700; }
   .mf-acc.mf-peligro .mf-acc-ico { width: 44px; height: 44px; border-radius: 14px; margin-right: 6px; }
   .mf-menu {
-    position: fixed; z-index: 151; left: max(12px, env(safe-area-inset-left, 0px)); right: calc(max(12px, env(safe-area-inset-right, 0px)) + 64px);
+    position: fixed; z-index: 151; left: max(12px, env(safe-area-inset-left, 0px)); right: max(12px, env(safe-area-inset-right, 0px));
     bottom: calc(14px + 64px + 12px + env(safe-area-inset-bottom, 0px));
     max-width: 400px; margin: 0 auto; padding: 14px; border-radius: 24px;
     display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px;
     background: rgba(17,24,39,.9); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
     border: 1px solid rgba(255,255,255,.1); box-shadow: 0 20px 44px rgba(0,0,0,.55);
     font-family: Manrope, 'DM Sans', system-ui, sans-serif;
-    opacity: 0; transform: translateY(16px) scale(.97); transform-origin: 80% 100%; pointer-events: none;
+    opacity: 0; transform: translateY(16px) scale(.97); transform-origin: 88% 100%; pointer-events: none;
     transition: opacity .25s, transform .4s cubic-bezier(.16,1,.3,1);
   }
   .mf-menu-titulo { grid-column: 1 / -1; font-size: 11px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; color: #94a3b8; padding: 2px 4px 0; }
@@ -187,8 +192,8 @@
           ${tab('estadisticas', 'Estadíst.', 'mifinanza-estadisticas-v2.html')}
           ${tab('menu', 'Menú')}
         </nav>
-        <button type="button" class="mf-plus" aria-label="Añadir" aria-haspopup="menu" aria-expanded="false" aria-controls="mf-acciones">${svg('<path d="M12 5v14M5 12h14"/>', 2.6)}</button>
-      </div>`
+      </div>
+      <button type="button" class="mf-plus" aria-label="Añadir" aria-haspopup="menu" aria-expanded="false" aria-controls="mf-acciones">${svg('<path d="M12 5v14M5 12h14"/>', 2.6)}</button>`
     document.body.appendChild(raiz)
 
     const plus = raiz.querySelector('.mf-plus')
@@ -204,6 +209,7 @@
       plus.setAttribute('aria-expanded', String(cual === 'mas'))
       plus.setAttribute('aria-label', cual === 'mas' ? 'Cerrar' : 'Añadir')
       tabMenu.setAttribute('aria-expanded', String(cual === 'menu'))
+      plus.classList.toggle('mf-oculto', cual === 'menu')  // con el Menú abierto el + taparía una casilla
       botones.forEach(b => { b.tabIndex = cual === 'mas' ? 0 : -1 })
       casillas.forEach(c => { c.tabIndex = cual === 'menu' ? 0 : -1 })
       if (cual && navigator.vibrate) navigator.vibrate(8)
@@ -219,6 +225,14 @@
       abrir(null); volver.focus()
     })
     botones.forEach(b => b.addEventListener('click', () => { abrir(null); items[+b.dataset.i].run() }))
+
+    let ultimoY = window.scrollY
+    window.addEventListener('scroll', () => {
+      const y = window.scrollY
+      if (Math.abs(y - ultimoY) < 8) return
+      plus.classList.toggle('mf-oculto', y > ultimoY && y > 80 && !abierto)
+      ultimoY = y
+    }, { passive: true })
   }
 
   // Llegada desde otra pantalla con ?accion=gasto|ingreso|fijo|csv: se abre en cuanto hay sesión.
