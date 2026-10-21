@@ -580,7 +580,7 @@
     <div class="modal-handle"></div>
     <div style="font-size:40px;margin:8px 0 14px;">🚫</div>
     <div class="modal-title" style="margin-bottom:12px;">Límite alcanzado</div>
-    <p style="font-size:14px;color:var(--subtext);line-height:1.7;margin-bottom:24px;padding:0 4px;">
+    <p id="limite-texto" style="font-size:14px;color:var(--subtext);line-height:1.7;margin-bottom:24px;padding:0 4px;">
       Has alcanzado el límite de 200 movimientos importados. Para continuar, contacta con nosotros:
     </p>
     <a href="https://wa.me/34640309239" target="_blank" rel="noopener noreferrer"
@@ -1305,7 +1305,7 @@
       ]);
       const totalImportados = (resG.count ?? 0) + (resI.count ?? 0);
       if (totalImportados + totalNuevos > limiteTotal) {
-        document.getElementById('modal-limite-premium').style.display = 'flex';
+        mostrarModalLimite({ usados: totalImportados, max: limiteTotal, nuevos: totalNuevos });
         return;
       }
     }
@@ -1331,68 +1331,41 @@
   async function aplicarCodigo() {
     const input    = document.getElementById('codigo-input');
     const feedback = document.getElementById('codigo-feedback');
-    const codigo   = input.value.trim().toUpperCase();
+    const codigo   = input.value.trim();
     feedback.textContent = '';
+    if (!codigo) return;
 
-    const CODIGOS_VALIDOS = ['CARLOS', 'CARLOS2', 'CARLOS3'];
-    if (!CODIGOS_VALIDOS.includes(codigo)) {
+    // El código se valida en el servidor: la página no conoce los códigos válidos
+    const { data: { session } } = await dbClient.auth.getSession();
+    const token = session?.access_token;
+    if (!token) { feedback.style.color = '#ef4444'; feedback.textContent = 'Sesión expirada, vuelve a iniciar sesión.'; return; }
+    let datos = {}, ok = false;
+    try {
+      const resp = await fetch('/.netlify/functions/canjear-codigo', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', authorization: 'Bearer ' + token },
+        body: JSON.stringify({ codigo })
+      });
+      ok = resp.ok;
+      datos = await resp.json().catch(() => ({}));
+    } catch (_) { datos = { error: 'Sin conexión' }; }
+    if (!ok) {
       feedback.style.color = '#ef4444';
-      feedback.textContent = 'Código no válido';
-      return;
-    }
-
-    const uid = window.currentUserId;
-    const { data: perfilRows } = await dbClient.from('perfil').select('id, codigos_usados, limite_importacion').eq('usuario_id', uid).limit(1);
-    const perfilRow = perfilRows?.[0];
-    const usados = parseCodigosUsados(perfilRow?.codigos_usados);
-    const limiteBase = perfilRow?.limite_importacion ?? 200;
-
-    if (usados.includes(codigo)) {
-      feedback.style.color = '#ef4444';
-      feedback.textContent = 'Este código ya fue utilizado';
-      return;
-    }
-
-    const nuevosUsados = [...usados, codigo];
-    let err;
-    if (perfilRow?.id) {
-      ({ error: err } = await dbClient.from('perfil').update({ codigos_usados: nuevosUsados }).eq('id', perfilRow.id));
-    } else {
-      ({ error: err } = await dbClient.from('perfil').insert({ usuario_id: uid, codigos_usados: nuevosUsados }));
-    }
-    if (err) {
-      feedback.style.color = '#ef4444';
-      feedback.textContent = 'Error al guardar el código: ' + err.message;
+      feedback.textContent = datos.error || 'No se pudo aplicar el código';
       return;
     }
 
     input.value = '';
     feedback.style.color = '#4ade80';
     feedback.textContent = '¡Límite ampliado! Ya puedes importar 200 movimientos más';
-
-    if (_pendingCsvText) {
-      const nuevoLimite = limiteBase + nuevosUsados.length * 200;
-      const filasCsv = _pendingCsvText.split(/\r?\n/).filter((l, i) => i > 0 && l.trim()).length;
-      const [resG, resI] = await Promise.all([
-        dbClient.from('gastos').select('*', { count: 'exact', head: true }).eq('usuario_id', uid).eq('origen', 'importado'),
-        dbClient.from('ingresos').select('*', { count: 'exact', head: true }).eq('usuario_id', uid).eq('origen', 'importado')
-      ]);
-      const totalImportados = (resG.count ?? 0) + (resI.count ?? 0);
-      if (totalImportados + filasCsv <= nuevoLimite) {
-        document.getElementById('btn-continuar-importacion').style.display = 'block';
-      }
-    }
-    actualizarModalLimite();
+    if (_pendingCsvText) document.getElementById('btn-continuar-importacion').style.display = 'block';
   }
 
-  async function actualizarModalLimite() {
-    const uid = window.currentUserId;
-    if (!uid) return;
-    const TODOS_CODIGOS = ['CARLOS', 'CARLOS2', 'CARLOS3'];
-    const { data: perfilRows } = await dbClient.from('perfil').select('codigos_usados').eq('usuario_id', uid).limit(1);
-    const usados = parseCodigosUsados(perfilRows?.[0]?.codigos_usados);
-    const agotados = TODOS_CODIGOS.every(c => usados.includes(c));
-    document.getElementById('codigo-wrap').style.display = agotados ? 'none' : 'block';
+  function mostrarModalLimite(info) {
+    const txt = document.getElementById('limite-texto');
+    if (info && info.max) txt.textContent = `Llevas ${info.usados} de ${info.max} movimientos importados y este archivo trae unos ${info.nuevos}. Para continuar, contacta con nosotros:`;
+    document.getElementById('codigo-wrap').style.display = 'block';
+    document.getElementById('modal-limite-premium').style.display = 'flex';
   }
 
   function cerrarModalLimite() {
@@ -1424,6 +1397,11 @@
         body: JSON.stringify({ csv: csvText, categorias })
       });
       let datos;
+      if (resp.status === 402) {
+        _pendingCsvText = csvText;
+        mostrarModalLimite(await resp.json().catch(() => ({})));
+        return;
+      }
       if (!resp.ok) {
         datos = await resp.json().catch(() => ({}));
         const dbgTxt = datos.dbg ? '\n\n─── DEBUG ───\n' + JSON.stringify(datos.dbg, null, 2) : '';
@@ -1734,12 +1712,15 @@
     try {
       const uid = window.currentUserId;
       if (!uid) return;
-      const [resG, resI] = await Promise.all([
+      const [resG, resI, resP] = await Promise.all([
         dbClient.from('gastos').select('*', { count: 'exact', head: true }).eq('usuario_id', uid).eq('origen', 'importado'),
-        dbClient.from('ingresos').select('*', { count: 'exact', head: true }).eq('usuario_id', uid).eq('origen', 'importado')
+        dbClient.from('ingresos').select('*', { count: 'exact', head: true }).eq('usuario_id', uid).eq('origen', 'importado'),
+        dbClient.from('perfil').select('*').eq('usuario_id', uid).limit(1)
       ]);
+      const perfilRow = resP.data?.[0] || {};
+      if (perfilRow.premium === true) return;
       const total = (resG.count ?? 0) + (resI.count ?? 0);
-      const limite = 200;
+      const limite = (perfilRow.limite_importacion ?? 200) + parseCodigosUsados(perfilRow.codigos_usados).length * 200;
       const pct = Math.min((total / limite) * 100, 100);
       const color = pct >= 90 ? '#ef4444' : pct >= 75 ? '#f0a030' : '#4ade80';
       texto.textContent = `${total} / ${limite}`;
@@ -1805,34 +1786,7 @@
     try {
       const csvText = await fileToCSV(file);
 
-      // ── Chequeo de límite antes de llamar a la IA ──────────────────────────
-      const uid = window.currentUserId;
-      const { data: perfilRowsCSV } = await dbClient.from('perfil').select('premium, codigos_usados, limite_importacion').eq('usuario_id', uid).limit(1);
-      const perfilRowCSV   = perfilRowsCSV?.[0] || {};
-      const isPremiumCSV   = perfilRowCSV.premium === true;
-      const codigosCSV     = parseCodigosUsados(perfilRowCSV.codigos_usados);
-      const limiteBaseCSV  = perfilRowCSV.limite_importacion ?? 200;
-      const limiteTotalCSV = limiteBaseCSV + codigosCSV.length * 200;
-
-      if (!isPremiumCSV) {
-        const filasCsv = csvText.split(/\r?\n/).filter((l, i) => i > 0 && l.trim()).length;
-        const [resGcsv, resIcsv] = await Promise.all([
-          dbClient.from('gastos').select('*', { count: 'exact', head: true }).eq('usuario_id', uid).eq('origen', 'importado'),
-          dbClient.from('ingresos').select('*', { count: 'exact', head: true }).eq('usuario_id', uid).eq('origen', 'importado')
-        ]);
-        const totalImportados = (resGcsv.count ?? 0) + (resIcsv.count ?? 0);
-        console.log('filasCsv:', filasCsv, 'totalImportados:', totalImportados, 'limiteTotal:', limiteTotalCSV);
-        if (totalImportados + filasCsv > limiteTotalCSV) {
-          _pendingCsvText = csvText;
-          document.getElementById('csv-btn-seleccionar').style.display = 'block';
-          document.getElementById('csv-estado').textContent = '';
-          cerrarCSV();
-          document.getElementById('modal-limite-premium').style.display = 'flex';
-          actualizarModalLimite();
-          return;
-        }
-      }
-
+      // El límite lo comprueba el servidor (responde 402 si no quedan movimientos)
       const { data: { session } } = await dbClient.auth.getSession();
       const token = session?.access_token;
       if (!token) {
@@ -1848,6 +1802,14 @@
         body: JSON.stringify({ csv: csvText, categorias })
       });
       let datos;
+      if (resp.status === 402) {
+        _pendingCsvText = csvText;
+        document.getElementById('csv-btn-seleccionar').style.display = 'block';
+        document.getElementById('csv-estado').textContent = '';
+        cerrarCSV();
+        mostrarModalLimite(await resp.json().catch(() => ({})));
+        return;
+      }
       if (!resp.ok) {
         datos = await resp.json().catch(() => ({}));
         const dbgTxt = datos.dbg ? '\n\n─── DEBUG ───\n' + JSON.stringify(datos.dbg, null, 2) : '';

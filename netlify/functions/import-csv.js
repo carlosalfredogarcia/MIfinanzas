@@ -6,8 +6,7 @@
 //   2) Lista de conceptos (extraída con el índice correcto) → nombre simplificado + categoría.
 //   Fechas e importes los parsea JS puro; sin heurístico propio de detección de columnas.
 
-const SUPABASE_URL = 'https://gapeweomesgawnodarsp.supabase.co'
-const SUPABASE_KEY = 'sb_publishable_u7ug3SBOsuz2zb56gqBLjw_aLJ0Vvp8'
+const { obtenerUsuario, estadoLimite, analisisHoy, registrarAnalisis, MAX_ANALISIS_DIA } = require('../lib/limite')
 
 const CATS_DEFAULT = [
   '🏠 Alquiler', '💳 Crédito', '📱 Línea', '🏋️ Gym', '⛽ Gasolina',
@@ -106,21 +105,15 @@ function normalizarFecha(str) {
   return null
 }
 
-async function obtenerUsuario(token) {
-  if (!token) return null
-  try {
-    const resp = await fetch(`${SUPABASE_URL}/auth/v1/user`, {
-      headers: { authorization: `Bearer ${token}`, apikey: SUPABASE_KEY }
-    })
-    if (!resp.ok) return null
-    const data = await resp.json()
-    return data.id ? data : null
-  } catch {
-    return null
+const NO_CACHE = { 'content-type': 'application/json', 'cache-control': 'no-store, no-cache' }
+
+// Respuesta 402 cuando el usuario no puede importar más; el navegador muestra el aviso de límite
+function sinLimite(estado, nuevos) {
+  return {
+    statusCode: 402, headers: NO_CACHE,
+    body: JSON.stringify({ error: 'Has llegado al límite de movimientos importados', limite: true, usados: estado.usados, max: estado.limite, nuevos })
   }
 }
-
-const NO_CACHE = { 'content-type': 'application/json', 'cache-control': 'no-store, no-cache' }
 
 exports.handler = async (event) => {
   if (event.httpMethod !== 'POST') {
@@ -152,6 +145,14 @@ exports.handler = async (event) => {
     : CATS_DEFAULT
 
   const lineas = csv.split(/\r\n|\r|\n/).filter(l => l.trim())
+
+  // Límite de importación: lo decide el servidor, no el navegador
+  let estado
+  try {
+    estado = await estadoLimite(usuario.id, token)
+  } catch (e) {
+    return { statusCode: 503, headers: NO_CACHE, body: JSON.stringify({ error: 'No se pudo comprobar tu límite de importación. Inténtalo de nuevo.' }) }
+  }
 
   // Buscar cabecera MiFinanza en las primeras 5 filas.
   // XLSX exportado desde SheetJS puede tener filas vacías (,,,,) al inicio,
@@ -193,12 +194,20 @@ exports.handler = async (event) => {
         movimientos.push({ fecha, descripcion: concepto, categoria, monto, tipo: 'gasto' })
       }
     }
+    if (!estado.premium && estado.usados + movimientos.length > estado.limite) return sinLimite(estado, movimientos.length)
     const dbgPriCats = movimientos.slice(0, 3).map(m => m.categoria)
     const dbgPriLineas = lineas.slice(tipoA_idx, tipoA_idx + 4).map(l => l.slice(0, 120))
     return { statusCode: 200, headers: NO_CACHE, body: JSON.stringify({ tipo: 'mifinanza', movimientos, dbg: { cabecera_detectada: 'tipoA', header_row: tipoA_idx, cols: tipoA_cols, primeros_tipos_raw: dbgTiposA, primeras_cats: dbgPriCats, primeras_lineas: dbgPriLineas } }) }
   }
 
   // ─── Tipo B: CSV de banco externo ────────────────────────────────────────
+  const filasEstimadas = Math.max(0, lineas.length - 1)
+  if (!estado.premium && estado.usados + filasEstimadas > estado.limite) return sinLimite(estado, filasEstimadas)
+  if (await analisisHoy(usuario.id).catch(() => 0) >= MAX_ANALISIS_DIA) {
+    return { statusCode: 429, headers: NO_CACHE, body: JSON.stringify({ error: `Has analizado ${MAX_ANALISIS_DIA} archivos en las últimas 24 horas. Vuelve a intentarlo mañana.` }) }
+  }
+  await registrarAnalisis(usuario.id, filasEstimadas)
+
   const apiKey = process.env.ANTHROPIC_API_KEY
   if (!apiKey) {
     return { statusCode: 500, headers: NO_CACHE, body: JSON.stringify({ error: 'ANTHROPIC_API_KEY no configurada en el servidor' }) }
