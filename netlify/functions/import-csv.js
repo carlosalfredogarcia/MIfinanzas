@@ -4,9 +4,21 @@
 //   1) Primeras 20 filas numeradas → Claude detecta qué fila es la cabecera real (puede haber
 //      metadata del banco antes), y los índices de columna para fecha/descripción/importe.
 //   2) Lista de conceptos (extraída con el índice correcto) → nombre simplificado + categoría.
+//      Cada concepto distinto se envía una sola vez (MERCADONA x80 → 1), en lotes con reintento.
 //   Fechas e importes los parsea JS puro; sin heurístico propio de detección de columnas.
+// El límite lo decide el servidor: si el archivo trae más movimientos de los que quedan,
+// se importan los más recientes y se devuelve cuántos quedaron fuera (recortados).
 
-const { obtenerUsuario, estadoLimite, analisisHoy, registrarAnalisis, MAX_ANALISIS_DIA } = require('../lib/limite')
+const { obtenerUsuario, estadoLimite, analisisHoy, registrarAnalisis, actualizarAnalisis, MAX_ANALISIS_DIA } = require('../lib/limite')
+
+// Modelo configurable desde Netlify (IMPORT_MODEL) para probar otro sin tocar código
+const MODELO = process.env.IMPORT_MODEL || 'claude-haiku-4-5-20251001'
+// Precio en $ por millón de tokens [entrada, salida]
+const PRECIOS = { 'claude-haiku-4-5': [1, 5], 'claude-haiku-5-5': [0.10, 0.50] }
+const precioModelo = m => PRECIOS[Object.keys(PRECIOS).find(k => m.startsWith(k))] || [1, 5]
+const CHUNK_SIZE   = 30
+const PARALELO     = 8
+const TIEMPO_REINTENTO_MS = 6000 // no reintentar si ya se gastó este tiempo (Netlify corta a los 10 s)
 
 const CATS_DEFAULT = [
   '🏠 Alquiler', '💳 Crédito', '📱 Línea', '🏋️ Gym', '⛽ Gasolina',
@@ -107,6 +119,50 @@ function normalizarFecha(str) {
 
 const NO_CACHE = { 'content-type': 'application/json', 'cache-control': 'no-store, no-cache' }
 
+// Llamada a Claude con reintentos (429, 5xx o red) que suma los tokens usados en `uso`
+async function llamarClaude(apiKey, body, uso, t0) {
+  for (let intento = 0; ; intento++) {
+    let resp, data
+    try {
+      resp = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', 'x-api-key': apiKey, 'anthropic-version': '2023-06-01' },
+        body: JSON.stringify({ model: MODELO, ...body })
+      })
+      data = await resp.json().catch(() => ({}))
+    } catch (err) {
+      resp = { ok: false, status: 0 }; data = { error: String(err) }
+    }
+    if (data.usage) {
+      uso.llamadas++
+      uso.input_tokens  += data.usage.input_tokens  || 0
+      uso.output_tokens += data.usage.output_tokens || 0
+    }
+    const reintentable = !resp.ok && (resp.status === 0 || resp.status === 429 || resp.status >= 500)
+    if (!reintentable || intento >= 2 || Date.now() - t0 > TIEMPO_REINTENTO_MS) return { ok: resp.ok, status: resp.status, data }
+    await new Promise(r => setTimeout(r, 400 * (intento + 1)))
+  }
+}
+
+// Índices de los movimientos que entran en el cupo: los más recientes y, en la primera
+// importación, solo los de los últimos 12 meses
+function elegirRecientes(fechas, estado, hoy) {
+  const desde = new Date(hoy); desde.setFullYear(desde.getFullYear() - 1)
+  const minFecha = estado.primera ? desde.toISOString().slice(0, 10) : ''
+  const validos = fechas.map((f, i) => ({ f, i })).filter(x => x.f && x.f >= minFecha)
+  validos.sort((a, b) => b.f.localeCompare(a.f))
+  const elegidos = validos.slice(0, estado.cupo).map(x => x.i).sort((a, b) => a - b)
+  return { elegidos, recortados: fechas.filter(Boolean).length - elegidos.length }
+}
+
+// MERCADONA 1234 12/03 y MERCADONA 5678 15/04 → mismo concepto
+const costeUsd = uso => {
+  const [pin, pout] = precioModelo(uso.modelo)
+  return +((uso.input_tokens * pin + uso.output_tokens * pout) / 1e6).toFixed(4)
+}
+
+const claveConcepto = txt => txt.toUpperCase().replace(/\d+/g, ' ').replace(/[^\p{L}\s]/gu, ' ').replace(/\s+/g, ' ').trim() || txt
+
 // Respuesta 402 cuando el usuario no puede importar más; el navegador muestra el aviso de límite
 function sinLimite(estado, nuevos) {
   return {
@@ -194,24 +250,28 @@ exports.handler = async (event) => {
         movimientos.push({ fecha, descripcion: concepto, categoria, monto, tipo: 'gasto' })
       }
     }
-    if (!estado.premium && estado.usados + movimientos.length > estado.limite) return sinLimite(estado, movimientos.length)
+    if (estado.cupo === 0) return sinLimite(estado, movimientos.length)
+    const selA = elegirRecientes(movimientos.map(m => normalizarFecha(m.fecha)), estado, new Date().toISOString().slice(0, 10))
+    if (selA.recortados > 0) movimientos.splice(0, movimientos.length, ...selA.elegidos.map(i => movimientos[i]))
     const dbgPriCats = movimientos.slice(0, 3).map(m => m.categoria)
     const dbgPriLineas = lineas.slice(tipoA_idx, tipoA_idx + 4).map(l => l.slice(0, 120))
-    return { statusCode: 200, headers: NO_CACHE, body: JSON.stringify({ tipo: 'mifinanza', movimientos, dbg: { cabecera_detectada: 'tipoA', header_row: tipoA_idx, cols: tipoA_cols, primeros_tipos_raw: dbgTiposA, primeras_cats: dbgPriCats, primeras_lineas: dbgPriLineas } }) }
+    return { statusCode: 200, headers: NO_CACHE, body: JSON.stringify({ tipo: 'mifinanza', movimientos, recortados: selA.recortados, primera: estado.primera, dbg: { cabecera_detectada: 'tipoA', header_row: tipoA_idx, cols: tipoA_cols, primeros_tipos_raw: dbgTiposA, primeras_cats: dbgPriCats, primeras_lineas: dbgPriLineas } }) }
   }
 
   // ─── Tipo B: CSV de banco externo ────────────────────────────────────────
   const filasEstimadas = Math.max(0, lineas.length - 1)
-  if (!estado.premium && estado.usados + filasEstimadas > estado.limite) return sinLimite(estado, filasEstimadas)
+  if (estado.cupo === 0) return sinLimite(estado, filasEstimadas)
   if (await analisisHoy(usuario.id).catch(() => 0) >= MAX_ANALISIS_DIA) {
     return { statusCode: 429, headers: NO_CACHE, body: JSON.stringify({ error: `Has analizado ${MAX_ANALISIS_DIA} archivos en las últimas 24 horas. Vuelve a intentarlo mañana.` }) }
   }
-  await registrarAnalisis(usuario.id, filasEstimadas)
 
   const apiKey = process.env.ANTHROPIC_API_KEY
   if (!apiKey) {
     return { statusCode: 500, headers: NO_CACHE, body: JSON.stringify({ error: 'ANTHROPIC_API_KEY no configurada en el servidor' }) }
   }
+  const t0 = Date.now()
+  const uso = { modelo: MODELO, llamadas: 0, input_tokens: 0, output_tokens: 0 }
+  const usoId = await registrarAnalisis(usuario.id, { filas: filasEstimadas, primera: estado.primera, modelo: MODELO })
 
   const hoy       = new Date().toISOString().slice(0, 10)
   const MAX_FILAS = 2000
@@ -272,35 +332,24 @@ exports.handler = async (event) => {
     }
   }
 
-  let schemaResp
-  try {
-    schemaResp = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: { 'content-type': 'application/json', 'x-api-key': apiKey, 'anthropic-version': '2023-06-01' },
-      body: JSON.stringify({
-        model: 'claude-haiku-4-5-20251001',
-        max_tokens: 400,
-        tools: [schemaTool],
-        tool_choice: { type: 'tool', name: 'detectar_esquema' },
-        messages: [{
-          role: 'user',
-          content: `Extracto bancario. Identifica la fila de cabecera real (puede haber metadata antes) y los índices de columna para fecha, descripción del movimiento, importe y tipo gasto/ingreso.
+  const schemaResp = await llamarClaude(apiKey, {
+    max_tokens: 400,
+    tools: [schemaTool],
+    tool_choice: { type: 'tool', name: 'detectar_esquema' },
+    messages: [{
+      role: 'user',
+      content: `Extracto bancario. Identifica la fila de cabecera real (puede haber metadata antes) y los índices de columna para fecha, descripción del movimiento, importe y tipo gasto/ingreso.
 
 PRIMERAS ${Math.min(MUESTRA_N, lineas.length)} FILAS DEL ARCHIVO:
 ${muestraNum}`
-        }]
-      })
-    })
-  } catch (err) {
-    return { statusCode: 502, headers: NO_CACHE, body: JSON.stringify({ error: 'No se pudo contactar a Anthropic', detalle: String(err), dbg }) }
-  }
+    }]
+  }, uso, t0)
 
   if (!schemaResp.ok) {
-    const errText = await schemaResp.text()
-    return { statusCode: 502, headers: NO_CACHE, body: JSON.stringify({ error: 'Error de la API de Anthropic', detalle: errText, dbg }) }
+    return { statusCode: 502, headers: NO_CACHE, body: JSON.stringify({ error: 'Error de la API de Anthropic', detalle: schemaResp.data, dbg }) }
   }
 
-  const schemaData    = await schemaResp.json()
+  const schemaData    = schemaResp.data
   dbg.schema_call_raw = schemaData
 
   const schemaToolUse = (schemaData.content || []).find(b => b.type === 'tool_use')
@@ -324,15 +373,26 @@ ${muestraNum}`
   dbg.first_data_row    = firstDataRow
 
   // Extraer filas de datos reales descartando toda la metadata
-  const filasEnviar = lineas.slice(firstDataRow, firstDataRow + MAX_FILAS)
+  let filasEnviar = lineas.slice(firstDataRow, firstDataRow + MAX_FILAS)
+  // Solo los que entran en el cupo (los más recientes): no se paga IA por lo que no se importa
+  const selB = elegirRecientes(filasEnviar.map(l => normalizarFecha(parseCSVLinea(l, sep)[esquema.fecha_col])), estado, hoy)
+  filasEnviar = selB.elegidos.map(i => filasEnviar[i])
   dbg.filas_datos = filasEnviar.length
+  dbg.recortados  = selB.recortados
 
   // ── Llamada 2: simplificar conceptos en lotes paralelos ──────────────────
-  // Lotes de 50 → Promise.all → se resuelven en paralelo (~3-4 s para 400 filas)
-  const CHUNK_SIZE = 50
-  const conceptosTodos = filasEnviar.map(linea =>
+  // Cada concepto distinto va una sola vez; luego se reparte a todas sus filas
+  const conceptosFila = filasEnviar.map(linea =>
     (parseCSVLinea(linea, sep)[esquema.descripcion_col] || '').trim()
   )
+  const indiceUnico = new Map()
+  const conceptosTodos = []
+  const unicoDeFila = conceptosFila.map(txt => {
+    const k = claveConcepto(txt)
+    if (!indiceUnico.has(k)) { indiceUnico.set(k, conceptosTodos.length); conceptosTodos.push(txt) }
+    return indiceUnico.get(k)
+  })
+  dbg.conceptos_unicos = conceptosTodos.length
 
   dbg.primeros_3_conceptos_enviados = conceptosTodos.slice(0, 3)
 
@@ -366,53 +426,51 @@ ${muestraNum}`
     }
   }
 
-  // Partir en lotes y lanzarlos todos en paralelo
+  // Partir en lotes y lanzarlos en paralelo (como mucho PARALELO a la vez)
   const chunks = []
   for (let s = 0; s < conceptosTodos.length; s += CHUNK_SIZE) {
     chunks.push(conceptosTodos.slice(s, s + CHUNK_SIZE))
   }
   dbg.lotes = chunks.length
 
-  let chunkResults
-  try {
-    chunkResults = await Promise.all(chunks.map((chunk, ci) => {
-      const lista = chunk.map((txt, j) => `${j + 1}. ${txt}`).join('\n')
-      return fetch('https://api.anthropic.com/v1/messages', {
-        method: 'POST',
-        headers: { 'content-type': 'application/json', 'x-api-key': apiKey, 'anthropic-version': '2023-06-01' },
-        body: JSON.stringify({
-          model: 'claude-haiku-4-5-20251001',
-          max_tokens: 2048,
-          tools: [conceptsTool],
-          tool_choice: { type: 'tool', name: 'simplificar_conceptos' },
-          messages: [{
-            role: 'user',
-            content: `Para cada concepto bancario devuelve nombre simplificado (1-3 palabras) y categoría. Incluye TODOS los movimientos de la lista sin excepción, incluso los que tengan descripción genérica o vacía. No descartes ninguna fila — la lista de salida debe tener exactamente el mismo número de elementos que la lista de entrada.
+  const procesarLote = async (chunk, ci) => {
+    const lista = chunk.map((txt, j) => `${j + 1}. ${txt}`).join('\n')
+    const r = await llamarClaude(apiKey, {
+      max_tokens: 4096,
+      tools: [conceptsTool],
+      tool_choice: { type: 'tool', name: 'simplificar_conceptos' },
+      messages: [{
+        role: 'user',
+        content: `Para cada concepto bancario devuelve nombre simplificado (1-3 palabras) y categoría. Incluye TODOS los movimientos de la lista sin excepción, incluso los que tengan descripción genérica o vacía. No descartes ninguna fila — la lista de salida debe tener exactamente el mismo número de elementos que la lista de entrada.
 
 CONCEPTOS (lote ${ci + 1}/${chunks.length}):
 ${lista}
 
 Fecha hoy: ${hoy}
 Categorías: ${categorias.join(', ')}`
-          }]
-        })
-      }).then(r => r.json())
-    }))
-  } catch (err) {
-    return { statusCode: 502, headers: NO_CACHE, body: JSON.stringify({ error: 'No se pudo contactar a Anthropic (conceptos)', detalle: String(err), dbg }) }
+      }]
+    }, uso, t0)
+    const tu = r.ok && (r.data.content || []).find(b => b.type === 'tool_use')
+    return tu && Array.isArray(tu.input.conceptos) ? tu.input.conceptos : null
   }
+  const chunkResults = new Array(chunks.length)
+  let siguiente = 0
+  await Promise.all(Array.from({ length: Math.min(PARALELO, chunks.length) }, async () => {
+    while (siguiente < chunks.length) { const ci = siguiente++; chunkResults[ci] = await procesarLote(chunks[ci], ci) }
+  }))
 
-  // Verificar cada lote y concatenar en orden
-  const conceptos = []
-  for (let ci = 0; ci < chunkResults.length; ci++) {
-    const data = chunkResults[ci]
-    const tu   = (data.content || []).find(b => b.type === 'tool_use')
-    if (!tu || !Array.isArray(tu.input.conceptos) || tu.input.conceptos.length === 0) {
-      dbg.lote_fallido = { ci, data }
-      return { statusCode: 502, headers: NO_CACHE, body: JSON.stringify({ error: `Lote ${ci + 1} sin respuesta válida`, dbg }) }
-    }
-    conceptos.push(...tu.input.conceptos)
+  // Un lote que falla no tira la importación: sus conceptos quedan en "📦 Otros" para revisarlos
+  const lotesFallidos = chunkResults.filter(r => !r).length
+  if (chunks.length && lotesFallidos === chunks.length) {
+    await actualizarAnalisis(usoId, { input_tokens: uso.input_tokens, output_tokens: uso.output_tokens, coste_usd: costeUsd(uso) })
+    return { statusCode: 502, headers: NO_CACHE, body: JSON.stringify({ error: 'No se pudieron categorizar los movimientos. Inténtalo de nuevo.', dbg }) }
   }
+  dbg.lotes_fallidos = lotesFallidos
+  const conceptosUnicos = []
+  chunks.forEach((chunk, ci) => chunk.forEach((txt, j) => {
+    conceptosUnicos.push(chunkResults[ci]?.[j] || { nombre: txt.slice(0, 40), categoria: '📦 Otros' })
+  }))
+  const conceptos = unicoDeFila.map(u => conceptosUnicos[u])
 
   dbg.concepts_preview = { total: conceptos.length, primeros_5: conceptos.slice(0, 5) }
 
@@ -505,9 +563,14 @@ Categorías: ${categorias.join(', ')}`
   dbg.credito_col                = esquema.credito_col
   dbg.primeros_5_montos_raw      = filasEnviar.slice(0, 5).map(l => parseCSVLinea(l, sep)[esquema.monto_col])
 
+  uso.coste_usd = costeUsd(uso)
+  uso.segundos   = +((Date.now() - t0) / 1000).toFixed(1)
+  dbg.uso = uso
+  await actualizarAnalisis(usoId, { filas: filasEnviar.length, input_tokens: uso.input_tokens, output_tokens: uso.output_tokens, coste_usd: uso.coste_usd })
+
   return {
     statusCode: 200,
     headers: NO_CACHE,
-    body: JSON.stringify({ tipo: 'banco', movimientos, gastos: movimientos, dbg })
+    body: JSON.stringify({ tipo: 'banco', movimientos, gastos: movimientos, recortados: selB.recortados, primera: estado.primera, uso, dbg })
   }
 }

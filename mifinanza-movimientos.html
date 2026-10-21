@@ -448,6 +448,7 @@
     <div style="background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.25);border-radius:10px;padding:11px 13px;margin-bottom:10px;font-size:13px;color:#f1f5f9;line-height:1.5;flex-shrink:0;">
       ⚠️ Revisa que los datos sean correctos, especialmente la categoría de cada movimiento. Una buena revisión te dará datos precisos y un mejor control de tus finanzas.
     </div>
+    <div id="revision-recorte" style="display:none;background:rgba(99,102,241,0.1);border:1px solid rgba(99,102,241,0.3);border-radius:10px;padding:11px 13px;margin-bottom:10px;font-size:13px;color:#f1f5f9;line-height:1.5;flex-shrink:0;"></div>
     <div id="revision-resumen" style="font-size:13px;color:var(--subtext);margin-bottom:10px;flex-shrink:0;"></div>
     <div id="revision-voz-lista" style="overflow:auto;flex:1;min-height:0;margin:0 -24px;padding:0 24px;"></div>
     <div style="flex-shrink:0;padding:12px 0 20px;">
@@ -1263,14 +1264,7 @@
 
     const uid = window.currentUserId;
 
-    // ── Comprobar premium y límite de importación ──────────────────────────
-    const { data: perfilRows } = await dbClient.from('perfil').select('premium, codigos_usados, limite_importacion').eq('usuario_id', uid).limit(1);
-    const perfilRow    = perfilRows?.[0] || {};
-    const isPremium    = perfilRow.premium === true;
-    const codigosUsados = parseCodigosUsados(perfilRow.codigos_usados);
-    // Límite base 200 + 200 por cada código de desbloqueo aplicado
-    const LIMITE_BASE  = perfilRow.limite_importacion ?? 200;
-    const limiteTotal  = LIMITE_BASE + codigosUsados.length * 200;
+    // El límite ya lo aplicó el servidor al analizar el archivo
 
     // ── Construir listas de movimientos válidos ────────────────────────────
     const gastos = [], ingresos = [];
@@ -1294,20 +1288,6 @@
     if (!gastos.length && !ingresos.length) {
       alert('Completa al menos un movimiento válido (descripción y monto)');
       return;
-    }
-
-    // ── Verificar si los nuevos superan el límite acumulado ────────────────
-    if (!isPremium) {
-      const totalNuevos = gastos.length + ingresos.length;
-      const [resG, resI] = await Promise.all([
-        dbClient.from('gastos').select('*', { count: 'exact', head: true }).eq('usuario_id', uid).eq('origen', 'importado'),
-        dbClient.from('ingresos').select('*', { count: 'exact', head: true }).eq('usuario_id', uid).eq('origen', 'importado')
-      ]);
-      const totalImportados = (resG.count ?? 0) + (resI.count ?? 0);
-      if (totalImportados + totalNuevos > limiteTotal) {
-        mostrarModalLimite({ usados: totalImportados, max: limiteTotal, nuevos: totalNuevos });
-        return;
-      }
     }
 
     const ops = [];
@@ -1359,6 +1339,17 @@
     feedback.style.color = '#4ade80';
     feedback.textContent = '¡Límite ampliado! Ya puedes importar 200 movimientos más';
     if (_pendingCsvText) document.getElementById('btn-continuar-importacion').style.display = 'block';
+  }
+
+  // Si el archivo traía más de lo que entra, el servidor manda los más recientes y cuántos quedaron fuera
+  function avisoRecorte(datos) {
+    const el = document.getElementById('revision-recorte');
+    const n = datos?.recortados || 0;
+    el.style.display = n > 0 ? 'block' : 'none';
+    if (!n) return;
+    el.textContent = datos.primera
+      ? `🎁 Tu primera importación es gratis: hemos traído tus movimientos de los últimos 12 meses. ${n} más antiguos se quedaron fuera.`
+      : `Hemos traído tus movimientos más recientes. ${n} no caben en tu límite gratuito: para traerlos, desbloquea la importación ilimitada.`;
   }
 
   function mostrarModalLimite(info) {
@@ -1419,6 +1410,7 @@
         return;
       }
       abrirRevisionVoz(movimientos);
+      avisoRecorte(datos);
     } catch (err) {
       alert('❌ ' + err.message);
     }
@@ -1712,15 +1704,17 @@
     try {
       const uid = window.currentUserId;
       if (!uid) return;
-      const [resG, resI, resP] = await Promise.all([
-        dbClient.from('gastos').select('*', { count: 'exact', head: true }).eq('usuario_id', uid).eq('origen', 'importado'),
-        dbClient.from('ingresos').select('*', { count: 'exact', head: true }).eq('usuario_id', uid).eq('origen', 'importado'),
-        dbClient.from('perfil').select('*').eq('usuario_id', uid).limit(1)
-      ]);
-      const perfilRow = resP.data?.[0] || {};
-      if (perfilRow.premium === true) return;
-      const total = (resG.count ?? 0) + (resI.count ?? 0);
-      const limite = (perfilRow.limite_importacion ?? 200) + parseCodigosUsados(perfilRow.codigos_usados).length * 200;
+      const { data: { session } } = await dbClient.auth.getSession();
+      const resp = await fetch('/.netlify/functions/estado-importacion', { headers: { authorization: 'Bearer ' + (session?.access_token || '') } });
+      if (!resp.ok) return;
+      const est = await resp.json();
+      if (est.premium) return;
+      if (est.primera) {
+        texto.textContent = `Primera importación gratis · hasta ${String(est.primeraMax).replace(/\B(?=(\d{3})+(?!\d))/g, '.')} movimientos (12 meses)`;
+        texto.style.color = '#4ade80'; barra.style.width = '0%'; wrap.style.display = 'block';
+        return;
+      }
+      const total = est.usados, limite = est.limite;
       const pct = Math.min((total / limite) * 100, 100);
       const color = pct >= 90 ? '#ef4444' : pct >= 75 ? '#f0a030' : '#4ade80';
       texto.textContent = `${total} / ${limite}`;
@@ -1832,8 +1826,10 @@
         document.getElementById('csv-btn-seleccionar').style.display = 'block';
         return;
       }
+      if (datos.uso) console.log('Coste IA de esta importación:', datos.uso);
       cerrarCSV();
       abrirRevisionVoz(movimientos);
+      avisoRecorte(datos);
     } catch (err) {
       document.getElementById('csv-estado').textContent = '❌ ' + err.message + '\n\nRevisa que el archivo sea un CSV, XLS o XLSX válido.';
       document.getElementById('csv-btn-seleccionar').style.display = 'block';

@@ -1,7 +1,8 @@
 // netlify/lib/limite.js
 // Límite de importación comprobado en el servidor. El navegador solo muestra el resultado:
 // el usuario no puede saltárselo cambiando el código de la página.
-//   - Gratis: 200 movimientos importados (+200 por cada código de desbloqueo).
+//   - Primera importación gratis: hasta PRIMERA_MAX movimientos de los últimos 12 meses.
+//   - Después: 200 movimientos más (+200 por cada código de desbloqueo).
 //   - premium = true: sin límite.
 //   - Todos: como máximo MAX_ANALISIS_DIA análisis con IA al día (protege el gasto de la API).
 
@@ -12,6 +13,8 @@ const SERVICE_KEY  = process.env.SUPABASE_SERVICE_ROLE_KEY || ''
 const LIMITE_BASE      = 200
 const POR_CODIGO       = 200
 const MAX_ANALISIS_DIA = 20
+const PRIMERA_MAX      = 1000
+const PRIMERA_INTENTOS = 3   // análisis "primera importación" permitidos sin llegar a guardar
 
 // token = sesión del usuario (lee solo sus filas por RLS); sin token = clave de servicio
 function cabeceras(token, extra = {}) {
@@ -54,15 +57,30 @@ async function contar(tabla, filtro, token) {
   return parseInt((resp.headers.get('content-range') || '').split('/')[1], 10) || 0
 }
 
-// Estado del usuario: cuántos lleva importados y cuál es su límite
+// Primeras importaciones registradas (filas analizadas en cada una)
+async function primerasImportaciones(uid) {
+  if (!SERVICE_KEY) return []
+  try {
+    const resp = await fetch(`${SUPABASE_URL}/rest/v1/import_uso?usuario_id=eq.${uid}&primera=eq.true&select=filas`, { headers: cabeceras(null) })
+    const filas = resp.ok ? await resp.json() : []
+    return Array.isArray(filas) ? filas.map(r => r.filas || 0) : []
+  } catch { return [] }
+}
+
+// Estado del usuario: cuántos lleva importados, su límite y cuántos puede importar ahora (cupo)
 async function estadoLimite(uid, token) {
   const perfil = await leerPerfil(uid, token)
   const premium = perfil?.premium === true
   const codigos = parseCodigos(perfil?.codigos_usados)
-  const limite = (perfil?.limite_importacion ?? LIMITE_BASE) + codigos.length * POR_CODIGO
   const filtro = `usuario_id=eq.${uid}&origen=eq.importado`
-  const [g, i] = await Promise.all([contar('gastos', filtro, token), contar('ingresos', filtro, token)])
-  return { premium, limite, usados: g + i, perfil, codigos }
+  const [g, i, primeras] = await Promise.all([contar('gastos', filtro, token), contar('ingresos', filtro, token), primerasImportaciones(uid)])
+  const usados = g + i
+  // Lo traído en la primera importación no gasta los 200 gratis
+  const bono = Math.min(PRIMERA_MAX, Math.max(0, ...primeras))
+  const limite = (perfil?.limite_importacion ?? LIMITE_BASE) + codigos.length * POR_CODIGO + bono
+  const primera = !premium && usados === 0 && primeras.length < PRIMERA_INTENTOS
+  const cupo = premium ? Infinity : primera ? PRIMERA_MAX : Math.max(0, limite - usados)
+  return { premium, limite, usados, perfil, codigos, primera, cupo }
 }
 
 // Análisis con IA de hoy (tabla import_uso, solo accesible con la clave de servicio)
@@ -72,15 +90,28 @@ async function analisisHoy(uid) {
   return contar('import_uso', `usuario_id=eq.${uid}&creado=gte.${encodeURIComponent(desde)}`)
 }
 
-async function registrarAnalisis(uid, filas) {
-  if (!SERVICE_KEY) { console.warn('SUPABASE_SERVICE_ROLE_KEY sin configurar: no se registra el análisis'); return }
-  await fetch(`${SUPABASE_URL}/rest/v1/import_uso`, {
-    method: 'POST', headers: cabeceras(null, { 'content-type': 'application/json', prefer: 'return=minimal' }),
-    body: JSON.stringify({ usuario_id: uid, filas })
+// Se registra antes de llamar a la IA (cuenta para el máximo diario aunque falle) y devuelve el id
+async function registrarAnalisis(uid, datos) {
+  if (!SERVICE_KEY) { console.warn('SUPABASE_SERVICE_ROLE_KEY sin configurar: no se registra el análisis'); return null }
+  try {
+    const resp = await fetch(`${SUPABASE_URL}/rest/v1/import_uso?select=id`, {
+      method: 'POST', headers: cabeceras(null, { 'content-type': 'application/json', prefer: 'return=representation' }),
+      body: JSON.stringify({ usuario_id: uid, ...datos })
+    })
+    return resp.ok ? (await resp.json())[0]?.id ?? null : null
+  } catch (e) { console.warn('import_uso:', e.message); return null }
+}
+
+// Al terminar: filas reales enviadas, tokens y coste
+async function actualizarAnalisis(id, datos) {
+  if (!SERVICE_KEY || !id) return
+  await fetch(`${SUPABASE_URL}/rest/v1/import_uso?id=eq.${id}`, {
+    method: 'PATCH', headers: cabeceras(null, { 'content-type': 'application/json', prefer: 'return=minimal' }),
+    body: JSON.stringify(datos)
   }).catch(e => console.warn('import_uso:', e.message))
 }
 
 module.exports = {
-  SUPABASE_URL, SUPABASE_KEY, SERVICE_KEY, LIMITE_BASE, POR_CODIGO, MAX_ANALISIS_DIA,
-  cabeceras, obtenerUsuario, parseCodigos, leerPerfil, estadoLimite, analisisHoy, registrarAnalisis,
+  SUPABASE_URL, SUPABASE_KEY, SERVICE_KEY, LIMITE_BASE, POR_CODIGO, MAX_ANALISIS_DIA, PRIMERA_MAX,
+  cabeceras, obtenerUsuario, parseCodigos, leerPerfil, estadoLimite, analisisHoy, registrarAnalisis, actualizarAnalisis,
 }

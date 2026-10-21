@@ -36,13 +36,19 @@ CREATE TRIGGER proteger_perfil_premium
   BEFORE INSERT OR UPDATE ON perfil
   FOR EACH ROW EXECUTE FUNCTION public.proteger_perfil_premium();
 
--- 3. Registro de análisis con IA (máximo 20 al día por usuario).
+-- 3. Registro de cada análisis con IA: sirve para el máximo de 20 al día, para saber
+--    si es la primera importación y para ver cuánto te cuesta cada una.
 --    Con RLS y sin políticas: los usuarios no pueden leerla ni escribirla.
 CREATE TABLE IF NOT EXISTS public.import_uso (
-  id         BIGSERIAL PRIMARY KEY,
-  usuario_id UUID NOT NULL,
-  filas      INTEGER NOT NULL DEFAULT 0,
-  creado     TIMESTAMPTZ NOT NULL DEFAULT now()
+  id            BIGSERIAL PRIMARY KEY,
+  usuario_id    UUID NOT NULL,
+  filas         INTEGER NOT NULL DEFAULT 0,
+  primera       BOOLEAN NOT NULL DEFAULT false,
+  modelo        TEXT,
+  input_tokens  INTEGER NOT NULL DEFAULT 0,
+  output_tokens INTEGER NOT NULL DEFAULT 0,
+  coste_usd     NUMERIC(10,4) NOT NULL DEFAULT 0,
+  creado        TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 ALTER TABLE public.import_uso ENABLE ROW LEVEL SECURITY;
 CREATE INDEX IF NOT EXISTS idx_import_uso ON public.import_uso (usuario_id, creado);
@@ -54,3 +60,10 @@ CREATE INDEX IF NOT EXISTS idx_import_uso ON public.import_uso (usuario_id, crea
 SELECT tablename, rowsecurity FROM pg_tables
 WHERE schemaname = 'public'
 ORDER BY tablename;
+
+-- ─────────────────────────────────────────────────────────────────────────
+-- Para consultar cuando quieras: lo que te ha costado la importación con IA
+-- ─────────────────────────────────────────────────────────────────────────
+-- SELECT date_trunc('month', creado) AS mes, count(*) AS importaciones,
+--        sum(filas) AS movimientos, sum(coste_usd) AS coste_usd
+-- FROM import_uso GROUP BY 1 ORDER BY 1 DESC;
