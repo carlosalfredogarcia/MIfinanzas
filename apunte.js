@@ -26,9 +26,9 @@
   .mfa-fondo { position: fixed; inset: 0; z-index: 400; background: rgba(5,8,16,.62); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); opacity: 0; pointer-events: none; transition: opacity .2s; }
   .mfa-hoja { position: fixed; left: 0; right: 0; bottom: 0; z-index: 401; max-width: 480px; margin: 0 auto; max-height: 92vh; overflow-y: auto; overscroll-behavior: contain;
     background: #111827; border: 1px solid rgba(255,255,255,.08); border-bottom: 0; border-radius: 24px 24px 0 0; padding: 10px 18px calc(18px + env(safe-area-inset-bottom));
-    font-family: Manrope, system-ui, sans-serif; color: #f1f5f9; transform: translateY(100%); transition: transform .26s cubic-bezier(.2,.8,.2,1); box-shadow: 0 -20px 50px rgba(0,0,0,.5); }
+    font-family: Manrope, system-ui, sans-serif; color: #f1f5f9; transform: translateY(100%); visibility: hidden; transition: transform .26s cubic-bezier(.2,.8,.2,1), visibility 0s .26s; box-shadow: 0 -20px 50px rgba(0,0,0,.5); }
   .mfa-abierto .mfa-fondo { opacity: 1; pointer-events: auto; }
-  .mfa-abierto .mfa-hoja { transform: none; }
+  .mfa-abierto .mfa-hoja { transform: none; visibility: visible; transition: transform .26s cubic-bezier(.2,.8,.2,1); }
   .mfa-asa { width: 40px; height: 4px; border-radius: 99px; background: #334155; margin: 0 auto 12px; }
   .mfa-cab { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 6px; }
   .mfa-tit { font-size: 15px; font-weight: 800; letter-spacing: -.01em; }
@@ -139,7 +139,8 @@
     document.documentElement.style.overflow = 'hidden'
     clearTimeout(tCerrar); hoja.inert = false
     toastEl.classList.remove('mfa-ver')
-    requestAnimationFrame(() => raiz.classList.add('mfa-abierto'))
+    hoja.getBoundingClientRect()  // fija la posición de partida para que la animación se vea
+    raiz.classList.add('mfa-abierto')
     // El foco en el mismo toque abre el teclado numérico en el móvil
     inpImporte.focus({ preventScroll: true })
     cargarDatos().then(() => { pintarCats(); pintarRecientes() })

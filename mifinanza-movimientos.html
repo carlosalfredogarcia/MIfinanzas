@@ -1238,6 +1238,45 @@
       '.';
     actualizarContadorRevision();
     document.getElementById('modal-revision-voz').style.display = 'flex';
+    marcarFijosRepetidos(movimientos);
+  }
+
+  // Al importar el banco, el alquiler (o cualquier fijo) vendría otra vez en el extracto y se
+  // contaría dos veces. Esos movimientos se marcan y no se guardan, salvo que el usuario lo pida.
+  async function marcarFijosRepetidos(movimientos) {
+    const fechas = movimientos.map(m => m.fecha).filter(Boolean).sort();
+    if (!fechas.length) return;
+    const { data: fijos } = await dbClient.from('gastos_fijos').select('nombre, categoria, monto, fecha_inicio, fecha_fin')
+      .eq('usuario_id', window.currentUserId).lte('fecha_inicio', fechas[fechas.length - 1]).or(`fecha_fin.gte.${fechas[0]},fecha_fin.is.null`);
+    if (!fijos?.length) return;
+    const palabras = t => String(t || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z\s]/g, ' ').split(/\s+/).filter(p => p.length >= 3);
+    const parecido = (a, b) => { const pb = new Set(palabras(b)); return palabras(a).some(p => pb.has(p)); };
+    const items = document.querySelectorAll('#revision-voz-lista .revision-item');
+    let n = 0;
+    movimientos.forEach((m, i) => {
+      if (m.tipo === 'ingreso' || !m.fecha || !items[i]) return;
+      const mes = m.fecha.slice(0, 7), monto = parseFloat(m.monto) || 0;
+      const f = fijos.find(f => f.fecha_inicio.slice(0, 7) <= mes && (!f.fecha_fin || f.fecha_fin.slice(0, 7) >= mes)
+        && Math.abs(monto - f.monto) <= Math.max(1, f.monto * 0.03) && (m.categoria === f.categoria || parecido(m.descripcion, f.nombre)));
+      if (!f) return;
+      n++;
+      const item = items[i];
+      item.dataset.fijo = '1';
+      const campos = item.querySelectorAll('textarea, select, input, .dp-btn');
+      campos.forEach(c => { c.style.opacity = '.45'; });
+      const nota = document.createElement('div');
+      nota.style.cssText = 'margin-top:6px;font-size:12.5px;color:#a5b4fc;display:flex;align-items:center;gap:8px;flex-wrap:wrap';
+      nota.innerHTML = `<span>↻ Ya está en tu gasto fijo «${escapeHtml(f.nombre)}»: no se guardará</span>`;
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.textContent = 'Guardar igualmente';
+      btn.style.cssText = 'background:none;border:1px solid #263248;border-radius:99px;color:#f1f5f9;font:700 12px Manrope,sans-serif;padding:4px 10px;cursor:pointer';
+      btn.onclick = () => { delete item.dataset.fijo; campos.forEach(c => { c.style.opacity = ''; }); nota.remove(); };
+      nota.appendChild(btn);
+      item.querySelector('div[style*="flex:1;min-width:0"]').appendChild(nota);
+    });
+    if (n) document.getElementById('revision-resumen').insertAdjacentHTML('beforeend',
+      ` <span style="color:#a5b4fc;font-weight:600;">${n} ya ${n === 1 ? 'está' : 'están'} en tus gastos fijos y no se ${n === 1 ? 'guardará' : 'guardarán'}.</span>`);
   }
 
   function actualizarContadorRevision() {
@@ -1276,6 +1315,7 @@
     const gastos = [], ingresos = [];
 
     for (const item of items) {
+      if (item.dataset.fijo === '1') continue;  // ya lo cuenta su gasto fijo
       const fecha       = item.querySelector('.rv-fecha').value || hoy;
       const descripcion = item.querySelector('.rv-descripcion').value.trim();
       const categoria   = item.querySelector('.rv-categoria').value;
