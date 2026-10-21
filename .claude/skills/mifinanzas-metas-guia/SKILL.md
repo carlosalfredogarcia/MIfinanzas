@@ -57,7 +57,9 @@ El recorrido que hace el usuario hoy, y que el diseño debe convertir en pasos c
 - **Paso 4, seguimiento de lujo**: resumen del mes ("te quedan 312 € para 9 días · 34 €/día"),
   categorías en tres grupos (pasadas, con margen, fijas), barra real/plan por categoría, botón
   Repartir en las pasadas, y el progreso de la meta con "a este ritmo llegarás en…".
-- **Colchón de ahorro**: se mantiene, junto a la meta.
+- **Colchón de ahorro**: oculto por decisión del usuario (no sabe dónde ubicarlo). El bloque
+  sigue en el HTML con `hidden` y los datos de `colchon_movimientos` no se tocan. No volver a
+  mostrarlo sin que lo pida.
 
 ## Contrato técnico (no romper)
 

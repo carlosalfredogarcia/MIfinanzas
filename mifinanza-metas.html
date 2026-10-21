@@ -4,22 +4,24 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>MiFinanza – Metas</title>
-<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="datepicker.js"></script>
 <style>
   :root {
-    --bg: #0d1117;
-    --card: #161b22;
-    --card2: #21262d;
-    --accent: #58a6ff;
-    --accent2: #4fd1c5;
-    --danger: #f85149;
-    --success: #3fb950;
-    --gold: #f5c842;
-    --text: #e6edf3;
-    --subtext: #8b949e;
-    --border: #21262d;
-    --border2: #30363d;
+    --bg: #0a0e1a;
+    --card: #111827;
+    --card2: #1a2234;
+    --accent: #6366f1;
+    --accent2: #34d399;
+    --danger: #ef4444;
+    --success: #10b981;
+    --gold: #f59e0b;
+    --text: #f1f5f9;
+    --subtext: #94a3b8;
+    --border: #1f2937;
+    --border2: #263248;
+    --red-txt: #f87171;
+    --green-txt: #34d399;
   }
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -28,7 +30,7 @@
   body {
     background: var(--bg);
     color: var(--text);
-    font-family: 'DM Sans', sans-serif;
+    font-family: 'Manrope', sans-serif;
     min-height: 100vh;
   }
 
@@ -37,7 +39,7 @@
   .header { padding: 52px 24px 20px; animation: fadeUp 0.4s ease both; }
 
   .header-title {
-    font-family: 'DM Sans', sans-serif;
+    font-family: 'Manrope', sans-serif;
     font-size: 26px;
     font-weight: 700;
     color: var(--text);
@@ -47,10 +49,10 @@
 
   .meta-principal {
     margin: 0 24px 16px;
-    background: #0d2818;
+    background: #0f1f1a;
     border-radius: 24px;
     padding: 22px;
-    border: 1px solid #1a4a2a;
+    border: 1px solid #1f4d3a;
     position: relative;
     overflow: hidden;
     animation: fadeUp 0.4s 0.1s ease both;
@@ -62,7 +64,7 @@
     position: absolute;
     top: -40px; right: -40px;
     width: 160px; height: 160px;
-    background: radial-gradient(circle, rgba(88,166,255,0.08) 0%, transparent 70%);
+    background: radial-gradient(circle, rgba(99,102,241,0.08) 0%, transparent 70%);
     pointer-events: none;
   }
 
@@ -74,7 +76,7 @@
   }
 
   .principal-nombre {
-    font-family: 'DM Sans', sans-serif;
+    font-family: 'Manrope', sans-serif;
     font-size: 18px;
     font-weight: 700;
     color: var(--text);
@@ -83,50 +85,50 @@
   .principal-btns { display: flex; align-items: center; gap: 6px; flex-shrink: 0; margin-left: 8px; }
 
   .btn-eliminar-principal {
-    background: rgba(248,81,73,0.1);
-    border: 1px solid rgba(248,81,73,0.2);
+    background: rgba(239,68,68,0.1);
+    border: 1px solid rgba(239,68,68,0.2);
     border-radius: 8px;
     padding: 5px 10px;
     font-size: 11px;
     color: var(--danger);
     cursor: pointer;
-    font-family: 'DM Sans', sans-serif;
+    font-family: 'Manrope', sans-serif;
     transition: background 0.2s;
     flex-shrink: 0;
   }
 
-  .btn-eliminar-principal:hover { background: rgba(248,81,73,0.2); }
+  .btn-eliminar-principal:hover { background: rgba(239,68,68,0.2); }
 
   .btn-editar-principal {
-    background: rgba(88,166,255,0.1);
-    border: 1px solid rgba(88,166,255,0.2);
+    background: rgba(99,102,241,0.1);
+    border: 1px solid rgba(99,102,241,0.2);
     border-radius: 8px;
     padding: 5px 10px;
     font-size: 11px;
     color: var(--accent);
     cursor: pointer;
-    font-family: 'DM Sans', sans-serif;
+    font-family: 'Manrope', sans-serif;
     transition: background 0.2s;
     flex-shrink: 0;
   }
 
-  .btn-editar-principal:hover { background: rgba(88,166,255,0.2); }
+  .btn-editar-principal:hover { background: rgba(99,102,241,0.2); }
 
   .principal-fecha { font-size: 12px; color: var(--subtext); margin-bottom: 16px; }
 
   .llevas-faltan-grid { display: flex; gap: 10px; margin-bottom: 16px; }
 
   .lf-card { flex: 1; background: rgba(255,255,255,0.04); border-radius: 14px; padding: 14px; }
-  .lf-label { font-size: 10px; color: var(--subtext); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 6px; font-family: 'DM Sans', sans-serif; }
-  .lf-valor { font-family: 'Roboto', sans-serif; font-size: 24px; font-weight: 700; line-height: 1.1; }
-  .lf-llevas .lf-valor { color: #3fb950; }
+  .lf-label { font-size: 10px; color: var(--subtext); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 6px; font-family: 'Manrope', sans-serif; }
+  .lf-valor { font-family: 'Manrope', sans-serif; font-size: 24px; font-weight: 700; line-height: 1.1; }
+  .lf-llevas .lf-valor { color: #10b981; }
   .lf-faltan .lf-valor { color: #c0c0c0; }
   .lf-input {
     background: none; border: none; outline: none; padding: 0; margin: 0;
     width: 100%; color: inherit; font: inherit; -moz-appearance: textfield;
   }
   .lf-input::-webkit-outer-spin-button, .lf-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-  .lf-sub { font-size: 10px; color: var(--subtext); margin-top: 4px; font-family: 'DM Sans', sans-serif; }
+  .lf-sub { font-size: 10px; color: var(--subtext); margin-top: 4px; font-family: 'Manrope', sans-serif; }
 
   .principal-progress-row { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; }
 
@@ -146,7 +148,7 @@
   }
 
   .principal-percent {
-    font-family: 'Roboto', sans-serif;
+    font-family: 'Manrope', sans-serif;
     font-size: 13px;
     font-weight: 700;
     color: var(--accent);
@@ -164,32 +166,32 @@
   }
 
   .detalle-item { display: flex; flex-direction: column; gap: 2px; }
-  .detalle-label { color: var(--subtext); font-size: 10px; text-transform: uppercase; letter-spacing: 0.06em; font-family: 'DM Sans', sans-serif; }
-  .detalle-val-green { color: #3fb950;      font-family: 'Roboto', sans-serif; font-weight: 700; font-size: 13px; }
-  .detalle-val-red   { color: #f85149;      font-family: 'Roboto', sans-serif; font-weight: 700; font-size: 13px; }
-  .detalle-val-blue  { color: var(--accent); font-family: 'Roboto', sans-serif; font-weight: 700; font-size: 13px; }
+  .detalle-label { color: var(--subtext); font-size: 10px; text-transform: uppercase; letter-spacing: 0.06em; font-family: 'Manrope', sans-serif; }
+  .detalle-val-green { color: #10b981;      font-family: 'Manrope', sans-serif; font-weight: 700; font-size: 13px; }
+  .detalle-val-red   { color: #ef4444;      font-family: 'Manrope', sans-serif; font-weight: 700; font-size: 13px; }
+  .detalle-val-blue  { color: var(--accent); font-family: 'Manrope', sans-serif; font-weight: 700; font-size: 13px; }
 
   .ahorro-nota {
     font-size: 11px;
     color: var(--subtext);
     margin-bottom: 10px;
     padding: 2px 2px;
-    font-family: 'DM Sans', sans-serif;
+    font-family: 'Manrope', sans-serif;
   }
 
   .promedio-banner {
     display: flex;
     align-items: center;
     gap: 10px;
-    background: rgba(88,166,255,0.1);
-    border: 1px solid rgba(88,166,255,0.25);
+    background: rgba(99,102,241,0.1);
+    border: 1px solid rgba(99,102,241,0.25);
     border-radius: 12px;
     padding: 12px 14px;
   }
 
   .promedio-icon { font-size: 18px; flex-shrink: 0; }
-  .promedio-text { font-size: 13px; color: var(--text); font-family: 'DM Sans', sans-serif; line-height: 1.4; }
-  .promedio-text strong { color: var(--accent); font-family: 'Roboto', sans-serif; font-weight: 700; }
+  .promedio-text { font-size: 13px; color: var(--text); font-family: 'Manrope', sans-serif; line-height: 1.4; }
+  .promedio-text strong { color: var(--accent); font-family: 'Manrope', sans-serif; font-weight: 700; }
 
   .seccion-label {
     font-size: 11px;
@@ -226,7 +228,7 @@
   .meta-monto  { text-align: right; }
 
   .meta-monto .llevado {
-    font-family: 'Roboto', sans-serif;
+    font-family: 'Manrope', sans-serif;
     font-size: 15px; font-weight: 700; color: var(--accent2);
   }
 
@@ -250,7 +252,7 @@
     flex: 1; background: var(--card2); border: none;
     border-radius: 10px; padding: 8px; font-size: 11px;
     color: var(--subtext); cursor: pointer;
-    font-family: 'DM Sans', sans-serif;
+    font-family: 'Manrope', sans-serif;
     transition: background 0.2s, color 0.2s;
   }
 
@@ -270,11 +272,11 @@
 
   .plan-icon {
     width: 38px; height: 38px; border-radius: 12px;
-    background: rgba(88,166,255,0.1);
+    background: rgba(99,102,241,0.1);
     display: flex; align-items: center; justify-content: center; font-size: 18px;
   }
 
-  .plan-title { font-family: 'DM Sans', sans-serif; font-size: 16px; font-weight: 700; color: var(--text); }
+  .plan-title { font-family: 'Manrope', sans-serif; font-size: 16px; font-weight: 700; color: var(--text); }
   .plan-sub   { font-size: 12px; color: var(--subtext); }
   .plan-row   { margin-bottom: 14px; }
   .analisis-panel {
@@ -296,19 +298,19 @@
     width: 100%; background: var(--card2);
     border: 1px solid var(--border); border-radius: 12px;
     padding: 11px 14px; color: var(--text);
-    font-family: 'DM Sans', sans-serif; font-size: 15px; outline: none;
+    font-family: 'Manrope', sans-serif; font-size: 15px; outline: none;
     transition: border-color 0.2s;
   }
 
-  .plan-input:focus { border-color: rgba(88,166,255,0.3); }
-  .bloque-ing-input { background: none; border: none; border-bottom: 1px solid rgba(255,255,255,0.08); font-family: 'Roboto', sans-serif; font-size: 24px; font-weight: 700; color: var(--success); width: 100%; padding: 4px 0 6px; outline: none; transition: border-color 0.2s; }
+  .plan-input:focus { border-color: rgba(99,102,241,0.3); }
+  .bloque-ing-input { background: none; border: none; border-bottom: 1px solid rgba(255,255,255,0.08); font-family: 'Manrope', sans-serif; font-size: 24px; font-weight: 700; color: var(--success); width: 100%; padding: 4px 0 6px; outline: none; transition: border-color 0.2s; }
   .bloque-ing-input:focus { border-bottom-color: var(--accent); }
-  .bloque-ing-input::placeholder { color: rgba(63,185,80,0.3); }
+  .bloque-ing-input::placeholder { color: rgba(16,185,129,0.3); }
 
   .bloque-acordeon { margin-bottom: 10px; }
 
   .bloque-card {
-    background: #1c2128; border-radius: 16px; padding: 16px 18px;
+    background: #151d2e; border-radius: 16px; padding: 16px 18px;
   }
   .bloque-card.clicable { cursor: pointer; }
 
@@ -317,7 +319,7 @@
     margin-bottom: 8px;
   }
   .bloque-label {
-    font-family: 'DM Sans', sans-serif; font-size: 11px; font-weight: 700;
+    font-family: 'Manrope', sans-serif; font-size: 11px; font-weight: 700;
     color: var(--subtext); text-transform: uppercase; letter-spacing: 0.08em;
   }
   .bloque-chevron {
@@ -328,7 +330,7 @@
   .chevron-metas.abierto { transform: rotate(180deg); }
 
   .bloque-total-grande {
-    font-family: 'Roboto', sans-serif; font-size: 24px; font-weight: 700;
+    font-family: 'Manrope', sans-serif; font-size: 24px; font-weight: 700;
     color: var(--success);
   }
   .bloque-total-grande.txt-verde { color: var(--success); }
@@ -342,7 +344,7 @@
     display: block; margin-top: 10px;
     background: none; border: 1px solid var(--border2); border-radius: 100px;
     padding: 6px 14px; font-size: 11px; color: var(--subtext);
-    cursor: pointer; font-family: 'DM Sans', sans-serif; transition: all 0.2s;
+    cursor: pointer; font-family: 'Manrope', sans-serif; transition: all 0.2s;
   }
   .btn-restablecer:hover { border-color: var(--accent); color: var(--accent); }
 
@@ -350,7 +352,7 @@
     display: block; width: 100%; margin-top: 10px; padding: 8px;
     background: none; border: none;
     color: var(--subtext); font-size: 11px; cursor: pointer; opacity: 0.45;
-    font-family: 'DM Sans', sans-serif; transition: opacity 0.2s;
+    font-family: 'Manrope', sans-serif; transition: opacity 0.2s;
   }
   .btn-cerrar-gastos:active { opacity: 0.8; }
 
@@ -373,13 +375,13 @@
     width: 60px; flex-shrink: 0; background: var(--bg);
     border: 1px solid var(--border); border-radius: 10px;
     padding: 8px 8px; color: var(--text); text-align: right;
-    font-family: 'DM Sans', sans-serif; font-size: 14px; outline: none;
+    font-family: 'Manrope', sans-serif; font-size: 14px; outline: none;
     transition: border-color 0.2s;
   }
-  .var-input:focus { border-color: rgba(88,166,255,0.3); }
+  .var-input:focus { border-color: rgba(99,102,241,0.3); }
   .var-spin-btns { display: none; align-items: center; gap: 4px; flex-shrink: 0; }
   .btn-spin { width: 32px; height: 32px; border: 1px solid var(--border); border-radius: 8px; background: var(--card2); color: var(--subtext); font-size: 18px; line-height: 1; cursor: pointer; display: flex; align-items: center; justify-content: center; user-select: none; -webkit-user-select: none; touch-action: manipulation; transition: background 0.15s, color 0.15s; }
-  .btn-spin:active { background: rgba(88,166,255,0.15); color: #58a6ff; border-color: rgba(88,166,255,0.4); }
+  .btn-spin:active { background: rgba(99,102,241,0.15); color: #6366f1; border-color: rgba(99,102,241,0.4); }
   @media (max-width: 768px) {
     .var-spin-btns { display: flex; }
     .var-input { width: 60px; }
@@ -397,49 +399,49 @@
   .vg-sub-row { display: flex; align-items: center; gap: 8px; padding: 7px 0; border-bottom: 1px solid rgba(139,148,158,0.1); }
   .vg-sub-emoji { font-size: 15px; flex-shrink: 0; }
   .vg-sub-nombre { flex: 1; font-size: 13px; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .vg-sub-input { background: none; border: none; color: var(--text); font-size: 13px; font-weight: 600; text-align: right; width: 60px; padding: 0; font-family: 'DM Sans',sans-serif; }
+  .vg-sub-input { background: none; border: none; color: var(--text); font-size: 13px; font-weight: 600; text-align: right; width: 60px; padding: 0; font-family: 'Manrope',sans-serif; }
   .vg-sub-input:focus { outline: none; }
   .vg-footer { display: flex; align-items: center; gap: 8px; margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(139,148,158,0.12); }
-  .btn-vg-edit-full { flex: 1; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.09); border-radius: 8px; padding: 6px 10px; font-size: 12px; color: var(--subtext); cursor: pointer; font-family: 'DM Sans',sans-serif; text-align: left; }
+  .btn-vg-edit-full { flex: 1; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.09); border-radius: 8px; padding: 6px 10px; font-size: 12px; color: var(--subtext); cursor: pointer; font-family: 'Manrope',sans-serif; text-align: left; }
   .btn-vg-edit-full:active { background: rgba(255,255,255,0.09); }
-  .btn-vg-ungroup { background: none; border: 1px solid rgba(139,148,158,0.2); border-radius: 8px; padding: 6px 10px; font-size: 12px; color: var(--subtext); cursor: pointer; font-family: 'DM Sans',sans-serif; flex-shrink: 0; }
+  .btn-vg-ungroup { background: none; border: 1px solid rgba(139,148,158,0.2); border-radius: 8px; padding: 6px 10px; font-size: 12px; color: var(--subtext); cursor: pointer; font-family: 'Manrope',sans-serif; flex-shrink: 0; }
   .btn-vg-ungroup:active { background: rgba(255,255,255,0.05); }
-  .btn-crear-grupo { width: 100%; background: none; border: 1px dashed rgba(88,166,255,0.3); border-radius: 12px; padding: 10px; font-size: 13px; color: rgba(88,166,255,0.7); cursor: pointer; font-family: 'DM Sans',sans-serif; transition: all 0.15s; margin-bottom: 8px; }
-  .btn-crear-grupo:active { background: rgba(88,166,255,0.06); border-color: rgba(88,166,255,0.5); }
+  .btn-crear-grupo { width: 100%; background: none; border: 1px dashed rgba(99,102,241,0.3); border-radius: 12px; padding: 10px; font-size: 13px; color: rgba(99,102,241,0.7); cursor: pointer; font-family: 'Manrope',sans-serif; transition: all 0.15s; margin-bottom: 8px; }
+  .btn-crear-grupo:active { background: rgba(99,102,241,0.06); border-color: rgba(99,102,241,0.5); }
   .grupo-modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.65); z-index: 800; display: flex; align-items: flex-end; justify-content: center; }
-  .grupo-modal { background: #1c2128; border-radius: 20px 20px 0 0; padding: 20px 18px 34px; width: 100%; max-width: 500px; max-height: 85vh; overflow-y: auto; }
+  .grupo-modal { background: #151d2e; border-radius: 20px 20px 0 0; padding: 20px 18px 34px; width: 100%; max-width: 500px; max-height: 85vh; overflow-y: auto; }
   .grupo-modal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
   .grupo-modal-titulo { font-size: 16px; font-weight: 700; color: var(--text); }
   .btn-modal-cerrar { background: none; border: none; font-size: 20px; color: var(--subtext); cursor: pointer; padding: 2px 8px; border-radius: 8px; line-height: 1; }
   .gm-label { font-size: 11px; color: var(--subtext); letter-spacing: 0.05em; text-transform: uppercase; margin-bottom: 7px; display: block; font-weight: 600; }
-  .gm-input { background: var(--bg); border: 1px solid var(--border); border-radius: 10px; padding: 9px 12px; color: var(--text); font-size: 14px; font-family: 'DM Sans',sans-serif; outline: none; transition: border-color 0.2s; }
-  .gm-input:focus { border-color: rgba(88,166,255,0.35); }
+  .gm-input { background: var(--bg); border: 1px solid var(--border); border-radius: 10px; padding: 9px 12px; color: var(--text); font-size: 14px; font-family: 'Manrope',sans-serif; outline: none; transition: border-color 0.2s; }
+  .gm-input:focus { border-color: rgba(99,102,241,0.35); }
   .gm-cats-list { display: flex; flex-direction: column; gap: 4px; max-height: 240px; overflow-y: auto; }
   .gm-cat-option { display: flex; align-items: center; gap: 10px; padding: 9px 12px; background: var(--bg); border-radius: 10px; cursor: pointer; font-size: 13px; color: var(--text); border: 1px solid transparent; transition: border-color 0.15s, background 0.15s; user-select: none; }
-  .gm-cat-option:has(input:checked) { border-color: rgba(88,166,255,0.35); background: rgba(88,166,255,0.06); }
-  .gm-cat-option input { accent-color: #58a6ff; width: 16px; height: 16px; flex-shrink: 0; }
+  .gm-cat-option:has(input:checked) { border-color: rgba(99,102,241,0.35); background: rgba(99,102,241,0.06); }
+  .gm-cat-option input { accent-color: #6366f1; width: 16px; height: 16px; flex-shrink: 0; }
   .grupo-modal-footer { display: flex; gap: 10px; margin-top: 18px; }
-  .btn-gm-guardar { flex: 1; background: #58a6ff; border: none; border-radius: 12px; padding: 12px; font-size: 14px; font-weight: 600; color: #0d1117; cursor: pointer; font-family: 'DM Sans',sans-serif; transition: opacity 0.15s; }
+  .btn-gm-guardar { flex: 1; background: #6366f1; border: none; border-radius: 12px; padding: 12px; font-size: 14px; font-weight: 600; color: #0a0e1a; cursor: pointer; font-family: 'Manrope',sans-serif; transition: opacity 0.15s; }
   .btn-gm-guardar:active { opacity: 0.85; }
-  .btn-gm-cancelar { background: none; border: 1px solid var(--border); border-radius: 12px; padding: 12px 16px; font-size: 14px; color: var(--subtext); cursor: pointer; font-family: 'DM Sans',sans-serif; }
+  .btn-gm-cancelar { background: none; border: 1px solid var(--border); border-radius: 12px; padding: 12px 16px; font-size: 14px; color: var(--subtext); cursor: pointer; font-family: 'Manrope',sans-serif; }
 
   .resumen-tipos { background: #1e2230; border-radius: 12px; padding: 12px 14px; border: 1px solid #2a2e3a; margin-top: 10px; }
   .resumen-tipos-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; font-size: 13px; }
   .resumen-tipos-row:last-of-type { margin-bottom: 0; }
   .resumen-tipos-label { color: var(--subtext); }
-  .resumen-tipos-valor { font-family: 'Roboto', sans-serif; font-weight: 700; }
+  .resumen-tipos-valor { font-family: 'Manrope', sans-serif; font-weight: 700; }
   .resumen-tipos-bar { height: 5px; border-radius: 100px; overflow: hidden; background: #2a2e3a; margin-top: 10px; display: flex; }
   .bar-necesario { background: rgba(74,222,128,0.65); transition: width 0.3s; }
   .bar-opcional  { background: rgba(251,146,60,0.55); transition: width 0.3s; }
 
-  .analisis-header { display: flex; align-items: flex-start; justify-content: space-between; cursor: pointer; padding: 12px 14px; background: #1c2128; border-radius: 14px; border: 1px solid var(--border2); user-select: none; transition: background 0.15s; margin-bottom: 6px; }
-  .analisis-header:active { background: #21262d; }
+  .analisis-header { display: flex; align-items: flex-start; justify-content: space-between; cursor: pointer; padding: 12px 14px; background: #151d2e; border-radius: 14px; border: 1px solid var(--border2); user-select: none; transition: background 0.15s; margin-bottom: 6px; }
+  .analisis-header:active { background: #1a2234; }
   .analisis-chevron { color: var(--subtext); font-size: 16px; transition: transform 0.25s; flex-shrink: 0; margin-top: 2px; }
   .analisis-chevron.abierto { transform: rotate(90deg); }
   .analisis-body { overflow: hidden; max-height: 0; transition: max-height 0.35s ease, opacity 0.25s ease; opacity: 0; }
   .analisis-body.abierto { max-height: 420px; opacity: 1; }
-  .analisis-msg { background: rgba(88,166,255,0.07); border: 1px solid rgba(88,166,255,0.18); border-radius: 10px; padding: 10px 12px; font-size: 12px; color: var(--subtext); line-height: 1.55; }
-  .analisis-float { position: fixed; left: 50%; transform: translateX(-50%); background: #1c2128; border: 1px solid #30363d; border-radius: 16px; padding: 14px 16px 12px; width: min(330px, 94vw); z-index: 500; box-shadow: 0 8px 32px rgba(0,0,0,0.6); opacity: 0; pointer-events: none; transition: opacity 0.18s; }
+  .analisis-msg { background: rgba(99,102,241,0.07); border: 1px solid rgba(99,102,241,0.18); border-radius: 10px; padding: 10px 12px; font-size: 12px; color: var(--subtext); line-height: 1.55; }
+  .analisis-float { position: fixed; left: 50%; transform: translateX(-50%); background: #151d2e; border: 1px solid #263248; border-radius: 16px; padding: 14px 16px 12px; width: min(330px, 94vw); z-index: 500; box-shadow: 0 8px 32px rgba(0,0,0,0.6); opacity: 0; pointer-events: none; transition: opacity 0.18s; }
   .analisis-float.visible { opacity: 1; }
   .af-title { font-size: 10px; font-weight: 700; letter-spacing: 0.08em; color: var(--subtext); margin-bottom: 10px; }
   .af-head, .af-row { display: grid; grid-template-columns: 1fr 54px 54px 28px; align-items: center; gap: 2px; padding: 3px 0; }
@@ -452,20 +454,20 @@
   .asi-summary { flex: 1; min-width: 0; padding-right: 8px; }
   .asi-row1 { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
   .asi-ingreso { font-size: 12px; color: var(--subtext); }
-  .asi-saldo { font-size: 15px; font-weight: 700; font-family: 'Roboto', sans-serif; }
+  .asi-saldo { font-size: 15px; font-weight: 700; font-family: 'Manrope', sans-serif; }
   .asi-bar-wrap { height: 5px; background: rgba(255,255,255,0.08); border-radius: 3px; overflow: hidden; margin-bottom: 6px; }
   .asi-bar-fill { height: 100%; border-radius: 3px; transition: width 0.4s ease, background 0.4s ease; }
   .asi-row2 { font-size: 11px; color: var(--subtext); }
   /* comparison table */
-  .asi-toggle { background: rgba(125,133,144,0.1); border: 1px solid rgba(125,133,144,0.25); border-radius: 8px; color: #7d8590; font-size: 12px; padding: 4px 10px; cursor: pointer; font-family: 'DM Sans', sans-serif; }
+  .asi-toggle { background: rgba(125,133,144,0.1); border: 1px solid rgba(125,133,144,0.25); border-radius: 8px; color: #94a3b8; font-size: 12px; padding: 4px 10px; cursor: pointer; font-family: 'Manrope', sans-serif; }
   .asi-toggle:active { background: rgba(125,133,144,0.2); }
   .asi-cols-header { display: grid; grid-template-columns: 1fr 1fr 1fr; align-items: center; padding: 0 0 12px; }
   .asi-cols-tucaso { font-size: 11px; color: var(--subtext); text-transform: uppercase; letter-spacing: 0.07em; font-weight: 600; text-align: center; }
   .asi-cols-header .apd-wrap { justify-self: end; }
   .asi-metric-row { display: grid; grid-template-columns: 1fr 1fr 1fr; align-items: center; padding: 9px 0; border-top: 1px solid rgba(255,255,255,0.06); font-size: 13px; }
   .asi-metric-name { color: var(--text); line-height: 1.3; }
-  .asi-metric-real { font-family: 'Roboto', sans-serif; font-weight: 700; font-size: 13px; display: flex; justify-content: center; align-items: center; }
-  .asi-metric-meta { font-family: 'Roboto', sans-serif; font-weight: 700; text-align: right; font-size: 13px; color: var(--subtext); }
+  .asi-metric-real { font-family: 'Manrope', sans-serif; font-weight: 700; font-size: 13px; display: flex; justify-content: center; align-items: center; }
+  .asi-metric-meta { font-family: 'Manrope', sans-serif; font-weight: 700; text-align: right; font-size: 13px; color: var(--subtext); }
   .asi-metric-row.asi-gastos-row { cursor: pointer; -webkit-tap-highlight-color: transparent; }
   .asi-metric-row.asi-gastos-row:active { opacity: 0.8; }
   .asi-sub-inner { padding: 5px 0 5px 6px !important; border-top: none !important; font-size: 12px; }
@@ -475,9 +477,9 @@
   .asi-tabla th:nth-child(2) { text-align: center; }
   .asi-tabla th:nth-child(3) { text-align: right; }
   .asi-tabla td { padding: 8px 0; font-size: 13px; vertical-align: middle; border-top: 1px solid rgba(255,255,255,0.06); }
-  .asi-tabla td:nth-child(2) { text-align: center; font-family: 'Roboto', sans-serif; font-weight: 700; }
-  .asi-tabla td:nth-child(3) { text-align: right; font-family: 'Roboto', sans-serif; font-weight: 700; }
-  .asi-meta-inp { width: 52px; background: transparent; border: none; border-bottom: 1px solid rgba(255,255,255,0.25); border-radius: 0; color: inherit; text-align: right; font-size: 13px; font-family: 'Roboto', sans-serif; font-weight: 700; padding: 1px 0; -moz-appearance: textfield; appearance: none; }
+  .asi-tabla td:nth-child(2) { text-align: center; font-family: 'Manrope', sans-serif; font-weight: 700; }
+  .asi-tabla td:nth-child(3) { text-align: right; font-family: 'Manrope', sans-serif; font-weight: 700; }
+  .asi-meta-inp { width: 52px; background: transparent; border: none; border-bottom: 1px solid rgba(255,255,255,0.25); border-radius: 0; color: inherit; text-align: right; font-size: 13px; font-family: 'Manrope', sans-serif; font-weight: 700; padding: 1px 0; -moz-appearance: textfield; appearance: none; }
   .asi-meta-inp:focus { outline: none; border-bottom-color: rgba(255,255,255,0.7); }
   .asi-meta-inp::-webkit-inner-spin-button, .asi-meta-inp::-webkit-outer-spin-button { -webkit-appearance: none; display: none; }
   .asi-meta-sub { font-size: 10px; color: var(--subtext); margin-top: 3px; }
@@ -488,146 +490,146 @@
   .asi-sub-td { padding: 0 !important; border-top: none !important; }
   .asi-sub-row { display: flex; gap: 4px; font-size: 11px; color: var(--subtext); padding: 2px 0; }
   .asi-sub-row .asr-lbl { flex: 1; font-weight: 500; }
-  .asi-sub-row .asr-val { min-width: 56px; text-align: right; font-family: 'Roboto', sans-serif; font-weight: 600; }
+  .asi-sub-row .asr-val { min-width: 56px; text-align: right; font-family: 'Manrope', sans-serif; font-weight: 600; }
   .asi-sub-row .asr-meta { min-width: 56px; text-align: right; }
   .apd-wrap { position: relative; display: inline-block; }
-  .apd-btn { display: inline-flex; align-items: center; gap: 5px; background: rgba(125,133,144,0.1); border: 1px solid rgba(125,133,144,0.25); border-radius: 20px; padding: 4px 10px; cursor: pointer; color: var(--subtext); font-size: 10px; font-weight: 600; font-family: 'DM Sans', sans-serif; white-space: nowrap; -webkit-tap-highlight-color: transparent; }
+  .apd-btn { display: inline-flex; align-items: center; gap: 5px; background: rgba(125,133,144,0.1); border: 1px solid rgba(125,133,144,0.25); border-radius: 20px; padding: 4px 10px; cursor: pointer; color: var(--subtext); font-size: 10px; font-weight: 600; font-family: 'Manrope', sans-serif; white-space: nowrap; -webkit-tap-highlight-color: transparent; }
   .apd-btn:active { background: rgba(125,133,144,0.2); }
   .apd-dot { width: 5px; height: 5px; border-radius: 50%; background: #484f58; flex-shrink: 0; }
   .apd-chev { font-size: 9px; transition: transform .15s; display: inline-block; line-height: 1; }
   .apd-chev.apd-open { transform: rotate(180deg); }
-  .apd-menu { display: none; position: absolute; right: 0; top: calc(100% + 5px); background: #1c2128; border: 1px solid #30363d; border-radius: 8px; padding: 4px 0; min-width: 120px; z-index: 200; box-shadow: 0 4px 14px rgba(0,0,0,0.5); }
+  .apd-menu { display: none; position: absolute; right: 0; top: calc(100% + 5px); background: #151d2e; border: 1px solid #263248; border-radius: 8px; padding: 4px 0; min-width: 120px; z-index: 200; box-shadow: 0 4px 14px rgba(0,0,0,0.5); }
   .apd-menu.apd-open { display: block; }
-  .apd-opt { display: flex; align-items: center; gap: 7px; width: 100%; background: none; border: none; color: #8b949e; font-size: 12px; font-family: 'DM Sans', sans-serif; padding: 7px 12px; cursor: pointer; text-align: left; white-space: nowrap; -webkit-tap-highlight-color: transparent; }
-  .apd-opt:hover, .apd-opt:active { background: rgba(255,255,255,0.06); color: #e6edf3; }
-  .apd-opt.apd-act { color: #e6edf3; }
-  .apd-opt.apd-act .apd-dot { background: #58a6ff; }
+  .apd-opt { display: flex; align-items: center; gap: 7px; width: 100%; background: none; border: none; color: #94a3b8; font-size: 12px; font-family: 'Manrope', sans-serif; padding: 7px 12px; cursor: pointer; text-align: left; white-space: nowrap; -webkit-tap-highlight-color: transparent; }
+  .apd-opt:hover, .apd-opt:active { background: rgba(255,255,255,0.06); color: #f1f5f9; }
+  .apd-opt.apd-act { color: #f1f5f9; }
+  .apd-opt.apd-act .apd-dot { background: #6366f1; }
 
   .tabla-comparativa { background: none; border: none; padding: 0; }
   .tabla-comp-empty { text-align: center; color: var(--subtext); font-size: 12px; padding: 12px 0; }
 
   .sc-dias { font-size: 12px; color: var(--subtext); margin-bottom: 12px; padding-left: 2px; }
-  .sc-resumen { background: #161b22; border: 1px solid #30363d; border-radius: 14px; padding: 14px 16px; margin-bottom: 12px; display: flex; flex-direction: column; gap: 8px; }
-  .sc-resumen-titulo { font-size: 14px; font-weight: 600; color: #e6edf3; }
-  .sc-resumen-dias { font-size: 12px; color: #7d8590; }
-  .sc-resumen-totales { font-size: 13px; color: #e6edf3; }
-  .sc-resumen-quedan { font-size: 13px; font-weight: 600; color: #3fb950; }
-  .sc-resumen-quedan.sc-resumen-over { color: #f85149; }
-  .sc-resumen-alertas { font-size: 12px; color: #f85149; line-height: 1.7; }
-  .sc-resumen-tip { font-size: 12px; color: #e3b341; line-height: 1.5; }
-  .sc-lista-card { background: #161b22; border: 1px solid #30363d; border-radius: 14px; padding: 4px 0; margin-bottom: 8px; }
+  .sc-resumen { background: #111827; border: 1px solid #263248; border-radius: 14px; padding: 14px 16px; margin-bottom: 12px; display: flex; flex-direction: column; gap: 8px; }
+  .sc-resumen-titulo { font-size: 14px; font-weight: 600; color: #f1f5f9; }
+  .sc-resumen-dias { font-size: 12px; color: #94a3b8; }
+  .sc-resumen-totales { font-size: 13px; color: #f1f5f9; }
+  .sc-resumen-quedan { font-size: 13px; font-weight: 600; color: #10b981; }
+  .sc-resumen-quedan.sc-resumen-over { color: #ef4444; }
+  .sc-resumen-alertas { font-size: 12px; color: #ef4444; line-height: 1.7; }
+  .sc-resumen-tip { font-size: 12px; color: #f59e0b; line-height: 1.5; }
+  .sc-lista-card { background: #111827; border: 1px solid #263248; border-radius: 14px; padding: 4px 0; margin-bottom: 8px; }
   .sc-lista-grupo { padding: 8px 14px; }
-  .sc-lista-grupo-title { font-size: 11px; font-weight: 700; color: #7d8590; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; }
+  .sc-lista-grupo-title { font-size: 11px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; }
   .sc-lista-row { display: flex; align-items: center; justify-content: space-between; padding: 7px 0; }
-  .sc-lista-label { font-size: 15px; color: #e6edf3; display: flex; align-items: center; gap: 6px; }
+  .sc-lista-label { font-size: 15px; color: #f1f5f9; display: flex; align-items: center; gap: 6px; }
   .sc-lista-pill { font-size: 13px; font-weight: 600; padding: 3px 10px; border-radius: 20px; white-space: nowrap; flex-shrink: 0; }
-  .sc-lista-pill-over { background: rgba(248,81,73,0.15); color: #f85149; }
-  .sc-lista-pill-free { background: rgba(63,185,80,0.15); color: #3fb950; }
-  .sc-lista-pill-fijo { background: rgba(125,133,144,0.12); color: #7d8590; }
-  .sc-lista-sep { height: 1px; background: #21262d; margin: 0 14px; }
+  .sc-lista-pill-over { background: rgba(239,68,68,0.15); color: #ef4444; }
+  .sc-lista-pill-free { background: rgba(16,185,129,0.15); color: #10b981; }
+  .sc-lista-pill-fijo { background: rgba(125,133,144,0.12); color: #94a3b8; }
+  .sc-lista-sep { height: 1px; background: #1a2234; margin: 0 14px; }
   .sc-lista-row-right { display: flex; align-items: center; gap: 7px; flex-shrink: 0; }
-  .sc-lista-repartir { background: rgba(88,166,255,0.1); border: 1px solid rgba(88,166,255,0.25); border-radius: 20px; color: #58a6ff; font-size: 11px; font-weight: 600; padding: 3px 9px; cursor: pointer; white-space: nowrap; font-family: 'DM Sans', sans-serif; -webkit-tap-highlight-color: transparent; }
-  .sc-lista-repartir:active { background: rgba(88,166,255,0.22); }
+  .sc-lista-repartir { background: rgba(99,102,241,0.1); border: 1px solid rgba(99,102,241,0.25); border-radius: 20px; color: #6366f1; font-size: 11px; font-weight: 600; padding: 3px 9px; cursor: pointer; white-space: nowrap; font-family: 'Manrope', sans-serif; -webkit-tap-highlight-color: transparent; }
+  .sc-lista-repartir:active { background: rgba(99,102,241,0.22); }
   .sc-lista-row-wrap { }
   .sc-lista-row-clickable { cursor: pointer; -webkit-tap-highlight-color: transparent; }
   .sc-lista-row-clickable:active { opacity: 0.7; }
-  .sc-det-chev { font-size: 12px; color: #7d8590; transition: transform 0.2s ease; flex-shrink: 0; margin-left: 4px; display: inline-block; line-height: 1; }
+  .sc-det-chev { font-size: 12px; color: #94a3b8; transition: transform 0.2s ease; flex-shrink: 0; margin-left: 4px; display: inline-block; line-height: 1; }
   .sc-det-panel { max-height: 0; overflow: hidden; transition: max-height 0.3s ease; }
-  .sc-det-inner { padding: 8px 0 4px; border-top: 1px solid #21262d; margin-top: 4px; }
+  .sc-det-inner { padding: 8px 0 4px; border-top: 1px solid #1a2234; margin-top: 4px; }
   .sc-det-summary { display: flex; justify-content: space-between; align-items: flex-start; padding: 0 2px 8px; }
   .sc-det-col { display: flex; flex-direction: column; gap: 2px; }
-  .sc-det-lbl { font-size: 10px; color: #7d8590; text-transform: uppercase; letter-spacing: 0.06em; font-weight: 600; }
+  .sc-det-lbl { font-size: 10px; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.06em; font-weight: 600; }
   .sc-det-amt { font-size: 15px; font-weight: 700; }
   .sc-det-bar-wrap { margin-bottom: 8px; }
-  .sc-det-bar { height: 4px; background: #21262d; border-radius: 4px; overflow: hidden; margin-bottom: 4px; }
+  .sc-det-bar { height: 4px; background: #1a2234; border-radius: 4px; overflow: hidden; margin-bottom: 4px; }
   .sc-det-bar-fill { height: 100%; border-radius: 4px; }
   .sc-det-bar-nums { display: flex; justify-content: space-between; font-size: 10px; }
   .sc-det-movs { display: flex; flex-direction: column; }
-  .sc-det-mov { display: flex; justify-content: space-between; align-items: flex-start; padding: 9px 0; border-bottom: 1px solid #1c2230; }
+  .sc-det-mov { display: flex; justify-content: space-between; align-items: flex-start; padding: 9px 0; border-bottom: 1px solid #151d2e; }
   .sc-det-mov:last-child { border-bottom: none; }
   .sc-det-mov-info { display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0; }
-  .sc-det-mov-name { font-size: 14px; color: #e6edf3; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .sc-det-mov-date { font-size: 11px; color: #7d8590; }
-  .sc-det-mov-amount { font-size: 14px; font-weight: 600; color: #f85149; flex-shrink: 0; margin-left: 10px; }
-  .sc-det-empty { font-size: 13px; color: #7d8590; padding: 10px 0; text-align: center; }
+  .sc-det-mov-name { font-size: 14px; color: #f1f5f9; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .sc-det-mov-date { font-size: 11px; color: #94a3b8; }
+  .sc-det-mov-amount { font-size: 14px; font-weight: 600; color: #ef4444; flex-shrink: 0; margin-left: 10px; }
+  .sc-det-empty { font-size: 13px; color: #94a3b8; padding: 10px 0; text-align: center; }
   .rdist-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 600; align-items: flex-end; justify-content: center; }
   .rdist-overlay.rdist-open { display: flex; }
   .rdist-modal { background: #090e17; border-radius: 20px 20px 0 0; width: 100%; max-width: 480px; max-height: 88vh; overflow-y: auto; padding-bottom: env(safe-area-inset-bottom, 12px); }
-  .rdist-top-row { display: flex; align-items: center; justify-content: space-between; padding: 18px 18px 14px; border-bottom: 1px solid #1c2230; }
-  .rdist-top-cat { font-size: 16px; font-weight: 700; color: #e6edf3; }
-  .rdist-top-pill { font-size: 13px; font-weight: 700; color: #e6edf3; background: rgba(248,81,73,0.28); border: 1px solid rgba(248,81,73,0.35); padding: 5px 13px; border-radius: 20px; white-space: nowrap; }
+  .rdist-top-row { display: flex; align-items: center; justify-content: space-between; padding: 18px 18px 14px; border-bottom: 1px solid #151d2e; }
+  .rdist-top-cat { font-size: 16px; font-weight: 700; color: #f1f5f9; }
+  .rdist-top-pill { font-size: 13px; font-weight: 700; color: #f1f5f9; background: rgba(239,68,68,0.28); border: 1px solid rgba(239,68,68,0.35); padding: 5px 13px; border-radius: 20px; white-space: nowrap; }
   .rdist-section-lbl { font-size: 10px; font-weight: 700; color: #3d4656; text-transform: uppercase; letter-spacing: 0.1em; padding: 14px 18px 6px; }
   .rdist-origen-row { display: flex; align-items: center; gap: 11px; padding: 8px 18px 14px; }
   .rdist-origen-icon { font-size: 22px; flex-shrink: 0; }
-  .rdist-origen-name { flex: 1; font-size: 15px; font-weight: 700; color: #e6edf3; }
-  .rdist-origen-exc { font-size: 14px; font-weight: 700; color: #f85149; }
-  .rdist-sep { height: 1px; background: #1c2230; }
-  .rdist-dest-row { display: flex; align-items: center; gap: 12px; padding: 13px 18px; border-bottom: 1px solid #1c2230; }
+  .rdist-origen-name { flex: 1; font-size: 15px; font-weight: 700; color: #f1f5f9; }
+  .rdist-origen-exc { font-size: 14px; font-weight: 700; color: #ef4444; }
+  .rdist-sep { height: 1px; background: #151d2e; }
+  .rdist-dest-row { display: flex; align-items: center; gap: 12px; padding: 13px 18px; border-bottom: 1px solid #151d2e; }
   .rdist-dest-row:last-child { border-bottom: none; }
   .rdist-dest-icon { font-size: 22px; flex-shrink: 0; }
   .rdist-dest-info { flex: 1; min-width: 0; }
-  .rdist-dest-name { font-size: 15px; font-weight: 700; color: #e6edf3; }
-  .rdist-dest-libre { font-size: 12px; color: #3fb950; margin-top: 2px; transition: color .15s; }
-  .rdist-dest-libre.rdist-agotado { color: #f85149; }
+  .rdist-dest-name { font-size: 15px; font-weight: 700; color: #f1f5f9; }
+  .rdist-dest-libre { font-size: 12px; color: #10b981; margin-top: 2px; transition: color .15s; }
+  .rdist-dest-libre.rdist-agotado { color: #ef4444; }
   .rdist-dest-inputwrap { display: flex; align-items: center; gap: 5px; flex-shrink: 0; }
-  .rdist-input { width: 72px; background: #141b27; border: 1.5px solid #252e3f; border-radius: 9px; color: #e6edf3; font-size: 15px; font-weight: 600; padding: 9px 10px; text-align: right; font-family: 'Roboto', sans-serif; -webkit-appearance: none; }
-  .rdist-input:focus { outline: none; border-color: #3fb950; }
-  .rdist-euro { font-size: 14px; color: #5a6478; font-weight: 600; }
-  .rdist-empty { font-size: 13px; color: #5a6478; padding: 22px 18px; text-align: center; }
+  .rdist-input { width: 72px; background: #141b27; border: 1.5px solid #252e3f; border-radius: 9px; color: #f1f5f9; font-size: 15px; font-weight: 600; padding: 9px 10px; text-align: right; font-family: 'Manrope', sans-serif; -webkit-appearance: none; }
+  .rdist-input:focus { outline: none; border-color: #10b981; }
+  .rdist-euro { font-size: 14px; color: #64748b; font-weight: 600; }
+  .rdist-empty { font-size: 13px; color: #64748b; padding: 22px 18px; text-align: center; }
   .rdist-progress-wrap { padding: 13px 18px 10px; }
   .rdist-progress-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 7px; }
-  .rdist-progress-lbl { font-size: 12px; color: #5a6478; }
-  .rdist-progress-nums { font-size: 12px; font-weight: 700; color: #e6edf3; }
-  .rdist-progress-bar { height: 5px; background: #1c2230; border-radius: 5px; overflow: hidden; }
-  .rdist-progress-fill { height: 100%; background: #3fb950; border-radius: 5px; transition: width .2s ease; }
-  .rdist-confirmar-btn { display: block; width: calc(100% - 36px); margin: 14px 18px 6px; background: #3fb950; border: none; border-radius: 14px; color: #080e17; font-size: 16px; font-weight: 700; padding: 17px; cursor: pointer; font-family: 'DM Sans', sans-serif; -webkit-tap-highlight-color: transparent; letter-spacing: 0.01em; }
+  .rdist-progress-lbl { font-size: 12px; color: #64748b; }
+  .rdist-progress-nums { font-size: 12px; font-weight: 700; color: #f1f5f9; }
+  .rdist-progress-bar { height: 5px; background: #151d2e; border-radius: 5px; overflow: hidden; }
+  .rdist-progress-fill { height: 100%; background: #10b981; border-radius: 5px; transition: width .2s ease; }
+  .rdist-confirmar-btn { display: block; width: calc(100% - 36px); margin: 14px 18px 6px; background: #10b981; border: none; border-radius: 14px; color: #080e17; font-size: 16px; font-weight: 700; padding: 17px; cursor: pointer; font-family: 'Manrope', sans-serif; -webkit-tap-highlight-color: transparent; letter-spacing: 0.01em; }
   .rdist-confirmar-btn:active { background: #35a344; }
   .rdist-confirm-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.55); z-index: 700; align-items: flex-end; justify-content: center; }
   .rdist-confirm-overlay.rdist-confirm-open { display: flex; }
-  .rdist-confirm-sheet { background: #0d1117; border-radius: 20px 20px 0 0; width: 100%; max-width: 480px; padding: 26px 20px calc(22px + env(safe-area-inset-bottom, 0px)); }
-  .rdist-confirm-msg { font-size: 16px; font-weight: 700; color: #e6edf3; margin-bottom: 8px; }
-  .rdist-confirm-sub { font-size: 13px; color: #7d8590; margin-bottom: 24px; line-height: 1.5; }
+  .rdist-confirm-sheet { background: #0a0e1a; border-radius: 20px 20px 0 0; width: 100%; max-width: 480px; padding: 26px 20px calc(22px + env(safe-area-inset-bottom, 0px)); }
+  .rdist-confirm-msg { font-size: 16px; font-weight: 700; color: #f1f5f9; margin-bottom: 8px; }
+  .rdist-confirm-sub { font-size: 13px; color: #94a3b8; margin-bottom: 24px; line-height: 1.5; }
   .rdist-confirm-btns { display: flex; gap: 10px; }
-  .rdist-confirm-cancel { flex: 1; background: #21262d; border: none; border-radius: 13px; color: #e6edf3; font-size: 15px; font-weight: 600; padding: 15px; cursor: pointer; font-family: 'DM Sans', sans-serif; -webkit-tap-highlight-color: transparent; }
+  .rdist-confirm-cancel { flex: 1; background: #1a2234; border: none; border-radius: 13px; color: #f1f5f9; font-size: 15px; font-weight: 600; padding: 15px; cursor: pointer; font-family: 'Manrope', sans-serif; -webkit-tap-highlight-color: transparent; }
   .rdist-confirm-cancel:active { background: #2d333b; }
-  .rdist-confirm-ok { flex: 1; background: #3fb950; border: none; border-radius: 13px; color: #080e17; font-size: 15px; font-weight: 700; padding: 15px; cursor: pointer; font-family: 'DM Sans', sans-serif; -webkit-tap-highlight-color: transparent; }
+  .rdist-confirm-ok { flex: 1; background: #10b981; border: none; border-radius: 13px; color: #080e17; font-size: 15px; font-weight: 700; padding: 15px; cursor: pointer; font-family: 'Manrope', sans-serif; -webkit-tap-highlight-color: transparent; }
   .rdist-confirm-ok:active { background: #35a344; }
   .sc-lista-pin { font-size: 11px; opacity: 0.22; cursor: pointer; -webkit-tap-highlight-color: transparent; transition: opacity .15s; flex-shrink: 0; user-select: none; margin-left: 8px; }
   .sc-lista-pin.sc-pin-on { opacity: 1; }
   .sc-lista-pin:active { opacity: 0.6; }
   .sc-lista-oculto-toggle { display: flex; align-items: center; justify-content: space-between; padding: 9px 14px; cursor: pointer; -webkit-tap-highlight-color: transparent; }
   .sc-lista-oculto-toggle:active { opacity: 0.7; }
-  .sc-lista-oculto-label { font-size: 11px; font-weight: 700; color: #7d8590; text-transform: uppercase; letter-spacing: 0.05em; }
-  .sc-lista-oculto-chev { font-size: 11px; color: #7d8590; display: inline-block; transition: transform .2s ease; }
+  .sc-lista-oculto-label { font-size: 11px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em; }
+  .sc-lista-oculto-chev { font-size: 11px; color: #94a3b8; display: inline-block; transition: transform .2s ease; }
   .sc-lista-oculto-body { overflow: hidden; transition: max-height .25s ease; }
-  .sc-card { background: #161b22; border-radius: 14px; padding: 12px 14px; margin-bottom: 8px; border: 1px solid var(--border); transition: opacity 0.3s, filter 0.3s; }
+  .sc-card { background: #111827; border-radius: 14px; padding: 12px 14px; margin-bottom: 8px; border: 1px solid var(--border); transition: opacity 0.3s, filter 0.3s; }
   .sc-card.sc-apagado { opacity: 0.3; filter: grayscale(0.8); }
   .sc-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
   .sc-cat { font-size: 13px; font-weight: 600; color: #adb8c5; }
   .sc-top-right { display: flex; align-items: center; gap: 8px; }
-  .sc-diff { font-family: monospace, sans-serif; font-size: 15px; font-weight: 700; font-variant-numeric: tabular-nums; flex-shrink: 0; padding: 2px 7px; border-radius: 6px; background: #0d1117; }
-  .sc-over    { color: #f85149; }
-  .sc-under   { color: #3fb950; }
-  .sc-en-meta { color: #e3b341; }
+  .sc-diff { font-family: monospace, sans-serif; font-size: 15px; font-weight: 700; font-variant-numeric: tabular-nums; flex-shrink: 0; padding: 2px 7px; border-radius: 6px; background: #0a0e1a; }
+  .sc-over    { color: #ef4444; }
+  .sc-under   { color: #10b981; }
+  .sc-en-meta { color: #f59e0b; }
   .sc-fijo-btn { background: none; border: none; cursor: pointer; padding: 2px 3px; font-size: 13px; line-height: 1; opacity: 0.25; transition: opacity 0.2s; flex-shrink: 0; }
   .sc-fijo-btn:hover { opacity: 0.6; }
   .sc-fijo-btn.sc-fijo-on { opacity: 1; filter: sepia(1) saturate(3) hue-rotate(10deg); }
-  .sc-toggle { width: 24px; height: 14px; border-radius: 100px; border: 1px solid #30363d; background: #21262d; cursor: pointer; position: relative; transition: background 0.2s, border-color 0.2s; flex-shrink: 0; padding: 0; }
-  .sc-toggle::after { content: ''; position: absolute; top: 3px; left: 3px; width: 8px; height: 8px; border-radius: 50%; background: #8b949e; transition: transform 0.2s, background 0.2s; }
-  .sc-toggle.sc-on { background: rgba(63,185,80,0.15); border-color: rgba(63,185,80,0.45); }
-  .sc-toggle.sc-on::after { transform: translateX(10px); background: #3fb950; }
+  .sc-toggle { width: 24px; height: 14px; border-radius: 100px; border: 1px solid #263248; background: #1a2234; cursor: pointer; position: relative; transition: background 0.2s, border-color 0.2s; flex-shrink: 0; padding: 0; }
+  .sc-toggle::after { content: ''; position: absolute; top: 3px; left: 3px; width: 8px; height: 8px; border-radius: 50%; background: #94a3b8; transition: transform 0.2s, background 0.2s; }
+  .sc-toggle.sc-on { background: rgba(16,185,129,0.15); border-color: rgba(16,185,129,0.45); }
+  .sc-toggle.sc-on::after { transform: translateX(10px); background: #10b981; }
   .sc-mid { display: flex; align-items: flex-end; justify-content: space-between; gap: 8px; margin-bottom: 10px; }
   .sc-col { text-align: left; }
   .sc-col:last-child { text-align: right; }
-  .sc-lbl { font-size: 9px; color: #7d8590; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 3px; }
-  .sc-valor { font-family: 'Roboto', sans-serif; font-size: 14px; font-weight: 700; }
-  .sc-val-meta    { color: #e6edf3; }
-  .sc-val-gastado { color: #e6edf3; }
-  .sc-val-ok   { color: #e6edf3; }
-  .sc-val-over { color: #e6edf3; }
+  .sc-lbl { font-size: 9px; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 3px; }
+  .sc-valor { font-family: 'Manrope', sans-serif; font-size: 14px; font-weight: 700; }
+  .sc-val-meta    { color: #f1f5f9; }
+  .sc-val-gastado { color: #f1f5f9; }
+  .sc-val-ok   { color: #f1f5f9; }
+  .sc-val-over { color: #f1f5f9; }
   .sc-sep { font-size: 11px; color: var(--subtext); padding-top: 14px; flex-shrink: 0; }
   .sc-bar { height: 4px; background: var(--border2); border-radius: 100px; overflow: hidden; }
-  .sc-bar-fill { height: 100%; border-radius: 100px; transition: width 0.4s; background: #7d8590; }
+  .sc-bar-fill { height: 100%; border-radius: 100px; transition: width 0.4s; background: #94a3b8; }
   .sc-col-tap { cursor: pointer; }
   .sc-col-tap:active { opacity: 0.7; }
   .sc-lbl-link::after { content: ' ↗'; font-size: 8px; opacity: 0.6; }
@@ -635,7 +637,7 @@
   .sc-movs-wrap.sc-abierto { max-height: 2400px; }
   .sc-chevron { display: inline-block; width: 11px; height: 11px; flex-shrink: 0; opacity: 0.45; vertical-align: middle; margin-left: 3px; transition: transform 0.3s ease, opacity 0.2s; }
   .sc-card:has(.sc-movs-wrap.sc-abierto) .sc-chevron { transform: rotate(180deg); opacity: 0.75; }
-  @keyframes scHighlightPlan { 10% { box-shadow: 0 0 0 3px rgba(88,166,255,0.55); } 90% { box-shadow: 0 0 0 2px rgba(88,166,255,0.1); } }
+  @keyframes scHighlightPlan { 10% { box-shadow: 0 0 0 3px rgba(99,102,241,0.55); } 90% { box-shadow: 0 0 0 2px rgba(99,102,241,0.1); } }
   .sc-highlight-plan { animation: scHighlightPlan 1.4s ease; }
   .sc-movs-inner { padding-top: 10px; border-top: 1px solid var(--border); margin-top: 10px; }
   .cat-mov-item { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--border2); }
@@ -646,8 +648,8 @@
   .cm-nombre { font-size: 13px; color: var(--text); font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .cm-fecha  { font-size: 11px; color: var(--subtext); margin-top: 1px; }
   .cm-monto  { font-size: 13px; font-weight: 700; color: var(--danger); flex-shrink: 0; }
-  .cm-monto.cm-verde { color: #3fb950; }
-  .cm-edit   { font-size: 12px; color: #58a6ff; flex-shrink: 0; opacity: 0.8; }
+  .cm-monto.cm-verde { color: #10b981; }
+  .cm-edit   { font-size: 12px; color: #6366f1; flex-shrink: 0; opacity: 0.8; }
   .cat-movs-empty { font-size: 12px; color: var(--subtext); text-align: center; padding: 12px 0; }
 
   .modal-overlay, .modal-abonar-overlay {
@@ -669,7 +671,7 @@
   @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
 
   .modal-handle { width: 40px; height: 4px; background: var(--border); border-radius: 100px; margin: 0 auto 20px; }
-  .modal-title  { font-family: 'DM Sans', sans-serif; font-size: 18px; font-weight: 700; color: var(--text); margin-bottom: 18px; }
+  .modal-title  { font-family: 'Manrope', sans-serif; font-size: 18px; font-weight: 700; color: var(--text); margin-bottom: 18px; }
 
   .input-group { margin-bottom: 12px; }
 
@@ -683,16 +685,16 @@
     width: 100%; background: var(--card2);
     border: 1px solid var(--border); border-radius: 12px;
     padding: 12px 14px; color: var(--text);
-    font-family: 'DM Sans', sans-serif; font-size: 15px; outline: none;
+    font-family: 'Manrope', sans-serif; font-size: 15px; outline: none;
   }
 
-  .input-group select option { background: #21262d; }
-  .input-group input:focus, .input-group select:focus { border-color: rgba(88,166,255,0.3); }
+  .input-group select option { background: #1a2234; }
+  .input-group input:focus, .input-group select:focus { border-color: rgba(99,102,241,0.3); }
 
   .btn-guardar {
-    width: 100%; background: var(--accent); color: #0d1117;
+    width: 100%; background: var(--accent); color: #0a0e1a;
     border: none; border-radius: 14px; padding: 14px;
-    font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 700;
+    font-family: 'Manrope', sans-serif; font-size: 15px; font-weight: 700;
     cursor: pointer; margin-top: 6px;
   }
   .btn-guardar:disabled { opacity: 0.5; cursor: not-allowed; }
@@ -700,7 +702,7 @@
   .btn-cancelar {
     width: 100%; background: none; border: none;
     color: var(--subtext); font-size: 14px; cursor: pointer;
-    padding: 12px; font-family: 'DM Sans', sans-serif;
+    padding: 12px; font-family: 'Manrope', sans-serif;
   }
 
   /* --- Modal Nueva Meta: fechas lado a lado y bloque cálculo --- */
@@ -709,38 +711,38 @@
   .m-calc-header { font-size: 10px; color: var(--subtext); text-transform: uppercase; letter-spacing: 0.1em; font-weight: 700; margin-bottom: 8px; }
   .m-calc-cards { display: flex; gap: 10px; margin-bottom: 10px; }
   .m-calc-card { flex: 1; border-radius: 12px; padding: 12px; }
-  .m-calc-verde { background: rgba(63,185,80,0.1); border: 1px solid rgba(63,185,80,0.2); }
-  .m-calc-azul  { background: rgba(88,166,255,0.1); border: 1px solid rgba(88,166,255,0.2); }
+  .m-calc-verde { background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.2); }
+  .m-calc-azul  { background: rgba(99,102,241,0.1); border: 1px solid rgba(99,102,241,0.2); }
   .m-calc-label { font-size: 9px; color: var(--subtext); text-transform: uppercase; letter-spacing: 0.1em; font-weight: 600; margin-bottom: 4px; }
-  .m-calc-valor { font-family: 'Roboto', sans-serif; font-size: 22px; font-weight: 700; line-height: 1.1; margin-bottom: 2px; }
-  .m-calc-verde .m-calc-valor { color: #3fb950; }
-  .m-calc-azul  .m-calc-valor { color: #58a6ff; }
+  .m-calc-valor { font-family: 'Manrope', sans-serif; font-size: 22px; font-weight: 700; line-height: 1.1; margin-bottom: 2px; }
+  .m-calc-verde .m-calc-valor { color: #10b981; }
+  .m-calc-azul  .m-calc-valor { color: #6366f1; }
   .m-calc-sub { font-size: 10px; color: var(--subtext); }
   .m-calc-texto { font-size: 11px; color: var(--subtext); line-height: 1.5; background: rgba(255,255,255,0.03); border-radius: 8px; padding: 8px 10px; }
   .m-emoji-grid { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
   .m-emoji-btn { width: 40px; height: 40px; border-radius: 10px; border: 1px solid var(--border); background: var(--card2); font-size: 20px; display: flex; align-items: center; justify-content: center; cursor: pointer; -webkit-tap-highlight-color: transparent; }
-  .m-emoji-btn.m-sel { border-color: rgba(88,166,255,0.55); background: rgba(88,166,255,0.1); }
+  .m-emoji-btn.m-sel { border-color: rgba(99,102,241,0.55); background: rgba(99,102,241,0.1); }
 
   /* COLCHÓN DE AHORRO */
   .colchon-card { margin: 0 24px 16px; background: var(--card); border-radius: 20px; padding: 20px; border: 1px solid var(--border); text-align: center; animation: fadeUp 0.4s ease both; opacity: 0; }
   .colchon-label { font-size: 11px; color: var(--subtext); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 8px; }
-  .colchon-total { font-family: 'Roboto', sans-serif; font-size: 30px; font-weight: 700; color: #3fb950; margin-bottom: 14px; }
-  .btn-colchon-add { background: var(--accent); color: #0d1117; border: none; border-radius: 12px; padding: 11px 22px; font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 700; cursor: pointer; transition: opacity 0.2s; }
+  .colchon-total { font-family: 'Manrope', sans-serif; font-size: 30px; font-weight: 700; color: #10b981; margin-bottom: 14px; }
+  .btn-colchon-add { background: var(--accent); color: #0a0e1a; border: none; border-radius: 12px; padding: 11px 22px; font-family: 'Manrope', sans-serif; font-size: 14px; font-weight: 700; cursor: pointer; transition: opacity 0.2s; }
   .btn-colchon-add:hover { opacity: 0.9; }
 
   .colchon-historial-wrap { padding: 0 24px; margin-bottom: 16px; animation: fadeUp 0.4s 0.05s ease both; opacity: 0; }
   .colchon-table-card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 14px 16px; }
   .colchon-table { width: 100%; border-collapse: collapse; font-size: 12px; }
-  .colchon-table th { text-align: left; color: var(--subtext); font-size: 10px; text-transform: uppercase; letter-spacing: 0.06em; padding-bottom: 8px; font-family: 'DM Sans', sans-serif; font-weight: 500; }
+  .colchon-table th { text-align: left; color: var(--subtext); font-size: 10px; text-transform: uppercase; letter-spacing: 0.06em; padding-bottom: 8px; font-family: 'Manrope', sans-serif; font-weight: 500; }
   .colchon-table td { padding: 8px 0; border-top: 1px solid var(--border2); color: var(--text); vertical-align: top; }
-  .colchon-table td.monto { font-family: 'Roboto', sans-serif; font-weight: 700; text-align: right; white-space: nowrap; }
+  .colchon-table td.monto { font-family: 'Manrope', sans-serif; font-weight: 700; text-align: right; white-space: nowrap; }
   .colchon-tag { font-size: 9px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; margin-top: 3px; }
-  .monto-entrada  { color: #3fb950; }
-  .monto-retirada { color: #f85149; }
+  .monto-entrada  { color: #10b981; }
+  .monto-retirada { color: #ef4444; }
   .colchon-acciones { text-align: right; white-space: nowrap; padding-left: 8px; }
   .fila-inactiva { opacity: 0.4; }
   .switch-sm { display: inline-block; width: 28px; height: 16px; background: var(--card2); border-radius: 100px; border: 1px solid var(--border2); position: relative; cursor: pointer; vertical-align: middle; margin-right: 8px; transition: background 0.3s, border-color 0.3s; }
-  .switch-sm.on { background: rgba(88,166,255,0.2); border-color: rgba(88,166,255,0.4); }
+  .switch-sm.on { background: rgba(99,102,241,0.2); border-color: rgba(99,102,241,0.4); }
   .switch-sm::after { content: ''; position: absolute; top: 1px; left: 1px; width: 12px; height: 12px; border-radius: 50%; background: var(--subtext); transition: transform 0.3s, background 0.3s; }
   .switch-sm.on::after { transform: translateX(12px); background: var(--accent); }
   .colchon-btn { cursor: pointer; font-size: 13px; opacity: 0.75; margin-left: 6px; transition: opacity 0.15s; }
@@ -754,7 +756,7 @@
     left: 50%;
     transform: translateX(-50%);
     background: var(--accent);
-    color: #0d1117;
+    color: #0a0e1a;
     width: 58px;
     height: 58px;
     border-radius: 50%;
@@ -764,11 +766,11 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 8px 32px rgba(88,166,255,0.4);
+    box-shadow: 0 8px 32px rgba(99,102,241,0.4);
     transition: transform 0.2s, box-shadow 0.2s;
     z-index: 100;
   }
-  .fab:hover { transform: translateX(-50%) scale(1.08); box-shadow: 0 12px 40px rgba(88,166,255,0.55); }
+  .fab:hover { transform: translateX(-50%) scale(1.08); box-shadow: 0 12px 40px rgba(99,102,241,0.55); }
 
   /* NAVBAR */
   .navbar {
@@ -789,9 +791,9 @@
   .mas-item { display: flex; align-items: center; gap: 14px; padding: 14px 2px; cursor: pointer; border-bottom: 1px solid var(--border); transition: opacity 0.15s; }
   .mas-item:last-of-type { border-bottom: none; margin-bottom: 16px; }
   .mas-item:active { opacity: 0.6; }
-  .mas-icon { width: 42px; height: 42px; border-radius: 13px; background: rgba(88,166,255,0.12); display: flex; align-items: center; justify-content: center; font-size: 19px; flex-shrink: 0; }
+  .mas-icon { width: 42px; height: 42px; border-radius: 13px; background: rgba(99,102,241,0.12); display: flex; align-items: center; justify-content: center; font-size: 19px; flex-shrink: 0; }
   .mas-label { flex: 1; font-size: 15px; font-weight: 600; color: var(--text); }
-  .mas-arrow { color: #58a6ff; font-size: 18px; }
+  .mas-arrow { color: #6366f1; font-size: 18px; }
 
   .spacer { height: 130px; }
 
@@ -805,10 +807,151 @@
     color: var(--text); z-index: 300; transition: transform 0.3s ease; white-space: nowrap;
   }
   .toast.show { transform: translateX(-50%) translateY(0); }
-  .toast.ok   { border-color: rgba(88,166,255,0.3); color: var(--accent); }
+  .toast.ok   { border-color: rgba(99,102,241,0.3); color: var(--accent); }
   .toast.err  { border-color: rgba(255,107,107,0.3); color: var(--danger); }
 
   .loading-metas { text-align: center; color: var(--subtext); font-size: 13px; padding: 20px 0; }
+
+  /* ═════════ Rediseño Metas: recorrido guiado (sistema del dashboard) ═════════ */
+  body { font-family: 'Manrope', sans-serif; }
+  .phone { width: 100%; max-width: 430px; overflow-x: clip; position: relative; }
+  .modal { width: 100%; max-width: 430px; }
+  .num { font-variant-numeric: tabular-nums; }
+  .phone button { font-family: inherit; }
+  .phone :focus-visible { outline: 2px solid #a5b4fc; outline-offset: 2px; }
+  .btn-guardar { background: #10b981; color: #052e1f; font-weight: 800; }
+
+  .header { padding: 52px 20px 12px; }
+  .header-title { font-size: 26px; font-weight: 800; letter-spacing: -0.02em; }
+  .header-sub { font-weight: 600; }
+
+  /* Pasos */
+  .pasos { margin: 0 20px 18px; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; padding: 5px; border-radius: 18px; background: var(--card); border: 1px solid var(--border); }
+  .paso-tab { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 8px 2px; min-height: 56px; border: 0; border-radius: 14px; background: none; color: var(--subtext); font: 700 11px 'Manrope', sans-serif; cursor: pointer; transition: background .25s, color .25s; }
+  .paso-tab b { width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; font-size: 12px; font-weight: 800; background: var(--card2); color: var(--subtext); transition: background .25s, color .25s; }
+  .paso-tab.activo { background: rgba(16,185,129,.14); color: var(--green-txt); }
+  .paso-tab.activo b { background: #10b981; color: #052e1f; }
+  .paso { animation: sube .5s cubic-bezier(.16,1,.3,1) both; }
+  .paso[hidden] { display: none; }
+  @keyframes sube { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+  .paso-intro { margin: 0 20px 16px; }
+  .paso-eyebrow { font-size: 11px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; color: var(--green-txt); }
+  .paso-intro h2 { margin: 4px 0 6px; font-size: 22px; font-weight: 800; letter-spacing: -0.01em; }
+  .paso-intro p { margin: 0; font-size: 14px; line-height: 1.5; color: var(--subtext); }
+  .paso-intro p b { color: var(--text); }
+  .btn-siguiente { display: flex; align-items: center; justify-content: center; gap: 8px; width: calc(100% - 40px); margin: 6px 20px 18px; height: 52px; border-radius: 16px; border: 0; background: #10b981; color: #052e1f; font: 800 15px 'Manrope', sans-serif; cursor: pointer; box-shadow: 0 10px 26px rgba(16,185,129,.28); }
+  .meta-vacia .btn-siguiente { width: 100%; margin: 8px 0 0; }
+
+  /* Tarjetas genéricas */
+  .tarjeta { margin: 0 20px 12px; padding: 16px; border-radius: 22px; background: var(--card); border: 1px solid var(--border); }
+  .t-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; margin-bottom: 10px; }
+  .t-titulo { margin: 0; font-size: 12px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: var(--subtext); }
+  .t-nota-corta { font-size: 11px; font-weight: 600; color: var(--subtext); text-align: right; }
+
+  /* Planificador: bloques existentes con el estilo nuevo */
+  .planificador { margin: 0 20px 12px; padding: 0; background: none; border: 0; animation: none; opacity: 1; }
+  .plan-title-row, .seccion-label { display: none; }
+  .bloque-card { background: var(--card); border: 1px solid var(--border); border-radius: 20px; padding: 14px 16px; }
+  .bloque-label { font-size: 12px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: var(--subtext); }
+  .bloque-ing-input { font: 800 28px 'Manrope', sans-serif; color: var(--green-txt); width: 100%; font-variant-numeric: tabular-nums; }
+  .bloque-total-grande { font-size: 24px; font-weight: 800; font-variant-numeric: tabular-nums; }
+  .disponible-card .bloque-total-grande { color: var(--green-txt); }
+  .bloque-total-grande.negativo { color: var(--red-txt) !important; }
+  .btn-restablecer { border-radius: 10px; font-weight: 700; }
+  .variables-sub { font-size: 12px; color: var(--subtext); line-height: 1.45; margin: 4px 2px 10px; }
+
+  /* Paso 1 */
+  .real-lista { display: flex; flex-direction: column; }
+  .real-fila { display: grid; grid-template-columns: 26px minmax(0, 1fr) auto auto; gap: 8px; align-items: center; padding: 9px 0; border-bottom: 1px solid rgba(255,255,255,.05); }
+  .real-fila:last-child { border-bottom: 0; }
+  .real-ico { font-size: 17px; }
+  .real-nom { font-size: 14px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .real-fila b { font-size: 14px; font-weight: 800; color: var(--red-txt); text-align: right; }
+  .etq-nec { font-size: 10px; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; padding: 2px 7px; border-radius: 999px; background: rgba(99,102,241,.16); color: #c7d2fe; }
+  .real-total { display: flex; justify-content: space-between; align-items: baseline; margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,.1); font-size: 13px; font-weight: 800; color: var(--subtext); }
+  .real-total b { font-size: 18px; color: var(--red-txt); }
+  .real-vacio { margin: 0; font-size: 14px; color: var(--subtext); line-height: 1.5; }
+  .veredicto { margin: 0 20px 12px; padding: 18px; border-radius: 22px; }
+  .veredicto:empty { display: none; }
+  .veredicto.neg { background: linear-gradient(140deg, rgba(239,68,68,.16), rgba(17,24,39,.6)); border: 1px solid rgba(239,68,68,.4); }
+  .veredicto.pos { background: linear-gradient(140deg, rgba(16,185,129,.18), rgba(17,24,39,.6) 60%, rgba(99,102,241,.14)); border: 1px solid rgba(16,185,129,.4); }
+  .v-lbl { font-size: 11px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; color: var(--subtext); }
+  .veredicto b { display: block; margin: 4px 0; font-size: 30px; font-weight: 800; letter-spacing: -0.02em; }
+  .veredicto.neg b { color: var(--red-txt); } .veredicto.pos b { color: var(--green-txt); }
+  .veredicto p { margin: 0; font-size: 14px; line-height: 1.5; color: var(--text); }
+
+  /* Paso 2: medidor fijo arriba mientras ajustas */
+  .medidor { position: sticky; top: 8px; z-index: 20; margin: 0 20px 12px; padding: 14px 16px; border-radius: 20px; background: rgba(17,24,39,.92); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border: 1px solid var(--border); box-shadow: 0 12px 30px rgba(0,0,0,.35); }
+  .medidor.ok { border-color: rgba(16,185,129,.5); } .medidor.cerca { border-color: rgba(245,158,11,.5); } .medidor.mal { border-color: rgba(239,68,68,.5); }
+  .med-top { display: flex; align-items: baseline; gap: 8px; font-size: 13px; font-weight: 700; color: var(--subtext); }
+  .med-top b { font-size: 24px; font-weight: 800; color: var(--text); }
+  .medidor.ok .med-top b { color: var(--green-txt); } .medidor.cerca .med-top b { color: #fbbf24; } .medidor.mal .med-top b { color: var(--red-txt); }
+  .med-obj { margin-left: auto; }
+  .med-barra { position: relative; height: 10px; margin: 8px 0 8px; border-radius: 999px; background: #1f2937; }
+  .med-barra i { position: absolute; inset: 0 auto 0 0; border-radius: 999px; background: #ef4444; transition: width .4s cubic-bezier(.16,1,.3,1), background .3s; }
+  .medidor.ok .med-barra i { background: #10b981; } .medidor.cerca .med-barra i { background: #f59e0b; }
+  .med-barra em { position: absolute; top: -4px; width: 3px; height: 18px; margin-left: -1px; border-radius: 2px; background: #fff; box-shadow: 0 0 0 2px var(--card); }
+  .med-barra em.cien { background: rgba(255,255,255,.35); width: 2px; }
+  .med-msg { margin: 0; font-size: 13px; line-height: 1.45; color: var(--text); }
+  .med-msg b { color: #fff; }
+  .med-vacio { margin: 0; font-size: 14px; color: var(--subtext); }
+  .tipos-ahorro { margin: 0 20px 12px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+  .tipo { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; padding: 12px 14px; border-radius: 18px; background: var(--card); border: 1px solid var(--border); color: var(--text); text-align: left; cursor: pointer; transition: border-color .25s, background .25s; }
+  .tipo.activo { border-color: rgba(16,185,129,.6); background: rgba(16,185,129,.10); }
+  .tipo-nom { font-size: 13px; font-weight: 800; }
+  .tipo-pct { font-size: 22px; font-weight: 800; color: var(--green-txt); line-height: 1.1; }
+  .tipo-eur { font-size: 12px; font-weight: 700; color: #c7d2fe; }
+  .tipo-lema { font-size: 11px; color: var(--subtext); font-weight: 600; }
+  .analisis-panel { position: static; z-index: auto; background: var(--card); border: 1px solid var(--border); border-radius: 20px; padding: 6px 16px 4px; margin: 0 0 12px; }
+  .analisis-header { display: none; }
+  .apd-wrap { display: none; }
+  .analisis-msg { font-size: 13px; line-height: 1.45; color: #dbe2ff; background: rgba(99,102,241,.10); border: 1px solid rgba(99,102,241,.22); border-radius: 12px; padding: 10px 12px; }
+  .var-row { background: var(--card2); border-radius: 14px; padding: 10px 14px; }
+  .var-input { font-variant-numeric: tabular-nums; }
+  .aviso-sincero { margin-top: 8px; padding: 8px 10px; border-radius: 10px; background: rgba(245,158,11,.10); border: 1px solid rgba(245,158,11,.3); color: #fde68a; font-size: 12px; line-height: 1.45; }
+
+  /* Paso 3: meta en cristal y semáforo de realismo */
+  .meta-principal { margin: 0 20px 12px; border-radius: 24px; border: 1px solid rgba(16,185,129,.38); background: linear-gradient(140deg, rgba(16,185,129,.20) 0%, rgba(17,24,39,.6) 55%, rgba(99,102,241,.16) 100%); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); box-shadow: 0 20px 50px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.08); opacity: 1; animation: none; }
+  .meta-principal[hidden] { display: none; }
+  .principal-nombre { font-size: 20px; font-weight: 800; }
+  .lf-valor { font-weight: 800; font-variant-numeric: tabular-nums; }
+  .progress-track { background: rgba(10,14,26,.6); }
+  .progress-fill { background: linear-gradient(90deg, #10b981, #34d399); }
+  .meta-vacia { margin: 0 20px 12px; padding: 22px 18px; border-radius: 22px; background: var(--card); border: 1px dashed rgba(16,185,129,.45); display: flex; flex-direction: column; align-items: center; gap: 6px; text-align: center; }
+  .meta-vacia[hidden] { display: none; }
+  .meta-vacia-ico { font-size: 34px; } .meta-vacia b { font-size: 17px; } .meta-vacia span { font-size: 14px; color: var(--subtext); line-height: 1.5; }
+  .realismo { margin: 0 20px 12px; display: grid; grid-template-columns: 22px minmax(0, 1fr); gap: 12px; align-items: start; padding: 14px 16px; border-radius: 20px; background: var(--card); border: 1px solid var(--border); }
+  .realismo[hidden] { display: none; }
+  .realismo.mini { margin: 10px 0 0; padding: 10px 12px; border-radius: 14px; }
+  .realismo b { font-size: 15px; font-weight: 800; } .realismo p { margin: 2px 0 0; font-size: 13px; line-height: 1.45; color: var(--text); }
+  .r-sem { display: flex; flex-direction: column; gap: 4px; padding-top: 2px; }
+  .r-sem i { width: 12px; height: 12px; border-radius: 50%; background: #1f2937; }
+  .realismo.dificil { border-color: rgba(239,68,68,.45); } .realismo.dificil b { color: var(--red-txt); } .realismo.dificil .r-sem i:nth-child(1) { background: #ef4444; box-shadow: 0 0 8px #ef4444; }
+  .realismo.ambiciosa { border-color: rgba(245,158,11,.45); } .realismo.ambiciosa b { color: #fbbf24; } .realismo.ambiciosa .r-sem i:nth-child(2) { background: #f59e0b; box-shadow: 0 0 8px #f59e0b; }
+  .realismo.realista, .realismo.cumplida { border-color: rgba(16,185,129,.45); } .realismo.realista b, .realismo.cumplida b { color: var(--green-txt); }
+  .realismo.realista .r-sem i:nth-child(3), .realismo.cumplida .r-sem i:nth-child(3) { background: #10b981; box-shadow: 0 0 8px #10b981; }
+  .modal-guia { margin: -8px 0 14px; font-size: 13px; line-height: 1.45; color: var(--subtext); }
+
+  /* Paso 4: seguimiento */
+  .seg-meta { width: calc(100% - 40px); margin: 0 20px 12px; display: flex; flex-direction: column; gap: 8px; padding: 14px 16px; border-radius: 20px; text-align: left; color: var(--text); cursor: pointer; background: linear-gradient(140deg, rgba(16,185,129,.16), rgba(17,24,39,.6) 60%, rgba(99,102,241,.14)); border: 1px solid rgba(16,185,129,.35); }
+  .sm-top { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+  .sm-nom { font-size: 15px; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .sm-top b { font-size: 20px; font-weight: 800; color: var(--green-txt); }
+  .sm-barra { height: 8px; border-radius: 999px; background: rgba(10,14,26,.6); overflow: hidden; }
+  .sm-barra i { display: block; height: 100%; border-radius: 999px; background: linear-gradient(90deg, #10b981, #34d399); }
+  .sm-sub { font-size: 12px; font-weight: 600; color: var(--subtext); }
+  .tabla-comparativa { margin: 0 20px; }
+  .sc-lista-card { background: var(--card); border: 1px solid var(--border); border-radius: 20px; }
+  .sc-resumen-quedan { font-size: 15px; font-weight: 800; color: var(--green-txt); }
+  .sc-lista-label { font-weight: 700; }
+  .sc-lista-pill { font-weight: 800; font-variant-numeric: tabular-nums; }
+  .sc-lista-pill-over { background: rgba(239,68,68,.16); color: var(--red-txt); }
+  .sc-lista-pill-free { background: rgba(16,185,129,.16); color: var(--green-txt); }
+  .sc-lista-repartir { background: rgba(99,102,241,.14); border-color: rgba(99,102,241,.35); color: #c7d2fe; font-weight: 800; }
+
+  @media (prefers-reduced-motion: reduce) { .paso { animation: none; } .med-barra i { transition: none; } }
+  input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+  input[type=number] { -moz-appearance: textfield; }
 </style>
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="/icon-192.png">
@@ -816,16 +959,114 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="MiFinanza">
-<meta name="theme-color" content="#58a6ff">
+<meta name="theme-color" content="#6366f1">
 </head>
 <body>
 <div class="phone">
 
   <div class="header">
-    <div class="header-title">Mis Metas</div>
-    <div class="header-sub">Avanza y disfruta el camino</div>
+    <h1 class="header-title">Mis metas</h1>
+    <div class="header-sub">Entiende tu dinero, haz tu plan y cúmplelo</div>
   </div>
 
+  <nav class="pasos" role="tablist" aria-label="Pasos">
+    <button type="button" role="tab" class="paso-tab" data-paso="1" onclick="irPaso(1)"><b>1</b><span>Tu dinero</span></button>
+    <button type="button" role="tab" class="paso-tab" data-paso="2" onclick="irPaso(2)"><b>2</b><span>Tu plan</span></button>
+    <button type="button" role="tab" class="paso-tab" data-paso="3" onclick="irPaso(3)"><b>3</b><span>Tu meta</span></button>
+    <button type="button" role="tab" class="paso-tab" data-paso="4" onclick="irPaso(4)"><b>4</b><span>Seguimiento</span></button>
+  </nav>
+
+  <section class="paso" id="paso-1" role="tabpanel" aria-labelledby="paso-1-t">
+    <div class="paso-intro">
+      <span class="paso-eyebrow">Paso 1 de 4</span>
+      <h2 id="paso-1-t">Tu dinero real</h2>
+      <p>Antes de ponerte una meta, entiende tu dinero: lo que entra y lo que <b>de verdad</b> gastas de media, no lo que crees que gastas.</p>
+    </div>
+    <div class="planificador planificador-p1">
+    <div class="bloque-acordeon">
+      <div class="bloque-card clicable" onclick="toggleBloque('ingresos')">
+        <div class="bloque-card-top">
+          <span class="bloque-label">Ingresos</span>
+          <span class="bloque-chevron" id="chevron-ingresos">›</span>
+        </div>
+        <input type="number" inputmode="decimal" id="p-ingresos-total" class="bloque-ing-input" placeholder="0" onclick="event.stopPropagation()">
+        <button class="btn-restablecer" onclick="event.stopPropagation();pedirConfirmacionReset(restablecerIngresos)">Restablecer</button>
+      </div>
+      <div class="bloque-detalle" id="detalle-ingresos" style="display:none">
+        <div id="ingresos-movs-lista"></div>
+      </div>
+    </div>
+
+    </div>
+    <section class="tarjeta" aria-labelledby="real-t">
+      <div class="t-head"><h3 class="t-titulo" id="real-t">Lo que gastas de verdad</h3><span class="t-nota-corta" id="real-sub"></span></div>
+      <div id="real-lista" class="real-lista"></div>
+      <div class="real-total"><span>Total al mes</span><b class="num" id="real-total">—</b></div>
+    </section>
+    <div class="veredicto" id="real-veredicto"></div>
+    <button type="button" class="btn-siguiente" onclick="irPaso(2)">Siguiente: hacer mi plan <span aria-hidden="true">→</span></button>
+  </section>
+
+  <section class="paso" id="paso-2" role="tabpanel" aria-labelledby="paso-2-t" hidden>
+    <div class="paso-intro">
+      <span class="paso-eyebrow">Paso 2 de 4</span>
+      <h2 id="paso-2-t">Tu plan mensual</h2>
+      <p>Elige cómo quieres ahorrar y ajusta cada categoría hasta llegar a tu objetivo. Sé sincero: un plan que puedas cumplir vale más que uno perfecto.</p>
+    </div>
+    <div class="medidor" id="medidor" aria-live="polite"></div>
+    <div class="tipos-ahorro" id="tipos-ahorro" role="radiogroup" aria-label="Tipo de ahorro"></div>
+    <div class="planificador planificador-p2">
+    <div class="analisis-panel">
+      <div class="analisis-header" onclick="toggleAnalisis()">
+        <div class="asi-summary" id="analisis-summary">
+          <span style="font-size:13px;color:var(--subtext)">📊 Cargando análisis…</span>
+        </div>
+        <span class="analisis-chevron" id="analisis-chevron">›</span>
+      </div>
+      <div class="analisis-body abierto" id="analisis-body">
+        <div id="analisis-contenido"></div>
+      </div>
+    </div>
+
+    <div class="bloque-acordeon">
+      <div class="bloque-card clicable" onclick="toggleBloque('gastos')">
+        <div class="bloque-card-top">
+          <span class="bloque-label">Ajusta cada categoría</span>
+          <span class="bloque-chevron" id="chevron-gastos">›</span>
+        </div>
+        <div class="bloque-total-grande txt-rojo" id="p-gastos-total">$0.00</div>
+        <button class="btn-restablecer" onclick="event.stopPropagation();pedirConfirmacionReset(restablecerGastos)">Restablecer</button>
+      </div>
+      <div class="bloque-detalle" id="detalle-gastos" style="display:block">
+        <div id="resumen-tipos" style="display:none"></div>
+        <div class="variables-sub">Empieza con tu media real de los últimos meses cerrados. Toca − / + o escribe el importe.</div>
+        <div id="gastos-lista-plan"></div>
+      </div>
+    </div>
+
+    <div class="bloque-card disponible-card" id="disponible-card">
+      <div class="bloque-card-top">
+        <span class="bloque-label">Te queda para ahorrar</span>
+      </div>
+      <div class="bloque-total-grande" id="p-disponible-header">—</div>
+    </div>
+  </div>
+
+    <button type="button" class="btn-siguiente" onclick="irPaso(3)">Siguiente: mi meta <span aria-hidden="true">→</span></button>
+  </section>
+
+  <section class="paso" id="paso-3" role="tabpanel" aria-labelledby="paso-3-t" hidden>
+    <div class="paso-intro">
+      <span class="paso-eyebrow">Paso 3 de 4</span>
+      <h2 id="paso-3-t">Tu meta</h2>
+      <p>Ahora sí, con base real. Contamos lo que has ahorrado de verdad y lo que tu plan te permite ahorrar en los meses que quedan.</p>
+    </div>
+    <div class="meta-vacia" id="meta-vacia" hidden>
+      <div class="meta-vacia-ico" aria-hidden="true">🎯</div>
+      <b>Aún no tienes una meta</b>
+      <span>Ponle nombre y fechas. Te sugerimos una cantidad que puedas cumplir con tu plan.</span>
+      <button type="button" class="btn-siguiente" onclick="abrirModal()">Crear mi meta</button>
+    </div>
   <div class="meta-principal" id="bloque-principal">
     <div class="principal-top-row">
       <div>
@@ -879,87 +1120,29 @@
     </div>
   </div>
 
-  <div class="seccion-label" style="margin-top:16px">¿Cuánto puedo ahorrar?</div>
-  <div class="planificador">
-    <div class="plan-title-row">
-      <div class="plan-icon">🧮</div>
-      <div>
-        <div class="plan-title">Planificador</div>
-        <div class="plan-sub">Calcula tu potencial de ahorro</div>
-      </div>
-    </div>
+    <div class="realismo" id="meta-realismo" hidden></div>
+    <button type="button" class="btn-siguiente" id="btn-a-seguimiento" onclick="irPaso(4)">Siguiente: seguimiento <span aria-hidden="true">→</span></button>
+  </section>
 
-    <div class="analisis-panel">
-      <div class="analisis-header" onclick="toggleAnalisis()">
-        <div class="asi-summary" id="analisis-summary">
-          <span style="font-size:13px;color:var(--subtext)">📊 Cargando análisis…</span>
-        </div>
-        <span class="analisis-chevron" id="analisis-chevron">›</span>
-      </div>
-      <div class="analisis-body" id="analisis-body">
-        <div id="analisis-contenido"></div>
-      </div>
+  <section class="paso" id="paso-4" role="tabpanel" aria-labelledby="paso-4-t" hidden>
+    <div class="paso-intro">
+      <span class="paso-eyebrow">Paso 4 de 4</span>
+      <h2 id="paso-4-t">Seguimiento del mes</h2>
+      <p>Lo que llevas gastado frente a tu plan. Si una categoría se pasa, reparte el exceso entre las que tienen margen.</p>
     </div>
+    <div id="seg-meta"></div>
+    <div class="tabla-comparativa">
+      <div id="tabla-comp-body"></div>
+    </div>
+  </section>
 
-    <div class="bloque-acordeon">
-      <div class="bloque-card clicable" onclick="toggleBloque('ingresos')">
-        <div class="bloque-card-top">
-          <span class="bloque-label">Ingresos</span>
-          <span class="bloque-chevron" id="chevron-ingresos">›</span>
-        </div>
-        <input type="number" inputmode="decimal" id="p-ingresos-total" class="bloque-ing-input" placeholder="0" onclick="event.stopPropagation()">
-        <button class="btn-restablecer" onclick="event.stopPropagation();pedirConfirmacionReset(restablecerIngresos)">Restablecer</button>
-      </div>
-      <div class="bloque-detalle" id="detalle-ingresos" style="display:none">
-        <div id="ingresos-movs-lista"></div>
-      </div>
-    </div>
-
-    <div class="bloque-acordeon">
-      <div class="bloque-card clicable" onclick="toggleBloque('gastos')">
-        <div class="bloque-card-top">
-          <span class="bloque-label">Gastos Estimados</span>
-          <span class="bloque-chevron" id="chevron-gastos">›</span>
-        </div>
-        <div class="bloque-total-grande txt-rojo" id="p-gastos-total">$0.00</div>
-        <button class="btn-restablecer" onclick="event.stopPropagation();pedirConfirmacionReset(restablecerGastos)">Restablecer</button>
-      </div>
-      <div class="bloque-detalle" id="detalle-gastos" style="display:none">
-        <div id="resumen-tipos" style="display:none"></div>
-        <div class="variables-sub">Basado en meses cerrados</div>
-        <div id="gastos-lista-plan"></div>
-      </div>
-    </div>
-
-    <div class="bloque-card disponible-card" id="disponible-card">
-      <div class="bloque-card-top">
-        <span class="bloque-label">Disponible</span>
-      </div>
-      <div class="bloque-total-grande" id="p-disponible-header">$0.00</div>
-    </div>
-  </div>
-
-  <div class="bloque-acordeon" style="margin:16px 24px 0">
-    <div class="bloque-card clicable" onclick="toggleBloque('metas')">
-      <div class="bloque-card-top">
-        <span class="bloque-label">🧭 Seguimiento de metas</span>
-        <span class="bloque-chevron chevron-metas" id="chevron-metas">▾</span>
-      </div>
-    </div>
-    <div class="bloque-detalle" id="detalle-metas" style="display:none">
-      <div class="tabla-comparativa">
-        <div id="tabla-comp-body"></div>
-      </div>
-    </div>
-  </div>
-
-  <div class="bloque-acordeon" style="margin:16px 24px 0">
+  <div class="bloque-acordeon" id="bloque-colchon" hidden style="margin:16px 24px 0">
     <div class="bloque-card clicable" onclick="toggleBloque('colchon')">
       <div class="bloque-card-top">
         <span class="bloque-label">Mi colchón de ahorro</span>
         <span class="bloque-chevron" id="chevron-colchon">›</span>
       </div>
-      <div class="bloque-total-grande" id="colchon-total" style="color:#3fb950">$0</div>
+      <div class="bloque-total-grande" id="colchon-total" style="color:#10b981">$0</div>
     </div>
     <div class="bloque-detalle" id="detalle-colchon" style="display:none">
       <div style="text-align:center;padding:4px 0 14px;">
@@ -1009,7 +1192,7 @@
       <div class="mas-arrow">›</div>
     </div>
     <div class="mas-item" onclick="location.href='mifinanza-fijos.html'">
-      <div class="mas-icon"><span style="color:#58a6ff">↻</span></div>
+      <div class="mas-icon"><span style="color:#6366f1">↻</span></div>
       <div class="mas-label">Gastos Fijos</div>
       <div class="mas-arrow">›</div>
     </div>
@@ -1036,7 +1219,8 @@
 <div class="modal-overlay" id="modal">
   <div class="modal">
     <div class="modal-handle"></div>
-    <div class="modal-title">Nueva meta</div>
+    <div class="modal-title">Tu meta</div>
+    <p class="modal-guia">Sé sincero: una meta que puedas cumplir te motiva; una imposible te frustra. Te sugerimos una cantidad según tu plan.</p>
     <div class="input-group">
       <label>Nombre de la meta</label>
       <input type="text" id="m-nombre" placeholder="Ej: Viaje, Carro, Fondo...">
@@ -1081,7 +1265,8 @@
     </div>
     <div class="input-group">
       <label>Monto objetivo</label>
-      <input type="number" id="m-monto" placeholder="$0.00" oninput="_metaMontoEditado=true">
+      <input type="number" id="m-monto" placeholder="0" oninput="_metaMontoEditado=true">
+      <div class="realismo mini" id="m-realismo" hidden></div>
     </div>
     <div class="input-group">
       <label>Emoji / Icono</label>
@@ -1267,8 +1452,15 @@
     setTimeout(() => { t.className = 'toast' }, ms)
   }
 
-  function fmt(n) {
-    return '$' + parseFloat(n || 0).toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+  // Importe en formato español con la moneda del usuario (el € va detrás). Sin decimales si son ,00.
+  function fmt(n, dec) {
+    const v = parseFloat(n || 0)
+    const d = dec !== undefined ? dec : (Math.abs(v - Math.round(v)) < 0.005 ? 0 : 2)
+    const [ent, frac] = Math.abs(v).toFixed(d).split('.')
+    const num = ent.replace(/\B(?=(\d{3})+(?!\d))/g, '.') + (frac ? ',' + frac : '')
+    const signo = v < 0 ? '−' : ''
+    const mon = window.moneda || localStorage.getItem('moneda') || '$'
+    return mon === '€' ? signo + num + '\u00a0€' : signo + mon + num
   }
 
   function fmtFecha(f) {
@@ -1310,7 +1502,9 @@
       return
     }
 
-    const fondo = data.find(m => m.icono === '💰') || null
+    // Una meta principal: la marcada como principal, si no la de 💰, si no la última creada.
+    // (Antes solo se mostraba la de 💰 y una meta con otro emoji "desaparecía".)
+    const fondo = data.find(m => m.es_principal) || data.find(m => m.icono === '💰') || data[data.length - 1] || null
 
     todasMetasData = data
     metaFondoData = fondo
@@ -1322,6 +1516,11 @@
   function renderFondo(meta) {
     const btnEliminar = document.getElementById('btn-eliminar-p')
     const btnEditar   = document.getElementById('btn-editar-p')
+    document.getElementById('meta-vacia').hidden = !!meta
+    document.getElementById('bloque-principal').hidden = !meta
+    document.getElementById('btn-a-seguimiento').hidden = !meta
+    if (!meta) { document.getElementById('meta-realismo').hidden = true; document.getElementById('seg-meta').innerHTML = '' }
+    elegirPasoInicial(!!meta)
 
     if (!meta) {
       document.getElementById('p-nombre').textContent  = 'Sin fondo de ahorro'
@@ -1349,19 +1548,21 @@
     const pct    = objetivo > 0 ? Math.min(100, (actual / objetivo) * 100) : 0
     const faltan = Math.max(0, objetivo - actual)
 
-    document.getElementById('p-percent').textContent = `${pct.toFixed(1)}%`
+    document.getElementById('p-percent').textContent = `${Math.round(pct)} %`
     document.getElementById('p-llevado').textContent = fmt(actual)
-    document.getElementById('p-faltan').value = faltan.toFixed(2)
-    document.getElementById('p-objetivo').textContent = `Meta: ${fmt(objetivo)}`
+    document.getElementById('p-faltan').value = Math.round(faltan)
+    document.getElementById('p-objetivo').textContent = `Meta: ${fmt(Math.round(objetivo))}`
     setTimeout(() => { document.getElementById('p-barra').style.width = pct + '%' }, 100)
 
+    metaProgreso = { actual, objetivo, fechaLimite }
+    renderRealismo()
     const meses = mesesRestantes(fechaLimite)
     const promedio = document.getElementById('promedio-wrap')
     const texto = document.getElementById('promedio-texto')
 
     if (meses && faltan > 0) {
       const mensual = faltan / meses
-      texto.innerHTML = `Necesitas ahorrar <strong>${fmt(mensual)}/mes</strong> para cumplir en ${meses} mes${meses === 1 ? '' : 'es'}`
+      texto.innerHTML = `Necesitas ahorrar <strong>${fmt(Math.ceil(mensual))}/mes</strong> para cumplir en ${meses} mes${meses === 1 ? '' : 'es'}`
       promedio.style.display = 'flex'
     } else if (faltan <= 0) {
       texto.textContent = '¡Meta cumplida! 🎉'
@@ -1588,7 +1789,10 @@
     cargarMetas()
   }
 
-  function abrirModal()  { document.getElementById('modal').classList.add('visible') }
+  function abrirModal()  {
+    if (metaFondoData) { irPaso(3); editarFondo(); return }  // una meta principal: se edita la que hay
+    document.getElementById('modal').classList.add('visible')
+  }
   function cerrarModal() {
     document.getElementById('modal').classList.remove('visible')
     _metaMontoEditado = false
@@ -1677,6 +1881,7 @@
     const dispRestante = dispMensual * mesesRest
     const sugerido     = acumulado + dispRestante
     _metaMontoSugerido = sugerido
+    calcMeta = { acumulado, mesesRest, dispMensual }
 
     const mesInicio   = fmtMes(iy, im)
     const mesAnterior = fmtMes(prevY, prevM)
@@ -1691,8 +1896,9 @@
       `Llevas acumulado ${fmt(acumulado)} desde ${mesInicio} hasta ${mesAnterior}. Te quedan ${mesesRest} ${mesS(mesesRest)} hasta ${mesFin}, con ${fmt(dispMensual)}/mes disponible → ${fmt(dispRestante)} más posibles.`
 
     if (!_metaMontoEditado) {
-      document.getElementById('m-monto').value = sugerido > 0 ? sugerido.toFixed(2) : ''
+      document.getElementById('m-monto').value = sugerido > 0 ? Math.round(sugerido) : ''
     }
+    realismoModal()
   }
 
   function selEmojiMeta(btn, emoji) {
@@ -1909,7 +2115,7 @@
       inp.value = ingresosOverride
     } else {
       const suma = ingresosOriginal.reduce((s, r) => s + parseFloat(r.monto || 0), 0)
-      inp.value = suma > 0 ? suma.toFixed(2) : ''
+      inp.value = suma > 0 ? +suma.toFixed(2) : ''
     }
     inp.addEventListener('input', () => {
       const val = inp.value === '' ? null : parseFloat(inp.value)
@@ -1935,7 +2141,7 @@
     cont.innerHTML = sorted.map(r => {
       const nombre = (r.concepto || 'Ingreso').replace(/&/g,'&amp;').replace(/</g,'&lt;')
       const fecha = _diaMesSeg(r.fecha)
-      const monto = '$' + parseFloat(r.monto || 0).toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+      const monto = fmt(r.monto)
       return `
         <div class="cat-mov-item">
           <div class="cm-icon">💰</div>
@@ -2068,6 +2274,8 @@
     const mesActual = new Date().toISOString().substring(0, 7)
     const mesesCerrados = datosMensuales.filter(d => d.key !== mesActual).slice(0, 3)
     const numMeses = mesesCerrados.length || 1
+    ahorroRealMedio = mesesCerrados.length ? mesesCerrados.reduce((t, d) => t + d.ingresos - d.gastos, 0) / mesesCerrados.length : null
+    mesesBase = mesesCerrados.map(d => d.mes)
 
     console.log('[Planificador] mesActual (excluido):', mesActual)
     console.log('[Planificador] mesesCerrados:', JSON.stringify(mesesCerrados.map(d => d.key)))
@@ -2493,7 +2701,7 @@
       const row     = document.createElement('div')
       row.className = 'var-row'
       row._planCat  = cat
-      const mediaStr = '$' + Math.round(gastosOriginal[cat] || 0).toLocaleString('es-MX')
+      const mediaStr = fmt(Math.round(gastosOriginal[cat] || 0))
       row.innerHTML = `
         <div style="display:flex;align-items:center;gap:8px;margin-bottom:5px;">
           <span class="var-emoji">${emoji}</span>
@@ -2645,6 +2853,9 @@
     renderTablaComparativa()
     actualizarResumenTipos()
     actualizarAnalisis()
+    renderPaso1()
+    avisosSinceridad()
+    renderRealismo()
   }
 
   function toggleAnalisis() {
@@ -2689,7 +2900,7 @@
     const pAhorro   = Math.max(0, saldo / ingresos * 100)
     const metaGastos = 100 - metaAhorro
 
-    function col(v, meta, inv) { const d = inv ? meta - v : v - meta; return d <= 0.5 ? '#4ade80' : d <= 15 ? '#e3b341' : '#f85149' }
+    function col(v, meta, inv) { const d = inv ? meta - v : v - meta; return d <= 0.5 ? '#34d399' : d <= 15 ? '#f59e0b' : '#ef4444' }
     function est(v, meta, inv) { const d = inv ? meta - v : v - meta; return d <= 0.5 ? '✅' : d <= 15 ? '⚠️' : '❌' }
 
     const filas = [
@@ -2707,8 +2918,8 @@
       ${filas.map(f => `
       <div class="af-row">
         <span class="af-cell-label">${f.label}</span>
-        <span class="af-cell-val" style="color:${col(f.v, f.meta, f.inv)}">${f.v.toFixed(2)}%</span>
-        <span class="af-cell-val" style="color:var(--subtext)">${f.meta}%</span>
+        <span class="af-cell-val" style="color:${col(f.v, f.meta, f.inv)}">${Math.round(f.v)} %</span>
+        <span class="af-cell-val" style="color:var(--subtext)">${f.meta} %</span>
         <span class="af-cell-est">${est(f.v, f.meta, f.inv)}</span>
       </div>`).join('')}`
   }
@@ -2749,6 +2960,7 @@
       } catch(e) {}
     }
 
+    renderPlanExtras()
     const summaryEl = document.getElementById('analisis-summary')
     const cont      = document.getElementById('analisis-contenido')
     if (!summaryEl || !cont) return
@@ -2783,21 +2995,21 @@
       if (cat && (categoriaTipos[cat] ?? 'opcional') === 'necesario') gastosNec += val
       else gastosOpc += val
     })
-    const tcasoNec = isEur ? fmt(gastosNec) : (gastosNec / ingresos * 100).toFixed(2) + '%'
-    const tcasoOpc = isEur ? fmt(gastosOpc) : (gastosOpc / ingresos * 100).toFixed(2) + '%'
+    const tcasoNec = isEur ? fmt(gastosNec) : Math.round(gastosNec / ingresos * 100) + ' %'
+    const tcasoOpc = isEur ? fmt(gastosOpc) : Math.round(gastosOpc / ingresos * 100) + ' %'
     const esPersonalizado = perfilAhorro === 'personalizado'
-    const tmetaNec = esPersonalizado ? '—' : (isEur ? fmt(ingresos * metaNecesarios / 100) : metaNecesarios + '%')
-    const tmetaOpc = esPersonalizado ? '—' : (isEur ? fmt(ingresos * metaOpcionales / 100) : metaOpcionales + '%')
+    const tmetaNec = esPersonalizado ? '—' : (isEur ? fmt(ingresos * metaNecesarios / 100) : metaNecesarios + ' %')
+    const tmetaOpc = esPersonalizado ? '—' : (isEur ? fmt(ingresos * metaOpcionales / 100) : metaOpcionales + ' %')
     const chevRot       = _asiGastosOpen ? 'rotate(180deg)' : ''
     const gastosSubMaxH = _asiGastosOpen ? '80px' : '0'
 
-    const tcasoGastos = isEur ? fmt(gastos) : pGastos.toFixed(2) + '%'
-    const tmetaGastos = isEur ? fmt(ingresos * metaGastos / 100) : metaGastos + '%'
-    const tcasoAhorro = isEur ? fmt(Math.max(0, saldo)) : pAhorroPos.toFixed(2) + '%'
-    const gColorClass = pGastos > metaGastos ? '#f85149' : '#4ade80'
-    const aColorClass = saldo >= 0 ? '#4ade80' : '#f85149'
+    const tcasoGastos = isEur ? fmt(gastos) : Math.round(pGastos) + ' %'
+    const tmetaGastos = isEur ? fmt(ingresos * metaGastos / 100) : metaGastos + ' %'
+    const tcasoAhorro = isEur ? fmt(Math.max(0, saldo)) : Math.round(pAhorroPos) + ' %'
+    const gColorClass = pGastos > metaGastos ? '#ef4444' : '#34d399'
+    const aColorClass = saldo >= 0 ? '#34d399' : '#ef4444'
     const inputVal     = isEur ? Math.round(metaAhorro_eur) : metaAhorro
-    const inputSymbol  = isEur ? '€' : '%'
+    const inputSymbol  = isEur ? (window.moneda || '$') : '%'
     const inputMin     = isEur ? Math.round(ingresos * 0.05) : 5
     const inputMax     = isEur ? Math.round(ingresos * 0.50) : 50
     const inputSubText = isEur ? `= ${Math.round(metaAhorro)}%` : `${fmt(metaAhorro_eur)}/mes`
@@ -2995,7 +3207,7 @@
       const icono = _iconMovSeg(esFijo, m.categoria)
       const nombre = (m.label || m.categoria || '').replace(/&/g,'&amp;').replace(/</g,'&lt;')
       const fecha = _diaMesSeg(m.fecha)
-      const monto = '$' + m.monto.toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+      const monto = fmt(m.monto)
       return `
         <div class="cat-mov-item">
           <div class="cm-icon">${icono}</div>
@@ -3012,8 +3224,8 @@
   function _buildDetalleHtml(cat, estimado, real) {
     const overBudget = real > estimado
     const pct = estimado > 0 ? Math.min(100, (real / estimado) * 100) : (real > 0 ? 100 : 0)
-    const barColor = overBudget ? '#f85149' : '#3fb950'
-    const gastadoColor = overBudget ? '#f85149' : '#3fb950'
+    const barColor = overBudget ? '#ef4444' : '#10b981'
+    const gastadoColor = overBudget ? '#ef4444' : '#10b981'
     const movs = (movsRealMes[cat] || []).slice().sort((a, b) => (b.fecha || '').localeCompare(a.fecha || ''))
     const movsHtml = movs.length === 0
       ? '<div class="sc-det-empty">Sin movimientos este mes</div>'
@@ -3021,7 +3233,7 @@
           const nombre = (m.label || cat).replace(/&/g, '&amp;').replace(/</g, '&lt;')
           return `<div class="sc-det-mov"><div class="sc-det-mov-info"><span class="sc-det-mov-name">${nombre}</span><span class="sc-det-mov-date">${_diaMesSeg(m.fecha)}</span></div><span class="sc-det-mov-amount">${fmt(m.monto)}</span></div>`
         }).join('')
-    return `<div class="sc-det-inner"><div class="sc-det-summary"><div class="sc-det-col"><div class="sc-det-lbl">Gastado</div><div class="sc-det-amt" style="color:${gastadoColor}">${fmt(real)}</div></div><div class="sc-det-col" style="text-align:right"><div class="sc-det-lbl">Meta</div><div class="sc-det-amt" style="color:#e6edf3">${fmt(estimado)}</div></div></div><div class="sc-det-bar-wrap"><div class="sc-det-bar"><div class="sc-det-bar-fill" style="width:${pct.toFixed(1)}%;background:${barColor}"></div></div><div class="sc-det-bar-nums"><span style="color:${gastadoColor}">${fmt(real)}</span><span style="color:#7d8590">${fmt(estimado)}</span></div></div><div class="sc-det-movs">${movsHtml}</div></div>`
+    return `<div class="sc-det-inner"><div class="sc-det-summary"><div class="sc-det-col"><div class="sc-det-lbl">Gastado</div><div class="sc-det-amt" style="color:${gastadoColor}">${fmt(real)}</div></div><div class="sc-det-col" style="text-align:right"><div class="sc-det-lbl">Meta</div><div class="sc-det-amt" style="color:#f1f5f9">${fmt(estimado)}</div></div></div><div class="sc-det-bar-wrap"><div class="sc-det-bar"><div class="sc-det-bar-fill" style="width:${pct.toFixed(1)}%;background:${barColor}"></div></div><div class="sc-det-bar-nums"><span style="color:${gastadoColor}">${fmt(real)}</span><span style="color:#94a3b8">${fmt(estimado)}</span></div></div><div class="sc-det-movs">${movsHtml}</div></div>`
   }
 
   function scToggleDetalle(cat, estimado, real) {
@@ -3172,6 +3384,7 @@
   }
 
   function irACategoriaPlanificador(key) {
+    irPaso(2)
     const detalle = document.getElementById('detalle-gastos')
     if (detalle && detalle.style.display !== 'block') toggleBloque('gastos')
     setTimeout(() => {
@@ -3279,7 +3492,7 @@
 
     const quedanClass = teQuedan < 0 ? ' sc-resumen-over' : ''
     const quedanTxt   = teQuedan >= 0
-      ? `Te quedan ${fmt(teQuedan)} para los próximos ${diasQuedan} día${diasQuedan === 1 ? '' : 's'}`
+      ? `Te quedan ${fmt(teQuedan)} para ${diasQuedan} día${diasQuedan === 1 ? '' : 's'} · ${fmt(teQuedan / diasQuedan, 0)} al día`
       : `Te has pasado ${fmt(Math.abs(teQuedan))} del total estimado`
 
     const pasadas = activasTodas.filter(t => !t.esFijo && t.diff > 0)
@@ -3351,6 +3564,168 @@
       </div>
     `
   }
+
+  // ═════════════ Recorrido guiado en 4 pasos ═════════════
+  let ahorroRealMedio = null   // ahorro real medio de los últimos meses cerrados
+  let mesesBase = []           // meses usados para las medias
+  let metaProgreso = null      // { actual, objetivo, fechaLimite } de la meta principal
+  let calcMeta = null          // cálculo del modal de crear meta
+  let _pasoElegido = false
+
+  function irPaso(n) {
+    document.querySelectorAll('.paso').forEach(p => { p.hidden = p.id !== 'paso-' + n })
+    document.querySelectorAll('.paso-tab').forEach(t => {
+      const act = +t.dataset.paso === n
+      t.classList.toggle('activo', act)
+      t.setAttribute('aria-selected', String(act))
+    })
+    try { localStorage.setItem('mf-metas-paso', n) } catch (e) {}
+    _pasoElegido = true
+    const nav = document.querySelector('.pasos')
+    if (nav && nav.getBoundingClientRect().top < 0) window.scrollTo({ top: window.scrollY + nav.getBoundingClientRect().top - 8, behavior: 'smooth' })
+  }
+  // Primera vez: paso 1. Después: el último paso visitado o, con meta, el seguimiento.
+  function elegirPasoInicial(hayMeta) {
+    if (_pasoElegido) return
+    let guardado = null
+    try { guardado = parseInt(localStorage.getItem('mf-metas-paso')) } catch (e) {}
+    irPaso(guardado >= 1 && guardado <= 4 ? guardado : hayMeta ? 4 : 1)
+  }
+
+  const nombreCat = c => (c || '').trim().replace(/^[^\p{L}\p{N}]+/u, '').trim()
+  const emojiCat = c => { const t = (c || '').trim(); const f = [...t][0]; return f && f.codePointAt(0) > 127 ? t.slice(0, t.length - nombreCat(t).length).trim() : '📦' }
+
+  // Paso 1: lo que entra y lo que de verdad se gasta de media
+  function renderPaso1() {
+    const cont = document.getElementById('real-lista')
+    if (!cont) return
+    const cats = Object.entries(gastosOriginal).sort((a, b) => b[1] - a[1])
+    const total = cats.reduce((t, [, v]) => t + Math.round(v), 0)  // mismo redondeo que el plan del paso 2
+    const ing = totalIngresos()
+    document.getElementById('real-sub').textContent = mesesBase.length ? `media de ${mesesBase.slice().reverse().join(', ')}` : ''
+    cont.innerHTML = cats.length ? '' : '<p class="real-vacio">Aún no hay meses cerrados con gastos. Cuando termine tu primer mes verás aquí tu media real.</p>'
+    cats.forEach(([c, v]) => {
+      const fila = document.createElement('div')
+      fila.className = 'real-fila'
+      const nec = (categoriaTipos[c] ?? 'opcional') === 'necesario'
+      fila.innerHTML = `<span class="real-ico" aria-hidden="true"></span><span class="real-nom"></span>${nec ? '<span class="etq-nec">Necesario</span>' : ''}<b class="num"></b>`
+      fila.querySelector('.real-ico').textContent = emojiCat(c)
+      fila.querySelector('.real-nom').textContent = nombreCat(c)
+      fila.querySelector('b').textContent = fmt(Math.round(v))
+      cont.appendChild(fila)
+    })
+    document.getElementById('real-total').textContent = fmt(Math.round(total))
+    const ver = document.getElementById('real-veredicto')
+    if (!ing || !cats.length) { ver.innerHTML = ''; return }
+    const saldo = ing - total
+    ver.className = 'veredicto ' + (saldo < 0 ? 'neg' : 'pos')
+    ver.innerHTML = saldo < 0
+      ? `<span class="v-lbl">Con tus gastos de hoy</span><b class="num">${fmt(Math.round(saldo))} al mes</b><p>Estás gastando más de lo que ingresas. En el siguiente paso vemos cómo darle la vuelta.</p>`
+      : `<span class="v-lbl">Con tus gastos de hoy</span><b class="num">+${fmt(Math.round(saldo))} al mes</b><p>Te sobra dinero cada mes (${Math.round(saldo / ing * 100)} % de lo que entra). Vamos a convertirlo en un plan de ahorro.</p>`
+  }
+
+  // Paso 2: medidor en vivo y tarjetas de tipo de ahorro
+  function renderPlanExtras() {
+    const med = document.getElementById('medidor'), tipos = document.getElementById('tipos-ahorro')
+    if (!med || !tipos) return
+    const ing = totalIngresos()
+    if (!ing) { med.innerHTML = '<p class="med-vacio">Indica tus ingresos en el paso 1 para hacer el plan.</p>'; tipos.innerHTML = ''; return }
+    const gastos = totalGastos()
+    const pG = gastos / ing * 100
+    const objetivo = Math.round(100 - metaAhorro)
+    const ahorroPlan = ing - gastos
+    const sobra = gastos - ing * objetivo / 100
+    const tope = Math.max(110, pG + 5)
+    const ok = pG <= objetivo + 0.5
+    med.className = 'medidor ' + (ok ? 'ok' : pG > 100 ? 'mal' : 'cerca')
+    med.innerHTML = `
+      <div class="med-top"><span>Gastos</span><b class="num">${Math.round(pG)} %</b><span class="med-obj">objetivo ${objetivo} %</span></div>
+      <div class="med-barra"><i style="width:${Math.min(100, pG / tope * 100)}%"></i><em style="left:${objetivo / tope * 100}%"></em><em class="cien" style="left:${100 / tope * 100}%"></em></div>
+      <p class="med-msg">${ok
+        ? `Cumples tu plan: ahorras <b>${fmt(Math.round(ahorroPlan))} al mes</b>.`
+        : pG > 100
+          ? `Gastas ${fmt(Math.round(-ahorroPlan))} más de lo que entra. Recorta <b>${fmt(Math.ceil(sobra))}</b> para llegar a tu objetivo.`
+          : `Te faltan <b>${fmt(Math.ceil(sobra))}</b> de recortes para llegar al ${objetivo} %.`}</p>`
+    const T = [['basico', 'Básico', 'Para empezar'], ['equilibrado', 'Equilibrado', 'Disfrutar y avanzar'], ['ahorrador', 'Ahorrador', 'Ahorro a fondo']]
+    tipos.innerHTML = T.map(([k, nom, lema]) => {
+      const p = PERFILES_AHORRO[k]
+      return `<button type="button" role="radio" aria-checked="${perfilAhorro === k}" class="tipo${perfilAhorro === k ? ' activo' : ''}" onclick="seleccionarPerfil('${k}')">
+        <span class="tipo-nom">${nom}</span><span class="tipo-pct num">${p.ahorro} %</span><span class="tipo-eur num">${fmt(Math.round(ing * p.ahorro / 100))}/mes</span><span class="tipo-lema">${lema}</span></button>`
+    }).join('') + `<button type="button" role="radio" aria-checked="${perfilAhorro === 'personalizado'}" class="tipo${perfilAhorro === 'personalizado' ? ' activo' : ''}" onclick="elegirPersonalizado()">
+        <span class="tipo-nom">A tu medida</span><span class="tipo-pct num">${Math.round(metaAhorro)} %</span><span class="tipo-eur num">${fmt(Math.round(ing * metaAhorro / 100))}/mes</span><span class="tipo-lema">Tú decides</span></button>`
+  }
+  function elegirPersonalizado() {
+    seleccionarPerfil('personalizado')
+    setTimeout(() => { const i = document.querySelector('.asi-meta-inp'); if (i) { i.focus(); i.select() } }, 50)
+  }
+
+  // Sinceridad: aviso amable si una categoría baja a menos de la mitad de su media real
+  function avisosSinceridad() {
+    document.querySelectorAll('#gastos-lista-plan .var-row').forEach(row => {
+      const cat = row._planCat, inp = row.querySelector('.variable-input')
+      if (!cat || !inp) return
+      const media = gastosOriginal[cat] || 0, val = parseFloat(inp.value) || 0
+      let av = row.querySelector('.aviso-sincero')
+      const mostrar = media >= 20 && val < media * 0.5
+      if (!mostrar) { if (av) av.remove(); return }
+      if (!av) { av = document.createElement('div'); av.className = 'aviso-sincero'; row.appendChild(av) }
+      av.textContent = val === 0
+        ? `Tu media real es ${fmt(Math.round(media))}. ¿Seguro que este mes no gastarás nada aquí?`
+        : `Tu media real es ${fmt(Math.round(media))}. Bajarlo a ${fmt(Math.round(val))} es mucho: hazlo solo si de verdad puedes.`
+    })
+  }
+
+  // Paso 3: ¿es realista la meta? Compara lo que exige con lo que deja el plan y con lo que ahorras de verdad
+  function nivelRealismo(necesario, planAhorro, real) {
+    if (necesario <= 0) return 'cumplida'
+    if (necesario <= planAhorro && (real === null || necesario <= Math.max(0, real) * 1.15)) return 'realista'
+    if (necesario <= planAhorro) return 'ambiciosa'
+    return 'dificil'
+  }
+  function renderRealismo() {
+    const el = document.getElementById('meta-realismo'), seg = document.getElementById('seg-meta')
+    if (!el || !metaFondoData || !metaProgreso) return
+    const { actual, objetivo, fechaLimite } = metaProgreso
+    const faltan = Math.max(0, objetivo - actual)
+    const meses = mesesRestantes(fechaLimite) || 1
+    const necesario = faltan / meses
+    const planAhorro = totalIngresos() - totalGastos()
+    const nivel = nivelRealismo(necesario, planAhorro, ahorroRealMedio)
+    const alcanzable = actual + Math.max(0, planAhorro) * meses
+    const txt = {
+      cumplida: ['Meta cumplida', '¡Lo lograste! Puedes subir la meta o ponerte una nueva.'],
+      realista: ['Realista', `Necesitas ${fmt(Math.ceil(necesario))}/mes. Tu plan deja ${fmt(Math.round(planAhorro))}${ahorroRealMedio !== null ? ` y de media ahorras ${fmt(Math.round(ahorroRealMedio))}` : ''}. Vas bien.`],
+      ambiciosa: ['Ambiciosa', `Tu plan lo permite (${fmt(Math.round(planAhorro))}/mes), pero de media has ahorrado ${fmt(Math.round(ahorroRealMedio || 0))}. Si cumples el plan cada mes, llegas.`],
+      dificil: ['Difícil de cumplir', planAhorro <= 0
+        ? `Necesitas ${fmt(Math.ceil(necesario))}/mes, pero tu plan todavía no deja ahorro. Vuelve a Tu plan y ajusta tus gastos antes de fijar la meta.`
+        : `Necesitas ${fmt(Math.ceil(necesario))}/mes y tu plan deja ${fmt(Math.round(planAhorro))}. Para no frustrarte, ajusta la meta a unos ${fmt(Math.round(alcanzable / 10) * 10)} o dale más tiempo.`],
+    }[nivel]
+    el.hidden = false
+    el.className = 'realismo ' + nivel
+    el.innerHTML = `<span class="r-sem" aria-hidden="true"><i></i><i></i><i></i></span><div><b>${txt[0]}</b><p>${txt[1]}</p></div>`
+    const pct = objetivo > 0 ? Math.min(100, actual / objetivo * 100) : 0
+    seg.innerHTML = `<button type="button" class="seg-meta ${nivel}" onclick="irPaso(3)">
+      <span class="sm-top"><span class="sm-nom"></span><b class="num">${Math.round(pct)} %</b></span>
+      <span class="sm-barra"><i style="width:${pct}%"></i></span>
+      <span class="sm-sub">Llevas ${fmt(Math.round(actual))} de ${fmt(Math.round(objetivo))} · ${txt[0].toLowerCase()}${faltan > 0 ? ` · ${fmt(Math.ceil(necesario))}/mes` : ''}</span></button>`
+    seg.querySelector('.sm-nom').textContent = `${metaFondoData.icono || '🎯'} ${metaFondoData.nombre}`
+  }
+  // En el modal de crear meta: semáforo según el importe que escriba el usuario
+  function realismoModal() {
+    const el = document.getElementById('m-realismo')
+    if (!el || !calcMeta) return
+    const monto = parseFloat(document.getElementById('m-monto').value) || 0
+    if (!monto || !calcMeta.mesesRest) { el.hidden = true; return }
+    const necesario = Math.max(0, monto - calcMeta.acumulado) / calcMeta.mesesRest
+    const nivel = nivelRealismo(necesario, calcMeta.dispMensual, ahorroRealMedio)
+    const nombres = { cumplida: 'Ya lo tienes', realista: 'Realista', ambiciosa: 'Ambiciosa', dificil: 'Difícil de cumplir' }
+    el.hidden = false
+    el.className = 'realismo mini ' + nivel
+    el.innerHTML = `<span class="r-sem" aria-hidden="true"><i></i><i></i><i></i></span><div><b>${nombres[nivel]}</b><p>${nivel === 'dificil'
+      ? `Exige ${fmt(Math.ceil(necesario))}/mes y tu plan deja ${fmt(Math.round(calcMeta.dispMensual))}. Te sugerimos ${fmt(Math.round(_metaMontoSugerido))}.`
+      : `Exige ${fmt(Math.ceil(necesario))}/mes de los ${fmt(Math.round(calcMeta.dispMensual))} que deja tu plan.`}</p></div>`
+  }
+  document.getElementById('m-monto').addEventListener('input', realismoModal)
 
   cargarMetas()
   cargarIngresos()
