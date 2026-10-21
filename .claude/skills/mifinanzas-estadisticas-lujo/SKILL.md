@@ -1,6 +1,6 @@
 ---
 name: mifinanzas-estadisticas-lujo
-description: Rediseña y amplía la pantalla de Estadísticas de MiFinanzas (mifinanza-estadisticas-v2.html) con el sistema visual del dashboard y vistas "de película" para entender patrones de gasto — reparto en anillo, fugas de dinero, días de la semana, comparativa de meses, buscador de "¿cuándo fue la última vez?" y evolución por categoría con promedio. Úsala cuando el usuario pida mejorar, modernizar o añadir análisis a Estadísticas.
+description: Rediseña y amplía la pantalla de Estadísticas de MiFinanzas (mifinanza-estadisticas-v2.html) con el sistema visual del dashboard y vistas "de película" para entender patrones de gasto — reparto en anillo, fugas de dinero personales, comparativa de meses, última vez y frecuencia de un gasto, y evolución por categoría con promedio. Úsala cuando el usuario pida mejorar, modernizar o añadir análisis a Estadísticas.
 ---
 
 # MiFinanzas — Estadísticas de lujo
@@ -57,20 +57,24 @@ Todo se calcula con `datos`; ninguna consulta nueva.
    (esmeralda) o "Tiraste del ahorro X" (dorado), con tasa de ahorro en %.
 2. **Anillo de reparto**: SVG con las 5 categorías mayores + "Resto", total en el centro.
    Tocar un tramo abre esa categoría en el ranking.
-3. **Ranking de categorías**: de mayor a menor, % del total, barra, promedio/mes y la lista
-   de movimientos al abrirla (para ubicar gastos). Etiqueta **Reducible** en categorías
-   discrecionales (imprevistos, suscripciones, salidas, antojos).
-4. **Fugas de dinero**: suma de las categorías reducibles del período y cuánto se ahorraría
-   al año recortándolas a la mitad.
-5. **Qué días gastas más**: barras por día de la semana (solo gastos variables) y una frase
-   ("Los sábados gastas 2,3× más que la media").
-6. **Comparativa de meses** (período y año): ingresos vs gastos por mes en barras dobles,
-   mes con más ahorro marcado.
-7. **¿Cuándo fue la última vez?**: buscador sobre todos los meses. Por cada coincidencia:
-   última fecha, veces, cada cuántos días de media y total.
-8. **Evolución por categoría**: selector en chips, barras con línea de promedio, el mes más
-   alto en dorado, valores encima y una nota que cuenta la tendencia (sube/baja frente
-   al promedio y frente al mes anterior).
+3. **Gasto por categoría**: de mayor a menor, dos cifras claras por categoría (Promedio al mes /
+   Total · N meses; en Por mes, Este mes / Tu media con ▲▼) y la lista de movimientos al
+   abrirla (para ubicar gastos). Etiqueta **Reducible** según el análisis de fugas.
+4. **Evolución por categoría** (justo después del ranking): chips, barras con promedio, mes más
+   alto en dorado y una nota que cuenta la tendencia. Empieza por la categoría que más varía.
+5. **Fugas de dinero, personales**: no se decide por nombre fijo. Con los datos de cada persona
+   se marcan las categorías que varían mucho, van en aumento o son muchos gastos pequeños;
+   nunca las fijas, las estables ni los básicos (alquiler, luz, agua, internet, salud…). El
+   usuario puede quitar o añadir categorías (se guarda en el dispositivo, `mf-fugas`).
+6. **Mes a mes** (período y año): ingresos vs gastos por mes y el mejor mes marcado.
+7. **Última vez y frecuencia**: buscador sobre todos los meses con última fecha, cada cuántos
+   días, meses en que ocurrió y próxima fecha estimada.
+
+Descartado a propósito: "qué días gastas más" (las fechas importadas del banco son de cuando
+se anota el pago, no de la compra, y el dato no lleva a ninguna acción).
+
+Ninguna vista llama a la API de Claude: todo se calcula en el navegador con los datos ya
+cargados. Lo único que usa la API es la importación del extracto (`netlify/functions/import-csv.js`).
 
 Movimiento: entradas en cascada, barras que crecen, anillo que se dibuja; nada en bucle.
 `prefers-reduced-motion` lo apaga.

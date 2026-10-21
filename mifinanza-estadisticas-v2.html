@@ -277,8 +277,17 @@
   .fuga-total { font-size: 30px; font-weight: 800; color: #fbbf24; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
   .fuga-txt { font-size: 14px; color: var(--text); line-height: 1.5; margin: 4px 0 12px; }
   .fuga-txt b { color: var(--accent2); }
-  .fuga-lista { display: flex; flex-wrap: wrap; gap: 8px; }
-  .fuga-lista span { font-size: 13px; font-weight: 700; padding: 6px 10px; border-radius: 999px; background: rgba(245,158,11,.10); border: 1px solid rgba(245,158,11,.3); color: #fde68a; }
+  .fuga-lista { display: flex; flex-direction: column; gap: 8px; }
+  .fuga-item { display: grid; grid-template-columns: minmax(0, 1fr) auto 36px; gap: 10px; align-items: center; padding: 10px 6px 10px 12px; border-radius: 14px; background: rgba(245,158,11,.08); border: 1px solid rgba(245,158,11,.25); }
+  .fuga-info { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+  .fuga-info b { font-size: 14px; font-weight: 800; color: #fde68a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .fuga-info span { font-size: 12px; color: var(--subtext); font-weight: 600; }
+  .fuga-item strong { font-size: 15px; font-weight: 800; color: #fbbf24; }
+  .fuga-quitar { width: 36px; height: 36px; border-radius: 10px; border: 0; background: none; color: var(--subtext); cursor: pointer; display: grid; place-items: center; }
+  .fuga-quitar svg { width: 16px; height: 16px; }
+  .fuga-quitar:hover { color: var(--text); background: rgba(255,255,255,.06); }
+  .fuga-anadir { margin-top: 10px; width: 100%; height: 44px; padding: 0 12px; border-radius: 12px; background: var(--card2); border: 1px dashed rgba(148,163,184,.35); color: var(--subtext); font: 700 13px 'Manrope', sans-serif; }
+  .fuga-pie { margin: 10px 0 0; font-size: 12px; line-height: 1.45; color: var(--subtext); }
   .fuga-ok { font-size: 14px; color: var(--accent2); font-weight: 700; }
 
   /* Mes a mes */
@@ -291,14 +300,6 @@
   .comp-mes.mejor span { color: #fbbf24; }
   .comp-mes.mejor::before { content: "★"; position: absolute; top: -16px; color: #fbbf24; font-size: 12px; }
   @keyframes crece-y { from { transform: scaleY(0); } }
-
-  /* Días de la semana */
-  .semana { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 8px; align-items: end; height: 120px; }
-  .sem-dia { display: flex; flex-direction: column; align-items: center; gap: 6px; height: 100%; justify-content: flex-end; }
-  .sem-dia i { width: 100%; max-width: 30px; border-radius: 8px 8px 3px 3px; background: rgba(99,102,241,.45); transform-origin: bottom; animation: crece-y .8s cubic-bezier(.16,1,.3,1) both; }
-  .sem-dia.top i { background: linear-gradient(180deg, #fbbf24, #f59e0b); box-shadow: 0 0 14px rgba(245,158,11,.35); }
-  .sem-dia span { font-size: 11px; font-weight: 800; color: var(--subtext); }
-  .sem-dia.top span { color: #fbbf24; }
 
   /* Evolución */
   .cat-select { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
@@ -346,7 +347,7 @@
   .br-vacio { font-size: 14px; color: var(--subtext); }
 
   @media (prefers-reduced-motion: reduce) {
-    .hero, .tarjeta, .cats-card, .analisis-card, .donut .tramo, .cat-bar-fill, .comp-barras i, .sem-dia i, .evol-col i { animation: none !important; }
+    .hero, .tarjeta, .cats-card, .analisis-card, .donut .tramo, .cat-bar-fill, .comp-barras i, .evol-col i { animation: none !important; }
   }
 </style>
 <link rel="manifest" href="manifest.json">
@@ -458,11 +459,6 @@
     </section>
 
 
-    <section class="tarjeta" id="semana-card" aria-labelledby="semana-t">
-      <h2 class="t-titulo" id="semana-t">¿Qué días gastas más?</h2>
-      <div class="semana" id="semana"></div>
-      <p class="t-nota" id="semana-nota"></p>
-    </section>
   </div>
 
   <div class="spacer"></div>
@@ -686,6 +682,7 @@
       sel.innerHTML += `<option value="${cat}">${cat}</option>`
     })
 
+    analizarCategorias()
     document.getElementById('loading-wrap').style.display = 'none'
     document.getElementById('contenido').style.display    = ''
 
@@ -833,7 +830,7 @@
   function fmt(n) {
     const v = Math.round(Math.abs(parseFloat(n || 0)))
     const num = String(v).replace(/\B(?=(\d{3})+(?!\d))/g, '.')
-    return window.moneda === '€' ? num + ' €' : window.moneda + num
+    return window.moneda === '€' ? num + '\u00a0€' : window.moneda + num  // espacio que no se parte: el € no salta de línea
   }
 
   function setResumen(lIng, vIng, sIng, lGas, vGas, sGas, lAho, vAho, sAho, aho) {
@@ -1046,20 +1043,59 @@
   // ── Utilidades ──
   // Quita el emoji inicial (y su selector de variante) de una categoría: "⚠️ Gastos Imprevistos" → "Gastos Imprevistos"
   const sinEmoji = c => (c || '').trim().replace(/^[^\p{L}\p{N}]+/u, '').trim()
-  // Categorías discrecionales: donde suele haber dinero que se puede recortar
-  const REDUCIBLES = ['imprevist', 'suscrip', 'salida', 'antojo', 'ocio', 'restaur', 'delivery', 'caprich']
-  const esReducible = c => REDUCIBLES.some(r => sinEmoji(c).toLowerCase().includes(r))
+  // ── Fugas: qué categorías se pueden recortar, decidido con los datos de cada persona ──
+  // Nombres que suelen ser recortables (pista, no regla) y gastos básicos que nunca se marcan.
+  const PISTAS_RECORTABLE = ['imprevist', 'suscrip', 'salida', 'antojo', 'ocio', 'restaur', 'delivery', 'caprich', 'compras', 'bar']
+  const BASICOS = ['alquiler', 'hipoteca', 'luz', 'agua', 'internet', 'línea', 'linea', 'salud', 'seguro', 'crédito', 'credito', 'préstamo', 'prestamo', 'colegio', 'nómina', 'nomina']
+  let analisisCats = {}
+  const leerAjustes = () => { try { return JSON.parse(localStorage.getItem('mf-fugas')) || { incluir: [], excluir: [] } } catch { return { incluir: [], excluir: [] } } }
+  const guardarAjustes = a => { try { localStorage.setItem('mf-fugas', JSON.stringify(a)) } catch {} }
+
+  // Mira cada categoría en todos los meses: si es fija o estable no es una fuga; si varía mucho,
+  // va en aumento o son muchos gastos pequeños, sí. Así cada persona ve sus propias fugas.
+  function analizarCategorias() {
+    analisisCats = {}
+    const meses = [...datos].reverse()
+    const n = meses.length
+    const cats = new Set(); meses.forEach(d => Object.keys(d.cats).forEach(c => cats.add(c)))
+    cats.forEach(c => {
+      const nombre = sinEmoji(c).toLowerCase()
+      const vals = meses.map(d => d.cats[c] || 0)
+      const movs = meses.flatMap(d => d.movs[c] || [])
+      const media = vals.reduce((t, v) => t + v, 0) / n
+      const cv = media ? Math.sqrt(vals.reduce((t, v) => t + (v - media) ** 2, 0) / n) / media : 0
+      const presencia = vals.filter(v => v > 0).length / n
+      const variables = movs.filter(m => m.tipo === 'gasto')
+      const ticket = variables.length ? variables.reduce((t, m) => t + m.monto, 0) / variables.length : 0
+      const ult3 = vals.slice(-3), mediaUlt3 = ult3.reduce((t, v) => t + v, 0) / (ult3.length || 1)
+      let motivo = null
+      if (BASICOS.some(b => nombre.includes(b))) motivo = null
+      else if (movs.some(m => m.tipo === 'fijo') && !variables.length) motivo = null          // gasto fijo
+      else if (n >= 3 && presencia >= 0.8 && cv < 0.2) motivo = null                          // estable cada mes
+      else if (n >= 3 && variables.length / n >= 4 && ticket < 25) motivo = 'muchos gastos pequeños'
+      else if (n >= 4 && media > 0 && mediaUlt3 > media * 1.25) motivo = 'va en aumento'
+      else if (n >= 3 && cv >= 0.4 && media > 0) motivo = 'varía mucho de un mes a otro'
+      else if (PISTAS_RECORTABLE.some(r => nombre.includes(r))) motivo = 'suele ser recortable'
+      analisisCats[c] = { motivo }
+    })
+  }
+  const esReducible = c => {
+    const a = leerAjustes()
+    if (a.excluir.includes(c)) return false
+    if (a.incluir.includes(c)) return true
+    return !!(analisisCats[c] && analisisCats[c].motivo)
+  }
+  const motivoFuga = c => leerAjustes().incluir.includes(c) ? 'la marcaste tú' : (analisisCats[c] && analisisCats[c].motivo) || ''
   const COLORES = ['#6366f1', '#10b981', '#f59e0b', '#ef4444', '#38bdf8', '#64748b']
 
-  // ── Vistas extra: anillo, fugas, mes a mes y días de la semana ──
+  // ── Vistas extra: anillo, fugas y mes a mes ──
   function renderExtras(slice, soloMes) {
     const hay = slice.length > 0
-    ;['donut-card', 'fugas-card', 'semana-card'].forEach(id => { document.getElementById(id).hidden = !hay })
+    ;['donut-card', 'fugas-card'].forEach(id => { document.getElementById(id).hidden = !hay })
     document.getElementById('comp-card').hidden = !hay || soloMes || slice.length < 2
     if (!hay) return
     renderDonut(slice)
     renderFugas(slice)
-    renderSemana(slice)
     if (!soloMes && slice.length >= 2) renderComparativa(slice)
   }
 
@@ -1107,37 +1143,48 @@
     slice.forEach(d => Object.entries(d.cats).forEach(([c, v]) => { if (esReducible(c)) tot[c] = (tot[c] || 0) + v }))
     const lista = Object.entries(tot).sort((a, b) => b[1] - a[1])
     const total = lista.reduce((t, [, v]) => t + v, 0)
-    const box = document.getElementById('fugas')
-    if (!total) { box.innerHTML = '<p class="fuga-ok">No hay gastos en categorías reducibles en lo que estás viendo. Bien hecho.</p>'; return }
     const porMes = total / slice.length
-    box.innerHTML = `<div class="fuga-total num">${fmt(total)}</div>
-      <p class="fuga-txt">se fueron en gastos que se pueden recortar${slice.length > 1 ? ` (${fmt(porMes)} al mes)` : ''}. Si los bajas a la mitad, ahorrarías <b>${fmt(porMes / 2 * 12)} al año</b>.</p>
-      <div class="fuga-lista"></div>`
+    const box = document.getElementById('fugas')
+    box.innerHTML = total
+      ? `<div class="fuga-total num">${fmt(total)}</div>
+         <p class="fuga-txt">se fueron en gastos que se pueden recortar${slice.length > 1 ? ` (${fmt(porMes)} al mes)` : ''}. Si los bajas a la mitad, ahorrarías <b>${fmt(porMes / 2 * 12)} al año</b>.</p>
+         <div class="fuga-lista"></div>`
+      : '<p class="fuga-ok">No vemos fugas en lo que estás mirando. Bien hecho.</p>'
     const cont = box.querySelector('.fuga-lista')
-    lista.forEach(([c, v]) => { const sp = document.createElement('span'); sp.textContent = `${c} · ${fmt(v)}`; cont.appendChild(sp) })
+    if (cont) lista.forEach(([c, v]) => {
+      const item = document.createElement('div')
+      item.className = 'fuga-item'
+      item.innerHTML = `<div class="fuga-info"><b></b><span></span></div><strong class="num">${fmt(v)}</strong>
+        <button type="button" class="fuga-quitar" aria-label="No es una fuga para mí">${'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>'}</button>`
+      item.querySelector('b').textContent = c
+      item.querySelector('.fuga-info span').textContent = motivoFuga(c)
+      item.querySelector('.fuga-quitar').addEventListener('click', () => ajustarFuga(c, false))
+      cont.appendChild(item)
+    })
+    // Añadir a mano una categoría que para ti sí es una fuga
+    const resto = [...new Set(slice.flatMap(d => Object.keys(d.cats)))].filter(c => !esReducible(c)).sort((a, b) => sinEmoji(a).localeCompare(sinEmoji(b), 'es'))
+    if (resto.length) {
+      const sel = document.createElement('select')
+      sel.className = 'fuga-anadir'
+      sel.setAttribute('aria-label', 'Marcar otra categoría como fuga')
+      sel.innerHTML = '<option value="">+ Marcar otra categoría como fuga</option>' + resto.map(c => `<option></option>`).join('')
+      ;[...sel.options].slice(1).forEach((o, i) => { o.value = resto[i]; o.textContent = resto[i] })
+      sel.addEventListener('change', () => { if (sel.value) ajustarFuga(sel.value, true) })
+      box.appendChild(sel)
+    }
+    box.insertAdjacentHTML('beforeend', '<p class="fuga-pie">Las detectamos con tus datos: gastos que varían mucho, van en aumento o son muchos y pequeños. Quita o añade las que quieras.</p>')
   }
 
-  function renderSemana(slice) {
-    // Solo gastos variables: los fijos caen siempre el mismo día y no dicen nada del hábito
-    const dias = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom']
-    const suma = Array(7).fill(0)
-    slice.forEach(d => Object.values(d.movs).flat().forEach(m => {
-      if (m.tipo !== 'gasto') return
-      const w = (new Date(m.fecha + 'T00:00:00').getDay() + 6) % 7
-      suma[w] += m.monto
-    }))
-    const max = Math.max(...suma)
-    const cont = document.getElementById('semana')
-    const nota = document.getElementById('semana-nota')
-    if (!max) { cont.innerHTML = ''; nota.textContent = 'Aún no hay gastos variables para ver tus días.'; return }
-    const iTop = suma.indexOf(max)
-    cont.innerHTML = suma.map((v, i) => `<div class="sem-dia${i === iTop ? ' top' : ''}" title="${dias[i]}: ${fmt(v)}"><i style="height:${Math.max(4, Math.round(v / max * 90))}px;animation-delay:${i * 50}ms"></i><span>${dias[i]}</span></div>`).join('')
-    const media = suma.reduce((t, v) => t + v, 0) / 7
-    const nombres = ['los lunes', 'los martes', 'los miércoles', 'los jueves', 'los viernes', 'los sábados', 'los domingos']
-    const veces = media ? (max / media) : 0
-    nota.textContent = veces >= 1.3
-      ? `${nombres[iTop][0].toUpperCase() + nombres[iTop].slice(1)} gastas ${veces.toFixed(1).replace('.', ',')} veces más que un día normal (${fmt(max)} en total).`
-      : `Tu gasto está bastante repartido durante la semana; el día más alto es el ${['lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado', 'domingo'][iTop]}.`
+  // Ajuste manual del usuario (se guarda en este dispositivo)
+  function ajustarFuga(cat, esFuga) {
+    const a = leerAjustes()
+    a.incluir = a.incluir.filter(c => c !== cat); a.excluir = a.excluir.filter(c => c !== cat)
+    const auto = !!(analisisCats[cat] && analisisCats[cat].motivo)
+    if (esFuga && !auto) a.incluir.push(cat)
+    if (!esFuga && auto) a.excluir.push(cat)
+    guardarAjustes(a)
+    renderCatsUI()
+    renderFugas(catsSliceActual)
   }
 
   function renderComparativa(slice) {
