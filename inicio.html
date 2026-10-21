@@ -139,6 +139,7 @@
   .ring-center { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
   .ring-pct { font-size: 26px; font-weight: 800; color: var(--white); letter-spacing: -0.02em; }
   .ring-sub { font-size: 11px; font-weight: 700; color: var(--sub); }
+  .ring-pct.danger { color: var(--red-txt); }
   .salud-right { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
   .salud-badge {
     align-self: flex-start; font-size: 12px; font-weight: 800; padding: 5px 10px; border-radius: 999px;
@@ -146,9 +147,7 @@
   }
   .salud-badge.warn { color: var(--gold); background: rgba(245,158,11,.16); }
   .salud-badge.danger { color: var(--red); background: rgba(239,68,68,.16); }
-  .salud-texto { font-size: 15px; line-height: 1.45; color: var(--text); }
-  .salud-texto strong { font-weight: 800; }
-  .salud-resto { font-size: 13px; color: var(--sub); }
+  .salud-resto { font-size: 15px; line-height: 1.45; color: var(--sub); }
   .salud-resto strong { color: var(--text); }
   .salud-bar-wrap { display: flex; flex-direction: column; gap: 8px; }
   .salud-bar-track { position: relative; display: grid; grid-template-columns: 80fr 15fr 5fr; gap: 3px; height: 10px; }
@@ -367,7 +366,6 @@
       </div>
       <div class="salud-right">
         <div class="salud-badge" id="salud-badge">Calculando</div>
-        <p class="salud-texto" id="salud-texto"></p>
         <p class="salud-resto num" id="salud-resto"></p>
       </div>
     </div>
@@ -554,18 +552,17 @@
   function actualizarSalud(pctGastado, saldo, totalIng) {
     const ring = document.getElementById('salud-ring')
     const badge = document.getElementById('salud-badge')
-    const texto = document.getElementById('salud-texto')
     const resto = document.getElementById('salud-resto')
     const circ = 2 * Math.PI * 54  // r=54 → 339,29
 
     if (totalIng <= 0) {
-      ring.className = 'ring-fg'
+      ring.setAttribute('class', 'ring-fg')
       ring.style.strokeDashoffset = circ
       document.getElementById('salud-pct').textContent = '—'
+      document.getElementById('salud-pct').className = 'ring-pct num'
       badge.textContent = 'Sin ingresos'
       badge.className = 'salud-badge warn'
-      texto.textContent = 'Aún no has registrado ingresos este mes.'
-      resto.innerHTML = saldo < 0 ? `Llevas <strong>${fmt(-saldo)}</strong> gastados.` : ''
+      resto.innerHTML = 'Aún no has registrado ingresos este mes.' + (saldo < 0 ? ` Llevas <strong>${fmt(-saldo)}</strong> gastados.` : '')
       document.getElementById('salud-marker').style.left = '0%'
       document.getElementById('salud-svg').setAttribute('aria-label', 'Sin ingresos registrados este mes')
       return
@@ -573,17 +570,19 @@
 
     const p = Math.max(0, pctGastado)
     ring.style.strokeDashoffset = circ * (1 - Math.min(1, p / 100))
-    document.getElementById('salud-pct').textContent = pctTxt(p)
 
     let estado, clase
     if (p < 80)       { estado = 'Bajo control'; clase = '' }
     else if (p <= 95) { estado = 'Atención';     clase = 'warn' }
     else              { estado = 'Al límite';    clase = 'danger' }
-    ring.className = 'ring-fg' + (clase ? ' ' + clase : '')
+    ring.setAttribute('class', 'ring-fg' + (clase ? ' ' + clase : ''))  // en SVG, className no se puede asignar
     badge.textContent = estado
     badge.className = 'salud-badge' + (clase ? ' ' + clase : '')
+    // El porcentaje se pone en rojo cuando el mes está al límite o pasado (más del 95 %).
+    const pctEl = document.getElementById('salud-pct')
+    pctEl.textContent = pctTxt(p)
+    pctEl.className = 'ring-pct num' + (clase === 'danger' ? ' danger' : '')
 
-    texto.innerHTML = `Has gastado el <strong>${pctTxt(p)}</strong> de lo que ingresaste este mes.`
     resto.innerHTML = saldo >= 0
       ? `Te quedan <strong>${fmt(saldo)}</strong> hasta fin de mes.`
       : `<span style="color:var(--red-txt)">Llevas ${fmt(-saldo)} en negativo.</span>`
