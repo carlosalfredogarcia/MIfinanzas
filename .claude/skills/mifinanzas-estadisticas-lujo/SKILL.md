@@ -1,6 +1,6 @@
 ---
 name: mifinanzas-estadisticas-lujo
-description: Rediseña y amplía la pantalla de Estadísticas de MiFinanzas (mifinanza-estadisticas-v2.html) con el sistema visual del dashboard y vistas "de película" para entender patrones de gasto — reparto en anillo, fugas de dinero personales, comparativa de meses, última vez y frecuencia de un gasto, y evolución por categoría con promedio. Úsala cuando el usuario pida mejorar, modernizar o añadir análisis a Estadísticas.
+description: Rediseña y amplía la pantalla de Estadísticas de MiFinanzas (mifinanza-estadisticas-v2.html) con el sistema visual del dashboard y vistas claras para entender patrones de gasto — anillo con tabla de categorías (% · media/mes · total), evolución por categoría con resumen del período, y última vez y frecuencia de un gasto. Úsala cuando el usuario pida mejorar, modernizar o añadir análisis a Estadísticas.
 ---
 
 # MiFinanzas — Estadísticas de lujo
@@ -49,35 +49,28 @@ esmeralda `#10b981` (texto `#34d399`), rojo `#ef4444` (texto `#f87171`), dorado 
 `tabular-nums`. Tarjeta principal con cristal (degradado esmeralda→índigo, blur 12 px).
 Iconos SVG de trazo; emoji solo en categorías.
 
-## Vistas de lujo ("de película")
+## Vistas (lo que el usuario aprobó)
 
-Todo se calcula con `datos`; ninguna consulta nueva.
+Todo se calcula con `datos`; ninguna consulta nueva ni llamada a la API de Claude.
 
-1. **Cabecera de resultado**: ingresos, gastos y el veredicto en grande: "Ahorraste X"
-   (esmeralda) o "Tiraste del ahorro X" (dorado), con tasa de ahorro en %.
-2. **Anillo de reparto**: SVG con las 5 categorías mayores + "Resto", total en el centro.
-   Tocar un tramo abre esa categoría en el ranking.
-3. **Gasto por categoría**: de mayor a menor, dos cifras claras por categoría (Promedio al mes /
-   Total · N meses; en Por mes, Este mes / Tu media con ▲▼) y la lista de movimientos al
-   abrirla (para ubicar gastos). Etiqueta **Reducible** según el análisis de fugas.
-4. **Evolución por categoría** (justo después del ranking): chips, barras con promedio, mes más
-   alto en dorado y una nota que cuenta la tendencia. Empieza por la categoría que más varía.
-5. **Fugas de dinero, personales**: no se decide por nombre fijo. Con los datos de cada persona
-   se marcan las categorías que varían mucho, van en aumento o son muchos gastos pequeños;
-   nunca las fijas, las estables ni los básicos (alquiler, luz, agua, internet, salud…). El
-   usuario puede quitar o añadir categorías (se guarda en el dispositivo, `mf-fugas`).
-6. **Mes a mes** (período y año): ingresos vs gastos por mes y el mejor mes marcado.
-7. **Última vez y frecuencia**: buscador sobre todos los meses con última fecha, cada cuántos
+1. **Resultado**: ingresos, gastos y el veredicto en grande: "Ahorraste X" (esmeralda) o
+   "Tiraste del ahorro X" (dorado), con el % de lo que entró.
+2. **¿A dónde va tu dinero?** (un solo panel): anillo con las 5 categorías mayores + "Resto" y,
+   debajo, una tabla compacta con TODAS las categorías: % · Media/mes · Total (en "Por mes": % · Total).
+   Sin barras. Tocar una fila (o un tramo del anillo) despliega sus movimientos para ubicar
+   o editar un gasto.
+3. **Evolución por categoría**: chips, barras con promedio, mes más alto en dorado. La nota de
+   abajo es el resumen del período: "Tu mejor mes fue febrero: ahorraste 495 €. En 3 meses
+   gastaste más de lo que entró (…)". No poner frases tipo "bajaste X un 40 %": no le sirven.
+4. **Última vez y frecuencia**: buscador sobre todos los meses con última fecha, cada cuántos
    días, meses en que ocurrió y próxima fecha estimada.
 
-Descartado a propósito: "qué días gastas más" (las fechas importadas del banco son de cuando
-se anota el pago, no de la compra, y el dato no lleva a ninguna acción).
+Descartado a propósito por el usuario: "qué días gastas más", "fugas de dinero" y el gráfico
+"mes a mes". No volver a añadirlos sin que lo pida.
 
-Ninguna vista llama a la API de Claude: todo se calcula en el navegador con los datos ya
-cargados. Lo único que usa la API es la importación del extracto (`netlify/functions/import-csv.js`).
-
-Movimiento: entradas en cascada, barras que crecen, anillo que se dibuja; nada en bucle.
-`prefers-reduced-motion` lo apaga.
+Regla de oro: nada que obligue a hacer mucho scroll; cifras con su etiqueta, sin adornos.
+La pantalla no debe desplazarse sola al cambiar de modo o elegir meses (no usar `scrollIntoView`
+en la página para centrar chips).
 
 ## Proceso
 
