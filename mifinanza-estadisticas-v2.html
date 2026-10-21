@@ -4,28 +4,28 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>MiFinanza – Estadísticas</title>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="datepicker.js"></script>
 <style>
   :root {
-    --bg: #0f0f13; --card: #17171d; --card2: #1e1e27;
-    --accent: #b8f564; --accent2: #4fd1c5; --danger: #ff6b6b;
-    --gold: #f5c842; --text: #f0f0f5; --subtext: #8888a0;
-    --border: rgba(255,255,255,0.06);
+    --bg: #0a0e1a; --card: #111827; --card2: #1a2234;
+    --accent: #10b981; --accent2: #34d399; --danger: #ef4444;
+    --gold: #f59e0b; --text: #f1f5f9; --subtext: #94a3b8;
+    --border: #1f2937; --indigo: #6366f1; --red-txt: #f87171;
   }
 
   html { visibility: hidden }
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
   html, body { height: 100%; }
-  body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; min-height: 100vh; display: flex; justify-content: center; }
+  body { background: var(--bg); color: var(--text); font-family: 'Manrope', sans-serif; min-height: 100vh; display: flex; justify-content: center; }
 
   .phone { width: 390px; min-height: 100vh; background: var(--bg); }
 
   .header { padding: 52px 24px 20px; animation: fadeUp 0.4s ease both; }
 
   .header-title {
-    font-family: 'Syne', sans-serif; font-size: 24px; font-weight: 800;
+    font-family: 'Manrope', sans-serif; font-size: 24px; font-weight: 800;
     background: linear-gradient(90deg, #fff 30%, var(--accent));
     -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
   }
@@ -64,11 +64,11 @@
 
   .res-item { flex: 1; background: var(--card); border-radius: 16px; padding: 13px 10px; border: 1px solid var(--border); text-align: center; }
   .res-label { font-size: 9px; color: var(--subtext); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 5px; }
-  .res-value { font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 700; }
+  .res-value { font-family: 'Manrope', sans-serif; font-size: 15px; font-weight: 700; }
   .res-sub   { font-size: 9px; color: var(--subtext); margin-top: 3px; }
 
   .cats-card { margin: 0 24px 16px; background: var(--card); border-radius: 20px; padding: 18px; border: 1px solid var(--border); animation: fadeUp 0.4s 0.22s ease both; opacity: 0; }
-  .cats-title { font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 14px; }
+  .cats-title { font-family: 'Manrope', sans-serif; font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 14px; }
 
   .cat-row { margin-bottom: 12px; }
   .cat-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; cursor: pointer; }
@@ -77,7 +77,7 @@
   .cat-chevron { font-size: 9px; color: var(--subtext); transition: transform 0.2s ease; }
   .cat-row.abierta .cat-chevron { transform: rotate(90deg); }
   .cat-right { text-align: right; }
-  .cat-total { font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700; color: var(--danger); }
+  .cat-total { font-family: 'Manrope', sans-serif; font-size: 13px; font-weight: 700; color: var(--danger); }
   .cat-prom  { font-size: 10px; color: var(--subtext); }
   .cat-bar-track { background: var(--card2); border-radius: 100px; height: 5px; overflow: hidden; }
   .cat-bar-fill  { height: 100%; border-radius: 100px; background: linear-gradient(90deg, var(--accent2), var(--accent)); transition: width 0.7s ease; }
@@ -99,19 +99,19 @@
   .modal-base { position: fixed; inset: 0; background: rgba(0,0,0,0.75); backdrop-filter: blur(8px); z-index: 200; display: none; align-items: flex-end; justify-content: center; }
   .modal-box { width: 390px; background: var(--card); border-radius: 28px 28px 0 0; padding: 24px 24px 40px; border-top: 1px solid var(--border); }
   .modal-handle { width: 40px; height: 4px; background: rgba(255,255,255,0.08); border-radius: 100px; margin: 0 auto 20px; }
-  .modal-title { font-family: 'Syne', sans-serif; font-size: 17px; font-weight: 700; color: var(--text); margin-bottom: 18px; }
+  .modal-title { font-family: 'Manrope', sans-serif; font-size: 17px; font-weight: 700; color: var(--text); margin-bottom: 18px; }
   .fld { margin-bottom: 12px; }
   .lbl { font-size: 11px; color: var(--subtext); text-transform: uppercase; letter-spacing: 0.08em; display: block; margin-bottom: 6px; }
-  .inp { width: 100%; background: var(--card2); border: 1px solid var(--border); border-radius: 12px; padding: 12px 14px; color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 15px; outline: none; }
+  .inp { width: 100%; background: var(--card2); border: 1px solid var(--border); border-radius: 12px; padding: 12px 14px; color: var(--text); font-family: 'Manrope', sans-serif; font-size: 15px; outline: none; }
   .inp:focus { border-color: #58a6ff; }
   .inp option { background: #1e1e27; }
-  .btn-ok { width: 100%; border: none; border-radius: 14px; padding: 15px; font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 700; cursor: pointer; margin-bottom: 8px; background: #58a6ff; color: #0d1117; }
-  .btn-no { width: 100%; background: none; border: none; color: var(--subtext); font-size: 14px; cursor: pointer; padding: 10px; font-family: 'DM Sans', sans-serif; }
+  .btn-ok { width: 100%; border: none; border-radius: 14px; padding: 15px; font-family: 'Manrope', sans-serif; font-size: 15px; font-weight: 700; cursor: pointer; margin-bottom: 8px; background: #58a6ff; color: #0d1117; }
+  .btn-no { width: 100%; background: none; border: none; color: var(--subtext); font-size: 14px; cursor: pointer; padding: 10px; font-family: 'Manrope', sans-serif; }
 
   .analisis-card { margin: 0 24px 16px; background: var(--card); border-radius: 20px; padding: 18px; border: 1px solid var(--border); animation: fadeUp 0.4s 0.26s ease both; opacity: 0; }
-  .analisis-title { font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 12px; }
+  .analisis-title { font-family: 'Manrope', sans-serif; font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 12px; }
 
-  .cat-select { width: 100%; background: var(--card2); border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px; color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 13px; outline: none; margin-bottom: 14px; cursor: pointer; }
+  .cat-select { width: 100%; background: var(--card2); border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px; color: var(--text); font-family: 'Manrope', sans-serif; font-size: 13px; outline: none; margin-bottom: 14px; cursor: pointer; }
   .cat-select option { background: #1e1e27; }
 
   .evol-barras { display: flex; align-items: flex-end; gap: 6px; height: 80px; margin-bottom: 8px; }
@@ -139,18 +139,199 @@
   .panelmas-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.75); backdrop-filter: blur(8px); z-index: 200; display: none; align-items: flex-end; justify-content: center; }
   .panelmas-box { width: 390px; background: var(--card); border-radius: 28px 28px 0 0; padding: 24px 24px 40px; border-top: 1px solid var(--border); }
   .panelmas-handle { width: 40px; height: 4px; background: rgba(255,255,255,0.08); border-radius: 100px; margin: 0 auto 20px; }
-  .panelmas-title { font-family: 'Syne', sans-serif; font-size: 17px; font-weight: 700; color: var(--text); margin-bottom: 14px; }
+  .panelmas-title { font-family: 'Manrope', sans-serif; font-size: 17px; font-weight: 700; color: var(--text); margin-bottom: 14px; }
   .mas-item { display: flex; align-items: center; gap: 14px; padding: 14px 2px; cursor: pointer; border-bottom: 1px solid var(--border); transition: opacity 0.15s; }
   .mas-item:last-of-type { border-bottom: none; margin-bottom: 16px; }
   .mas-item:active { opacity: 0.6; }
   .mas-icon { width: 42px; height: 42px; border-radius: 13px; background: rgba(88,166,255,0.12); display: flex; align-items: center; justify-content: center; font-size: 19px; flex-shrink: 0; }
   .mas-label { flex: 1; font-size: 15px; font-weight: 600; color: var(--text); }
   .mas-arrow { color: #58a6ff; font-size: 18px; }
-  .panelmas-cancelar { width: 100%; background: none; border: none; color: var(--subtext); font-size: 14px; cursor: pointer; padding: 10px; font-family: 'DM Sans', sans-serif; }
+  .panelmas-cancelar { width: 100%; background: none; border: none; color: var(--subtext); font-size: 14px; cursor: pointer; padding: 10px; font-family: 'Manrope', sans-serif; }
 
   .spacer { height: 100px; }
 
   @keyframes fadeUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* ═════ Rediseño Estadísticas (sistema del dashboard) ═════ */
+  body { font-family: 'Manrope', sans-serif; align-items: flex-start; }
+  .phone { width: 100%; max-width: 430px; position: relative; overflow-x: clip; }
+  .num { font-variant-numeric: tabular-nums; }
+  .phone button { font-family: inherit; }
+  .phone :focus-visible { outline: 2px solid #a5b4fc; outline-offset: 2px; }
+  .blob { position: absolute; border-radius: 50%; filter: blur(70px); pointer-events: none; z-index: 0; }
+  .blob-g { top: 160px; left: -70px; width: 240px; height: 240px; background: #10b981; opacity: .22; }
+  .blob-i { top: 260px; right: -80px; width: 240px; height: 240px; background: #6366f1; opacity: .26; }
+  .phone > :not(.blob) { position: relative; z-index: 1; }
+
+  .header { padding: 52px 20px 14px; }
+  .header-title { font-size: 26px; font-weight: 800; letter-spacing: -0.02em; background: none; -webkit-text-fill-color: currentColor; color: var(--text); }
+  .header-sub { font-size: 13px; color: var(--subtext); font-weight: 600; margin-top: 2px; }
+
+  .modo-tabs { margin: 0 20px 14px; padding: 4px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4px; background: var(--card); border: 1px solid var(--border); border-radius: 16px; }
+  .modo-tab { height: 42px; border: 0; border-radius: 12px; background: none; color: var(--subtext); font: 700 13px 'Manrope', sans-serif; cursor: pointer; transition: background .25s, color .25s; }
+  .modo-tab.active { background: rgba(16,185,129,.16); color: var(--accent2); font-weight: 800; }
+
+  .periodo-wrap, .buscador-wrap { margin: 0 20px 14px; padding: 0; background: none; border: 0; }
+  .periodo-label { font-size: 12px; font-weight: 700; color: var(--subtext); margin-bottom: 8px; letter-spacing: 0; text-transform: none; }
+  .meses-grid, .meses-sel-grid { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 6px; }
+  .mes-chip, .mes-sel-chip {
+    height: 40px; display: grid; place-items: center; border-radius: 12px; cursor: pointer;
+    background: var(--card); border: 1px solid var(--border); color: var(--text); font: 700 13px 'Manrope', sans-serif; padding: 0;
+  }
+  .mes-chip.active, .mes-sel-chip.seleccionado { background: rgba(16,185,129,.16); border-color: rgba(16,185,129,.55); color: var(--accent2); }
+  .mes-chip.sin-datos { color: #475569; background: transparent; cursor: default; }
+  .meses-sel-count { margin-top: 10px; font-size: 13px; color: var(--subtext); font-weight: 600; }
+  .meses-sel-count span { color: var(--accent2); font-weight: 800; }
+  .loading-wrap { margin: 30px 20px; color: var(--subtext); text-align: center; }
+
+  /* Resultado (cristal) */
+  .hero {
+    margin: 0 20px 14px; padding: 20px; border-radius: 24px; display: flex; flex-direction: column; gap: 16px;
+    border: 1px solid rgba(16,185,129,.38);
+    background: linear-gradient(140deg, rgba(16,185,129,.20) 0%, rgba(17,24,39,.55) 55%, rgba(99,102,241,.16) 100%);
+    backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+    box-shadow: 0 20px 50px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.08);
+    animation: sube .6s cubic-bezier(.16,1,.3,1) both;
+  }
+  .hero.neg { border-color: rgba(245,158,11,.45); background: linear-gradient(140deg, rgba(245,158,11,.16) 0%, rgba(17,24,39,.55) 55%, rgba(99,102,241,.14) 100%); }
+  .hero-veredicto { display: flex; flex-direction: column; gap: 4px; }
+  .hero-lbl { font-size: 12px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; color: var(--accent2); }
+  .hero.neg .hero-lbl { color: #fbbf24; }
+  .hero-val { font-size: 40px; font-weight: 800; letter-spacing: -0.03em; line-height: 1.05; color: #e6f0ea; }
+  .hero.neg .hero-val { color: #fbbf24; }
+  .hero-sub { font-size: 13px; color: var(--subtext); font-weight: 600; display: flex; gap: 8px; flex-wrap: wrap; }
+  #tasa-aho:not(:empty) { color: var(--accent2); font-weight: 800; }
+  .hero.neg #tasa-aho { color: #fbbf24; }
+  .hero-par { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+  .hero-item { display: flex; flex-direction: column; gap: 2px; padding: 12px 14px; border-radius: 16px; background: rgba(10,14,26,.55); border: 1px solid rgba(255,255,255,.06); min-width: 0; }
+  .hero-mini { font-size: 12px; font-weight: 700; color: var(--subtext); }
+  .hero-num { font-size: 19px; font-weight: 800; }
+  .hero-num.ing { color: var(--accent2) !important; } .hero-num.gas { color: var(--red-txt) !important; }
+  .hero-mini2 { font-size: 11px; color: var(--subtext); font-weight: 600; }
+
+  /* Tarjetas */
+  .tarjeta, .cats-card, .analisis-card {
+    margin: 0 20px 14px; padding: 18px; border-radius: 24px; background: var(--card); border: 1px solid var(--border);
+    animation: sube .6s cubic-bezier(.16,1,.3,1) both;
+  }
+  .t-titulo, .cats-title, .analisis-title { font-size: 12px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; color: var(--subtext); margin: 0 0 14px; }
+  .t-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+  .t-leyenda { font-size: 11px; font-weight: 700; color: var(--subtext); display: flex; align-items: center; gap: 5px; }
+  .t-leyenda i { width: 8px; height: 8px; border-radius: 2px; display: inline-block; }
+  .lg-ing { background: #10b981; } .lg-gas { background: #ef4444; margin-left: 6px; }
+  .t-nota { margin: 12px 0 0; font-size: 14px; line-height: 1.45; color: #dbe2ff; padding: 10px 12px; border-radius: 12px; background: rgba(99,102,241,.10); border: 1px solid rgba(99,102,241,.22); }
+  .t-nota:empty { display: none; }
+  @keyframes sube { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+
+  /* Anillo de reparto */
+  .donut-wrap { display: grid; grid-template-columns: 140px minmax(0, 1fr); gap: 16px; align-items: center; }
+  .donut { width: 140px; height: 140px; }
+  .donut .tramo { fill: none; stroke-width: 22; cursor: pointer; transition: stroke-width .2s, opacity .2s; animation: dibuja 1.2s cubic-bezier(.16,1,.3,1) both; }
+  .donut .tramo:hover { stroke-width: 26; }
+  .donut-centro-v { font: 800 17px 'Manrope', sans-serif; fill: #fff; }
+  .donut-centro-l { font: 700 10px 'Manrope', sans-serif; fill: #94a3b8; letter-spacing: .08em; }
+  @keyframes dibuja { from { stroke-dasharray: 0 999; } }
+  .donut-leyenda { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+  .donut-leyenda li { display: grid; grid-template-columns: 10px minmax(0, 1fr) auto; gap: 8px; align-items: center; font-size: 13px; cursor: pointer; }
+  .donut-leyenda i { width: 10px; height: 10px; border-radius: 3px; }
+  .donut-leyenda span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--text); font-weight: 600; }
+  .donut-leyenda b { color: var(--subtext); font-weight: 800; font-variant-numeric: tabular-nums; }
+
+  /* Ranking */
+  .cat-row { padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,.05); background: none; border-radius: 0; margin: 0; }
+  .cat-row:last-child { border-bottom: 0; }
+  .cat-top { display: grid; grid-template-columns: 40px minmax(0, 1fr) auto; gap: 12px; align-items: center; cursor: pointer; }
+  .cat-ico { width: 40px; height: 40px; border-radius: 12px; display: grid; place-items: center; font-size: 19px; background: var(--card2); }
+  .cat-left { font-size: 15px; font-weight: 700; color: var(--text); display: flex; flex-direction: column; align-items: flex-start; gap: 3px; min-width: 0; text-align: left; }
+  .cat-nombre { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .cat-pct { font-size: 12px; color: var(--subtext); font-weight: 700; }
+  .cat-right { text-align: right; }
+  .cat-total { font-size: 15px; font-weight: 800; color: var(--red-txt); font-variant-numeric: tabular-nums; }
+  .cat-prom { font-size: 11px; color: var(--subtext); font-weight: 600; font-variant-numeric: tabular-nums; }
+  .cat-chevron { display: none; }
+  .cat-bar-track { height: 6px; margin: 10px 0 0 52px; border-radius: 999px; background: #1f2937; overflow: hidden; }
+  .cat-bar-fill { height: 100%; border-radius: 999px; background: linear-gradient(90deg, #6366f1, #818cf8); transform-origin: left; animation: crece-x .9s cubic-bezier(.16,1,.3,1) both; }
+  .cat-row.reducible .cat-bar-fill { background: linear-gradient(90deg, #f59e0b, #fbbf24); }
+  @keyframes crece-x { from { transform: scaleX(0); } }
+  .etq { font-size: 10px; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; padding: 2px 7px; border-radius: 999px; background: rgba(245,158,11,.16); color: #fbbf24; }
+  .cat-row.abierta .cat-ico { background: rgba(16,185,129,.16); }
+  .cat-movs { margin: 12px 0 0 52px; padding: 6px 0 0; border-top: 1px dashed rgba(255,255,255,.08); background: none; }
+  .cat-mov-item { display: grid; grid-template-columns: 30px minmax(0, 1fr) auto 24px; gap: 10px; align-items: center; padding: 8px 0; cursor: pointer; border: 0; background: none; }
+  .cm-icon { font-size: 15px; } .cm-nombre { font-size: 14px; font-weight: 700; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .cm-fecha { font-size: 12px; color: var(--subtext); } .cm-monto { font-size: 14px; font-weight: 800; color: var(--red-txt); font-variant-numeric: tabular-nums; }
+  .cm-edit { color: var(--subtext); font-size: 13px; }
+  .cat-movs-footer { font-size: 12px; color: var(--subtext); padding: 8px 0 2px; }
+  .cat-movs-footer span { color: var(--text); font-weight: 800; }
+
+  /* Fugas */
+  .fuga-total { font-size: 30px; font-weight: 800; color: #fbbf24; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+  .fuga-txt { font-size: 14px; color: var(--text); line-height: 1.5; margin: 4px 0 12px; }
+  .fuga-txt b { color: var(--accent2); }
+  .fuga-lista { display: flex; flex-wrap: wrap; gap: 8px; }
+  .fuga-lista span { font-size: 13px; font-weight: 700; padding: 6px 10px; border-radius: 999px; background: rgba(245,158,11,.10); border: 1px solid rgba(245,158,11,.3); color: #fde68a; }
+  .fuga-ok { font-size: 14px; color: var(--accent2); font-weight: 700; }
+
+  /* Mes a mes */
+  .comp { display: flex; align-items: flex-end; gap: 10px; height: 150px; overflow-x: auto; padding-top: 18px; scrollbar-width: none; }
+  .comp-mes { flex: 1 0 34px; display: flex; flex-direction: column; align-items: center; gap: 6px; height: 100%; justify-content: flex-end; position: relative; }
+  .comp-barras { display: flex; align-items: flex-end; gap: 3px; height: 100%; width: 100%; justify-content: center; }
+  .comp-barras i { width: 11px; border-radius: 4px 4px 2px 2px; transform-origin: bottom; animation: crece-y .8s cubic-bezier(.16,1,.3,1) both; }
+  .comp-barras .b-ing { background: #10b981; } .comp-barras .b-gas { background: #ef4444; }
+  .comp-mes span { font-size: 11px; font-weight: 700; color: var(--subtext); }
+  .comp-mes.mejor span { color: #fbbf24; }
+  .comp-mes.mejor::before { content: "★"; position: absolute; top: -16px; color: #fbbf24; font-size: 12px; }
+  @keyframes crece-y { from { transform: scaleY(0); } }
+
+  /* Días de la semana */
+  .semana { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 8px; align-items: end; height: 120px; }
+  .sem-dia { display: flex; flex-direction: column; align-items: center; gap: 6px; height: 100%; justify-content: flex-end; }
+  .sem-dia i { width: 100%; max-width: 30px; border-radius: 8px 8px 3px 3px; background: rgba(99,102,241,.45); transform-origin: bottom; animation: crece-y .8s cubic-bezier(.16,1,.3,1) both; }
+  .sem-dia.top i { background: linear-gradient(180deg, #fbbf24, #f59e0b); box-shadow: 0 0 14px rgba(245,158,11,.35); }
+  .sem-dia span { font-size: 11px; font-weight: 800; color: var(--subtext); }
+  .sem-dia.top span { color: #fbbf24; }
+
+  /* Evolución */
+  .cat-select { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
+  .cat-chips { display: flex; gap: 8px; overflow-x: auto; margin: 0 -18px 14px; padding: 0 18px; scrollbar-width: none; }
+  .cat-chips::-webkit-scrollbar { display: none; }
+  .cat-chip { flex: none; height: 36px; padding: 0 12px; border-radius: 999px; border: 1px solid var(--border); background: var(--card2); color: var(--subtext); font: 700 13px 'Manrope', sans-serif; cursor: pointer; white-space: nowrap; }
+  .cat-chip.active { background: rgba(16,185,129,.16); border-color: rgba(16,185,129,.5); color: var(--accent2); }
+  .evol { position: relative; display: flex; align-items: flex-end; gap: 6px; height: 170px; padding-top: 22px; overflow-x: auto; scrollbar-width: none; }
+  .evol-col { flex: 1 0 30px; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; gap: 6px; }
+  .evol-col b { font-size: 10px; font-weight: 800; color: var(--subtext); font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .evol-col i { width: 100%; max-width: 26px; border-radius: 7px 7px 3px 3px; background: rgba(99,102,241,.55); transform-origin: bottom; animation: crece-y .8s cubic-bezier(.16,1,.3,1) both; }
+  .evol-col.alto i { background: rgba(239,68,68,.75); }
+  .evol-col.bajo i { background: rgba(16,185,129,.75); }
+  .evol-col.max i { background: linear-gradient(180deg, #fbbf24, #f59e0b); box-shadow: 0 0 14px rgba(245,158,11,.35); }
+  .evol-col.max b { color: #fbbf24; }
+  .evol-col span { font-size: 11px; font-weight: 700; color: var(--subtext); }
+  .evol-prom { position: absolute; left: 0; right: 0; border-top: 1px dashed rgba(241,245,249,.45); pointer-events: none; }
+  .evol-leyenda { display: flex; flex-wrap: wrap; gap: 6px 14px; margin-top: 10px; font-size: 11px; font-weight: 700; color: var(--subtext); }
+  .evol-leyenda span { display: flex; align-items: center; gap: 6px; }
+  .evol-leyenda i { width: 10px; height: 10px; border-radius: 3px; display: inline-block; }
+  .evol-leyenda .lg-prom { height: 0; border-top: 1px dashed #f1f5f9; border-radius: 0; width: 14px; }
+  .lg-max { background: #f59e0b; } .lg-alto { background: rgba(239,68,68,.75); } .lg-bajo { background: rgba(16,185,129,.75); }
+  .evol-prom em { position: absolute; left: 0; top: -18px; font-style: normal; font-size: 10px; font-weight: 800; color: #f1f5f9; background: var(--card); padding: 0 4px; }
+  .analisis-nota { text-align: left; margin: 12px 0 0; font-size: 14px; line-height: 1.45; color: #dbe2ff; padding: 10px 12px; border-radius: 12px; background: rgba(99,102,241,.10); border: 1px solid rgba(99,102,241,.22); }
+
+  /* Buscador */
+  .busca { position: relative; }
+  .busca svg { position: absolute; left: 14px; top: 50%; width: 18px; height: 18px; transform: translateY(-50%); color: var(--subtext); }
+  .busca input { width: 100%; height: 48px; padding: 0 14px 0 42px; border-radius: 14px; background: var(--card2); border: 1px solid var(--border); color: var(--text); font: 600 15px 'Manrope', sans-serif; outline: none; }
+  .busca input:focus { border-color: #6366f1; }
+  .busca input::placeholder { color: var(--subtext); font-weight: 500; }
+  #busca-res { display: flex; flex-direction: column; gap: 10px; margin-top: 12px; }
+  #busca-res:empty { display: none; }
+  .br-item { padding: 12px 14px; border-radius: 16px; background: rgba(99,102,241,.08); border: 1px solid rgba(99,102,241,.22); }
+  .br-top { display: flex; justify-content: space-between; gap: 10px; align-items: baseline; }
+  .br-nombre { font-size: 15px; font-weight: 800; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .br-ultima { font-size: 13px; font-weight: 800; color: var(--accent2); white-space: nowrap; }
+  .br-meta { font-size: 12px; color: var(--subtext); margin-top: 4px; font-weight: 600; }
+  .br-vacio { font-size: 14px; color: var(--subtext); }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hero, .tarjeta, .cats-card, .analisis-card, .donut .tramo, .cat-bar-fill, .comp-barras i, .sem-dia i, .evol-col i { animation: none !important; }
+  }
 </style>
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="/icon-192.png">
@@ -158,27 +339,29 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="MiFinanza">
-<meta name="theme-color" content="#b8f564">
+<meta name="theme-color" content="#0a0e1a">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="auth.js"></script>
 </head>
 <body>
 <div class="phone">
+  <div class="blob blob-g" aria-hidden="true"></div>
+  <div class="blob blob-i" aria-hidden="true"></div>
 
   <div class="header">
-    <div class="header-title">Estadísticas</div>
+    <h1 class="header-title">Estadísticas</h1>
     <div class="header-sub">Entiende tus patrones de gasto</div>
   </div>
 
-  <div class="modo-tabs">
-    <div class="modo-tab" id="tab-periodo" onclick="setModo('periodo')">Por período</div>
-    <div class="modo-tab active" id="tab-mes"    onclick="setModo('mes')">Por mes</div>
-    <div class="modo-tab" id="tab-anio"   onclick="setModo('anio')">Año completo</div>
+  <div class="modo-tabs" role="tablist" aria-label="Tipo de análisis">
+    <button type="button" role="tab" class="modo-tab" id="tab-periodo" onclick="setModo('periodo')">Por período</button>
+    <button type="button" role="tab" class="modo-tab active" id="tab-mes" onclick="setModo('mes')">Por mes</button>
+    <button type="button" role="tab" class="modo-tab" id="tab-anio" onclick="setModo('anio')">Año completo</button>
   </div>
 
   <div id="vista-periodo">
     <div class="periodo-wrap">
-      <div class="periodo-label">Selecciona meses a comparar</div>
+      <div class="periodo-label">Toca los meses que quieres comparar</div>
       <div class="meses-sel-grid" id="meses-sel-grid"></div>
       <div class="meses-sel-count" id="meses-sel-count"></div>
     </div>
@@ -186,7 +369,6 @@
 
   <div id="vista-mes" style="display:none">
     <div class="buscador-wrap">
-      <div class="buscador-label">Selecciona un mes</div>
       <div class="meses-grid" id="meses-grid"></div>
     </div>
   </div>
@@ -195,36 +377,73 @@
 
   <div id="contenido" style="display:none">
 
-    <div class="resumen-row">
-      <div class="res-item">
-        <div class="res-label" id="lbl-ing">Prom. ingresos</div>
-        <div class="res-value" style="color:var(--accent)"  id="val-ing">—</div>
-        <div class="res-sub"   id="sub-ing">por mes</div>
+    <section class="hero" aria-label="Resultado">
+      <div class="hero-veredicto">
+        <span class="hero-lbl" id="lbl-aho">Ahorro</span>
+        <span class="hero-val num" id="val-aho">—</span>
+        <span class="hero-sub"><span id="sub-aho"></span><span id="tasa-aho"></span></span>
       </div>
-      <div class="res-item">
-        <div class="res-label" id="lbl-gas">Prom. gastos</div>
-        <div class="res-value" style="color:var(--danger)"  id="val-gas">—</div>
-        <div class="res-sub"   id="sub-gas">por mes</div>
+      <div class="hero-par">
+        <div class="hero-item">
+          <span class="hero-mini" id="lbl-ing">Ingresos</span>
+          <span class="hero-num num ing" id="val-ing">—</span>
+          <span class="hero-mini2" id="sub-ing"></span>
+        </div>
+        <div class="hero-item">
+          <span class="hero-mini" id="lbl-gas">Gastos</span>
+          <span class="hero-num num gas" id="val-gas">—</span>
+          <span class="hero-mini2" id="sub-gas"></span>
+        </div>
       </div>
-      <div class="res-item">
-        <div class="res-label" id="lbl-aho">Prom. ahorro</div>
-        <div class="res-value" style="color:var(--accent2)" id="val-aho">—</div>
-        <div class="res-sub"   id="sub-aho">por mes</div>
+    </section>
+
+    <section class="tarjeta" id="donut-card" aria-labelledby="donut-t">
+      <h2 class="t-titulo" id="donut-t">¿A dónde va tu dinero?</h2>
+      <div class="donut-wrap">
+        <svg class="donut" id="donut" viewBox="0 0 160 160" role="img" aria-label="Reparto del gasto por categoría"></svg>
+        <ul class="donut-leyenda" id="donut-leyenda"></ul>
       </div>
-    </div>
+    </section>
 
     <div class="cats-card">
-      <div class="cats-title" id="cats-title">Gasto por categoría</div>
+      <h2 class="cats-title" id="cats-title">Gasto por categoría</h2>
       <div id="cats-wrap"></div>
     </div>
 
-    <div class="analisis-card" id="analisis-card">
-      <div class="analisis-title">📈 Evolución por categoría</div>
-      <select class="cat-select" id="cat-select" onchange="renderAnalisis()"></select>
-      <div class="evol-barras" id="evol-barras"></div>
-      <div class="analisis-nota" id="analisis-nota"></div>
-    </div>
+    <section class="tarjeta fugas" id="fugas-card" aria-labelledby="fugas-t">
+      <h2 class="t-titulo" id="fugas-t">Fugas de dinero</h2>
+      <div id="fugas"></div>
+    </section>
 
+    <section class="tarjeta" id="comp-card" aria-labelledby="comp-t">
+      <div class="t-head"><h2 class="t-titulo" id="comp-t">Mes a mes</h2><span class="t-leyenda"><i class="lg-ing"></i>Ingresos <i class="lg-gas"></i>Gastos</span></div>
+      <div class="comp" id="comp"></div>
+      <p class="t-nota" id="comp-nota"></p>
+    </section>
+
+    <section class="tarjeta" id="semana-card" aria-labelledby="semana-t">
+      <h2 class="t-titulo" id="semana-t">¿Qué días gastas más?</h2>
+      <div class="semana" id="semana"></div>
+      <p class="t-nota" id="semana-nota"></p>
+    </section>
+
+    <section class="analisis-card" id="analisis-card" aria-labelledby="analisis-t">
+      <h2 class="analisis-title" id="analisis-t">Evolución por categoría</h2>
+      <div class="cat-chips" id="cat-chips" role="toolbar" aria-label="Elegir categoría"></div>
+      <select class="cat-select" id="cat-select" onchange="renderAnalisis()" aria-label="Categoría"></select>
+      <div class="evol" id="evol-barras"></div>
+      <div class="evol-leyenda" id="evol-leyenda"></div>
+      <p class="analisis-nota" id="analisis-nota"></p>
+    </section>
+
+    <section class="tarjeta" id="busca-card" aria-labelledby="busca-t">
+      <h2 class="t-titulo" id="busca-t">¿Cuándo fue la última vez?</h2>
+      <div class="busca">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <input type="search" id="busca-input" placeholder="Ej.: aceite, pelo, Mercadona" aria-label="Buscar un gasto en todos los meses" autocomplete="off">
+      </div>
+      <div id="busca-res"></div>
+    </section>
 
   </div>
 
@@ -328,10 +547,13 @@
   let catsSoloMesActual = false
   let categoriaAbierta  = null
   let editandoItem      = null
+  let catElegida        = false  // la categoría de Evolución la eligió el usuario
+  let ingTotalResumen   = 0   // ingresos totales de lo que se está viendo, para la tasa de ahorro
 
   async function cargarDatos() {
     const ok = await fetchDatos()
     if (!ok) return
+    if (mesSeleccionado === null) mesSeleccionado = 0
     setModo('mes')
     const savedScroll = sessionStorage.getItem('stats-scroll')
     if (savedScroll) setTimeout(() => window.scrollTo(0, parseInt(savedScroll, 10)), 0)
@@ -491,8 +713,9 @@
     const n = mesesPeriodo.size
     if (n === 0) {
       contador.textContent = 'Toca los meses que quieres comparar'
-      setResumen('Prom. ingresos','—','','Prom. gastos','—','','Saldo real','—','', 0)
+      setResumen('Prom. ingresos','—','','Prom. gastos','—','','Ahorro','—','', 0)
       document.getElementById('cats-wrap').innerHTML    = ''
+      renderExtras([], false)
       return
     }
 
@@ -507,13 +730,14 @@
     // Saldo real acumulado: suma de (ingresos - gastos) de cada mes seleccionado.
     // d.gastos ya incluye los gastos fijos, así que no se restan aparte.
     const saldoTotal = Math.round(tIng - tGas)
+    ingTotalResumen = tIng
     const esPositivo = saldoTotal >= 0
-    const vSaldo = (esPositivo ? '✅ +' : '⚠️ -') + fmt(Math.abs(saldoTotal))
+    const vSaldo = (esPositivo ? '+' : '−') + fmt(Math.abs(saldoTotal))
 
     setResumen(
       'Prom. ingresos', fmt(pIng), 'por mes',
       'Prom. gastos',   fmt(pGas), 'por mes',
-      esPositivo ? 'Total ahorrado' : 'Total perdido', vSaldo, 'en el período', saldoTotal
+      esPositivo ? 'Ahorraste en el período' : 'Tiraste del ahorro', vSaldo, `${n} ${n === 1 ? 'mes' : 'meses'}`, saldoTotal
     )
 
     dibujarCats(slice, false)
@@ -533,7 +757,7 @@
 
     const mesesConDatos = new Set(datos.map(d => d.key))
     MESES_LABELS.forEach((lbl, i) => {
-      const key = `2026-${String(i + 1).padStart(2, '0')}`
+      const key = `${datos[0].anio}-${String(i + 1).padStart(2, '0')}`
       if (!mesesConDatos.has(key)) {
         const chip = document.createElement('div')
         chip.className = 'mes-chip sin-datos'
@@ -546,6 +770,7 @@
     else {
       document.getElementById('cats-wrap').innerHTML    = ''
       setResumen('Ingresos','—','','Gastos','—','','Ahorro','—','', 0)
+      renderExtras([], true)
     }
   }
 
@@ -559,11 +784,12 @@
     const d    = datos[idx]
     const prev = datos[idx + 1]
     const aho  = d.ingresos - d.gastos
+    ingTotalResumen = d.ingresos
 
     setResumen(
       'Ingresos', fmt(d.ingresos), d.mesNombre,
       'Gastos',   fmt(d.gastos),   d.mesNombre,
-      'Ahorro',   (aho >= 0 ? '+' : '') + fmt(Math.abs(aho)), d.mesNombre, aho
+      aho >= 0 ? 'Ahorraste este mes' : 'Tiraste del ahorro', (aho >= 0 ? '+' : '−') + fmt(Math.abs(aho)), d.mesNombre + ' ' + d.anio, aho
     )
 
     dibujarCats([d], true)
@@ -573,19 +799,23 @@
     const tIng = datos.reduce((s, d) => s + d.ingresos, 0)
     const tGas = datos.reduce((s, d) => s + d.gastos,   0)
     const tAho = tIng - tGas
+    ingTotalResumen = tIng
 
     setResumen(
       'Total ingresos', fmt(tIng), 'en el año',
       'Total gastos',   fmt(tGas), 'en el año',
-      'Total ahorro',   (tAho >= 0 ? '+' : '') + fmt(Math.abs(tAho)), 'en el año', tAho
+      tAho >= 0 ? 'Llevas ahorrado' : 'Tiraste del ahorro', (tAho >= 0 ? '+' : '−') + fmt(Math.abs(tAho)), `en ${datos.length} ${datos.length === 1 ? 'mes' : 'meses'}`, tAho
     )
 
     dibujarCats(datos, false)
     renderAnalisis()
   }
 
+  // Formato español con punto de miles (4.180) y la moneda del usuario; el € va detrás.
   function fmt(n) {
-    return window.moneda + parseFloat(n || 0).toLocaleString('es-MX', { minimumFractionDigits: 0, maximumFractionDigits: 0 })
+    const v = Math.round(Math.abs(parseFloat(n || 0)))
+    const num = String(v).replace(/\B(?=(\d{3})+(?!\d))/g, '.')
+    return window.moneda === '€' ? num + ' €' : window.moneda + num
   }
 
   function setResumen(lIng, vIng, sIng, lGas, vGas, sGas, lAho, vAho, sAho, aho) {
@@ -598,7 +828,13 @@
     document.getElementById('lbl-aho').textContent = lAho
     document.getElementById('val-aho').textContent = vAho
     document.getElementById('sub-aho').textContent = sAho
-    document.getElementById('val-aho').style.color = aho >= 0 ? 'var(--accent2)' : 'var(--danger)'
+    document.getElementById('val-aho').style.color = ''
+    // Veredicto: ahorraste o tiraste del ahorro, con la tasa de ahorro sobre los ingresos
+    const hero = document.querySelector('.hero')
+    const sinDatos = vAho === '—'
+    hero.classList.toggle('neg', !sinDatos && aho < 0)
+    const ing = ingTotalResumen
+    document.getElementById('tasa-aho').textContent = !sinDatos && ing > 0 ? `${aho >= 0 ? 'Guardaste' : 'Gastaste de más'} el ${Math.round(Math.abs(aho) / ing * 100)} % de lo que entró` : ''
   }
 
   function dibujarCats(slice, soloMes) {
@@ -606,6 +842,7 @@
     catsSoloMesActual = soloMes
     categoriaAbierta  = null
     renderCatsUI()
+    renderExtras(slice, soloMes)
   }
 
   function toggleCategoria(cat) {
@@ -614,7 +851,7 @@
   }
 
   function iconMov(esFijo, cat) {
-    if (esFijo) return '<span style="color:#58a6ff">↻</span>'
+    if (esFijo) return '<span style="color:#a5b4fc">↻</span>'
     if (!cat) return '📦'
     const first = [...cat.trim()][0]
     return first && first.codePointAt(0) > 127 ? first : (iconsCat[cat] || '📦')
@@ -637,15 +874,22 @@
     const wrap = document.getElementById('cats-wrap')
     wrap.innerHTML = ''
 
+    const suma = Object.values(totales).reduce((t, v) => t + v, 0)
     Object.entries(totales).sort((a, b) => b[1] - a[1]).forEach(([cat, total]) => {
       const pct    = Math.round((total / maxC) * 100)
       const prom   = soloMes ? total : Math.round(total / n)
       const abierta = categoriaAbierta === cat
+      const reducible = esReducible(cat)
       const row    = document.createElement('div')
-      row.className = 'cat-row' + (abierta ? ' abierta' : '')
+      row.className = 'cat-row' + (abierta ? ' abierta' : '') + (reducible ? ' reducible' : '')
+      row.dataset.cat = cat
       row.innerHTML = `
-        <div class="cat-top">
-          <div class="cat-left"><span class="cat-chevron">▶</span>${cat}</div>
+        <div class="cat-top" role="button" tabindex="0" aria-expanded="${abierta}">
+          <span class="cat-ico" aria-hidden="true">${iconMov(false, cat)}</span>
+          <div class="cat-left">
+            <span class="cat-nombre"><span class="cat-txt"></span>${reducible ? '<span class="etq">Reducible</span>' : ''}</span>
+            <span class="cat-pct">${(total / suma * 100).toFixed(1).replace('.', ',')} % del gasto</span>
+          </div>
           <div class="cat-right">
             ${!soloMes
               ? `<div class="cat-total">${fmt(prom)}/mes</div><div class="cat-prom">Total: ${fmt(total)}</div>`
@@ -654,6 +898,8 @@
         </div>
         <div class="cat-bar-track"><div class="cat-bar-fill" style="width:${pct}%"></div></div>
       `
+      row.querySelector('.cat-txt').textContent = sinEmoji(cat)
+      row.querySelector('.cat-top').addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleCategoria(cat) } })
       row.querySelector('.cat-top').addEventListener('click', () => toggleCategoria(cat))
 
       if (abierta) {
@@ -673,12 +919,13 @@
             item.innerHTML = `
               <div class="cm-icon">${iconMov(m.tipo === 'fijo', m.categoria)}</div>
               <div class="cm-info">
-                <div class="cm-nombre">${m.label}</div>
-                <div class="cm-fecha">${diaMes(m.fecha)}</div>
+                <div class="cm-nombre"></div>
+                <div class="cm-fecha">${diaMes(m.fecha)} ${m.fecha.slice(0, 4)}</div>
               </div>
               <div class="cm-monto">${fmt(m.monto)}</div>
-              <div class="cm-edit">✏️</div>
+              <div class="cm-edit" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19 9l-4-4L4 16Z"/></svg></div>
             `
+            item.querySelector('.cm-nombre').textContent = m.label
             item.addEventListener('click', () => abrirEdicionItem(m))
             movsWrap.appendChild(item)
           })
@@ -696,40 +943,226 @@
   }
 
   function renderAnalisis() {
-    const cat   = document.getElementById('cat-select').value
+    const sel   = document.getElementById('cat-select')
     const slice = modoActual === 'anio'
       ? [...datos].reverse()
       : datos.filter(d => mesesPeriodo.has(d.key)).sort((a, b) => a.key.localeCompare(b.key))
     if (!slice.length) return
-    const vals  = slice.map(d => d.cats[cat] || 0)
-    const maxV  = Math.max(...vals) || 1
-    const prom  = Math.round(vals.reduce((s, v) => s + v, 0) / vals.length)
+    // Hasta que el usuario elija, se enseña la categoría que más ha variado: es la que cuenta una historia
+    if (!catElegida) {
+      let mejor = null, mayor = -1
+      ;[...sel.options].map(o => o.value).forEach(c => {
+        const v = slice.map(d => d.cats[c] || 0), m = v.reduce((t, x) => t + x, 0) / v.length
+        const desv = m ? Math.sqrt(v.reduce((t, x) => t + (x - m) ** 2, 0) / v.length) : 0
+        if (desv > mayor) { mayor = desv; mejor = c }
+      })
+      if (mejor) sel.value = mejor
+    }
+    const cat = sel.value
+    if (!cat) return
 
+    // Chips: categorías del período, de mayor a menor gasto
+    const tot = {}
+    slice.forEach(d => Object.entries(d.cats).forEach(([c, v]) => { tot[c] = (tot[c] || 0) + v }))
+    const chips = document.getElementById('cat-chips')
+    chips.innerHTML = ''
+    Object.entries(tot).sort((a, b) => b[1] - a[1]).forEach(([c]) => {
+      const b = document.createElement('button')
+      b.type = 'button'; b.className = 'cat-chip' + (c === cat ? ' active' : '')
+      b.setAttribute('aria-pressed', String(c === cat))
+      b.textContent = c
+      b.addEventListener('click', () => { sel.value = c; catElegida = true; renderAnalisis() })
+      chips.appendChild(b)
+    })
+    const act = chips.querySelector('.active'); if (act) act.scrollIntoView({ block: 'nearest', inline: 'center' })
+
+    const vals = slice.map(d => d.cats[cat] || 0)
+    const maxV = Math.max(...vals) || 1
+    const prom = vals.reduce((t, v) => t + v, 0) / vals.length
+    const iMax = vals.indexOf(Math.max(...vals))
+    const multiAnio = new Set(slice.map(d => d.anio)).size > 1
     const wrap = document.getElementById('evol-barras')
     wrap.innerHTML = ''
+    const ALTO = 110  // px de la barra más alta
     vals.forEach((v, i) => {
-      const h   = Math.round((v / maxV) * 68)
-      const tip = v > prom * 1.1 ? 'alto' : v < prom * 0.9 ? 'bajo' : 'normal'
-      const g   = document.createElement('div')
-      g.className = 'eb-grupo'
-      g.innerHTML = `<div class="eb-val">${fmt(v)}</div><div class="eb-barra ${tip}" style="height:${h}px"></div><div class="eb-mes">${slice[i].mes}</div>`
-      wrap.appendChild(g)
+      const tipo = i === iMax && v > 0 ? 'max' : v > prom * 1.1 ? 'alto' : v < prom * 0.9 ? 'bajo' : ''
+      const col = document.createElement('div')
+      col.className = 'evol-col ' + tipo
+      col.innerHTML = `<b>${v ? fmt(v) : '—'}</b><i style="height:${Math.max(3, Math.round(v / maxV * ALTO))}px;animation-delay:${i * 50}ms"></i><span>${slice[i].mes}${multiAnio ? " '" + String(slice[i].anio).slice(2) : ''}</span>`
+      wrap.appendChild(col)
     })
+    if (prom > 0) {
+      const linea = document.createElement('div')
+      linea.className = 'evol-prom'
+      linea.style.bottom = (22 + Math.round(prom / maxV * ALTO)) + 'px'
+      wrap.appendChild(linea)
+    }
+    document.getElementById('evol-leyenda').innerHTML = prom > 0
+      ? `<span><i class="lg-prom"></i>Promedio ${fmt(prom)}/mes</span><span><i class="lg-max"></i>Mes más alto</span><span><i class="lg-alto"></i>Sobre el promedio</span><span><i class="lg-bajo"></i>Bajo el promedio</span>` : ''
+    wrap.scrollLeft = wrap.scrollWidth  // empieza mostrando los meses recientes
 
-    const ult = vals[vals.length - 1]
-    const ant = vals[vals.length - 2]
-    let nota = ''
-    if (!ant) { nota = `Promedio en ${cat}: ${fmt(prom)}/mes` }
+    // Nota que cuenta la tendencia: el último mes frente al promedio y frente al anterior
+    const nombre = sinEmoji(cat)
+    const ult = vals[vals.length - 1], ant = vals[vals.length - 2]
+    let nota
+    if (vals.length < 2) nota = `${nombre}: ${fmt(ult)} en ${slice[0].mesNombre}.`
     else {
-      const pct = ant > 0 ? Math.round(((ult - ant) / ant) * 100) : 0
-      if (pct > 10)       nota = `⚠️ Este mes gastaste un ${pct}% más en ${cat} que el anterior.`
-      else if (pct < -10) nota = `✅ Bajaste ${cat} un ${Math.abs(pct)}% vs el mes anterior.`
-      else                nota = `${cat} estable. Promedio: ${fmt(prom)}/mes.`
+      const vsProm = prom ? Math.round((ult - prom) / prom * 100) : 0
+      const vsAnt  = ant ? Math.round((ult - ant) / ant * 100) : 0
+      const pico   = `${slice[iMax].mesNombre} fue el mes más alto (${fmt(vals[iMax])}).`
+      if (vsAnt <= -10) nota = `Bajaste ${nombre} un ${Math.abs(vsAnt)} % frente a ${slice[slice.length - 2].mesNombre.toLowerCase()}. ${pico}`
+      else if (vsAnt >= 10) nota = `${nombre} subió un ${vsAnt} % frente a ${slice[slice.length - 2].mesNombre.toLowerCase()}${vsProm > 0 ? `, y está un ${vsProm} % por encima de tu promedio` : ''}. ${pico}`
+      else nota = `${nombre} se mantiene estable, en torno a ${fmt(prom)} al mes. ${pico}`
     }
     document.getElementById('analisis-nota').textContent = nota
   }
 
+  // ── Utilidades ──
+  // Quita el emoji inicial (y su selector de variante) de una categoría: "⚠️ Gastos Imprevistos" → "Gastos Imprevistos"
+  const sinEmoji = c => (c || '').trim().replace(/^[^\p{L}\p{N}]+/u, '').trim()
+  // Categorías discrecionales: donde suele haber dinero que se puede recortar
+  const REDUCIBLES = ['imprevist', 'suscrip', 'salida', 'antojo', 'ocio', 'restaur', 'delivery', 'caprich']
+  const esReducible = c => REDUCIBLES.some(r => sinEmoji(c).toLowerCase().includes(r))
+  const COLORES = ['#6366f1', '#10b981', '#f59e0b', '#ef4444', '#38bdf8', '#64748b']
 
+  // ── Vistas extra: anillo, fugas, mes a mes y días de la semana ──
+  function renderExtras(slice, soloMes) {
+    const hay = slice.length > 0
+    ;['donut-card', 'fugas-card', 'semana-card'].forEach(id => { document.getElementById(id).hidden = !hay })
+    document.getElementById('comp-card').hidden = !hay || soloMes || slice.length < 2
+    if (!hay) return
+    renderDonut(slice)
+    renderFugas(slice)
+    renderSemana(slice)
+    if (!soloMes && slice.length >= 2) renderComparativa(slice)
+  }
+
+  function renderDonut(slice) {
+    const tot = {}
+    slice.forEach(d => Object.entries(d.cats).forEach(([c, v]) => { tot[c] = (tot[c] || 0) + v }))
+    const orden = Object.entries(tot).sort((a, b) => b[1] - a[1])
+    const suma = orden.reduce((t, [, v]) => t + v, 0)
+    const partes = orden.slice(0, 5)
+    const resto = orden.slice(5).reduce((t, [, v]) => t + v, 0)
+    if (resto > 0) partes.push(['Resto', resto])
+    const R = 58, C = 2 * Math.PI * R
+    let acum = 0
+    const svg = document.getElementById('donut')
+    svg.innerHTML = partes.map(([c, v], i) => {
+      const largo = suma ? v / suma * C : 0
+      const seg = `<circle class="tramo" data-cat="${i < 5 ? encodeURIComponent(c) : ''}" cx="80" cy="80" r="${R}" stroke="${COLORES[i]}"
+        stroke-dasharray="${Math.max(0, largo - 2).toFixed(2)} ${C.toFixed(2)}" stroke-dashoffset="${(-acum).toFixed(2)}"
+        transform="rotate(-90 80 80)" style="animation-delay:${i * 80}ms"><title>${sinEmoji(c)}: ${fmt(v)}</title></circle>`
+      acum += largo
+      return seg
+    }).join('') + `<text class="donut-centro-v" x="80" y="82" text-anchor="middle">${fmt(suma)}</text><text class="donut-centro-l" x="80" y="99" text-anchor="middle">GASTADO</text>`
+    const ley = document.getElementById('donut-leyenda')
+    ley.innerHTML = ''
+    partes.forEach(([c, v], i) => {
+      const li = document.createElement('li')
+      li.innerHTML = `<i style="background:${COLORES[i]}"></i><span></span><b>${Math.round(v / suma * 100)} %</b>`
+      li.querySelector('span').textContent = c === 'Resto' ? 'Resto' : c
+      if (i < 5) li.addEventListener('click', () => abrirCategoria(c))
+      ley.appendChild(li)
+    })
+    svg.querySelectorAll('.tramo[data-cat]').forEach(t => { if (t.dataset.cat) t.addEventListener('click', () => abrirCategoria(decodeURIComponent(t.dataset.cat))) })
+  }
+
+  // Abre la categoría en el ranking y la lleva a la vista
+  function abrirCategoria(cat) {
+    categoriaAbierta = cat
+    renderCatsUI()
+    const fila = [...document.querySelectorAll('.cat-row')].find(r => r.dataset.cat === cat)
+    if (fila) fila.scrollIntoView({ behavior: 'smooth', block: 'center' })
+  }
+
+  function renderFugas(slice) {
+    const tot = {}
+    slice.forEach(d => Object.entries(d.cats).forEach(([c, v]) => { if (esReducible(c)) tot[c] = (tot[c] || 0) + v }))
+    const lista = Object.entries(tot).sort((a, b) => b[1] - a[1])
+    const total = lista.reduce((t, [, v]) => t + v, 0)
+    const box = document.getElementById('fugas')
+    if (!total) { box.innerHTML = '<p class="fuga-ok">No hay gastos en categorías reducibles en lo que estás viendo. Bien hecho.</p>'; return }
+    const porMes = total / slice.length
+    box.innerHTML = `<div class="fuga-total num">${fmt(total)}</div>
+      <p class="fuga-txt">se fueron en gastos que se pueden recortar${slice.length > 1 ? ` (${fmt(porMes)} al mes)` : ''}. Si los bajas a la mitad, ahorrarías <b>${fmt(porMes / 2 * 12)} al año</b>.</p>
+      <div class="fuga-lista"></div>`
+    const cont = box.querySelector('.fuga-lista')
+    lista.forEach(([c, v]) => { const sp = document.createElement('span'); sp.textContent = `${c} · ${fmt(v)}`; cont.appendChild(sp) })
+  }
+
+  function renderSemana(slice) {
+    // Solo gastos variables: los fijos caen siempre el mismo día y no dicen nada del hábito
+    const dias = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom']
+    const suma = Array(7).fill(0)
+    slice.forEach(d => Object.values(d.movs).flat().forEach(m => {
+      if (m.tipo !== 'gasto') return
+      const w = (new Date(m.fecha + 'T00:00:00').getDay() + 6) % 7
+      suma[w] += m.monto
+    }))
+    const max = Math.max(...suma)
+    const cont = document.getElementById('semana')
+    const nota = document.getElementById('semana-nota')
+    if (!max) { cont.innerHTML = ''; nota.textContent = 'Aún no hay gastos variables para ver tus días.'; return }
+    const iTop = suma.indexOf(max)
+    cont.innerHTML = suma.map((v, i) => `<div class="sem-dia${i === iTop ? ' top' : ''}" title="${dias[i]}: ${fmt(v)}"><i style="height:${Math.max(4, Math.round(v / max * 90))}px;animation-delay:${i * 50}ms"></i><span>${dias[i]}</span></div>`).join('')
+    const media = suma.reduce((t, v) => t + v, 0) / 7
+    const nombres = ['los lunes', 'los martes', 'los miércoles', 'los jueves', 'los viernes', 'los sábados', 'los domingos']
+    const veces = media ? (max / media) : 0
+    nota.textContent = veces >= 1.3
+      ? `${nombres[iTop][0].toUpperCase() + nombres[iTop].slice(1)} gastas ${veces.toFixed(1).replace('.', ',')} veces más que un día normal (${fmt(max)} en total).`
+      : `Tu gasto está bastante repartido durante la semana; el día más alto es el ${['lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado', 'domingo'][iTop]}.`
+  }
+
+  function renderComparativa(slice) {
+    slice = [...slice].sort((a, b) => a.key.localeCompare(b.key))  // de más antiguo a más reciente
+    const max = Math.max(...slice.map(d => Math.max(d.ingresos, d.gastos))) || 1
+    const ahorros = slice.map(d => d.ingresos - d.gastos)
+    const iMejor = ahorros.indexOf(Math.max(...ahorros))
+    const multiAnio = new Set(slice.map(d => d.anio)).size > 1
+    document.getElementById('comp').innerHTML = slice.map((d, i) => `
+      <div class="comp-mes${i === iMejor && ahorros[i] > 0 ? ' mejor' : ''}" title="${d.mesNombre}: ingresos ${fmt(d.ingresos)}, gastos ${fmt(d.gastos)}">
+        <div class="comp-barras"><i class="b-ing" style="height:${Math.max(3, Math.round(d.ingresos / max * 100))}%;animation-delay:${i * 50}ms"></i><i class="b-gas" style="height:${Math.max(3, Math.round(d.gastos / max * 100))}%;animation-delay:${i * 50 + 25}ms"></i></div>
+        <span>${d.mes}${multiAnio ? " '" + String(d.anio).slice(2) : ''}</span>
+      </div>`).join('')
+    const comp = document.getElementById('comp'); comp.scrollLeft = comp.scrollWidth  // empieza mostrando los meses recientes
+    const neg = slice.filter(d => d.gastos > d.ingresos)
+    document.getElementById('comp-nota').textContent =
+      (ahorros[iMejor] > 0 ? `Tu mejor mes fue ${slice[iMejor].mesNombre.toLowerCase()}: ahorraste ${fmt(ahorros[iMejor])}. ` : '') +
+      (neg.length ? `En ${neg.length} ${neg.length === 1 ? 'mes' : 'meses'} gastaste más de lo que entró (${neg.map(d => d.mes).join(', ')}).` : 'Ningún mes gastaste más de lo que entró.')
+  }
+
+  // ── ¿Cuándo fue la última vez? (busca en todos los meses) ──
+  ;(function () {
+    const input = document.getElementById('busca-input'), res = document.getElementById('busca-res')
+    input.addEventListener('input', () => {
+      const q = input.value.trim().toLowerCase()
+      res.innerHTML = ''
+      if (q.length < 2) return
+      const grupos = {}
+      datos.forEach(d => Object.values(d.movs).flat().forEach(m => {
+        if (!(m.label || '').toLowerCase().includes(q) && !(m.categoria || '').toLowerCase().includes(q)) return
+        const k = (m.label || '').trim().toLowerCase()
+        ;(grupos[k] = grupos[k] || { nombre: m.label, fechas: [], total: 0, cat: m.categoria }).fechas.push(m.fecha)
+        grupos[k].total += m.monto
+      }))
+      const lista = Object.values(grupos).sort((a, b) => b.fechas.sort().at(-1).localeCompare(a.fechas.sort().at(-1))).slice(0, 6)
+      if (!lista.length) { res.innerHTML = '<p class="br-vacio">No encuentro ningún gasto con ese nombre.</p>'; return }
+      const hoy = new Date(); hoy.setHours(0, 0, 0, 0)
+      lista.forEach(g => {
+        const f = [...new Set(g.fechas)].sort()
+        const ult = new Date(f.at(-1) + 'T00:00:00')
+        const hace = Math.round((hoy - ult) / 86400000)
+        const cada = f.length > 1 ? Math.round((new Date(f.at(-1)) - new Date(f[0])) / 86400000 / (f.length - 1)) : null
+        const el = document.createElement('div')
+        el.className = 'br-item'
+        el.innerHTML = `<div class="br-top"><span class="br-nombre"></span><span class="br-ultima">${ult.getDate()} ${MESES_LABELS[ult.getMonth()].toLowerCase()} ${ult.getFullYear()}</span></div>
+          <div class="br-meta">${hace === 0 ? 'Hoy' : hace > 0 ? `Hace ${hace} ${hace === 1 ? 'día' : 'días'}` : `Dentro de ${-hace} días`} · ${f.length} ${f.length === 1 ? 'vez' : 'veces'}${cada ? ` · cada ${cada} días de media` : ''} · ${fmt(g.total)} en total</div>`
+        el.querySelector('.br-nombre').textContent = `${iconMov(false, g.cat)} ${g.nombre}`
+        res.appendChild(el)
+      })
+    })
+  })()
 
   async function cargarCategoriasPerfil() {
     const uid = window.currentUserId
