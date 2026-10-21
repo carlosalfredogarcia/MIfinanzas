@@ -249,6 +249,16 @@
   .cat-total { font-size: 15px; font-weight: 800; color: var(--red-txt); font-variant-numeric: tabular-nums; }
   .cat-prom { font-size: 11px; color: var(--subtext); font-weight: 600; font-variant-numeric: tabular-nums; }
   .cat-chevron { display: none; }
+  .cat-top { grid-template-columns: 40px minmax(0, 1fr) 20px; }
+  .cat-flecha { width: 20px; height: 20px; color: var(--subtext); transition: transform .3s cubic-bezier(.16,1,.3,1); }
+  .cat-row.abierta .cat-flecha { transform: rotate(180deg); color: var(--accent2); }
+  .cat-cifras { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin: 10px 0 0 52px; }
+  .cifra { display: flex; flex-direction: column; gap: 2px; padding: 8px 10px; border-radius: 12px; background: rgba(255,255,255,.03); border: 1px solid rgba(255,255,255,.06); min-width: 0; }
+  .cifra span { font-size: 10px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--subtext); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .cifra b { font-size: 17px; font-weight: 800; color: #c7d2fe; font-variant-numeric: tabular-nums; }
+  .cifra b.rojo { color: var(--red-txt); }
+  .tend { font-style: normal; font-size: 11px; font-weight: 800; }
+  .tend.sube { color: var(--red-txt); } .tend.baja { color: var(--accent2); } .tend.igual { color: var(--subtext); }
   .cat-bar-track { height: 6px; margin: 10px 0 0 52px; border-radius: 999px; background: #1f2937; overflow: hidden; }
   .cat-bar-fill { height: 100%; border-radius: 999px; background: linear-gradient(90deg, #6366f1, #818cf8); transform-origin: left; animation: crece-x .9s cubic-bezier(.16,1,.3,1) both; }
   .cat-row.reducible .cat-bar-fill { background: linear-gradient(90deg, #f59e0b, #fbbf24); }
@@ -323,9 +333,15 @@
   #busca-res { display: flex; flex-direction: column; gap: 10px; margin-top: 12px; }
   #busca-res:empty { display: none; }
   .br-item { padding: 12px 14px; border-radius: 16px; background: rgba(99,102,241,.08); border: 1px solid rgba(99,102,241,.22); }
-  .br-top { display: flex; justify-content: space-between; gap: 10px; align-items: baseline; }
+  .br-stats { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin-top: 10px; }
+  .br-stat { display: flex; flex-direction: column; gap: 2px; padding: 10px 12px; border-radius: 12px; background: rgba(10,14,26,.5); border: 1px solid rgba(255,255,255,.06); min-width: 0; }
+  .br-stat span { font-size: 10px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--subtext); }
+  .br-stat b { font-size: 16px; font-weight: 800; color: #fff; }
+  .br-stat em { font-style: normal; font-size: 12px; font-weight: 700; color: var(--accent2); }
+  .br-tl { display: flex; gap: 4px; margin-top: 10px; }
+  .br-tl i { flex: 1; height: 8px; border-radius: 3px; background: rgba(148,163,184,.15); }
+  .br-tl i.si { background: #6366f1; box-shadow: 0 0 8px rgba(99,102,241,.5); }
   .br-nombre { font-size: 15px; font-weight: 800; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .br-ultima { font-size: 13px; font-weight: 800; color: var(--accent2); white-space: nowrap; }
   .br-meta { font-size: 12px; color: var(--subtext); margin-top: 4px; font-weight: 600; }
   .br-vacio { font-size: 14px; color: var(--subtext); }
 
@@ -410,6 +426,15 @@
       <div id="cats-wrap"></div>
     </div>
 
+    <section class="analisis-card" id="analisis-card" aria-labelledby="analisis-t">
+      <h2 class="analisis-title" id="analisis-t">Evolución por categoría</h2>
+      <div class="cat-chips" id="cat-chips" role="toolbar" aria-label="Elegir categoría"></div>
+      <select class="cat-select" id="cat-select" onchange="renderAnalisis()" aria-label="Categoría"></select>
+      <div class="evol" id="evol-barras"></div>
+      <div class="evol-leyenda" id="evol-leyenda"></div>
+      <p class="analisis-nota" id="analisis-nota"></p>
+    </section>
+
     <section class="tarjeta fugas" id="fugas-card" aria-labelledby="fugas-t">
       <h2 class="t-titulo" id="fugas-t">Fugas de dinero</h2>
       <div id="fugas"></div>
@@ -421,23 +446,10 @@
       <p class="t-nota" id="comp-nota"></p>
     </section>
 
-    <section class="tarjeta" id="semana-card" aria-labelledby="semana-t">
-      <h2 class="t-titulo" id="semana-t">¿Qué días gastas más?</h2>
-      <div class="semana" id="semana"></div>
-      <p class="t-nota" id="semana-nota"></p>
-    </section>
 
-    <section class="analisis-card" id="analisis-card" aria-labelledby="analisis-t">
-      <h2 class="analisis-title" id="analisis-t">Evolución por categoría</h2>
-      <div class="cat-chips" id="cat-chips" role="toolbar" aria-label="Elegir categoría"></div>
-      <select class="cat-select" id="cat-select" onchange="renderAnalisis()" aria-label="Categoría"></select>
-      <div class="evol" id="evol-barras"></div>
-      <div class="evol-leyenda" id="evol-leyenda"></div>
-      <p class="analisis-nota" id="analisis-nota"></p>
-    </section>
 
     <section class="tarjeta" id="busca-card" aria-labelledby="busca-t">
-      <h2 class="t-titulo" id="busca-t">¿Cuándo fue la última vez?</h2>
+      <h2 class="t-titulo" id="busca-t">Última vez y frecuencia</h2>
       <div class="busca">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
         <input type="search" id="busca-input" placeholder="Ej.: aceite, pelo, Mercadona" aria-label="Buscar un gasto en todos los meses" autocomplete="off">
@@ -445,6 +457,12 @@
       <div id="busca-res"></div>
     </section>
 
+
+    <section class="tarjeta" id="semana-card" aria-labelledby="semana-t">
+      <h2 class="t-titulo" id="semana-t">¿Qué días gastas más?</h2>
+      <div class="semana" id="semana"></div>
+      <p class="t-nota" id="semana-nota"></p>
+    </section>
   </div>
 
   <div class="spacer"></div>
@@ -874,7 +892,6 @@
     const wrap = document.getElementById('cats-wrap')
     wrap.innerHTML = ''
 
-    const suma = Object.values(totales).reduce((t, v) => t + v, 0)
     Object.entries(totales).sort((a, b) => b[1] - a[1]).forEach(([cat, total]) => {
       const pct    = Math.round((total / maxC) * 100)
       const prom   = soloMes ? total : Math.round(total / n)
@@ -883,19 +900,26 @@
       const row    = document.createElement('div')
       row.className = 'cat-row' + (abierta ? ' abierta' : '') + (reducible ? ' reducible' : '')
       row.dataset.cat = cat
+      // En "Por mes" se compara con tu media de esa categoría en todos los meses
+      let cifras
+      if (soloMes) {
+        const media = datos.reduce((t, d) => t + (d.cats[cat] || 0), 0) / datos.length
+        const dif = media ? Math.round((total - media) / media * 100) : 0
+        const tend = Math.abs(dif) < 10 ? '<em class="tend igual">En tu media</em>'
+          : dif > 0 ? `<em class="tend sube">▲ ${dif} % sobre tu media</em>` : `<em class="tend baja">▼ ${Math.abs(dif)} % bajo tu media</em>`
+        cifras = `<div class="cifra"><span>Este mes</span><b class="rojo">${fmt(total)}</b></div>
+          <div class="cifra"><span>Tu media</span><b>${fmt(media)}</b>${tend}</div>`
+      } else {
+        cifras = `<div class="cifra"><span>Promedio al mes</span><b>${fmt(prom)}</b></div>
+          <div class="cifra"><span>Total · ${n} ${n === 1 ? 'mes' : 'meses'}</span><b class="rojo">${fmt(total)}</b></div>`
+      }
       row.innerHTML = `
         <div class="cat-top" role="button" tabindex="0" aria-expanded="${abierta}">
           <span class="cat-ico" aria-hidden="true">${iconMov(false, cat)}</span>
-          <div class="cat-left">
-            <span class="cat-nombre"><span class="cat-txt"></span>${reducible ? '<span class="etq">Reducible</span>' : ''}</span>
-            <span class="cat-pct">${(total / suma * 100).toFixed(1).replace('.', ',')} % del gasto</span>
-          </div>
-          <div class="cat-right">
-            ${!soloMes
-              ? `<div class="cat-total">${fmt(prom)}/mes</div><div class="cat-prom">Total: ${fmt(total)}</div>`
-              : `<div class="cat-total">${fmt(total)}</div>`}
-          </div>
+          <div class="cat-left"><span class="cat-nombre"><span class="cat-txt"></span>${reducible ? '<span class="etq">Reducible</span>' : ''}</span></div>
+          <svg class="cat-flecha" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
         </div>
+        <div class="cat-cifras">${cifras}</div>
         <div class="cat-bar-track"><div class="cat-bar-fill" style="width:${pct}%"></div></div>
       `
       row.querySelector('.cat-txt').textContent = sinEmoji(cat)
@@ -974,7 +998,9 @@
       b.addEventListener('click', () => { sel.value = c; catElegida = true; renderAnalisis() })
       chips.appendChild(b)
     })
-    const act = chips.querySelector('.active'); if (act) act.scrollIntoView({ block: 'nearest', inline: 'center' })
+    // Centra el chip activo moviendo solo la fila de chips (scrollIntoView movía toda la página)
+    const act = chips.querySelector('.active')
+    if (act) chips.scrollLeft = act.offsetLeft - (chips.clientWidth - act.offsetWidth) / 2
 
     const vals = slice.map(d => d.cats[cat] || 0)
     const maxV = Math.max(...vals) || 1
@@ -1146,18 +1172,33 @@
         ;(grupos[k] = grupos[k] || { nombre: m.label, fechas: [], total: 0, cat: m.categoria }).fechas.push(m.fecha)
         grupos[k].total += m.monto
       }))
-      const lista = Object.values(grupos).sort((a, b) => b.fechas.sort().at(-1).localeCompare(a.fechas.sort().at(-1))).slice(0, 6)
+      const lista = Object.values(grupos).sort((a, b) => b.fechas.sort().at(-1).localeCompare(a.fechas.sort().at(-1))).slice(0, 4)
       if (!lista.length) { res.innerHTML = '<p class="br-vacio">No encuentro ningún gasto con ese nombre.</p>'; return }
       const hoy = new Date(); hoy.setHours(0, 0, 0, 0)
+      const fechaTxt = d => `${d.getDate()} ${MESES_LABELS[d.getMonth()].toLowerCase()} ${d.getFullYear()}`
       lista.forEach(g => {
         const f = [...new Set(g.fechas)].sort()
         const ult = new Date(f.at(-1) + 'T00:00:00')
         const hace = Math.round((hoy - ult) / 86400000)
         const cada = f.length > 1 ? Math.round((new Date(f.at(-1)) - new Date(f[0])) / 86400000 / (f.length - 1)) : null
+        const frecTxt = !cada ? 'Solo una vez'
+          : cada <= 10 ? `Cada ${cada} días · casi semanal`
+          : cada <= 45 ? `Cada ${cada} días · ~${(30 / cada).toFixed(1).replace('.0', '').replace('.', ',')} ${30 / cada >= 1.5 ? 'veces' : 'vez'} al mes`
+          : `Cada ${cada} días · ~cada ${Math.round(cada / 30)} meses`
+        const prox = cada ? new Date(ult.getTime() + cada * 86400000) : null
+        // Línea de tiempo: los meses de los datos, marcados donde hubo este gasto
+        const mesesTL = [...datos].reverse().map(d => d.key)
+        const conGasto = new Set(f.map(x => x.slice(0, 7)))
         const el = document.createElement('div')
         el.className = 'br-item'
-        el.innerHTML = `<div class="br-top"><span class="br-nombre"></span><span class="br-ultima">${ult.getDate()} ${MESES_LABELS[ult.getMonth()].toLowerCase()} ${ult.getFullYear()}</span></div>
-          <div class="br-meta">${hace === 0 ? 'Hoy' : hace > 0 ? `Hace ${hace} ${hace === 1 ? 'día' : 'días'}` : `Dentro de ${-hace} días`} · ${f.length} ${f.length === 1 ? 'vez' : 'veces'}${cada ? ` · cada ${cada} días de media` : ''} · ${fmt(g.total)} en total</div>`
+        el.innerHTML = `
+          <div class="br-nombre"></div>
+          <div class="br-stats">
+            <div class="br-stat"><span>Última vez</span><b>${fechaTxt(ult)}</b><em>${hace === 0 ? 'Hoy' : hace > 0 ? `Hace ${hace} ${hace === 1 ? 'día' : 'días'}` : `Dentro de ${-hace} días`}</em></div>
+            <div class="br-stat"><span>Frecuencia</span><b>${cada ? `Cada ${cada} días` : '1 vez'}</b><em>${frecTxt.split(' · ')[1] || 'sin repetir aún'}</em></div>
+          </div>
+          <div class="br-tl" aria-label="Meses en los que hubo este gasto">${mesesTL.map(k => `<i class="${conGasto.has(k) ? 'si' : ''}" title="${MESES_LABELS[+k.slice(5) - 1]} ${k.slice(0, 4)}"></i>`).join('')}</div>
+          <div class="br-meta">${f.length} ${f.length === 1 ? 'vez' : 'veces'} · ${fmt(g.total)} en total${prox && prox > hoy ? ` · si sigues igual, la próxima sería hacia el ${prox.getDate()} ${MESES_LABELS[prox.getMonth()].toLowerCase()}` : ''}</div>`
         el.querySelector('.br-nombre').textContent = `${iconMov(false, g.cat)} ${g.nombre}`
         res.appendChild(el)
       })
