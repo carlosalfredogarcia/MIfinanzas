@@ -2,6 +2,7 @@
 // Se carga al final del <body>. Sustituye la .navbar y el .fab propios de cada página
 // y añade dos menús rápidos que no se confunden entre sí:
 //  - el botón + (flota sobre la barra, a la derecha; abre una columna de botones): Gasto, Ingreso, Gasto fijo, Importar CSV;
+//    "Gasto" abre el apunte rápido (apunte.js) en la misma pantalla;
 //  - la pestaña Menú (panel de casillas sobre la barra): Metas, Gastos fijos, Préstamos, Perfil.
 ;(function () {
   const pagina = (location.pathname.split('/').pop() || 'inicio.html').replace('.html', '')
@@ -13,12 +14,19 @@
     : pagina === 'mifinanza-estadisticas-v2' ? 'estadisticas'
     : 'menu'
 
+  // Apunte rápido de gastos (apunte.js): se abre encima de cualquier pantalla, sin cambiar de página
+  if (!window.mfApunte) {
+    const s = document.createElement('script')
+    s.src = 'apunte.js'
+    document.head.appendChild(s)
+  }
+
   // Si la función existe en esta página se usa; si no, se abre Movimientos con esa acción.
   const local = (fn, accion) => () => (typeof window[fn] === 'function' ? window[fn]() : ir(accion))
   const ir = accion => { location.href = MOV + '?accion=' + accion }
 
   const ACCIONES = {
-    gasto:   { label: 'Gasto',        color: '#f87171', fondo: 'rgba(239,68,68,.16)',  icono: '<path d="M12 5v14M19 12l-7 7-7-7"/>', run: local('abrirGasto', 'gasto') },
+    gasto:   { label: 'Gasto',        color: '#f87171', fondo: 'rgba(239,68,68,.16)',  icono: '<path d="M12 5v14M19 12l-7 7-7-7"/>', run: () => (window.mfApunte ? window.mfApunte.abrir() : ir('gasto')) },
     ingreso: { label: 'Ingreso',      color: '#34d399', fondo: 'rgba(16,185,129,.16)', icono: '<path d="M12 19V5M5 12l7-7 7 7"/>', run: local('abrirIngreso', 'ingreso') },
     fijo:    { label: 'Gasto fijo',   color: '#a5b4fc', fondo: 'rgba(99,102,241,.18)', icono: '<path d="M21 12a9 9 0 1 1-3-6.7L21 8"/><path d="M21 3v5h-5"/>', run: local('abrirGastoFijo', 'fijo') },
     csv:     { label: 'Importar CSV', color: '#fbbf24', fondo: 'rgba(245,158,11,.16)', icono: '<path d="M12 3v12M7 10l5 5 5-5"/><path d="M5 21h14"/>', run: local('abrirImportarCSV', 'csv') },
@@ -240,10 +248,11 @@
     const accion = new URLSearchParams(location.search).get('accion')
     if (!accion || !ACCIONES[accion]) return
     history.replaceState(null, '', location.pathname)
-    const fn = { gasto: 'abrirGasto', ingreso: 'abrirIngreso', fijo: 'abrirGastoFijo', csv: 'abrirImportarCSV' }[accion]
+    const fn = { ingreso: 'abrirIngreso', fijo: 'abrirGastoFijo', csv: 'abrirImportarCSV' }[accion]
+    const lista = () => accion === 'gasto' ? window.mfApunte && window.mfApunte.abrir : window[fn]
     let n = 0
     const iv = setInterval(() => {
-      if (window.currentUserId && typeof window[fn] === 'function') { clearInterval(iv); window[fn]() }
+      if (window.currentUserId && typeof lista() === 'function') { clearInterval(iv); lista()() }
       else if (++n > 100) clearInterval(iv)
     }, 50)
   }

@@ -8,6 +8,14 @@
   "background_color": "#0f0f13",
   "theme_color": "#b8f564",
   "orientation": "portrait",
+  "shortcuts": [
+    {
+      "name": "Apuntar gasto",
+      "short_name": "Gasto",
+      "url": "/inicio.html?accion=gasto",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    }
+  ],
   "icons": [
     {
       "src": "/icon-192.png",
