@@ -4,103 +4,124 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>MiFinanza – Perfil</title>
-<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #0d1117;
-    --card: #161b22;
-    --card2: #21262d;
-    --accent: #58a6ff;
-    --danger: #f85149;
-    --success: #3fb950;
-    --text: #e6edf3;
-    --subtext: #8b949e;
-    --border: #21262d;
-    --border2: #30363d;
+    --bg: #0a0e1a;
+    --card: #111827;
+    --card2: #1a2234;
+    --campo: #0f1626;
+    --border: #1f2937;
+    --border2: #263248;
+    --text: #f1f5f9;
+    --subtext: #94a3b8;
+    --muted: #64748b;
+    --green: #10b981;
+    --green-txt: #34d399;
+    --red: #ef4444;
+    --red-txt: #f87171;
+    --gold-txt: #fbbf24;
+    --indigo: #6366f1;
+    --indigo-txt: #a5b4fc;
   }
-
   html { visibility: hidden }
   * { margin: 0; padding: 0; box-sizing: border-box; }
-  html, body { height: 100%; }
-  body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; min-height: 100vh; display: flex; justify-content: center; }
-  .phone { width: 390px; min-height: 100vh; background: var(--bg); }
+  [hidden] { display: none !important; }
+  body { background: var(--bg); color: var(--text); font-family: 'Manrope', system-ui, sans-serif; min-height: 100vh; display: flex; justify-content: center; }
+  button, input { font-family: inherit; }
+  .num { font-variant-numeric: tabular-nums; }
+  .phone { width: 100%; max-width: 430px; min-height: 100vh; position: relative; overflow-x: clip; padding-bottom: 130px; }
+  .blob { position: absolute; border-radius: 50%; filter: blur(70px); pointer-events: none; z-index: 0; }
+  .blob-i { top: 40px; left: -70px; width: 240px; height: 240px; background: var(--indigo); opacity: .26; }
+  .blob-g { top: 160px; right: -90px; width: 220px; height: 220px; background: var(--green); opacity: .16; }
+  .phone > :not(.blob) { position: relative; z-index: 1; }
+  @keyframes subir { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
 
-  /* HERO */
-  .hero { padding: 52px 24px 24px; display: flex; flex-direction: column; align-items: center; text-align: center; }
-  .avatar { width: 72px; height: 72px; border-radius: 50%; background: var(--card2); border: 2px solid var(--accent); display: flex; align-items: center; justify-content: center; font-family: 'Roboto', sans-serif; font-size: 28px; font-weight: 700; color: var(--text); margin-bottom: 12px; }
-  .hero-nombre { font-family: 'DM Sans', sans-serif; font-size: 20px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
-  .hero-moneda { font-size: 13px; color: var(--subtext); }
+  /* Cabecera */
+  .hero { display: flex; align-items: center; gap: 14px; padding: 52px 20px 20px; animation: subir .4s ease both; }
+  .avatar { width: 58px; height: 58px; border-radius: 20px; display: grid; place-items: center; font-size: 24px; font-weight: 800; color: #fff; flex: none;
+    background: linear-gradient(140deg, var(--indigo), var(--green)); box-shadow: 0 10px 26px rgba(99,102,241,.35); }
+  .hero-nombre { font-size: 22px; font-weight: 800; letter-spacing: -.02em; }
+  .hero-correo { font-size: 13px; color: var(--subtext); margin-top: 2px; word-break: break-all; }
 
-  /* SECCIONES */
-  .seccion { margin: 0 24px 12px; background: var(--card); border-radius: 14px; padding: 18px 20px; border: 1px solid var(--border); }
-  .seccion-titulo { font-size: 10px; color: var(--subtext); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 14px; font-weight: 600; }
+  .seccion { margin: 0 20px 18px; animation: subir .45s .05s ease both; }
+  .sec-tit { font-size: 11px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margin: 0 4px 8px; }
+  .tarjeta { background: var(--card); border: 1px solid var(--border); border-radius: 20px; overflow: hidden; }
+  .fila { display: flex; align-items: center; gap: 12px; padding: 13px 14px; width: 100%; background: none; border: 0; color: inherit; text-align: left; font-size: 14.5px; cursor: pointer; text-decoration: none; }
+  .fila + .fila, .fila + .bloque, .bloque + .fila { border-top: 1px solid var(--border); }
+  .fila-ico { width: 34px; height: 34px; border-radius: 11px; background: var(--card2); display: grid; place-items: center; font-size: 16px; flex: none; }
+  .fila-txt { flex: 1; min-width: 0; }
+  .fila-txt b { display: block; font-weight: 700; }
+  .fila-txt small { display: block; font-size: 12px; color: var(--subtext); margin-top: 1px; }
+  .fila-der { color: var(--subtext); font-size: 13px; font-weight: 700; flex: none; }
+  .flecha::after { content: '›'; font-size: 20px; color: var(--muted); margin-left: 4px; }
+  .bloque { padding: 13px 14px; }
+  .lbl { display: block; font-size: 11px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+  .inp { width: 100%; background: var(--campo); border: 1px solid var(--border); border-radius: 14px; padding: 12px 14px; color: var(--text); font-size: 15px; font-weight: 600; outline: none; }
+  .inp:focus { border-color: #475569; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip { border: 1px solid var(--border); background: var(--campo); color: #cbd5e1; border-radius: 999px; padding: 8px 13px; font-size: 13px; font-weight: 700; cursor: pointer; }
+  .chip[aria-pressed="true"] { background: rgba(99,102,241,.18); border-color: var(--indigo); color: #fff; }
+  .guardado { font-size: 12px; color: var(--green-txt); font-weight: 700; height: 16px; margin-top: 6px; transition: opacity .3s; }
 
-  /* INPUTS DIRECTOS */
-  .fld { margin-bottom: 14px; }
-  .fld:last-child { margin-bottom: 0; }
-  .lbl { font-size: 11px; color: var(--subtext); text-transform: uppercase; letter-spacing: 0.08em; display: block; margin-bottom: 6px; }
-  .inp { width: 100%; background: var(--bg); border: 1px solid var(--border2); border-radius: 12px; padding: 12px 14px; color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 15px; outline: none; transition: border-color 0.15s; display: block; }
-  .inp:focus { border-color: var(--accent); }
-  textarea.inp { resize: none; height: 80px; line-height: 1.5; }
+  /* Plan */
+  .plan { padding: 16px; background: linear-gradient(140deg, rgba(99,102,241,.2), rgba(16,185,129,.08) 70%), var(--card); }
+  .plan-tit { display: flex; justify-content: space-between; align-items: center; }
+  .plan-tit b { font-size: 16px; }
+  .plan-etq { font-size: 11px; font-weight: 800; border-radius: 99px; padding: 3px 9px; background: rgba(16,185,129,.16); color: var(--green-txt); }
+  .plan-etq.premium { background: rgba(245,158,11,.16); color: var(--gold-txt); }
+  .plan p { font-size: 13px; color: var(--subtext); line-height: 1.5; margin: 6px 0 12px; }
+  .barra { height: 8px; border-radius: 99px; background: rgba(255,255,255,.07); overflow: hidden; }
+  .barra i { display: block; height: 100%; border-radius: 99px; background: linear-gradient(90deg, var(--indigo), #818cf8); }
+  .plan-pie { display: flex; justify-content: space-between; font-size: 12px; color: var(--subtext); margin-top: 6px; }
 
-  /* MONEDA */
-  .moneda-opts { display: flex; gap: 8px; flex-wrap: wrap; }
-  .moneda-chip { background: var(--card2); border: 1px solid var(--border2); border-radius: 10px; padding: 9px 14px; font-size: 13px; color: var(--subtext); cursor: pointer; transition: all 0.2s; }
-  .moneda-chip.active { background: rgba(88,166,255,0.12); border-color: rgba(88,166,255,0.4); color: var(--accent); font-weight: 600; }
+  /* Categorías */
+  .cat-fila { display: flex; align-items: center; gap: 10px; padding: 10px 14px; }
+  .cat-fila + .cat-fila { border-top: 1px solid var(--border); }
+  .cat-e { font-size: 19px; width: 26px; text-align: center; flex: none; }
+  .cat-n { flex: 1; min-width: 0; font-size: 14.5px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .cat-n small { display: block; font-size: 12px; font-weight: 500; color: var(--subtext); }
+  .cat-btn { border: 0; background: none; color: var(--subtext); width: 34px; height: 34px; border-radius: 10px; cursor: pointer; font-size: 17px; flex: none; }
+  .cat-btn:hover { background: var(--card2); color: var(--text); }
+  .btn-sec { width: 100%; border: 1px dashed var(--border2); background: none; color: var(--indigo-txt); border-radius: 14px; padding: 12px; font-size: 14px; font-weight: 800; cursor: pointer; margin-top: 10px; }
+  .ver-mas { width: 100%; border: 0; border-top: 1px solid var(--border); background: none; color: var(--subtext); padding: 11px; font-size: 13px; font-weight: 700; cursor: pointer; }
 
-  /* COLOR */
-  .colores-wrap { display: flex; gap: 10px; justify-content: space-around; }
-  .color-item { display: flex; flex-direction: column; align-items: center; gap: 6px; cursor: pointer; }
-  .color-circulo { width: 40px; height: 40px; border-radius: 50%; border: 3px solid transparent; transition: transform 0.2s, border-color 0.2s; }
-  .color-item.active .color-circulo { border-color: var(--text); transform: scale(1.12); }
-  .color-nombre { font-size: 10px; color: var(--subtext); }
-  .color-item.active .color-nombre { color: var(--text); }
+  /* Soporte */
+  .soporte { padding: 16px; display: flex; gap: 14px; align-items: center; background: linear-gradient(140deg, rgba(16,185,129,.16), rgba(16,185,129,.04)); border-color: rgba(16,185,129,.3); }
+  .soporte-txt { flex: 1; }
+  .soporte-txt b { display: block; font-size: 15px; }
+  .soporte-txt small { display: block; font-size: 12.5px; color: var(--subtext); line-height: 1.45; margin-top: 3px; }
+  .btn-wa { flex: none; display: inline-flex; align-items: center; gap: 7px; border: 0; border-radius: 14px; padding: 12px 14px; background: #25d366; color: #052e16; font-size: 14px; font-weight: 800; cursor: pointer; text-decoration: none; }
+  .peligro { color: var(--red-txt); }
+  .version { text-align: center; font-size: 12px; color: var(--muted); margin-top: 6px; }
 
-  /* CATEGORÍAS */
-  .cats-wrap { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
-  .cat-tag { background: var(--card2); border: 1px solid var(--border2); border-radius: 100px; padding: 6px 12px; font-size: 12px; color: var(--text); display: flex; align-items: center; gap: 6px; transition: border-color 0.2s; }
-  .cat-tag:hover { border-color: rgba(248,81,73,0.35); }
-  .cat-tag .remove { color: var(--subtext); font-size: 14px; line-height: 1; cursor: pointer; background: none; border: none; padding: 0; font-family: inherit; transition: color 0.2s; }
-  .cat-tag:hover .remove { color: var(--danger); }
-  .btn-add-cat { background: none; border: 1px dashed var(--border2); border-radius: 100px; padding: 6px 14px; font-size: 12px; color: var(--subtext); cursor: pointer; font-family: 'DM Sans', sans-serif; transition: all 0.2s; }
-  .btn-add-cat:hover { border-color: var(--accent); color: var(--accent); }
+  /* Hoja */
+  .h-fondo { position: fixed; inset: 0; z-index: 300; background: rgba(5,8,16,.62); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); opacity: 0; pointer-events: none; transition: opacity .2s; }
+  .hoja { position: fixed; left: 0; right: 0; bottom: 0; z-index: 301; max-width: 480px; margin: 0 auto; max-height: 92vh; overflow-y: auto; overscroll-behavior: contain;
+    background: var(--card); border: 1px solid rgba(255,255,255,.08); border-bottom: 0; border-radius: 24px 24px 0 0; padding: 10px 18px calc(18px + env(safe-area-inset-bottom));
+    transform: translateY(100%); visibility: hidden; transition: transform .26s cubic-bezier(.2,.8,.2,1), visibility 0s .26s; box-shadow: 0 -20px 50px rgba(0,0,0,.5); }
+  .h-abierta .h-fondo { opacity: 1; pointer-events: auto; }
+  .h-abierta .hoja { transform: none; visibility: visible; transition: transform .26s cubic-bezier(.2,.8,.2,1); }
+  .h-asa { width: 40px; height: 4px; border-radius: 99px; background: #334155; margin: 0 auto 12px; }
+  .h-cab { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+  .h-tit { font-size: 16px; font-weight: 800; }
+  .h-x { width: 34px; height: 34px; border-radius: 50%; border: 0; background: var(--card2); color: var(--subtext); font-size: 18px; cursor: pointer; }
+  .h-txt { font-size: 13px; color: var(--subtext); line-height: 1.55; margin-bottom: 14px; }
+  .h-campo { margin-bottom: 14px; }
+  .emojis { display: grid; grid-template-columns: repeat(8, 1fr); gap: 6px; }
+  .emojis button { aspect-ratio: 1; border-radius: 11px; border: 1px solid transparent; background: var(--card2); font-size: 19px; cursor: pointer; }
+  .emojis button[aria-pressed="true"] { border-color: var(--indigo); background: rgba(99,102,241,.18); }
+  .btn-grande { width: 100%; border: 0; border-radius: 16px; padding: 15px; font-size: 15px; font-weight: 800; cursor: pointer; background: var(--indigo); color: #fff; }
+  .btn-grande:disabled { opacity: .35; cursor: default; }
+  .btn-grande.rojo { background: var(--red); }
+  .h-opc { display: grid; gap: 8px; margin-top: 4px; }
+  .h-opc button { text-align: left; border: 1px solid var(--border); background: var(--campo); color: var(--text); border-radius: 14px; padding: 12px 14px; font-size: 14px; font-weight: 700; cursor: pointer; }
+  .h-opc button small { display: block; font-size: 12px; font-weight: 500; color: var(--subtext); margin-top: 2px; }
 
-  /* BOTONES PRINCIPALES */
-  .btn-guardar { display: block; margin: 4px 24px 10px; width: calc(100% - 48px); background: var(--accent); color: #0d1117; border: none; border-radius: 14px; padding: 15px; font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 700; cursor: pointer; transition: opacity 0.2s; }
-  .btn-guardar:hover { opacity: 0.88; }
-  .btn-guardar:disabled { opacity: 0.6; cursor: default; }
-  .btn-logout { display: block; margin: 0 24px 24px; width: calc(100% - 48px); background: none; border: 1px solid var(--danger); border-radius: 14px; padding: 14px; font-family: 'DM Sans', sans-serif; font-size: 14px; color: var(--danger); cursor: pointer; transition: background 0.2s; }
-  .btn-logout:hover { background: rgba(248,81,73,0.08); }
-
-  /* MODAL confirmar eliminar cat */
-  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.75); backdrop-filter: blur(8px); z-index: 200; display: none; align-items: flex-end; justify-content: center; }
-  .modal { width: 390px; background: var(--card); border-radius: 28px 28px 0 0; padding: 24px 24px 40px; border-top: 1px solid var(--border2); }
-  .modal-handle { width: 40px; height: 4px; background: rgba(255,255,255,0.08); border-radius: 100px; margin: 0 auto 20px; }
-  .modal-title { font-family: 'DM Sans', sans-serif; font-size: 18px; font-weight: 700; color: var(--text); margin-bottom: 8px; }
-  .btn-ok { width: 100%; border: none; border-radius: 14px; padding: 14px; font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 700; cursor: pointer; margin-bottom: 8px; transition: opacity 0.2s; }
-  .btn-ok:hover { opacity: 0.9; }
-  .btn-cancelar { width: 100%; background: none; border: none; color: var(--subtext); font-size: 13px; cursor: pointer; padding: 10px; font-family: 'DM Sans', sans-serif; }
-  .mas-item { display: flex; align-items: center; gap: 14px; padding: 14px 2px; cursor: pointer; border-bottom: 1px solid var(--border2); transition: opacity 0.15s; }
-  .mas-item:last-of-type { border-bottom: none; margin-bottom: 16px; }
-  .mas-item:active { opacity: 0.6; }
-  .mas-icon { width: 42px; height: 42px; border-radius: 13px; background: rgba(88,166,255,0.12); display: flex; align-items: center; justify-content: center; font-size: 19px; flex-shrink: 0; }
-  .mas-label { flex: 1; font-size: 15px; font-weight: 600; color: var(--text); }
-  .mas-arrow { color: #58a6ff; font-size: 18px; }
-
-  /* NAVBAR */
-  .navbar { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 390px; background: rgba(13,17,23,0.97); backdrop-filter: blur(20px); border-top: 1px solid var(--border2); padding: 12px 0 24px; display: flex; justify-content: space-around; align-items: center; z-index: 99; }
-  .nav-item { display: flex; flex-direction: column; align-items: center; gap: 5px; cursor: pointer; opacity: 0.35; transition: opacity 0.2s; flex: 1; }
-  .nav-item.active { opacity: 1; }
-  .nav-icon { font-size: 22px; }
-  .nav-dot  { width: 4px; height: 4px; border-radius: 50%; background: var(--accent); }
-
-  /* TOAST */
-  .toast { position: fixed; top: 24px; left: 50%; transform: translateX(-50%) translateY(-80px); background: var(--card); border: 1px solid var(--border2); border-radius: 14px; padding: 12px 20px; font-size: 13px; color: var(--text); z-index: 300; transition: transform 0.3s ease; white-space: nowrap; }
-  .toast.show { transform: translateX(-50%) translateY(0); }
-  .toast.ok  { border-color: rgba(88,166,255,0.4); color: var(--accent); }
-  .toast.err { border-color: rgba(248,81,73,0.4);  color: var(--danger); }
-
-  .spacer { height: 110px; }
+  .toast { position: fixed; left: 50%; bottom: calc(110px + env(safe-area-inset-bottom)); z-index: 302; transform: translate(-50%, 20px); opacity: 0; pointer-events: none; transition: all .22s;
+    display: flex; align-items: center; gap: 14px; white-space: nowrap; background: var(--card2); border: 1px solid var(--border2); border-radius: 14px; padding: 12px 14px 12px 16px; font-size: 14px; font-weight: 700; box-shadow: 0 14px 30px rgba(0,0,0,.5); max-width: calc(100vw - 32px); }
+  .toast.ver { opacity: 1; transform: translate(-50%, 0); pointer-events: auto; }
+  .toast button { border: 0; background: none; color: var(--indigo-txt); font-size: 14px; font-weight: 800; cursor: pointer; padding: 4px; }
 </style>
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="/icon-192.png">
@@ -108,322 +129,372 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="MiFinanza">
-<meta name="theme-color" content="#58a6ff">
+<meta name="theme-color" content="#0a0e1a">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="auth.js"></script>
 </head>
 <body>
 <div class="phone">
+  <div class="blob blob-i" aria-hidden="true"></div>
+  <div class="blob blob-g" aria-hidden="true"></div>
 
-  <!-- HERO -->
-  <div class="hero">
-    <div class="avatar" id="avatar-letra">C</div>
-    <div class="hero-nombre" id="hero-nombre">—</div>
-    <div class="hero-moneda" id="hero-moneda">$ — Dólar</div>
-  </div>
-
-  <!-- Información personal -->
-  <div class="seccion">
-    <div class="seccion-titulo">Información personal</div>
-    <div class="fld">
-      <label class="lbl" for="inp-nombre">Nombre</label>
-      <input type="text" id="inp-nombre" class="inp" placeholder="Tu nombre"
-             oninput="syncHero(this.value)">
+  <header class="hero">
+    <div class="avatar" id="avatar" aria-hidden="true">?</div>
+    <div>
+      <h1 class="hero-nombre" id="hero-nombre">Tu perfil</h1>
+      <div class="hero-correo" id="hero-correo"></div>
     </div>
-  </div>
+  </header>
 
-  <!-- Moneda -->
-  <div class="seccion">
-    <div class="seccion-titulo">Moneda</div>
-    <div class="moneda-opts">
-      <div class="moneda-chip" data-cod="$"  data-label="$ — Dólar"    onclick="setMoneda(this)">$ — Dólar</div>
-      <div class="moneda-chip" data-cod="€"  data-label="€ — Euro"     onclick="setMoneda(this)">€ — Euro</div>
-      <div class="moneda-chip" data-cod="Bs" data-label="Bs — Bolívar"  onclick="setMoneda(this)">Bs — Bolívar</div>
+  <!-- Soporte -->
+  <section class="seccion" aria-labelledby="t-soporte">
+    <h2 class="sec-tit" id="t-soporte">Ayuda</h2>
+    <div class="tarjeta soporte">
+      <div class="soporte-txt"><b>¿Algún problema o idea?</b><small>Escríbenos por WhatsApp. Te respondemos personalmente.</small></div>
+      <a class="btn-wa" id="btn-wa" href="#" target="_blank" rel="noopener noreferrer">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm0 18.2a8.2 8.2 0 0 1-4.2-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2Zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8s-.4-.1-.6.1-.7.8-.8 1-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.3-.4.2-.4.7-1.3.1-.2 0-.3 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2 5.2 5.2 0 0 0 1.1 2.8 11.9 11.9 0 0 0 4.6 4c1.7.7 2.4.8 3.2.7a2.8 2.8 0 0 0 1.8-1.3 2.3 2.3 0 0 0 .2-1.3c-.1-.1-.2-.2-.5-.3Z"/></svg>
+        WhatsApp</a>
     </div>
-  </div>
+  </section>
 
-  <!-- Color principal -->
-  <div class="seccion">
-    <div class="seccion-titulo">Color principal</div>
-    <div class="colores-wrap">
-      <div class="color-item" data-color="#58a6ff" onclick="setColor(this)">
-        <div class="color-circulo" style="background:#58a6ff"></div>
-        <div class="color-nombre">Azul</div>
+  <!-- Datos personales y preferencias -->
+  <section class="seccion" aria-labelledby="t-tu">
+    <h2 class="sec-tit" id="t-tu">Tú</h2>
+    <div class="tarjeta">
+      <div class="bloque">
+        <label class="lbl" for="inp-nombre">Nombre</label>
+        <input class="inp" id="inp-nombre" placeholder="¿Cómo te llamas?" maxlength="40" autocomplete="given-name">
       </div>
-      <div class="color-item" data-color="#3fb950" onclick="setColor(this)">
-        <div class="color-circulo" style="background:#3fb950"></div>
-        <div class="color-nombre">Verde</div>
-      </div>
-      <div class="color-item" data-color="#f5c842" onclick="setColor(this)">
-        <div class="color-circulo" style="background:#f5c842"></div>
-        <div class="color-nombre">Dorado</div>
-      </div>
-      <div class="color-item" data-color="#ff8c61" onclick="setColor(this)">
-        <div class="color-circulo" style="background:#ff8c61"></div>
-        <div class="color-nombre">Naranja</div>
-      </div>
-      <div class="color-item" data-color="#b47aff" onclick="setColor(this)">
-        <div class="color-circulo" style="background:#b47aff"></div>
-        <div class="color-nombre">Morado</div>
+      <div class="bloque">
+        <span class="lbl">Moneda</span>
+        <div class="chips" id="monedas" role="group" aria-label="Moneda"></div>
+        <div class="guardado" id="guardado" aria-live="polite"></div>
       </div>
     </div>
-  </div>
+  </section>
+
+  <!-- Plan -->
+  <section class="seccion" aria-labelledby="t-plan">
+    <h2 class="sec-tit" id="t-plan">Tu plan</h2>
+    <div class="tarjeta plan" id="plan">
+      <div class="plan-tit"><b id="plan-nombre">Gratis</b><span class="plan-etq" id="plan-etq">Gratis</span></div>
+      <p id="plan-txt">Todo MiFinanzas es gratis. La importación de extractos del banco incluye 200 movimientos.</p>
+      <div id="plan-uso">
+        <div class="barra"><i id="plan-barra" style="width:0%"></i></div>
+        <div class="plan-pie"><span>Movimientos importados</span><b class="num" id="plan-cifra">—</b></div>
+      </div>
+    </div>
+  </section>
 
   <!-- Categorías -->
-  <div class="seccion">
-    <div class="seccion-titulo">Mis categorías</div>
-    <div class="cats-wrap" id="cats-wrap"></div>
-    <button class="btn-add-cat" onclick="agregarCat()">+ Agregar categoría</button>
-  </div>
+  <section class="seccion" aria-labelledby="t-cats">
+    <h2 class="sec-tit" id="t-cats">Mis categorías</h2>
+    <div class="tarjeta" id="cats"><div class="cat-fila"><span class="cat-n" style="color:var(--subtext)">Cargando…</span></div></div>
+    <button type="button" class="btn-sec" id="btn-nueva-cat">＋ Nueva categoría</button>
+    <div id="cats-fuera" style="margin-top:14px" hidden></div>
+  </section>
 
-  <button class="btn-guardar" onclick="guardar()">Guardar cambios</button>
-  <button class="btn-logout"  onclick="cerrarSesion()">Cerrar sesión</button>
-
-  <div class="spacer"></div>
+  <!-- Datos y cuenta -->
+  <section class="seccion" aria-labelledby="t-cuenta">
+    <h2 class="sec-tit" id="t-cuenta">Tus datos y tu cuenta</h2>
+    <div class="tarjeta">
+      <a class="fila" href="mifinanza-movimientos.html#descargar"><span class="fila-ico">⬇️</span><span class="fila-txt"><b>Descargar mis movimientos</b><small>En CSV, XLS o XLSX</small></span><span class="flecha"></span></a>
+      <button type="button" class="fila" id="btn-clave"><span class="fila-ico">🔑</span><span class="fila-txt"><b>Cambiar contraseña</b><small>Te enviamos un enlace a tu correo</small></span><span class="flecha"></span></button>
+      <a class="fila" href="privacidad.html"><span class="fila-ico">🛡️</span><span class="fila-txt"><b>Privacidad</b><small>Qué guardamos y para qué</small></span><span class="flecha"></span></a>
+      <button type="button" class="fila" id="btn-salir"><span class="fila-ico">↩️</span><span class="fila-txt"><b>Cerrar sesión</b></span></button>
+      <button type="button" class="fila" id="btn-borrar"><span class="fila-ico">🗑️</span><span class="fila-txt"><b class="peligro">Borrar mi cuenta y mis datos</b></span><span class="flecha"></span></button>
+    </div>
+    <div class="version">MiFinanzas</div>
+  </section>
 </div>
 
-<nav class="navbar">
-  <div class="nav-item" onclick="location.href='inicio.html'">
-    <span class="nav-icon">🏠</span>
-  </div>
-  <div class="nav-item" onclick="location.href='mifinanza-movimientos.html'">
-    <span class="nav-icon">📋</span>
-  </div>
-  <div class="nav-item" onclick="location.href='mifinanza-estadisticas-v2.html'">
-    <span class="nav-icon">📊</span>
-  </div>
-  <div class="nav-item active" onclick="abrirPanelMas()">
-    <span class="nav-icon">···</span>
-    <div class="nav-dot"></div>
-  </div>
-</nav>
-
-<div class="modal-overlay" id="panel-mas">
-  <div class="modal">
-    <div class="modal-handle"></div>
-    <div class="modal-title">Más opciones</div>
-    <div class="mas-item" onclick="location.href='mifinanza-metas.html'">
-      <div class="mas-icon">🎯</div>
-      <div class="mas-label">Metas</div>
-      <div class="mas-arrow">›</div>
-    </div>
-    <div class="mas-item" onclick="location.href='mifinanza-fijos.html'">
-      <div class="mas-icon"><span style="color:#58a6ff">↻</span></div>
-      <div class="mas-label">Gastos Fijos</div>
-      <div class="mas-arrow">›</div>
-    </div>
-    <div class="mas-item" onclick="location.href='mifinanza-prestamos.html'">
-      <div class="mas-icon">🤝</div>
-      <div class="mas-label">Préstamos</div>
-      <div class="mas-arrow">›</div>
-    </div>
-    <div class="mas-item" onclick="location.href='mifinanza-viajes.html'" style="display:none">
-      <div class="mas-icon">✈️</div>
-      <div class="mas-label">Viajes</div>
-      <div class="mas-arrow">›</div>
-    </div>
-    <div class="mas-item" onclick="location.href='mifinanza-perfil.html'">
-      <div class="mas-icon">👤</div>
-      <div class="mas-label">Perfil</div>
-      <div class="mas-arrow">›</div>
-    </div>
-    <button class="btn-cancelar" onclick="cerrarPanelMas()">Cancelar</button>
-  </div>
+<!-- Hoja reutilizable -->
+<div id="hoja-raiz">
+  <div class="h-fondo" data-cerrar></div>
+  <section class="hoja" role="dialog" aria-modal="true" aria-labelledby="h-tit" inert>
+    <div class="h-asa"></div>
+    <div class="h-cab"><span class="h-tit" id="h-tit"></span><button type="button" class="h-x" data-cerrar aria-label="Cerrar">×</button></div>
+    <div id="h-cuerpo"></div>
+  </section>
 </div>
 
-<!-- Modal confirmar eliminar categoría -->
-<div class="modal-overlay" id="modal-borrar-cat" style="display:none">
-  <div class="modal">
-    <div class="modal-handle"></div>
-    <div class="modal-title" style="color:#f85149">Eliminar categoría</div>
-    <p style="color:#8b949e;font-size:13px;line-height:1.5;margin:0 0 14px;padding:10px 12px;background:rgba(248,81,73,0.08);border:1px solid rgba(248,81,73,0.25);border-radius:10px">⚠️ Al eliminar esta categoría, los movimientos asociados perderán su clasificación y afectará a tu análisis de gastos.</p>
-    <p style="color:#e6edf3;font-size:15px;line-height:1.5;margin:0 0 8px">Escribe <strong>CONFIRMAR</strong> para eliminar la categoría <strong id="borrar-cat-nombre"></strong>.</p>
-    <input type="text" id="borrar-cat-input" class="inp" placeholder="CONFIRMAR" autocomplete="off" oninput="actualizarBtnCat()" style="margin-bottom:12px">
-    <button id="borrar-cat-btn" onclick="confirmarEliminarCat()" class="btn-ok" style="background:#f85149;color:#fff;opacity:0.4;pointer-events:none">Eliminar categoría</button>
-    <button class="btn-cancelar" onclick="cerrarBorrarCat()">Cancelar</button>
-  </div>
-</div>
+<div class="toast" id="toast" role="status" aria-live="polite"><span></span><button type="button">Deshacer</button></div>
 
-<div class="toast" id="toast"></div>
 <script>
-
-  let colorActual = '#58a6ff'
-
-  function toast(msg, tipo = 'ok') {
-    const t = document.getElementById('toast')
-    t.textContent = msg
-    t.className = `toast ${tipo} show`
-    setTimeout(() => { t.className = 'toast' }, 2500)
-  }
-
-  function syncHero(val) {
-    document.getElementById('hero-nombre').textContent  = val || '—'
-    document.getElementById('avatar-letra').textContent = val ? val[0].toUpperCase() : '?'
-  }
-
+  const WHATSAPP = '34640309239'
   const CATS_DEFAULT = '🏠 Alquiler,💳 Crédito,📱 Línea,🏋️ Gym,⛽ Gasolina,💻 Tecnología,❤️ Salud,👕 Ropa,🎉 Salidas,🌍 Remesas,⚠️ Gastos Imprevistos,📋 Trámite,🚗 Vehículo,📦 Otros,🛒 Supermercado,💧 Agua,🧴 Cuidado personal,📺 Suscripción,💡 Luz,🌐 Internet,💼 Nómina'
+  // Se guarda el símbolo, que es lo que usan las demás pantallas para mostrar los importes
+  const MONEDAS = [['€', 'Euro'], ['$', 'Dólar / Peso'], ['Bs', 'Bolívar'], ['S/', 'Sol'], ['R$', 'Real'], ['£', 'Libra']]
+  const EMOJIS = ['🏷️', '🍔', '☕', '🍺', '🛒', '🐶', '👶', '🎁', '✈️', '🚌', '🚕', '💊', '💇', '🎮', '📚', '🎓', '🧹', '🔧', '🛋️', '💍', '⚽', '🎬', '🎵', '🏦', '💼', '🏠', '💡', '📱', '🚗', '❤️', '👕', '📦']
+  // Tablas donde se guarda el nombre de la categoría (para renombrar o juntar sin perder nada)
+  // [tabla, columna de la categoría, columna del usuario]
+  const TABLAS_CAT = [['gastos', 'categoria', 'usuario_id'], ['gastos_fijos', 'categoria', 'usuario_id'], ['ingresos', 'tipo', 'usuario_id'], ['user_gasto_plan', 'categoria', 'user_id'], ['categoria_tipo', 'categoria', 'user_id']]
 
+  let perfil = null, uid = null, correo = '', categorias = [], usos = {}
+  let verTodas = false
+
+  const $ = id => document.getElementById(id)
+  const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c])
+  const sinEmoji = c => String(c || '').replace(/^[^\p{L}\p{N}]+/u, '').trim()
+  const emoji = c => (String(c || '').match(/^[^\p{L}\p{N}\s]+/u) || ['🏷️'])[0].trim()
+  const mismaCat = (a, b) => sinEmoji(a).toLowerCase() === sinEmoji(b).toLowerCase()
+
+  // ── Carga ──────────────────────────────────────────────────
   async function cargarPerfil() {
     const { data: { session } } = await dbClient.auth.getSession()
-    const uid = session?.user?.id
+    uid = session?.user?.id
+    correo = session?.user?.email || ''
     if (!uid) return
-    const { data: rows } = await dbClient.from('perfil').select('*').eq('usuario_id', uid).limit(1)
-    const perfil = rows?.[0]
-    const datos = perfil || { nombre: '', moneda: '$', color: '#58a6ff', categorias: CATS_DEFAULT }
+    // El color de acento ya no se elige: cada pantalla usa su propio diseño
+    localStorage.removeItem('color')
+    const { data: filas } = await dbClient.from('perfil').select('*').eq('usuario_id', uid).limit(1)
+    perfil = filas?.[0] || null
     if (!perfil) {
-      await dbClient.from('perfil')
-        .insert({ usuario_id: uid, nombre: '', moneda: '$', color: '#58a6ff', categorias: CATS_DEFAULT })
+      const { data } = await dbClient.from('perfil').insert({ usuario_id: uid, nombre: '', moneda: localStorage.getItem('moneda') || '€', categorias: CATS_DEFAULT }).select()
+      perfil = data?.[0] || { usuario_id: uid, nombre: '', moneda: '€', categorias: CATS_DEFAULT }
     }
-
-    const nombre = datos.nombre || ''
-    document.getElementById('inp-nombre').value         = nombre
-    document.getElementById('hero-nombre').textContent  = nombre || '—'
-    document.getElementById('avatar-letra').textContent = nombre ? nombre[0].toUpperCase() : '?'
-
-    if (datos.moneda) {
-      const simbolo = { USD:'$', EUR:'€', VES:'Bs', COP:'$', MXN:'$', DOP:'$', '$':'$', '€':'€', Bs:'Bs' }[datos.moneda] || '$'
-      document.querySelectorAll('.moneda-chip').forEach(c => {
-        c.classList.toggle('active', c.dataset.cod === simbolo)
-      })
-      const chip = document.querySelector(`.moneda-chip[data-cod="${simbolo}"]`)
-      if (chip) document.getElementById('hero-moneda').textContent = chip.dataset.label
-      localStorage.setItem('moneda', simbolo)
-    }
-
-    if (datos.color) {
-      colorActual = datos.color
-      document.documentElement.style.setProperty('--accent', datos.color)
-      document.querySelectorAll('.color-item').forEach(c => {
-        c.classList.toggle('active', c.dataset.color === datos.color)
-      })
-      localStorage.setItem('color', datos.color)
-    }
-
-    const catsStr = datos.categorias || CATS_DEFAULT
-    const cats = [...new Set(catsStr.split(',').map(c => c.trim()).filter(Boolean))]
-    const sk = s => s.replace(/^[^\p{L}]+/u, '').toLowerCase()
-    cats.sort((a, b) => sk(a).localeCompare(sk(b), 'es'))
-    renderCats(cats)
+    categorias = [...new Set((perfil.categorias || CATS_DEFAULT).split(',').map(c => c.trim()).filter(Boolean))]
+    pintarCabecera(); pintarMonedas(); pintarCats(); prepararWhatsApp()
+    $('inp-nombre').value = perfil.nombre || ''
+    cargarUsos(); cargarPlan()
   }
 
-  const iconsCat = {
-    'Comida':'🍔','Alquiler':'🏠','Remesas':'🌍','Tecnología':'💻',
-    'Gym':'🏋️','Línea':'📱','Salud':'❤️','Antojos':'🍩',
-    'Transporte':'🚗','Ocio':'🎬','Ropa':'👕'
+  function pintarCabecera() {
+    const n = (perfil.nombre || '').trim()
+    $('hero-nombre').textContent = n || 'Tu perfil'
+    $('hero-correo').textContent = correo
+    $('avatar').textContent = (n || correo || '?').charAt(0).toUpperCase()
   }
 
-  function renderCats(lista) {
-    const wrap = document.getElementById('cats-wrap')
-    wrap.innerHTML = ''
-    lista.forEach(cat => {
-      const tag = document.createElement('div')
-      tag.className = 'cat-tag'
-      tag.innerHTML = `<span class="cat-text">${cat}</span><button class="remove" onclick="eliminarCat(this.closest('.cat-tag'))">×</button>`
-      wrap.appendChild(tag)
+  // ── Nombre y moneda (se guardan solos) ─────────────────────
+  async function guardarPerfil(cambios, msg) {
+    const { error } = await dbClient.from('perfil').update(cambios).eq('usuario_id', uid)
+    if (error) { aviso('No se pudo guardar: ' + error.message); return false }
+    Object.assign(perfil, cambios)
+    const g = $('guardado'); g.textContent = '✓ ' + msg; g.style.opacity = 1
+    clearTimeout(g._t); g._t = setTimeout(() => { g.style.opacity = 0 }, 1800)
+    return true
+  }
+
+  let tNombre
+  $('inp-nombre').addEventListener('input', () => {
+    clearTimeout(tNombre)
+    tNombre = setTimeout(async () => {
+      if (await guardarPerfil({ nombre: $('inp-nombre').value.trim() }, 'Nombre guardado')) pintarCabecera()
+    }, 600)
+  })
+
+  function pintarMonedas() {
+    const actual = { USD: '$', EUR: '€', VES: 'Bs' }[perfil.moneda] || perfil.moneda || '€'
+    $('monedas').innerHTML = MONEDAS.map(([s, n]) => `<button type="button" class="chip" data-mon="${esc(s)}" aria-pressed="${s === actual}">${esc(s)} · ${n}</button>`).join('')
+    $('monedas').querySelectorAll('[data-mon]').forEach(b => b.addEventListener('click', async () => {
+      const s = b.dataset.mon
+      if (await guardarPerfil({ moneda: s }, 'Moneda guardada')) {
+        localStorage.setItem('moneda', s); window.moneda = s
+        pintarMonedas(); cargarPlan()
+      }
+    }))
+  }
+
+  // ── Plan e importación ─────────────────────────────────────
+  async function cargarPlan() {
+    if (perfil.premium === true) {
+      $('plan-nombre').textContent = 'Premium'
+      $('plan-etq').textContent = 'Premium'; $('plan-etq').classList.add('premium')
+      $('plan-txt').textContent = 'Tienes la importación de extractos sin límite. ¡Gracias por apoyar MiFinanzas!'
+      $('plan-uso').hidden = true
+      return
+    }
+    const filtro = q => q.eq('usuario_id', uid).eq('origen', 'importado')
+    const [g, i] = await Promise.all([
+      filtro(dbClient.from('gastos').select('*', { count: 'exact', head: true })),
+      filtro(dbClient.from('ingresos').select('*', { count: 'exact', head: true })),
+    ])
+    const usados = (g.count || 0) + (i.count || 0)
+    const codigos = String(perfil.codigos_usados || '').split(',').filter(Boolean).length
+    const limite = (perfil.limite_importacion ?? 200) + codigos * 200
+    $('plan-cifra').textContent = `${usados.toLocaleString('es-ES')} de ${limite.toLocaleString('es-ES')}`
+    $('plan-barra').style.width = Math.min(100, usados / limite * 100) + '%'
+    if (usados >= limite) $('plan-txt').textContent = 'Has usado todos los movimientos importados gratis. Puedes seguir apuntando a mano sin límite, o escríbenos para ampliar la importación.'
+  }
+
+  // ── Categorías ─────────────────────────────────────────────
+  async function cargarUsos() {
+    const res = await Promise.all([
+      dbClient.from('gastos').select('categoria').eq('usuario_id', uid),
+      dbClient.from('gastos_fijos').select('categoria').eq('usuario_id', uid),
+      dbClient.from('ingresos').select('tipo').eq('usuario_id', uid),
+    ])
+    usos = {}
+    for (const r of res) for (const f of r.data || []) { const c = f.categoria || f.tipo; if (c) usos[c] = (usos[c] || 0) + 1 }
+    pintarCats()
+  }
+
+  function pintarCats() {
+    const orden = [...categorias].sort((a, b) => (usos[b] || 0) - (usos[a] || 0) || sinEmoji(a).localeCompare(sinEmoji(b), 'es'))
+    const lista = verTodas ? orden : orden.slice(0, 8)
+    $('cats').innerHTML = lista.map(c => {
+      const n = usos[c] || 0
+      return `<div class="cat-fila"><span class="cat-e">${esc(emoji(c))}</span>
+        <span class="cat-n">${esc(sinEmoji(c))}<small>${n ? `${n.toLocaleString('es-ES')} movimiento${n === 1 ? '' : 's'}` : 'Sin movimientos'}</small></span>
+        <button type="button" class="cat-btn" data-cat="${esc(c)}" aria-label="Opciones de ${esc(sinEmoji(c))}">⋯</button></div>`
+    }).join('') + (orden.length > 8 ? `<button type="button" class="ver-mas" id="ver-mas">${verTodas ? 'Ver menos' : `Ver las ${orden.length}`}</button>` : '')
+    // Categorías con movimientos que no están en la lista (p. ej. puestas al importar): no salen al apuntar
+    const fuera = Object.keys(usos).filter(c => !categorias.includes(c)).sort((a, b) => usos[b] - usos[a])
+    $('cats-fuera').hidden = !fuera.length
+    $('cats-fuera').innerHTML = fuera.length ? `<p class="h-txt" style="margin:0 4px 8px">Tienes movimientos en estas categorías, pero no están en tu lista y no salen al apuntar:</p>
+      <div class="chips">${fuera.map(c => `<button type="button" class="chip" data-anadir="${esc(c)}">＋ ${esc(c)} <span style="color:var(--muted)">${usos[c]}</span></button>`).join('')}</div>` : ''
+    $('cats-fuera').querySelectorAll('[data-anadir]').forEach(b => b.addEventListener('click', async () => {
+      if (await guardarLista([...categorias, b.dataset.anadir])) aviso(`${b.dataset.anadir} añadida`)
+    }))
+    $('cats').querySelectorAll('[data-cat]').forEach(b => b.addEventListener('click', () => opcionesCat(b.dataset.cat)))
+    const vm = $('ver-mas'); if (vm) vm.addEventListener('click', () => { verTodas = !verTodas; pintarCats() })
+  }
+
+  async function guardarLista(nueva) {
+    const { error } = await dbClient.from('perfil').update({ categorias: nueva.join(',') }).eq('usuario_id', uid)
+    if (error) { aviso('No se pudo guardar: ' + error.message); return false }
+    categorias = nueva; perfil.categorias = nueva.join(',')
+    pintarCats()
+    return true
+  }
+
+  // Formulario de emoji + nombre, para crear o renombrar
+  function formCategoria({ titulo, inicial, boton, alGuardar }) {
+    let elegido = inicial ? emoji(inicial) : EMOJIS[0]
+    abrirHoja(titulo, `
+      <div class="h-campo"><span class="lbl">Emoji</span><div class="emojis" id="f-emojis"></div></div>
+      <div class="h-campo"><label class="lbl" for="f-nombre">Nombre</label><input class="inp" id="f-nombre" maxlength="30" placeholder="Ej: Mascotas" value="${esc(inicial ? sinEmoji(inicial) : '')}"></div>
+      <button type="button" class="btn-grande" id="f-ok">${boton}</button>`)
+    const lista = EMOJIS.includes(elegido) ? EMOJIS : [elegido, ...EMOJIS.slice(0, -1)]
+    $('f-emojis').innerHTML = lista.map(e => `<button type="button" aria-pressed="${e === elegido}" aria-label="${e}">${e}</button>`).join('')
+    $('f-emojis').querySelectorAll('button').forEach(b => b.addEventListener('click', () => {
+      elegido = b.textContent
+      $('f-emojis').querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', String(x === b)))
+    }))
+    const ok = async () => {
+      const n = $('f-nombre').value.trim().replace(/,/g, ' ')
+      if (!n) { $('f-nombre').focus(); return }
+      $('f-ok').disabled = true
+      await alGuardar(`${elegido} ${n.charAt(0).toUpperCase()}${n.slice(1)}`)
+      $('f-ok') && ($('f-ok').disabled = false)
+    }
+    $('f-ok').addEventListener('click', ok)
+    $('f-nombre').addEventListener('keydown', e => { if (e.key === 'Enter') ok() })
+    if (!inicial) $('f-nombre').focus()
+  }
+
+  $('btn-nueva-cat').addEventListener('click', () => formCategoria({
+    titulo: 'Nueva categoría', boton: 'Crear categoría',
+    alGuardar: async cat => {
+      if (categorias.some(c => mismaCat(c, cat))) { aviso('Ya tienes esa categoría'); return }
+      if (await guardarLista([...categorias, cat])) { cerrarHoja(); aviso(`${cat} creada`) }
+    },
+  }))
+
+  function opcionesCat(cat) {
+    const n = usos[cat] || 0
+    abrirHoja(`${emoji(cat)} ${sinEmoji(cat)}`, `
+      <p class="h-txt">${n ? `Tiene ${n.toLocaleString('es-ES')} movimiento${n === 1 ? '' : 's'}.` : 'Aún no tiene movimientos.'}</p>
+      <div class="h-opc">
+        <button type="button" id="o-renombrar">Renombrar o cambiar emoji<small>También cambia en tus movimientos, fijos y plan</small></button>
+        <button type="button" id="o-juntar">Juntar con otra categoría<small>Sus movimientos pasan a la otra y esta desaparece</small></button>
+        <button type="button" id="o-quitar">Quitar de la lista<small>Deja de salir al apuntar un gasto. Tus movimientos no se borran</small></button>
+      </div>`)
+    $('o-renombrar').addEventListener('click', () => formCategoria({
+      titulo: 'Renombrar categoría', inicial: cat, boton: 'Guardar',
+      alGuardar: async nueva => {
+        if (nueva === cat) { cerrarHoja(); return }
+        if (categorias.some(c => c !== cat && mismaCat(c, nueva))) { aviso('Ya existe; usa «Juntar con otra»'); return }
+        if (await moverCategoria(cat, nueva)) { cerrarHoja(); aviso(`Ahora se llama ${nueva}`) }
+      },
+    }))
+    $('o-juntar').addEventListener('click', () => {
+      const otras = categorias.filter(c => c !== cat)
+      abrirHoja(`Juntar ${sinEmoji(cat)} con…`, `<p class="h-txt">Elige la categoría que se queda. Los movimientos de «${esc(sinEmoji(cat))}» pasarán a ella.</p>
+        <div class="h-opc">${otras.map((c, i) => `<button type="button" data-i="${i}">${esc(c)}<small>${(usos[c] || 0).toLocaleString('es-ES')} movimientos</small></button>`).join('')}</div>`)
+      document.querySelectorAll('#h-cuerpo [data-i]').forEach(b => b.addEventListener('click', async () => {
+        const destino = otras[+b.dataset.i]
+        if (!confirm(`¿Pasar todo lo de «${sinEmoji(cat)}» a «${sinEmoji(destino)}»?`)) return
+        if (await moverCategoria(cat, destino)) { cerrarHoja(); aviso(`${sinEmoji(cat)} se juntó con ${sinEmoji(destino)}`) }
+      }))
+    })
+    $('o-quitar').addEventListener('click', async () => {
+      const antes = [...categorias]
+      if (await guardarLista(categorias.filter(c => c !== cat))) {
+        cerrarHoja()
+        aviso(`${sinEmoji(cat)} quitada`, () => guardarLista(antes))
+      }
     })
   }
 
-  function getCats() {
-    return [...document.querySelectorAll('.cat-tag .cat-text')].map(t => t.textContent.trim())
-  }
-
-  let _catTagPendiente = null
-
-  function eliminarCat(tagEl) {
-    _catTagPendiente = tagEl
-    const nombre = tagEl.querySelector('.cat-text').textContent.trim()
-    document.getElementById('borrar-cat-nombre').textContent = nombre
-    document.getElementById('borrar-cat-input').value = ''
-    actualizarBtnCat()
-    document.getElementById('modal-borrar-cat').style.display = 'flex'
-  }
-
-  function cerrarBorrarCat() {
-    document.getElementById('modal-borrar-cat').style.display = 'none'
-    _catTagPendiente = null
-  }
-
-  function actualizarBtnCat() {
-    const ok = document.getElementById('borrar-cat-input').value === 'CONFIRMAR'
-    const btn = document.getElementById('borrar-cat-btn')
-    btn.style.opacity = ok ? '1' : '0.4'
-    btn.style.pointerEvents = ok ? 'auto' : 'none'
-  }
-
-  function confirmarEliminarCat() {
-    if (document.getElementById('borrar-cat-input').value !== 'CONFIRMAR') return
-    if (_catTagPendiente) _catTagPendiente.remove()
-    cerrarBorrarCat()
-  }
-
-  function agregarCat() {
-    const emoji  = prompt('Emoji de la categoría (ej: 🚗):') || '📦'
-    const nombre = prompt('Nombre de la categoría:')
-    if (!nombre) return
-    const wrap = document.getElementById('cats-wrap')
-    const tag  = document.createElement('div')
-    tag.className = 'cat-tag'
-    tag.innerHTML = `<span class="cat-text">${emoji} ${nombre}</span><button class="remove" onclick="eliminarCat(this.closest('.cat-tag'))">×</button>`
-    wrap.appendChild(tag)
-  }
-
-  function setColor(el) {
-    document.querySelectorAll('.color-item').forEach(c => c.classList.remove('active'))
-    el.classList.add('active')
-    colorActual = el.dataset.color
-    document.documentElement.style.setProperty('--accent', colorActual)
-  }
-
-  function setMoneda(el) {
-    document.querySelectorAll('.moneda-chip').forEach(c => c.classList.remove('active'))
-    el.classList.add('active')
-    document.getElementById('hero-moneda').textContent = el.dataset.label
-  }
-
-  async function guardar() {
-    const nombre  = document.getElementById('inp-nombre').value.trim()
-    const moneda  = document.querySelector('.moneda-chip.active')?.dataset.cod || '$'
-    const color   = colorActual
-    const cats    = getCats().join(',')
-
-    const btn = document.querySelector('.btn-guardar')
-    btn.disabled = true
-    btn.textContent = 'Guardando...'
-
-    const { data: { session } } = await dbClient.auth.getSession()
-    const uid = session?.user?.id
-    if (!uid) { btn.disabled = false; btn.textContent = 'Guardar cambios'; toast('Sesión no válida', 'err'); return }
-
-    const payload = { nombre, moneda, color, categorias: cats }
-
-    const { data: rowsId } = await dbClient.from('perfil').select('id').eq('usuario_id', uid).limit(1)
-    const perfilId = rowsId?.[0]?.id
-
-    let error
-    if (perfilId) {
-      ;({ error } = await dbClient.from('perfil').update(payload).eq('id', perfilId))
-    } else {
-      ;({ error } = await dbClient.from('perfil').insert({ usuario_id: uid, ...payload }))
+  // Cambia el nombre en todas las tablas; si el destino ya existe, es «juntar»
+  async function moverCategoria(desde, hasta) {
+    for (const [tabla, col, usr] of TABLAS_CAT) {
+      const { error } = await dbClient.from(tabla).update({ [col]: hasta }).eq(usr, uid).eq(col, desde)
+      // En el plan y en los tipos solo puede haber una fila por categoría: si ya existe la de destino, sobra la vieja
+      if (error && (tabla === 'user_gasto_plan' || tabla === 'categoria_tipo')) await dbClient.from(tabla).delete().eq(usr, uid).eq(col, desde)
+      else if (error) { aviso('No se pudo cambiar: ' + error.message); return false }
     }
-
-    btn.disabled = false
-    btn.textContent = 'Guardar cambios'
-
-    if (error) { toast('Error al guardar: ' + error.message, 'err'); return }
-    localStorage.setItem('moneda', moneda)
-    localStorage.setItem('color', color)
-    syncHero(nombre)
-    toast('Perfil guardado ✓')
+    const lista = categorias.includes(hasta) ? categorias.filter(c => c !== desde) : categorias.map(c => c === desde ? hasta : c)
+    usos[hasta] = (usos[hasta] || 0) + (usos[desde] || 0); delete usos[desde]
+    return guardarLista(lista)
   }
 
-  async function cerrarSesion() {
-    await dbClient.auth.signOut()
-    window.location.replace('index.html')
+  // ── Soporte ────────────────────────────────────────────────
+  function prepararWhatsApp() {
+    const ua = navigator.userAgent
+    const movil = /iPhone|iPad/.test(ua) ? 'iPhone/iPad' : /Android/.test(ua) ? 'Android' : 'Ordenador'
+    const instalada = matchMedia('(display-mode: standalone), (display-mode: fullscreen)').matches ? 'app instalada' : 'navegador'
+    const texto = `Hola, te escribo desde MiFinanzas.\n\n(Cuéntanos aquí qué pasó o qué idea tienes)\n\n—\nCuenta: ${correo}\nDispositivo: ${movil} · ${instalada}`
+    $('btn-wa').href = `https://wa.me/${WHATSAPP}?text=${encodeURIComponent(texto)}`
   }
 
-  function abrirPanelMas() { document.getElementById('panel-mas').style.display = 'flex' }
-  function cerrarPanelMas() { document.getElementById('panel-mas').style.display = 'none' }
-  document.getElementById('panel-mas').addEventListener('click', function(e) { if (e.target === this) cerrarPanelMas() })
+  // ── Cuenta ─────────────────────────────────────────────────
+  $('btn-clave').addEventListener('click', async () => {
+    const { error } = await dbClient.auth.resetPasswordForEmail(correo, { redirectTo: location.origin + '/index.html' })
+    aviso(error ? 'No se pudo enviar: ' + error.message : 'Te enviamos un enlace a ' + correo)
+  })
+  $('btn-salir').addEventListener('click', async () => { await dbClient.auth.signOut(); location.replace('index.html') })
+  $('btn-borrar').addEventListener('click', () => {
+    const texto = `Hola, quiero borrar mi cuenta de MiFinanzas y todos mis datos.\n\nCuenta: ${correo}`
+    abrirHoja('Borrar mi cuenta', `
+      <p class="h-txt">Se borrarán tu cuenta y todos tus datos: movimientos, gastos fijos, metas y préstamos. No se puede deshacer.</p>
+      <p class="h-txt">Antes, si quieres, <a href="mifinanza-movimientos.html#descargar" style="color:var(--indigo-txt);font-weight:700">descarga tus movimientos</a>.</p>
+      <p class="h-txt">Para confirmar que eres tú, la petición se hace por WhatsApp y la completamos en un máximo de 30 días.</p>
+      <a class="btn-grande rojo" style="display:block;text-align:center;text-decoration:none" target="_blank" rel="noopener noreferrer" href="https://wa.me/${WHATSAPP}?text=${encodeURIComponent(texto)}">Pedir el borrado por WhatsApp</a>`)
+  })
+
+  // ── Hoja ───────────────────────────────────────────────────
+  const raizHoja = $('hoja-raiz'), hoja = raizHoja.querySelector('.hoja')
+  let tCerrar
+  function abrirHoja(titulo, html) {
+    $('h-tit').textContent = titulo
+    $('h-cuerpo').innerHTML = html
+    clearTimeout(tCerrar); hoja.inert = false
+    document.documentElement.style.overflow = 'hidden'
+    hoja.getBoundingClientRect()
+    raizHoja.classList.add('h-abierta')
+  }
+  function cerrarHoja() {
+    raizHoja.classList.remove('h-abierta')
+    document.documentElement.style.overflow = ''
+    document.activeElement?.blur?.()
+    tCerrar = setTimeout(() => { hoja.inert = true }, 280)
+  }
+  raizHoja.querySelectorAll('[data-cerrar]').forEach(b => b.addEventListener('click', cerrarHoja))
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && raizHoja.classList.contains('h-abierta')) cerrarHoja() })
+
+  let tAviso
+  function aviso(texto, deshacer) {
+    const t = $('toast'), b = t.querySelector('button')
+    t.querySelector('span').textContent = texto
+    b.hidden = !deshacer
+    b.onclick = deshacer ? () => { t.classList.remove('ver'); deshacer() } : null
+    t.classList.add('ver')
+    clearTimeout(tAviso)
+    tAviso = setTimeout(() => t.classList.remove('ver'), deshacer ? 5000 : 2800)
+  }
 
   cargarPerfil()
 </script>

@@ -685,6 +685,13 @@
     document.getElementById('modal-csv-rango').style.display = 'flex'
   }
 
+  // Llegada desde Perfil → «Descargar mis movimientos»
+  if (location.hash === '#descargar') {
+    history.replaceState(null, '', location.pathname)
+    let n = 0
+    const iv = setInterval(() => { if (window.currentUserId) { clearInterval(iv); abrirModalCSV() } else if (++n > 100) clearInterval(iv) }, 100)
+  }
+
   function cerrarModalCSV() {
     document.getElementById('modal-csv-rango').style.display = 'none'
   }

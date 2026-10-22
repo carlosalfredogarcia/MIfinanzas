@@ -180,7 +180,8 @@
       window.dbClient.from('perfil').select('categorias').eq('usuario_id', uid).limit(1),
     ])
     const propias = (perfil?.[0]?.categorias || '').split(',').map(c => c.trim()).filter(Boolean)
-    const cats = [...new Set([...propias, ...CATS_DEFAULT.split(',')])]
+    // La lista del perfil manda (en Perfil se pueden quitar); sin lista propia, la de siempre
+    const cats = [...new Set(propias.length ? propias : CATS_DEFAULT.split(','))]
     const freq = {}, porDesc = new Map(), recientes = []
     for (const g of gastos || []) {
       if (!g.categoria) continue
@@ -194,7 +195,7 @@
       porDesc.get(k).n++
     }
     if (!cats.includes('📦 Otros')) cats.push('📦 Otros')
-    for (const c of Object.keys(freq)) if (!cats.includes(c)) cats.push(c)
+    if (!propias.length) for (const c of Object.keys(freq)) if (!cats.includes(c)) cats.push(c)
     const top = [...cats].sort((a, b) => (freq[b] || 0) - (freq[a] || 0)).slice(0, TOP_CATS)
     datos = { cats, top, recientes, porDesc }
   }
