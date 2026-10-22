@@ -13,7 +13,12 @@
       "name": "Apuntar gasto",
       "short_name": "Gasto",
       "url": "/inicio.html?accion=gasto",
-      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+      "icons": [
+        {
+          "src": "/icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
     }
   ],
   "icons": [
@@ -41,5 +46,13 @@
       "type": "image/png",
       "purpose": "maskable"
     }
-  ]
+  ],
+  "share_target": {
+    "action": "/inicio.html",
+    "method": "GET",
+    "params": {
+      "title": "titulo",
+      "text": "texto"
+    }
+  }
 }

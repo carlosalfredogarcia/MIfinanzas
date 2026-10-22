@@ -1,12 +1,19 @@
-// apunte.js — apunte rápido de un gasto desde cualquier pantalla (lo carga nav.js).
-// El importe va primero con el teclado numérico abierto; debajo, los gastos recientes para
-// repetirlos con un toque y las categorías más usadas. La descripción es opcional y, si
-// coincide con un gasto anterior, elige su categoría. Al guardar no hay alerta: un aviso
-// con "Deshacer" durante unos segundos.
-// Todo se calcula en el navegador con los gastos de los últimos 90 días (sin IA).
+// apunte.js — apunte rápido de un gasto o un ingreso desde cualquier pantalla (lo carga nav.js).
+// El importe va primero con el teclado numérico abierto; debajo, los recientes para repetirlos
+// con un toque y las categorías más usadas. La descripción es opcional y, si coincide con uno
+// anterior, elige su categoría. Al guardar no hay alerta: un aviso con "Deshacer".
+// También se abre ya relleno: mfApunte.abrir('gasto', { monto, descripcion, categoria, fecha, texto })
+// (texto = mensaje del banco, que se lee aquí mismo sin IA).
 ;(function () {
   const CATS_DEFAULT = MF.CATS_GASTO
   const TOP_CATS = 7
+  // Lo que cambia entre apuntar un gasto y un ingreso
+  const MODOS = {
+    gasto: { titulo: 'Nuevo gasto', tabla: 'gastos', desc: 'descripcion', cat: 'categoria', acento: '#ef4444', textoBoton: '#fff', placeholder: 'Descripción (opcional)', borrado: 'Gasto eliminado' },
+    ingreso: { titulo: 'Nuevo ingreso', tabla: 'ingresos', desc: 'concepto', cat: 'tipo', acento: '#10b981', textoBoton: '#052e1f', placeholder: 'Concepto (opcional)', borrado: 'Ingreso eliminado' },
+  }
+  // Tipos de ingreso (los mismos que en Movimientos); se suman los que el usuario ya haya usado
+  const TIPOS_INGRESO = ['💼 Nómina', '💵 Efectivo', '⭐ Extra', '📦 Otro']
   // Funciones de recarga de cada pantalla, para que el gasto nuevo aparezca sin recargar la página
   const RECARGAS = ['cargarMovimientos', 'cargarDashboard', 'recargarDatos']
 
@@ -29,12 +36,12 @@
   .mfa-tit { font-size: 15px; font-weight: 800; letter-spacing: -.01em; }
   .mfa-x { width: 34px; height: 34px; border-radius: 50%; border: 0; background: #1a2234; color: #94a3b8; font-size: 18px; cursor: pointer; display: grid; place-items: center; }
   .mfa-importe { display: flex; align-items: baseline; justify-content: center; gap: 6px; padding: 10px 0 6px; }
-  .mfa-importe input { width: 1ch; min-width: 1ch; max-width: 8ch; background: none; border: 0; outline: none; color: #f1f5f9; font: 800 46px/1.1 Manrope, system-ui, sans-serif; text-align: center; font-variant-numeric: tabular-nums; letter-spacing: -.02em; caret-color: #f87171; padding: 0; }
+  .mfa-importe input { width: 1ch; min-width: 1ch; max-width: 8ch; background: none; border: 0; outline: none; color: #f1f5f9; font: 800 46px/1.1 Manrope, system-ui, sans-serif; text-align: center; font-variant-numeric: tabular-nums; letter-spacing: -.02em; caret-color: var(--mfa-acento); padding: 0; }
   .mfa-importe input::placeholder { color: #334155; }
   .mfa-mon { font-size: 26px; font-weight: 800; color: #64748b; }
   .mfa-fechas { display: flex; justify-content: center; gap: 6px; margin-bottom: 14px; }
   .mfa-chip { flex: none; border: 1px solid #1f2937; background: #1a2234; color: #cbd5e1; border-radius: 999px; padding: 7px 12px; font: 700 12.5px Manrope, system-ui, sans-serif; cursor: pointer; white-space: nowrap; }
-  .mfa-chip[aria-pressed="true"] { background: rgba(239,68,68,.16); border-color: rgba(239,68,68,.55); color: #fecaca; }
+  .mfa-chip[aria-pressed="true"] { background: color-mix(in srgb, var(--mfa-acento) 16%, transparent); border-color: color-mix(in srgb, var(--mfa-acento) 55%, transparent); color: #fff; }
   .mfa-fecha-otra { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; color-scheme: dark; }
   .mfa-lbl { font-size: 11px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: #64748b; margin: 0 0 8px; }
   .mfa-recientes { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; margin: 0 -18px 14px; padding-left: 18px; padding-right: 18px; scrollbar-width: none; }
@@ -47,7 +54,7 @@
   .mfa-cat { border: 1px solid #1f2937; background: #0f1626; color: #cbd5e1; border-radius: 14px; padding: 9px 4px 8px; cursor: pointer; font: 700 11px Manrope, system-ui, sans-serif; display: flex; flex-direction: column; align-items: center; gap: 4px; min-width: 0; }
   .mfa-cat span:first-child { font-size: 22px; line-height: 1; }
   .mfa-cat span:last-child { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .mfa-cat[aria-pressed="true"] { background: rgba(239,68,68,.14); border-color: #ef4444; color: #fff; }
+  .mfa-cat[aria-pressed="true"] { background: color-mix(in srgb, var(--mfa-acento) 14%, transparent); border-color: var(--mfa-acento); color: #fff; }
   .mfa-nueva { margin: -4px 0 14px; padding: 12px; border: 1px solid #1f2937; border-radius: 16px; background: #0f1626; }
   .mfa-emojis { display: flex; gap: 4px; overflow-x: auto; scrollbar-width: none; margin-bottom: 10px; }
   .mfa-emojis::-webkit-scrollbar { display: none; }
@@ -59,7 +66,7 @@
   .mfa-desc { width: 100%; box-sizing: border-box; background: #0f1626; border: 1px solid #1f2937; border-radius: 14px; padding: 13px 14px; color: #f1f5f9; font: 600 15px Manrope, system-ui, sans-serif; outline: none; }
   .mfa-desc:focus { border-color: #475569; }
   .mfa-sug { display: flex; gap: 6px; flex-wrap: wrap; min-height: 0; margin: 8px 0 0; }
-  .mfa-guardar { width: 100%; margin-top: 14px; border: 0; border-radius: 16px; padding: 16px; font: 800 16px Manrope, system-ui, sans-serif; background: #ef4444; color: #fff; cursor: pointer; box-shadow: 0 10px 26px rgba(239,68,68,.32); transition: opacity .15s; }
+  .mfa-guardar { width: 100%; margin-top: 14px; border: 0; border-radius: 16px; padding: 16px; font: 800 16px Manrope, system-ui, sans-serif; background: var(--mfa-acento); color: var(--mfa-texto-boton); cursor: pointer; box-shadow: 0 10px 26px color-mix(in srgb, var(--mfa-acento) 32%, transparent); transition: opacity .15s; }
   .mfa-guardar:disabled { opacity: .35; box-shadow: none; cursor: default; }
   .mfa-pie { display: flex; justify-content: center; margin-top: 10px; }
   .mfa-pegar { border: 0; background: none; color: #94a3b8; font: 700 13px Manrope, system-ui, sans-serif; cursor: pointer; padding: 6px 10px; }
@@ -70,8 +77,10 @@
   `
 
   let raiz, hoja, inpImporte, inpDesc, btnGuardar, toastEl
+  let modo = 'gasto', M = MODOS.gasto
   let estado = null      // { categoria, catManual, fecha }
-  let datos = null       // { cats, top, recientes, porDesc }
+  let datos = null       // { cats, top, recientes, porDesc } del modo abierto
+  const cache = {}       // datos ya cargados de cada modo
   let guardando = false
 
   function montar() {
@@ -135,8 +144,14 @@
     raiz.querySelector('.mfa-pegar').addEventListener('click', pegarDelBanco)
   }
 
-  function abrir() {
+  function abrir(m = 'gasto', relleno = {}) {
     montar()
+    modo = MODOS[m] ? m : 'gasto'; M = MODOS[modo]
+    datos = cache[modo] || null
+    raiz.style.setProperty('--mfa-acento', M.acento)
+    raiz.style.setProperty('--mfa-texto-boton', M.textoBoton)
+    raiz.querySelector('#mfa-tit').textContent = M.titulo
+    inpDesc.placeholder = M.placeholder
     estado = { categoria: null, catManual: false, fecha: fechaLocal() }
     const pre = moneda() !== '€'
     raiz.querySelector('[data-mon-pre]').textContent = pre ? moneda() : ''
@@ -153,7 +168,24 @@
     raiz.classList.add('mfa-abierto')
     // El foco en el mismo toque abre el teclado numérico en el móvil
     inpImporte.focus({ preventScroll: true })
-    cargarDatos().then(() => { pintarCats(); pintarRecientes() })
+    rellenar(relleno)
+    const m0 = modo
+    cargarDatos().then(() => {
+      if (modo !== m0) return
+      pintarCats(); pintarRecientes()
+      if (relleno.descripcion || relleno.texto) { if (!estado.categoria) adivinarCat(inpDesc.value); sugerir() }
+    })
+  }
+
+  // Abre ya relleno (Repetir en Movimientos, mensaje del banco, accesos directos)
+  function rellenar(r) {
+    // Lo que venga explícito manda; lo que falte se saca del mensaje del banco
+    if (r.texto) { const leido = leerMensajeBanco(r.texto); for (const k in leido) if (r[k] == null) r[k] = leido[k] }
+    if (r.monto > 0) inpImporte.value = importeTxt(+r.monto)
+    if (r.descripcion) inpDesc.value = r.descripcion
+    if (r.fecha && /^\d{4}-\d{2}-\d{2}$/.test(r.fecha) && r.fecha <= fechaLocal()) ponerFecha(r.fecha)
+    if (r.categoria) elegirCat(r.categoria, true)
+    actualizarBoton()
   }
 
   let tCerrar
@@ -169,17 +201,20 @@
     const uid = window.currentUserId
     if (!uid || !window.dbClient) return
     const desde = new Date(); desde.setDate(desde.getDate() - 90)
-    const [{ data: gastos }, { data: perfil }] = await Promise.all([
-      window.dbClient.from('gastos').select('descripcion, categoria, monto, fecha').eq('usuario_id', uid)
+    const m0 = modo, { tabla, desc, cat } = M
+    const [{ data: filas }, { data: perfil }] = await Promise.all([
+      window.dbClient.from(tabla).select(`${desc}, ${cat}, monto, fecha`).eq('usuario_id', uid)
         .gte('fecha', fechaLocal(desde)).order('fecha', { ascending: false }).limit(400),
-      window.dbClient.from('perfil').select('categorias').eq('usuario_id', uid).limit(1),
+      m0 === 'gasto' ? window.dbClient.from('perfil').select('categorias').eq('usuario_id', uid).limit(1) : { data: null },
     ])
-    const propias = (perfil?.[0]?.categorias || '').split(',').map(c => c.trim()).filter(Boolean)
-    // La lista del perfil manda (en Perfil se pueden quitar); sin lista propia, la de siempre
-    const cats = [...new Set(propias.length ? propias : CATS_DEFAULT.split(','))]
+    const propias = (perfil?.[0]?.categorias || '').split(',').map(c => c.trim()).filter(c => c && c !== '💼 Nómina')
+    // Gastos: la lista del perfil manda (en Perfil se pueden quitar); sin lista propia, la de siempre
+    const cats = m0 === 'ingreso' ? [...TIPOS_INGRESO] : [...new Set(propias.length ? propias : CATS_DEFAULT.split(','))]
     const freq = {}, porDesc = new Map(), recientes = []
-    for (const g of gastos || []) {
+    for (const f of filas || []) {
+      const g = { descripcion: f[desc], categoria: f[cat], monto: f.monto }
       if (!g.categoria) continue
+      if (m0 === 'ingreso' && !cats.includes(g.categoria)) cats.push(g.categoria)
       freq[g.categoria] = (freq[g.categoria] || 0) + 1
       const k = (g.descripcion || '').trim().toLowerCase()
       if (!k) continue
@@ -189,19 +224,21 @@
       }
       porDesc.get(k).n++
     }
-    if (!cats.includes('📦 Otros')) cats.push('📦 Otros')
-    if (!propias.length) for (const c of Object.keys(freq)) if (!cats.includes(c)) cats.push(c)
+    if (m0 === 'gasto' && !cats.includes('📦 Otros')) cats.push('📦 Otros')
+    if (m0 === 'gasto' && !propias.length) for (const c of Object.keys(freq)) if (!cats.includes(c)) cats.push(c)
     const top = [...cats].sort((a, b) => (freq[b] || 0) - (freq[a] || 0)).slice(0, TOP_CATS)
-    datos = { cats, top, recientes, porDesc }
+    cache[m0] = { cats, top, recientes, porDesc }
+    if (modo === m0) datos = cache[m0]
   }
 
   function pintarCats(todas) {
     const cont = raiz.querySelector('[data-cats]')
-    const base = datos ? (todas ? datos.cats : datos.top) : CATS_DEFAULT.split(',').slice(0, TOP_CATS)
+    const pocas = modo === 'ingreso'
+    const base = datos ? (todas || pocas ? datos.cats : datos.top) : (pocas ? TIPOS_INGRESO : CATS_DEFAULT.split(',').slice(0, TOP_CATS))
     const lista = [...base]
     if (estado.categoria && !lista.includes(estado.categoria)) lista.unshift(estado.categoria)
     cont.innerHTML = lista.map(c => `<button type="button" class="mfa-cat" data-cat="${esc(c)}" aria-pressed="${c === estado.categoria}"><span>${esc(emoji(c) || '•')}</span><span>${esc(sinEmoji(c))}</span></button>`).join('')
-      + (!datos ? '' : todas
+      + (!datos || pocas ? '' : todas
         ? `<button type="button" class="mfa-cat" data-nueva-cat><span>＋</span><span>Nueva</span></button>`
         : `<button type="button" class="mfa-cat" data-mas><span>⋯</span><span>Más</span></button>`)
     cont.querySelectorAll('[data-cat]').forEach(b => b.addEventListener('click', () => {
@@ -318,33 +355,34 @@
     ajustarAncho()
     btnGuardar.disabled = !listo() || guardando
     const n = parseImporte(inpImporte.value)
-    btnGuardar.textContent = n > 0 ? `Guardar ${fmt(n)}` : 'Guardar gasto'
+    btnGuardar.textContent = n > 0 ? `Guardar ${fmt(n)}` : (modo === 'ingreso' ? 'Guardar ingreso' : 'Guardar gasto')
   }
 
   async function guardar() {
     if (!listo() || guardando) return
     guardando = true; actualizarBoton()
+    const tabla = M.tabla, borrado = M.borrado
     const fila = {
       fecha: estado.fecha,
-      descripcion: inpDesc.value.trim() || sinEmoji(estado.categoria),
-      categoria: estado.categoria,
+      [M.desc]: inpDesc.value.trim() || sinEmoji(estado.categoria),
+      [M.cat]: estado.categoria,
       monto: Math.round(parseImporte(inpImporte.value) * 100) / 100,
       usuario_id: window.currentUserId,
       origen: 'manual',
     }
-    const { data, error } = await window.dbClient.from('gastos').insert([fila]).select('id')
+    const { data, error } = await window.dbClient.from(tabla).insert([fila]).select('id')
     guardando = false
     if (error) { actualizarBoton(); aviso('No se pudo guardar: ' + error.message); return }
     if (navigator.vibrate) navigator.vibrate(12)
     cerrar()
     recargarPantalla()
     const id = data?.[0]?.id
-    aviso(`${emoji(fila.categoria)} ${fmt(fila.monto)} guardado`, id ? async () => {
-      await window.dbClient.from('gastos').delete().eq('id', id)
+    aviso(`${emoji(estado.categoria)} ${fmt(fila.monto)} guardado`, id ? async () => {
+      await window.dbClient.from(tabla).delete().eq('id', id)
       recargarPantalla()
-      aviso('Gasto eliminado')
+      aviso(borrado)
     } : null)
-    datos = null  // la próxima vez se recargan los recientes con este gasto
+    delete cache[modo]; datos = null  // la próxima vez se recargan los recientes con este
   }
 
   function recargarPantalla() {
@@ -382,6 +420,13 @@
     return r
   }
 
+  // «Mercadona Alameda» → la categoría que tuvo «Mercadona» la última vez
+  function adivinarCat(desc) {
+    const palabra = String(desc || '').toLowerCase().split(' ')[0]
+    const previo = palabra && datos && [...datos.porDesc.values()].find(p => p.descripcion.toLowerCase().includes(palabra))
+    if (previo) elegirCat(previo.categoria, false)
+  }
+
   async function pegarDelBanco() {
     let txt = ''
     try { txt = await navigator.clipboard.readText() } catch { /* sin permiso */ }
@@ -392,8 +437,7 @@
     if (r.fecha && r.fecha <= fechaLocal()) ponerFecha(r.fecha)
     if (r.descripcion) {
       inpDesc.value = r.descripcion
-      const previo = datos && [...datos.porDesc.values()].find(p => p.descripcion.toLowerCase().includes(r.descripcion.toLowerCase().split(' ')[0]))
-      if (previo) elegirCat(previo.categoria, false)
+      adivinarCat(r.descripcion)
       sugerir()
     }
     actualizarBoton()

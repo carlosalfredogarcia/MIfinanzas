@@ -110,24 +110,62 @@ module.exports = [
     },
   },
   {
-    nombre: 'botón +: cada opción abre su formulario',
+    nombre: 'botón +: cada opción abre su hoja',
     async prueba(t) {
-      const casos = {
-        'inicio.html': { Ingreso: '#modal-ingreso', 'Gasto fijo': '#modal-fijo' },
-        'mifinanza-movimientos.html': { Ingreso: '#modal-ingreso', 'Gasto fijo': '#modal-fijo', 'Importar CSV': '#modal-csv' },
-        'mifinanza-fijos.html': { 'Gasto fijo': '.h-abierta' },
+      for (const pagina of ['inicio.html', 'mifinanza-movimientos.html', 'mifinanza-estadisticas-v2.html']) {
+        const pg = await t.abrir(pagina, { datos: completo() })
+        const url = pg.url()
+        await pg.click('.mf-plus'); await pg.waitForTimeout(300)
+        await pg.click('.mf-acc:has-text("Ingreso")'); await pg.waitForTimeout(800)
+        t.igual(pg.url(), url, `${pagina}: Ingreso cambió de página`)
+        t.igual(await pg.$eval('#mfa-tit', e => e.textContent), 'Nuevo ingreso')
+        await pg.click('.mfa-x'); await pg.waitForTimeout(300)
+        // Gasto fijo: va a Gastos fijos y abre su hoja
+        await pg.click('.mf-plus'); await pg.waitForTimeout(300)
+        await pg.click('.mf-acc:has-text("Gasto fijo")'); await pg.waitForTimeout(2500)
+        t.ok(pg.url().endsWith('/mifinanza-fijos.html'), `${pagina}: Gasto fijo no llevó a Gastos fijos (${pg.url()})`)
+        t.ok(await pg.$('#hoja-raiz.h-abierta'), `${pagina}: no se abrió la hoja de gasto fijo`)
+        t.sinErrores(pg)
+        await pg.context().close()
       }
-      for (const [pagina, opciones] of Object.entries(casos)) {
-        for (const [opcion, selector] of Object.entries(opciones)) {
-          const pg = await t.abrir(pagina, { datos: completo() })
-          await pg.click('.mf-plus'); await pg.waitForTimeout(300)
-          await pg.click(`.mf-acc:has-text("${opcion}")`); await pg.waitForTimeout(600)
-          const visible = await pg.$eval(selector, e => getComputedStyle(e).display !== 'none').catch(() => false)
-          t.ok(visible, `${pagina} → ${opcion} no abre ${selector}`)
-          t.sinErrores(pg)
-          await pg.context().close()
-        }
-      }
+      const pg = await t.abrir('mifinanza-movimientos.html', { datos: completo() })
+      await pg.click('.mf-plus'); await pg.waitForTimeout(300)
+      await pg.click('.mf-acc:has-text("Importar CSV")'); await pg.waitForTimeout(600)
+      t.ok(await pg.$eval('#modal-csv', e => getComputedStyle(e).display !== 'none'), 'Importar CSV no abre')
+      await pg.context().close()
+    },
+  },
+  {
+    nombre: 'ingreso rápido: nómina repetida con un toque',
+    async prueba(t) {
+      const pg = await t.abrir('inicio.html', { datos: completo() })
+      await pg.evaluate(() => mfApunte.abrir('ingreso')); await pg.waitForTimeout(800)
+      t.igual(await pg.$$eval('.mfa-cat', els => els.map(e => e.innerText.replace(/\n/g, ' '))), ['💼 Nómina', '💵 Efectivo', '⭐ Extra', '📦 Otro'])
+      await pg.click('.mfa-rec:has-text("Nómina")'); await pg.waitForTimeout(200)
+      await pg.click('.mfa-guardar'); await pg.waitForTimeout(500)
+      const ins = await pg.evaluate(() => window.__INS__.at(-1))
+      t.igual(ins.table, 'ingresos')
+      t.igual({ ...ins.v[0] }, { fecha: '2026-10-21', concepto: 'Nómina', tipo: '💼 Nómina', monto: 1380, usuario_id: 'u1', origen: 'manual' })
+      await pg.click('.mfa-toast button'); await pg.waitForTimeout(300)
+      t.igual(await pg.evaluate(() => window.__DEL__.at(-1)), 'ingresos')
+      t.sinErrores(pg)
+      await pg.context().close()
+    },
+  },
+  {
+    nombre: 'abrir con un mensaje del banco en la dirección (compartir, atajos)',
+    async prueba(t) {
+      const texto = encodeURIComponent('Compra con tarjeta en MERCADONA ALAMEDA por 27,80 EUR el 18/10')
+      const pg = await t.abrir('inicio.html?texto=' + texto, { datos: completo(), espera: 2500 })
+      t.ok(await pg.$('.mfa-abierto'), 'No se abrió el apunte')
+      t.igual(await pg.evaluate(() => [document.getElementById('mfa-importe').value, document.getElementById('mfa-desc').value, document.querySelector('[data-otra]').textContent]),
+        ['27,80', 'Mercadona Alameda', '📅 18 oct'])
+      t.igual(await pg.$eval('.mfa-cat[aria-pressed="true"]', e => e.innerText.replace(/\n/g, ' ')), '🛒 Supermercado')
+      t.ok(!pg.url().includes('texto='), 'La dirección no se limpió')
+      const pg2 = await t.abrir('mifinanza-movimientos.html?accion=gasto&importe=4,5&comercio=Starbucks', { datos: completo(), espera: 2500 })
+      t.igual(await pg2.evaluate(() => [document.getElementById('mfa-importe').value, document.getElementById('mfa-desc').value]), ['4,50', 'Starbucks'])
+      t.sinErrores(pg); t.sinErrores(pg2)
+      await pg.context().close(); await pg2.context().close()
     },
   },
 ]

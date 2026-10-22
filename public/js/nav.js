@@ -23,12 +23,15 @@
 
   // Si la función existe en esta página se usa; si no, se abre Movimientos con esa acción.
   const local = (fn, accion) => () => (typeof window[fn] === 'function' ? window[fn]() : ir(accion))
-  const ir = accion => { location.href = MOV + '?accion=' + accion }
+  const ir = (accion, pagina = MOV) => { location.href = pagina + '?accion=' + accion }
+  // Gasto e ingreso: la hoja rápida, encima de la pantalla en la que estés
+  const apunte = tipo => () => (window.mfApunte ? window.mfApunte.abrir(tipo) : ir(tipo))
+  const FIJOS = 'mifinanza-fijos.html'
 
   const ACCIONES = {
-    gasto:   { label: 'Gasto',        color: '#f87171', fondo: 'rgba(239,68,68,.16)',  icono: '<path d="M12 5v14M19 12l-7 7-7-7"/>', run: () => (window.mfApunte ? window.mfApunte.abrir() : ir('gasto')) },
-    ingreso: { label: 'Ingreso',      color: '#34d399', fondo: 'rgba(16,185,129,.16)', icono: '<path d="M12 19V5M5 12l7-7 7 7"/>', run: local('abrirIngreso', 'ingreso') },
-    fijo:    { label: 'Gasto fijo',   color: '#a5b4fc', fondo: 'rgba(99,102,241,.18)', icono: '<path d="M21 12a9 9 0 1 1-3-6.7L21 8"/><path d="M21 3v5h-5"/>', run: local('abrirGastoFijo', 'fijo') },
+    gasto:   { label: 'Gasto',        color: '#f87171', fondo: 'rgba(239,68,68,.16)',  icono: '<path d="M12 5v14M19 12l-7 7-7-7"/>', run: apunte('gasto') },
+    ingreso: { label: 'Ingreso',      color: '#34d399', fondo: 'rgba(16,185,129,.16)', icono: '<path d="M12 19V5M5 12l7-7 7 7"/>', run: apunte('ingreso') },
+    fijo:    { label: 'Gasto fijo',   color: '#a5b4fc', fondo: 'rgba(99,102,241,.18)', icono: '<path d="M21 12a9 9 0 1 1-3-6.7L21 8"/><path d="M21 3v5h-5"/>', run: () => ir('fijo', FIJOS) },
     csv:     { label: 'Importar CSV', color: '#fbbf24', fondo: 'rgba(245,158,11,.16)', icono: '<path d="M12 3v12M7 10l5 5 5-5"/><path d="M5 21h14"/>', run: local('abrirImportarCSV', 'csv') },
   }
 
@@ -38,7 +41,7 @@
     'mifinanza-prestamos': { label: 'Nuevo préstamo', fn: 'abrirModalNuevo' },
     'mifinanza-viajes':    { label: 'Nuevo viaje',    fn: 'abrirModalViaje' },
   }
-  // En Gastos fijos, "Gasto fijo" abre el formulario de esa misma pantalla.
+  // Gasto fijo: su hoja vive en Gastos fijos (desde otra pantalla se va allí y se abre sola)
   if (pagina === 'mifinanza-fijos' && typeof window.abrirModal === 'function') ACCIONES.fijo.run = () => window.abrirModal()
 
   // Pantallas del Menú (Viajes sigue oculto, como en el panel antiguo).
@@ -243,13 +246,19 @@
     }, { passive: true })
   }
 
-  // Llegada desde otra pantalla con ?accion=gasto|ingreso|fijo|csv: se abre en cuanto hay sesión.
+  // Llegada con ?accion=gasto|ingreso|fijo|csv: se abre en cuanto hay sesión.
+  // Gasto e ingreso aceptan datos para abrirse ya rellenos (accesos directos del móvil, compartir):
+  //   ?accion=gasto&importe=12,50&comercio=Mercadona&fecha=2026-10-21   o   ?texto=<mensaje del banco>
   function accionPendiente() {
-    const accion = new URLSearchParams(location.search).get('accion')
+    const q = new URLSearchParams(location.search)
+    const texto = [q.get('texto'), q.get('titulo')].filter(Boolean).join(' ')
+    const accion = q.get('accion') || (texto ? 'gasto' : '')
     if (!accion || !ACCIONES[accion]) return
+    if (accion === 'fijo' && pagina !== 'mifinanza-fijos') return ir('fijo', FIJOS)
     history.replaceState(null, '', location.pathname)
-    const fn = { ingreso: 'abrirIngreso', fijo: 'abrirGastoFijo', csv: 'abrirImportarCSV' }[accion]
-    const lista = () => accion === 'gasto' ? window.mfApunte && window.mfApunte.abrir : window[fn]
+    const relleno = { monto: parseFloat(String(q.get('importe') || '').replace(',', '.')) || undefined, descripcion: q.get('comercio') || undefined, fecha: q.get('fecha') || undefined, texto: texto || undefined }
+    const fn = { fijo: 'abrirModal', csv: 'abrirImportarCSV' }[accion]
+    const lista = () => accion === 'gasto' || accion === 'ingreso' ? window.mfApunte && (() => window.mfApunte.abrir(accion, relleno)) : window[fn]
     let n = 0
     const iv = setInterval(() => {
       if (window.currentUserId && typeof lista() === 'function') { clearInterval(iv); lista()() }

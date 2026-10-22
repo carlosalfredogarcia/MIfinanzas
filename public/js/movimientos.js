@@ -450,21 +450,11 @@ function abrirDetalle(m) {
 function cerrarDetalle() { document.getElementById('modal-detalle').style.display = 'none'; }
 function detalleEditar() { const m = enDetalle; cerrarDetalle(); if (m) abrirEditar(m); }
 function detalleEliminar() { const m = enDetalle; cerrarDetalle(); if (m) borrarConDeshacer(m); }
-// Repetir: abre el formulario de nuevo gasto o ingreso con los mismos datos y fecha de hoy
-async function detalleRepetir() {
+// Repetir: abre la hoja rápida (apunte.js) con los mismos datos y la fecha de hoy
+function detalleRepetir() {
   const m = enDetalle; cerrarDetalle();
-  if (!m) return;
-  if (m.tipo === 'ingreso') {
-    abrirIngreso();
-    document.getElementById('i-concepto').value = m.concepto || m.descripcion || '';
-    const sel = document.getElementById('i-tipo'); if ([...sel.options].some(o => o.value === m.categoria)) sel.value = m.categoria;
-    document.getElementById('i-monto').value = m.monto;
-  } else {
-    await abrirGasto();
-    document.getElementById('g-descripcion').value = m.descripcion || '';
-    const sel = document.getElementById('g-categoria'); if ([...sel.options].some(o => o.value === m.categoria)) sel.value = m.categoria;
-    document.getElementById('g-monto').value = m.monto;
-  }
+  if (!m || !window.mfApunte) return;
+  window.mfApunte.abrir(m.tipo === 'ingreso' ? 'ingreso' : 'gasto', { monto: +m.monto, descripcion: m.concepto || m.descripcion || '', categoria: m.categoria });
 }
 document.getElementById('modal-detalle').addEventListener('click', function (e) { if (e.target === this) cerrarDetalle(); });
 
