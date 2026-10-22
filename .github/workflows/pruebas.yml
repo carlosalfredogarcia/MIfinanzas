@@ -6,6 +6,7 @@ on:
 jobs:
   pruebas:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     defaults:
       run:
         working-directory: tests
@@ -15,5 +16,7 @@ jobs:
         with:
           node-version: 20
       - run: npm ci
-      - run: npx playwright@1.56.1 install --with-deps chromium
+      # Los servidores de GitHub ya traen Google Chrome: no hace falta descargar otro navegador
       - run: npm test
+        env:
+          CHROME_PATH: /usr/bin/google-chrome
