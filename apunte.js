@@ -53,6 +53,14 @@
   .mfa-cat span:first-child { font-size: 22px; line-height: 1; }
   .mfa-cat span:last-child { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .mfa-cat[aria-pressed="true"] { background: rgba(239,68,68,.14); border-color: #ef4444; color: #fff; }
+  .mfa-nueva { margin: -4px 0 14px; padding: 12px; border: 1px solid #1f2937; border-radius: 16px; background: #0f1626; }
+  .mfa-emojis { display: flex; gap: 4px; overflow-x: auto; scrollbar-width: none; margin-bottom: 10px; }
+  .mfa-emojis::-webkit-scrollbar { display: none; }
+  .mfa-emojis button { flex: none; width: 38px; height: 38px; border-radius: 11px; border: 1px solid transparent; background: #1a2234; font-size: 19px; cursor: pointer; }
+  .mfa-emojis button[aria-pressed="true"] { border-color: #ef4444; background: rgba(239,68,68,.14); }
+  .mfa-nueva-fila { display: flex; gap: 8px; }
+  .mfa-nueva-fila input { flex: 1; min-width: 0; background: #111827; border: 1px solid #1f2937; border-radius: 12px; padding: 11px 12px; color: #f1f5f9; font: 600 15px Manrope, system-ui, sans-serif; outline: none; }
+  .mfa-nueva-fila button { flex: none; border: 0; border-radius: 12px; padding: 0 16px; background: #ef4444; color: #fff; font: 800 14px Manrope, system-ui, sans-serif; cursor: pointer; }
   .mfa-desc { width: 100%; box-sizing: border-box; background: #0f1626; border: 1px solid #1f2937; border-radius: 14px; padding: 13px 14px; color: #f1f5f9; font: 600 15px Manrope, system-ui, sans-serif; outline: none; }
   .mfa-desc:focus { border-color: #475569; }
   .mfa-sug { display: flex; gap: 6px; flex-wrap: wrap; min-height: 0; margin: 8px 0 0; }
@@ -90,6 +98,10 @@
         <div data-bloque-rec><p class="mfa-lbl">Repetir</p><div class="mfa-recientes" data-recientes></div></div>
         <p class="mfa-lbl">Categoría</p>
         <div class="mfa-cats" data-cats></div>
+        <div class="mfa-nueva" data-nueva hidden>
+          <div class="mfa-emojis" data-emojis></div>
+          <div class="mfa-nueva-fila"><input data-nueva-nombre placeholder="Nombre de la categoría" maxlength="30" aria-label="Nombre de la nueva categoría"><button type="button" data-nueva-ok>Añadir</button></div>
+        </div>
         <input class="mfa-desc" id="mfa-desc" placeholder="Descripción (opcional)" autocomplete="off" enterkeyhint="done" aria-label="Descripción">
         <div class="mfa-sug" data-sug></div>
         <button type="button" class="mfa-guardar" disabled>Guardar gasto</button>
@@ -123,6 +135,8 @@
       try { otra.showPicker() } catch { otra.focus(); otra.click() }
     })
     btnGuardar.addEventListener('click', guardar)
+    raiz.querySelector('[data-nueva-ok]').addEventListener('click', guardarNuevaCat)
+    raiz.querySelector('[data-nueva-nombre]').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); guardarNuevaCat() } })
     raiz.querySelector('.mfa-pegar').addEventListener('click', pegarDelBanco)
   }
 
@@ -134,6 +148,7 @@
     raiz.querySelector('[data-mon-post]').textContent = pre ? '' : '€'
     inpImporte.value = ''; inpDesc.value = ''
     raiz.querySelector('[data-sug]').innerHTML = ''
+    raiz.querySelector('[data-nueva]').hidden = true
     ponerFecha(estado.fecha)
     pintarCats(); pintarRecientes(); actualizarBoton()
     document.documentElement.style.overflow = 'hidden'
@@ -190,13 +205,63 @@
     const lista = [...base]
     if (estado.categoria && !lista.includes(estado.categoria)) lista.unshift(estado.categoria)
     cont.innerHTML = lista.map(c => `<button type="button" class="mfa-cat" data-cat="${esc(c)}" aria-pressed="${c === estado.categoria}"><span>${esc(emoji(c) || '•')}</span><span>${esc(sinEmoji(c))}</span></button>`).join('')
-      + (todas || !datos ? '' : `<button type="button" class="mfa-cat" data-mas><span>⋯</span><span>Más</span></button>`)
+      + (!datos ? '' : todas
+        ? `<button type="button" class="mfa-cat" data-nueva-cat><span>＋</span><span>Nueva</span></button>`
+        : `<button type="button" class="mfa-cat" data-mas><span>⋯</span><span>Más</span></button>`)
     cont.querySelectorAll('[data-cat]').forEach(b => b.addEventListener('click', () => {
       elegirCat(b.dataset.cat, true)
       if (!inpImporte.value) inpImporte.focus({ preventScroll: true })
     }))
     const mas = cont.querySelector('[data-mas]')
     if (mas) mas.addEventListener('click', () => pintarCats(true))
+    const nueva = cont.querySelector('[data-nueva-cat]')
+    if (nueva) nueva.addEventListener('click', abrirNuevaCat)
+  }
+
+  // ── Crear una categoría sin salir del apunte (se guarda en el perfil, como en Perfil) ──
+  const EMOJIS = ['🏷️', '🍔', '☕', '🍺', '🐶', '👶', '🎁', '✈️', '🚌', '🚕', '💊', '💇', '🎮', '📚', '🎓', '🧹', '🔧', '🛋️', '💍', '⚽', '🎬', '🎵', '🏦', '💼']
+  let emojiNueva = EMOJIS[0]
+  function abrirNuevaCat() {
+    const panel = raiz.querySelector('[data-nueva]')
+    panel.hidden = false
+    emojiNueva = EMOJIS[0]
+    const fila = raiz.querySelector('[data-emojis]')
+    fila.innerHTML = EMOJIS.map(e => `<button type="button" aria-pressed="${e === emojiNueva}" aria-label="${e}">${e}</button>`).join('')
+    fila.querySelectorAll('button').forEach(b => b.addEventListener('click', () => {
+      emojiNueva = b.textContent
+      fila.querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', String(x === b)))
+      raiz.querySelector('[data-nueva-nombre]').focus({ preventScroll: true })
+    }))
+    const inp = raiz.querySelector('[data-nueva-nombre]')
+    inp.value = ''
+    inp.focus({ preventScroll: true })
+    panel.scrollIntoView({ block: 'nearest', behavior: 'smooth' })
+  }
+
+  async function guardarNuevaCat() {
+    const nombre = raiz.querySelector('[data-nueva-nombre]').value.trim().replace(/,/g, ' ')
+    if (!nombre) { raiz.querySelector('[data-nueva-nombre]').focus(); return }
+    const cat = `${emojiNueva} ${nombre.charAt(0).toUpperCase()}${nombre.slice(1)}`
+    if (datos.cats.some(c => sinEmoji(c).toLowerCase() === sinEmoji(cat).toLowerCase())) {
+      elegirCat(datos.cats.find(c => sinEmoji(c).toLowerCase() === sinEmoji(cat).toLowerCase()), true)
+      raiz.querySelector('[data-nueva]').hidden = true
+      return
+    }
+    const uid = window.currentUserId
+    const { data: filas } = await window.dbClient.from('perfil').select('id, categorias').eq('usuario_id', uid).limit(1)
+    const fila = filas?.[0]
+    // Mismo criterio que Perfil: si el usuario nunca personalizó, se parte de la lista por defecto
+    const lista = (fila?.categorias || CATS_DEFAULT).split(',').map(c => c.trim()).filter(Boolean)
+    lista.push(cat)
+    const { error } = fila
+      ? await window.dbClient.from('perfil').update({ categorias: lista.join(',') }).eq('id', fila.id)
+      : await window.dbClient.from('perfil').insert({ usuario_id: uid, categorias: lista.join(',') })
+    if (error) { aviso('No se pudo crear la categoría: ' + error.message); return }
+    datos.cats.push(cat)
+    raiz.querySelector('[data-nueva]').hidden = true
+    elegirCat(cat, true)
+    pintarCats(true)
+    if (!inpImporte.value) inpImporte.focus({ preventScroll: true })
   }
 
   function elegirCat(cat, manual) {
