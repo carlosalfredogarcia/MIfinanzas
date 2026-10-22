@@ -109,4 +109,25 @@ module.exports = [
       await pg.context().close()
     },
   },
+  {
+    nombre: 'botón +: cada opción abre su formulario',
+    async prueba(t) {
+      const casos = {
+        'inicio.html': { Ingreso: '#modal-ingreso', 'Gasto fijo': '#modal-fijo' },
+        'mifinanza-movimientos.html': { Ingreso: '#modal-ingreso', 'Gasto fijo': '#modal-fijo', 'Importar CSV': '#modal-csv' },
+        'mifinanza-fijos.html': { 'Gasto fijo': '.h-abierta' },
+      }
+      for (const [pagina, opciones] of Object.entries(casos)) {
+        for (const [opcion, selector] of Object.entries(opciones)) {
+          const pg = await t.abrir(pagina, { datos: completo() })
+          await pg.click('.mf-plus'); await pg.waitForTimeout(300)
+          await pg.click(`.mf-acc:has-text("${opcion}")`); await pg.waitForTimeout(600)
+          const visible = await pg.$eval(selector, e => getComputedStyle(e).display !== 'none').catch(() => false)
+          t.ok(visible, `${pagina} → ${opcion} no abre ${selector}`)
+          t.sinErrores(pg)
+          await pg.context().close()
+        }
+      }
+    },
+  },
 ]

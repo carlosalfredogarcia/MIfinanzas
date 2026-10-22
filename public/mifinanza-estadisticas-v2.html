@@ -126,27 +126,7 @@
 
   .loading-wrap { text-align: center; color: var(--subtext); font-size: 13px; padding: 40px 0; }
 
-  /* NAVBAR */
-  .navbar { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 390px; background: rgba(15,15,19,0.96); backdrop-filter: blur(20px); border-top: 1px solid var(--border); padding: 10px 0 22px; display: flex; justify-content: space-around; align-items: center; z-index: 99; }
-  .nav-item { display: flex; flex-direction: column; align-items: center; gap: 3px; cursor: pointer; opacity: 0.4; transition: opacity 0.2s; flex: 1; }
-  .nav-item.active { opacity: 1; }
-  .nav-icon  { font-size: 20px; }
-  .nav-label { font-size: 10px; color: var(--subtext); letter-spacing: 0.04em; }
-  .nav-item.active .nav-label { color: var(--accent); }
-  .nav-dot { width: 4px; height: 4px; border-radius: 50%; background: var(--accent); }
-
   /* PANEL "MÁS" */
-  .panelmas-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.75); backdrop-filter: blur(8px); z-index: 200; display: none; align-items: flex-end; justify-content: center; }
-  .panelmas-box { width: 390px; background: var(--card); border-radius: 28px 28px 0 0; padding: 24px 24px 40px; border-top: 1px solid var(--border); }
-  .panelmas-handle { width: 40px; height: 4px; background: rgba(255,255,255,0.08); border-radius: 100px; margin: 0 auto 20px; }
-  .panelmas-title { font-family: 'Manrope', sans-serif; font-size: 17px; font-weight: 700; color: var(--text); margin-bottom: 14px; }
-  .mas-item { display: flex; align-items: center; gap: 14px; padding: 14px 2px; cursor: pointer; border-bottom: 1px solid var(--border); transition: opacity 0.15s; }
-  .mas-item:last-of-type { border-bottom: none; margin-bottom: 16px; }
-  .mas-item:active { opacity: 0.6; }
-  .mas-icon { width: 42px; height: 42px; border-radius: 13px; background: rgba(88,166,255,0.12); display: flex; align-items: center; justify-content: center; font-size: 19px; flex-shrink: 0; }
-  .mas-label { flex: 1; font-size: 15px; font-weight: 600; color: var(--text); }
-  .mas-arrow { color: #58a6ff; font-size: 18px; }
-  .panelmas-cancelar { width: 100%; background: none; border: none; color: var(--subtext); font-size: 14px; cursor: pointer; padding: 10px; font-family: 'Manrope', sans-serif; }
 
   .spacer { height: 100px; }
 
@@ -390,10 +370,6 @@
       <p class="analisis-nota" id="analisis-nota"></p>
     </section>
 
-
-
-
-
     <section class="tarjeta" id="busca-card" aria-labelledby="busca-t">
       <h2 class="t-titulo" id="busca-t">Última vez y frecuencia</h2>
       <div class="busca">
@@ -402,7 +378,6 @@
       </div>
       <div id="busca-res"></div>
     </section>
-
 
   </div>
 
@@ -425,60 +400,6 @@
     <div class="fld" style="margin-bottom:18px" id="fld-em-fecha"><label class="lbl" id="lbl-em-fecha">Fecha</label><span class="dp-wrap"><input type="hidden" id="em-fecha" class="dp-real-input"><button type="button" class="inp dp-btn" data-dp-for="em-fecha" onclick="openDatePicker('em-fecha')"><span class="dp-txt" data-empty="true">Seleccionar fecha</span><svg class="dp-cal-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="16" height="15" rx="2"/><path d="M2 8h16M7 1v4M13 1v4"/></svg></button></span></div>
     <button onclick="guardarEdicionItem()" class="btn-ok">Guardar cambios</button>
     <button onclick="cerrarEdicionItem()" class="btn-no">Cancelar</button>
-  </div>
-</div>
-
-<!-- NAVBAR: 4 ítems, Estadísticas activo -->
-<nav class="navbar">
-  <div class="nav-item" onclick="location.href='inicio.html'">
-    <span class="nav-icon">🏠</span>
-    <span class="nav-label">Inicio</span>
-  </div>
-  <div class="nav-item" onclick="location.href='mifinanza-movimientos.html'">
-    <span class="nav-icon">📋</span>
-    <span class="nav-label">Movimientos</span>
-  </div>
-  <div class="nav-item active">
-    <span class="nav-icon">📊</span>
-    <span class="nav-label">Estadísticas</span>
-    <div class="nav-dot"></div>
-  </div>
-  <div class="nav-item" onclick="abrirPanelMas()">
-    <span class="nav-icon">···</span>
-    <span class="nav-label">Más</span>
-  </div>
-</nav>
-
-<div class="panelmas-overlay" id="panel-mas">
-  <div class="panelmas-box">
-    <div class="panelmas-handle"></div>
-    <div class="panelmas-title">Más opciones</div>
-    <div class="mas-item" onclick="location.href='mifinanza-metas.html'">
-      <div class="mas-icon">🎯</div>
-      <div class="mas-label">Metas</div>
-      <div class="mas-arrow">›</div>
-    </div>
-    <div class="mas-item" onclick="location.href='mifinanza-fijos.html'">
-      <div class="mas-icon"><span style="color:#58a6ff">↻</span></div>
-      <div class="mas-label">Gastos Fijos</div>
-      <div class="mas-arrow">›</div>
-    </div>
-    <div class="mas-item" onclick="location.href='mifinanza-prestamos.html'">
-      <div class="mas-icon">🤝</div>
-      <div class="mas-label">Préstamos</div>
-      <div class="mas-arrow">›</div>
-    </div>
-    <div class="mas-item" onclick="location.href='mifinanza-viajes.html'" style="display:none">
-      <div class="mas-icon">✈️</div>
-      <div class="mas-label">Viajes</div>
-      <div class="mas-arrow">›</div>
-    </div>
-    <div class="mas-item" onclick="location.href='mifinanza-perfil.html'">
-      <div class="mas-icon">👤</div>
-      <div class="mas-label">Perfil</div>
-      <div class="mas-arrow">›</div>
-    </div>
-    <button class="panelmas-cancelar" onclick="cerrarPanelMas()">Cancelar</button>
   </div>
 </div>
 <script>
@@ -1122,16 +1043,7 @@
     sessionStorage.setItem('stats-scroll', window.scrollY)
   })
 
-  function abrirPanelMas() { document.getElementById('panel-mas').style.display = 'flex' }
-  function cerrarPanelMas() { document.getElementById('panel-mas').style.display = 'none' }
-  document.getElementById('panel-mas').addEventListener('click', function(e) { if (e.target === this) cerrarPanelMas() })
-
   cargarDatos()
-</script>
-<script>
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/sw.js');
-  }
 </script>
 <script src="js/nav.js"></script>
 </body>

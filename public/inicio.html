@@ -205,49 +205,10 @@
   @keyframes draw { from { stroke-dashoffset: 600; } to { stroke-dashoffset: 0; } }
 
   /* ── FAB ── */
-  .fab {
-    position: fixed; bottom: calc(100px + env(safe-area-inset-bottom, 0px)); left: 50%;
-    transform: translateX(135px);
-    width: 60px; height: 60px; border-radius: 50%; border: 0; cursor: pointer;
-    display: grid; place-items: center; color: #052e1f; background: var(--green);
-    box-shadow: 0 10px 30px rgba(16,185,129,.45), 0 0 0 6px rgba(16,185,129,.12);
-    transition: transform .2s; z-index: 100;
-  }
-  .fab:hover { transform: translateX(135px) scale(1.06); }
-  .fab svg { width: 26px; height: 26px; }
 
   /* ── NAVBAR ── */
-  .navbar {
-    position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
-    width: 390px; max-width: 100%; z-index: 99;
-    display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); align-items: start;
-    padding: 10px 8px calc(16px + env(safe-area-inset-bottom, 0px));
-    background: rgba(10,14,26,.92); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
-    border-top: 1px solid var(--border);
-  }
-  .nav-item {
-    display: flex; flex-direction: column; align-items: center; gap: 4px; min-height: 44px;
-    font-size: 11px; font-weight: 700; color: var(--sub); text-decoration: none;
-    background: none; border: 0; cursor: pointer;
-  }
-  .nav-item.active { color: var(--green-txt); font-weight: 800; }
-  .nav-item svg { width: 22px; height: 22px; }
 
   /* ── MODALES ── */
-  .mas-item {
-    display: flex; align-items: center; gap: 14px; padding: 14px 2px;
-    cursor: pointer; border-bottom: 1px solid var(--card-border);
-    transition: opacity 0.15s;
-  }
-  .mas-item:last-of-type { border-bottom: none; margin-bottom: 16px; }
-  .mas-item:active { opacity: 0.6; }
-  .mas-icon {
-    width: 42px; height: 42px; border-radius: 13px;
-    background: rgba(99,102,241,0.14);
-    display: flex; align-items: center; justify-content: center; font-size: 19px; flex-shrink: 0;
-  }
-  .mas-label { flex: 1; font-size: 15px; font-weight: 600; color: var(--text); }
-  .mas-arrow { color: #a5b4fc; font-size: 18px; }
   .spacer { height: 140px; flex-shrink: 0; }
 
   /* Formularios */
@@ -255,12 +216,6 @@
   .inp:focus { border-color: var(--accent); }
   .lbl { font-size:11px; color:var(--sub); text-transform:uppercase; letter-spacing:0.08em; display:block; margin-bottom:6px; font-weight:700; }
   .fld { margin-bottom:12px; }
-  .cat-lbl-row { display:flex; justify-content:space-between; align-items:center; }
-  .cat-add-btn { color:#a5b4fc; cursor:pointer; font-weight:700; font-size:11px; text-transform:uppercase; letter-spacing:0.08em; }
-  .cat-nueva-panel { margin-top:8px; }
-  .cat-nueva-row { display:flex; gap:8px; }
-  .btn-cat-add { flex:1; background:var(--accent); color:#fff; border:none; border-radius:10px; padding:10px; font-family:'Manrope',sans-serif; font-size:13px; font-weight:700; cursor:pointer; }
-  .btn-cat-cancel { flex:1; background:none; border:1px solid var(--border); border-radius:10px; padding:10px; color:var(--sub); font-family:'Manrope',sans-serif; font-size:13px; cursor:pointer; }
   .toast { position:fixed; top:24px; left:50%; transform:translateX(-50%) translateY(-80px); background:var(--card); border:1px solid var(--border); border-radius:14px; padding:12px 20px; font-size:13px; color:var(--text); z-index:300; transition:transform 0.3s ease; white-space:nowrap; }
   .toast.show { transform:translateX(-50%) translateY(0); }
   .toast.ok { border-color:rgba(16,185,129,0.4); color:var(--green-txt); }
@@ -279,8 +234,6 @@
 
   @media (max-width: 390px) {
     .phone { width: 100%; }
-    .fab { left: auto; right: 20px; transform: none; }
-    .fab:hover { transform: scale(1.06); }
   }
   @media (prefers-reduced-motion: reduce) {
     .card-in, .fijo-bar-fill, .spark-line { animation: none; }
@@ -407,72 +360,6 @@
 
   <div class="spacer"></div>
 </div>
-
-<!-- FAB -->
-<button class="fab" onclick="abrirMenu()" aria-label="Añadir movimiento"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>
-
-<!-- NAVBAR -->
-<nav class="navbar" aria-label="Secciones">
-  <a class="nav-item active" href="inicio.html" aria-current="page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1Z"/></svg>Inicio</a>
-  <a class="nav-item" href="mifinanza-movimientos.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>Movimientos</a>
-  <a class="nav-item" href="mifinanza-estadisticas-v2.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>Estadísticas</a>
-  <button class="nav-item" type="button" onclick="abrirPanelMas()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/></svg>Más</button>
-</nav>
-
-<!-- MODAL: MÁS -->
-<div class="modal-base" id="panel-mas">
-  <div class="modal-box">
-    <div class="modal-handle"></div>
-    <div class="modal-title">Más opciones</div>
-    <div class="mas-item" onclick="location.href='mifinanza-metas.html'"><div class="mas-icon">🎯</div><div class="mas-label">Metas</div><div class="mas-arrow">›</div></div>
-    <div class="mas-item" onclick="location.href='mifinanza-fijos.html'"><div class="mas-icon"><span style="color:var(--accent)">↻</span></div><div class="mas-label">Gastos Fijos</div><div class="mas-arrow">›</div></div>
-    <div class="mas-item" onclick="location.href='mifinanza-prestamos.html'"><div class="mas-icon">🤝</div><div class="mas-label">Préstamos</div><div class="mas-arrow">›</div></div>
-    <div class="mas-item" onclick="location.href='mifinanza-viajes.html'" style="display:none"><div class="mas-icon">✈️</div><div class="mas-label">Viajes</div><div class="mas-arrow">›</div></div>
-    <div class="mas-item" onclick="location.href='mifinanza-perfil.html'"><div class="mas-icon">👤</div><div class="mas-label">Perfil</div><div class="mas-arrow">›</div></div>
-    <button class="btn-no" onclick="cerrarPanelMas()">Cancelar</button>
-  </div>
-</div>
-
-<!-- MODAL: FAB MENU -->
-<div class="modal-base" id="menu-fab">
-  <div class="modal-box">
-    <div class="modal-handle"></div>
-    <button onclick="abrirGasto()" style="width:100%;background:var(--card2);border:1px solid var(--border);border-radius:14px;padding:16px;color:var(--text);font-family:'Manrope',sans-serif;font-size:15px;cursor:pointer;margin-bottom:10px;text-align:left;font-weight:600;">💸 Registrar gasto</button>
-    <button onclick="abrirIngreso()" style="width:100%;background:var(--card2);border:1px solid var(--border);border-radius:14px;padding:16px;color:var(--text);font-family:'Manrope',sans-serif;font-size:15px;cursor:pointer;margin-bottom:10px;text-align:left;font-weight:600;">💰 Registrar ingreso</button>
-    <button onclick="abrirGastoFijo()" style="width:100%;background:var(--card2);border:1px solid var(--border);border-radius:14px;padding:16px;color:var(--text);font-family:'Manrope',sans-serif;font-size:15px;cursor:pointer;margin-bottom:10px;text-align:left;font-weight:600;">🔃 Registrar gasto fijo</button>
-    <button onclick="cerrarMenu()" class="btn-no">Cancelar</button>
-  </div>
-</div>
-
-<!-- MODAL: NUEVO GASTO -->
-<div class="modal-base" id="modal-gasto">
-  <div class="modal-box">
-    <div class="modal-handle"></div>
-    <div class="modal-title">Nuevo gasto</div>
-    <div class="fld"><label class="lbl">Fecha</label><span class="dp-wrap"><input type="hidden" id="g-fecha" class="dp-real-input"><button type="button" class="inp dp-btn" data-dp-for="g-fecha" onclick="openDatePicker('g-fecha')"><span class="dp-txt" data-empty="true">Seleccionar fecha</span><svg class="dp-cal-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="16" height="15" rx="2"/><path d="M2 8h16M7 1v4M13 1v4"/></svg></button></span></div>
-    <div class="fld"><label class="lbl">Descripción</label><input type="text" id="g-descripcion" class="inp" placeholder="Ej: Almuerzo, Gasolina..."></div>
-    <div class="fld">
-      <label class="lbl cat-lbl-row"><span>Categoría</span><span class="cat-add-btn" onclick="toggleNuevaCat('g-categoria')">+ Nueva</span></label>
-      <select id="g-categoria" class="inp">
-        <option>🍔 Comida</option><option>🏠 Alquiler</option><option>🌍 Remesas</option>
-        <option>💻 Tecnología</option><option>🏋️ Gym</option><option>📱 Línea</option>
-        <option>❤️ Salud</option><option>🍭 Antojos</option><option>⛽ Gasolina</option>
-        <option>👕 Ropa</option><option>📦 Otros</option>
-      </select>
-      <div class="cat-nueva-panel" id="panel-nueva-cat" style="display:none">
-        <input type="text" id="nueva-cat-input" class="inp" placeholder="Ej: 🚗 Vehículo" style="margin-bottom:8px">
-        <div class="cat-nueva-row">
-          <button type="button" class="btn-cat-add" onclick="guardarNuevaCategoria()">Añadir</button>
-          <button type="button" class="btn-cat-cancel" onclick="cerrarNuevaCat()">Cancelar</button>
-        </div>
-      </div>
-    </div>
-    <div class="fld" style="margin-bottom:18px"><label class="lbl">Monto</label><input type="number" id="g-monto" class="inp" placeholder="$0.00"></div>
-    <button onclick="guardarGasto()" class="btn-ok" style="background:var(--red);color:#fff">Guardar gasto</button>
-    <button onclick="cerrarGasto()" class="btn-no">Cancelar</button>
-  </div>
-</div>
-
 <!-- MODAL: NUEVO INGRESO -->
 <div class="modal-base" id="modal-ingreso">
   <div class="modal-box">
@@ -724,10 +611,6 @@
 
   cargarDashboard()
 
-  function abrirPanelMas() { document.getElementById('panel-mas').style.display = 'flex' }
-  function cerrarPanelMas() { document.getElementById('panel-mas').style.display = 'none' }
-  document.getElementById('panel-mas').addEventListener('click', function(e) { if(e.target===this) cerrarPanelMas() })
-
   const CATS_DEFAULT = '🏠 Alquiler,💳 Crédito,📱 Línea,🏋️ Gym,⛽ Gasolina,💻 Tecnología,❤️ Salud,👕 Ropa,🎉 Salidas,🌍 Remesas,⚠️ Gastos Imprevistos,📋 Trámite,🚗 Vehículo,📦 Otros,🛒 Supermercado,💧 Agua,🧴 Cuidado personal,📺 Suscripción,💡 Luz,🌐 Internet,💼 Nómina'
 
   async function cargarCategoriasPerfil() {
@@ -740,7 +623,7 @@
     const allCats = cats.concat(defaults.filter(d => !cats.includes(d)))
     const sk = s => s.replace(/^[^\p{L}]+/u, '').toLowerCase()
     allCats.sort((a,b) => sk(a).localeCompare(sk(b),'es'))
-    ;['g-categoria','f-categoria'].forEach(id => {
+    ;['f-categoria'].forEach(id => {
       const sel = document.getElementById(id)
       if(sel) sel.innerHTML = allCats.map(c => `<option>${c}</option>`).join('')
     })
@@ -752,56 +635,12 @@
     setTimeout(() => { t.className = 'toast' }, 2500)
   }
 
-  let nuevaCatTarget = null
-  function toggleNuevaCat(targetId) {
-    nuevaCatTarget = targetId
-    document.getElementById('panel-nueva-cat').style.display = 'block'
-    document.getElementById('nueva-cat-input').value = ''
-    document.getElementById('nueva-cat-input').focus()
-  }
-  function cerrarNuevaCat() {
-    document.getElementById('panel-nueva-cat').style.display = 'none'
-    document.getElementById('nueva-cat-input').value = ''
-  }
-  async function guardarNuevaCategoria() {
-    const nueva = document.getElementById('nueva-cat-input').value.trim()
-    if (!nueva) { alert('Escribe una categoría'); return }
-    const uid = window.currentUserId; if (!uid) return
-    const { data: rows } = await dbClient.from('perfil').select('id, categorias').eq('usuario_id', uid).limit(1)
-    const perfilRow = rows?.[0]
-    const catsStr = perfilRow?.categorias || CATS_DEFAULT
-    const cats = catsStr.split(',').map(c => c.trim()).filter(Boolean)
-    if (cats.includes(nueva)) { alert('Esa categoría ya existe'); return }
-    cats.push(nueva)
-    const nuevaLista = cats.join(',')
-    let error
-    if (perfilRow) { ;({error} = await dbClient.from('perfil').update({categorias:nuevaLista}).eq('id',perfilRow.id)) }
-    else { ;({error} = await dbClient.from('perfil').insert({usuario_id:uid,categorias:nuevaLista})) }
-    if (error) { alert('Error: '+error.message); return }
-    ;['g-categoria','f-categoria'].forEach(id => { const sel=document.getElementById(id); if(sel) sel.innerHTML+=`<option>${nueva}</option>` })
-    if (nuevaCatTarget) document.getElementById(nuevaCatTarget).value = nueva
-    cerrarNuevaCat(); toast('✅ Categoría añadida')
-  }
 
-  function abrirMenu() { document.getElementById('menu-fab').style.display = 'flex' }
-  function cerrarMenu() { document.getElementById('menu-fab').style.display = 'none' }
-  async function abrirGasto() { cerrarMenu(); document.getElementById('g-fecha').value=hoy; await cargarCategoriasPerfil(); document.getElementById('modal-gasto').style.display='flex' }
-  function cerrarGasto() { document.getElementById('modal-gasto').style.display='none' }
-  function abrirIngreso() { cerrarMenu(); document.getElementById('i-fecha').value=hoy; document.getElementById('modal-ingreso').style.display='flex' }
+  function abrirIngreso() { document.getElementById('i-fecha').value=hoy; document.getElementById('modal-ingreso').style.display='flex' }
   function cerrarIngreso() { document.getElementById('modal-ingreso').style.display='none' }
-  async function abrirGastoFijo() { cerrarMenu(); document.getElementById('f-nombre').value=''; document.getElementById('f-monto').value=''; document.getElementById('f-fecha').value=''; document.getElementById('f-fecha-fin').value=''; await cargarCategoriasPerfil(); document.getElementById('modal-fijo').style.display='flex' }
+  async function abrirGastoFijo() { document.getElementById('f-nombre').value=''; document.getElementById('f-monto').value=''; document.getElementById('f-fecha').value=''; document.getElementById('f-fecha-fin').value=''; await cargarCategoriasPerfil(); document.getElementById('modal-fijo').style.display='flex' }
   function cerrarGastoFijo() { document.getElementById('modal-fijo').style.display='none' }
 
-  async function guardarGasto() {
-    const fecha=document.getElementById('g-fecha').value
-    const descripcion=document.getElementById('g-descripcion').value.trim()
-    const categoria=document.getElementById('g-categoria').value
-    const monto=parseFloat(document.getElementById('g-monto').value)
-    if (!descripcion||isNaN(monto)) { alert('Completa descripción y monto'); return }
-    const {error} = await dbClient.from('gastos').insert([{fecha,descripcion,categoria,monto,usuario_id:window.currentUserId,origen:'manual'}])
-    if (error) { alert('Error: '+error.message) }
-    else { alert('✅ Gasto guardado'); cerrarGasto(); cargarDashboard() }
-  }
 
   async function guardarIngreso() {
     const fecha=document.getElementById('i-fecha').value
@@ -826,9 +665,6 @@
     if (error) { alert('Error: '+error.message) }
     else { alert('✅ Gasto fijo guardado'); cerrarGastoFijo(); cargarDashboard() }
   }
-</script>
-<script>
-  if ('serviceWorker' in navigator) { navigator.serviceWorker.register('/sw.js') }
 </script>
 <script src="js/nav.js"></script>
 </body>

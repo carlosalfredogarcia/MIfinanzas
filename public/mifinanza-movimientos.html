@@ -61,22 +61,6 @@
   .amount-ingreso { color: var(--success); }
   .loading { text-align: center; color: var(--subtext); font-size: 14px; padding: 40px 0; }
 
-  .fab { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%); background: var(--accent); color: #0a0e1a; width: 56px; height: 56px; border-radius: 50%; border: none; font-size: 28px; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 32px rgba(99,102,241,0.35); transition: transform 0.2s, box-shadow 0.2s; z-index: 100; }
-  .fab:hover { transform: translateX(-50%) scale(1.08); box-shadow: 0 12px 40px rgba(99,102,241,0.5); }
-
-  .navbar { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 390px; background: rgba(13,17,23,0.97); backdrop-filter: blur(20px); border-top: 1px solid var(--border2); padding: 12px 0 24px; display: flex; justify-content: space-around; align-items: center; z-index: 99; }
-  .nav-item { display: flex; flex-direction: column; align-items: center; gap: 5px; cursor: pointer; opacity: 0.35; transition: opacity 0.2s; flex: 1; }
-  .nav-item.active { opacity: 1; }
-  .nav-icon { font-size: 22px; }
-  .nav-dot { width: 4px; height: 4px; border-radius: 50%; background: var(--accent); }
-
-  .mas-item { display: flex; align-items: center; gap: 14px; padding: 14px 2px; cursor: pointer; border-bottom: 1px solid var(--border); transition: opacity 0.15s; }
-  .mas-item:last-of-type { border-bottom: none; margin-bottom: 16px; }
-  .mas-item:active { opacity: 0.6; }
-  .mas-icon { width: 42px; height: 42px; border-radius: 13px; background: rgba(99,102,241,0.12); display: flex; align-items: center; justify-content: center; font-size: 19px; flex-shrink: 0; }
-  .mas-label { flex: 1; font-size: 15px; font-weight: 600; color: var(--text); }
-  .mas-arrow { color: #6366f1; font-size: 18px; }
-
   .spacer { height: 120px; }
   @keyframes fadeUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
 
@@ -347,70 +331,6 @@
 
   <div class="spacer"></div>
 </div>
-
-<button class="fab" onclick="abrirMenu()">+</button>
-
-<nav class="navbar">
-  <div class="nav-item" onclick="location.href='inicio.html'">
-    <span class="nav-icon">🏠</span>
-  </div>
-  <div class="nav-item active" onclick="location.href='mifinanza-movimientos.html'">
-    <span class="nav-icon">📋</span>
-    <div class="nav-dot"></div>
-  </div>
-  <div class="nav-item" onclick="location.href='mifinanza-estadisticas-v2.html'">
-    <span class="nav-icon">📊</span>
-  </div>
-  <div class="nav-item" onclick="abrirPanelMas()">
-    <span class="nav-icon">···</span>
-  </div>
-</nav>
-
-<div class="modal-base" id="panel-mas">
-  <div class="modal-box">
-    <div class="modal-handle"></div>
-    <div class="modal-title">Más opciones</div>
-    <div class="mas-item" onclick="location.href='mifinanza-metas.html'">
-      <div class="mas-icon">🎯</div>
-      <div class="mas-label">Metas</div>
-      <div class="mas-arrow">›</div>
-    </div>
-    <div class="mas-item" onclick="location.href='mifinanza-fijos.html'">
-      <div class="mas-icon"><span style="color:#6366f1">↻</span></div>
-      <div class="mas-label">Gastos Fijos</div>
-      <div class="mas-arrow">›</div>
-    </div>
-    <div class="mas-item" onclick="location.href='mifinanza-prestamos.html'">
-      <div class="mas-icon">🤝</div>
-      <div class="mas-label">Préstamos</div>
-      <div class="mas-arrow">›</div>
-    </div>
-    <div class="mas-item" onclick="location.href='mifinanza-viajes.html'" style="display:none">
-      <div class="mas-icon">✈️</div>
-      <div class="mas-label">Viajes</div>
-      <div class="mas-arrow">›</div>
-    </div>
-    <div class="mas-item" onclick="location.href='mifinanza-perfil.html'">
-      <div class="mas-icon">👤</div>
-      <div class="mas-label">Perfil</div>
-      <div class="mas-arrow">›</div>
-    </div>
-    <button class="btn-no" onclick="cerrarPanelMas()">Cancelar</button>
-  </div>
-</div>
-
-<div class="modal-base" id="menu-fab">
-  <div class="modal-box">
-    <div class="modal-handle"></div>
-    <button onclick="abrirGasto()" style="width:100%;background:#1a2234;border:1px solid #263248;border-radius:14px;padding:16px;color:#f1f5f9;font-family:'Manrope',sans-serif;font-size:15px;cursor:pointer;margin-bottom:10px;text-align:left;">💸 Registrar gasto</button>
-    <button onclick="abrirImportarCSV()" style="width:100%;background:#1a2234;border:1px solid #263248;border-radius:14px;padding:16px;color:#f1f5f9;font-family:'Manrope',sans-serif;font-size:15px;cursor:pointer;margin-bottom:10px;text-align:left;">📂 Importar extracto CSV, XLS o XLSX</button>
-    <button onclick="abrirIngreso()" style="width:100%;background:#1a2234;border:1px solid #263248;border-radius:14px;padding:16px;color:#f1f5f9;font-family:'Manrope',sans-serif;font-size:15px;cursor:pointer;margin-bottom:10px;text-align:left;">💰 Registrar ingreso</button>
-    <button onclick="abrirGastoFijo()" style="width:100%;background:#1a2234;border:1px solid #263248;border-radius:14px;padding:16px;color:#f1f5f9;font-family:'Manrope',sans-serif;font-size:15px;cursor:pointer;margin-bottom:10px;text-align:left;">🔃 Registrar gasto fijo</button>
-    <button onclick="abrirBorrarTodo()" style="width:100%;background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.3);border-radius:14px;padding:16px;color:#ef4444;font-family:'Manrope',sans-serif;font-size:15px;cursor:pointer;margin-bottom:10px;text-align:left;">🗑 Eliminar todo</button>
-    <button onclick="cerrarMenu()" class="btn-no">Cancelar</button>
-  </div>
-</div>
-
 <div class="modal-base" id="modal-gasto">
   <div class="modal-box">
     <div class="modal-handle"></div>
@@ -439,7 +359,6 @@
     <button onclick="cerrarGasto()" class="btn-no">Cancelar</button>
   </div>
 </div>
-
 
 <div class="modal-base" id="modal-revision-voz">
   <div class="modal-box" style="max-height:92vh;display:flex;flex-direction:column;overflow:hidden;padding-bottom:0;">
@@ -941,7 +860,7 @@
         <span>${hayAlgo ? 'Prueba con otra búsqueda o quita el filtro.' : 'Añade un gasto o importa el extracto de tu banco.'}</span>
         ${hayAlgo ? '' : '<button type="button" id="vacio-anadir">Añadir el primero</button>'}</div>`;
       const btn = document.getElementById('vacio-anadir');
-      if (btn) btn.addEventListener('click', () => { const p = document.querySelector('.mf-plus'); p ? p.click() : abrirMenu(); });
+      if (btn) btn.addEventListener('click', () => { document.querySelector('.mf-plus')?.click(); });
       return;
     }
 
@@ -1131,17 +1050,15 @@
 
   const hoy = new Date().toISOString().split('T')[0];
 
-  function abrirMenu()       { document.getElementById('menu-fab').style.display = 'flex'; }
-  function cerrarMenu()      { document.getElementById('menu-fab').style.display = 'none'; }
-  async function abrirGasto()     { cerrarMenu(); document.getElementById('g-fecha').value = hoy; await cargarCategoriasPerfil(); document.getElementById('modal-gasto').style.display = 'flex'; }
+  async function abrirGasto()     { document.getElementById('g-fecha').value = hoy; await cargarCategoriasPerfil(); document.getElementById('modal-gasto').style.display = 'flex'; }
   function cerrarGasto()     { document.getElementById('modal-gasto').style.display = 'none'; }
-  function abrirIngreso()    { cerrarMenu(); document.getElementById('i-fecha').value = hoy; document.getElementById('modal-ingreso').style.display = 'flex'; }
+  function abrirIngreso()    { document.getElementById('i-fecha').value = hoy; document.getElementById('modal-ingreso').style.display = 'flex'; }
   function cerrarIngreso()   { document.getElementById('modal-ingreso').style.display = 'none'; }
-  async function abrirGastoFijo() { cerrarMenu(); ocultarErrorFecha('f'); await cargarCategoriasPerfil(); document.getElementById('modal-fijo').style.display = 'flex'; }
+  async function abrirGastoFijo() { ocultarErrorFecha('f'); await cargarCategoriasPerfil(); document.getElementById('modal-fijo').style.display = 'flex'; }
   function cerrarGastoFijo() { document.getElementById('modal-fijo').style.display = 'none'; }
 
   function abrirBorrarTodo() {
-    cerrarMenu();
+   
     document.getElementById('modal-borrar-1').style.display = 'flex';
   }
   function cerrarBorrar() {
@@ -1643,10 +1560,6 @@
   document.getElementById('f-fecha').addEventListener('input', () => ocultarErrorFecha('f'));
   document.getElementById('e-fecha').addEventListener('input', () => ocultarErrorFecha('e'));
 
-  function abrirPanelMas() { document.getElementById('panel-mas').style.display = 'flex'; }
-  function cerrarPanelMas() { document.getElementById('panel-mas').style.display = 'none'; }
-  document.getElementById('panel-mas').addEventListener('click', function(e) { if (e.target === this) cerrarPanelMas(); });
-
   const CATS_DEFAULT = '🏠 Alquiler,💳 Crédito,📱 Línea,🏋️ Gym,⛽ Gasolina,💻 Tecnología,❤️ Salud,👕 Ropa,🎉 Salidas,🌍 Remesas,⚠️ Gastos Imprevistos,📋 Trámite,🚗 Vehículo,📦 Otros,🛒 Supermercado,💧 Agua,🧴 Cuidado personal,📺 Suscripción,💡 Luz,🌐 Internet,💼 Nómina'
 
   async function cargarCategoriasPerfil() {
@@ -1768,7 +1681,7 @@
   }
 
   async function abrirImportarCSV() {
-    cerrarMenu();
+   
     document.getElementById('csv-estado').textContent = 'Selecciona el extracto de tu banco (CSV, XLS o XLSX). La app detectará los movimientos automáticamente — revisa las categorías antes de guardar.';
     document.getElementById('csv-btn-seleccionar').style.display = 'block';
     document.getElementById('csv-file').value = '';
@@ -1926,11 +1839,6 @@
   }
 
   cargarMovimientos();
-</script>
-<script>
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/sw.js');
-  }
 </script>
 <script src="js/nav.js"></script>
 </body>

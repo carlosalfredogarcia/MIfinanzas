@@ -358,7 +358,6 @@
 
   .disponible-card { margin-top: 4px; }
 
-
   .var-row { background: var(--card2); border-radius: 12px; padding: 9px 14px; margin-bottom: 6px; }
   .var-nombre-top { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text); margin-bottom: 0; }
   .vn-toggle-wrap { display: flex; align-items: center; gap: 4px; cursor: pointer; user-select: none; flex-shrink: 0; -webkit-tap-highlight-color: transparent; }
@@ -386,7 +385,6 @@
     .var-spin-btns { display: flex; }
     .var-input { width: 60px; }
   }
-
 
   .var-group { background: var(--card); border-radius: 12px; padding: 12px 14px; margin-bottom: 8px; border: 1px solid rgba(251,146,60,0.38); }
   .vg-header { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
@@ -748,52 +746,6 @@
   .colchon-btn { cursor: pointer; font-size: 13px; opacity: 0.75; margin-left: 6px; transition: opacity 0.15s; }
   .colchon-btn:hover { opacity: 1; }
   .colchon-empty { color: var(--subtext); font-size: 12px; text-align: center; padding: 10px 0; }
-
-  /* FAB: centro, flotando sobre la navbar */
-  .fab {
-    position: fixed;
-   bottom: 90px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: var(--accent);
-    color: #0a0e1a;
-    width: 58px;
-    height: 58px;
-    border-radius: 50%;
-    border: none;
-    font-size: 28px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 8px 32px rgba(99,102,241,0.4);
-    transition: transform 0.2s, box-shadow 0.2s;
-    z-index: 100;
-  }
-  .fab:hover { transform: translateX(-50%) scale(1.08); box-shadow: 0 12px 40px rgba(99,102,241,0.55); }
-
-  /* NAVBAR */
-  .navbar {
-    position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
-    width: 390px; background: rgba(13,17,23,0.97);
-    backdrop-filter: blur(20px); border-top: 1px solid var(--border);
-    padding: 10px 0 max(22px, env(safe-area-inset-bottom)); display: flex; justify-content: space-around;
-    align-items: center; z-index: 200;
-  }
-
-  .nav-item { display: flex; flex-direction: column; align-items: center; gap: 3px; cursor: pointer; opacity: 0.4; transition: opacity 0.2s; flex: 1; }
-  .nav-item.active { opacity: 1; }
-  .nav-icon  { font-size: 20px; }
-  .nav-label { font-size: 10px; color: var(--subtext); letter-spacing: 0.04em; }
-  .nav-item.active .nav-label { color: var(--accent); }
-  .nav-dot   { width: 4px; height: 4px; border-radius: 50%; background: var(--accent); }
-
-  .mas-item { display: flex; align-items: center; gap: 14px; padding: 14px 2px; cursor: pointer; border-bottom: 1px solid var(--border); transition: opacity 0.15s; }
-  .mas-item:last-of-type { border-bottom: none; margin-bottom: 16px; }
-  .mas-item:active { opacity: 0.6; }
-  .mas-icon { width: 42px; height: 42px; border-radius: 13px; background: rgba(99,102,241,0.12); display: flex; align-items: center; justify-content: center; font-size: 19px; flex-shrink: 0; }
-  .mas-label { flex: 1; font-size: 15px; font-weight: 600; color: var(--text); }
-  .mas-arrow { color: #6366f1; font-size: 18px; }
 
   .spacer { height: 130px; }
 
@@ -1157,64 +1109,6 @@
 
 <!-- Tarjeta flotante de análisis (visible al editar un gasto) -->
 <div class="analisis-float" id="analisis-float"></div>
-
-<!-- FAB flotante en el centro -->
-<button class="fab" onclick="abrirModal()">+</button>
-
-<!-- NAVBAR: 4 ítems, Más activo -->
-<nav class="navbar">
-  <div class="nav-item" onclick="location.href='inicio.html'">
-    <span class="nav-icon">🏠</span>
-    <span class="nav-label">Inicio</span>
-  </div>
-  <div class="nav-item" onclick="location.href='mifinanza-movimientos.html'">
-    <span class="nav-icon">📋</span>
-    <span class="nav-label">Movimientos</span>
-  </div>
-  <div class="nav-item" onclick="location.href='mifinanza-estadisticas-v2.html'">
-    <span class="nav-icon">📊</span>
-    <span class="nav-label">Estadísticas</span>
-  </div>
-  <div class="nav-item active" onclick="abrirPanelMas()">
-    <span class="nav-icon">···</span>
-    <span class="nav-label">Más</span>
-    <div class="nav-dot"></div>
-  </div>
-</nav>
-
-<div class="modal-overlay" id="panel-mas">
-  <div class="modal">
-    <div class="modal-handle"></div>
-    <div class="modal-title">Más opciones</div>
-    <div class="mas-item" onclick="location.href='mifinanza-metas.html'">
-      <div class="mas-icon">🎯</div>
-      <div class="mas-label">Metas</div>
-      <div class="mas-arrow">›</div>
-    </div>
-    <div class="mas-item" onclick="location.href='mifinanza-fijos.html'">
-      <div class="mas-icon"><span style="color:#6366f1">↻</span></div>
-      <div class="mas-label">Gastos Fijos</div>
-      <div class="mas-arrow">›</div>
-    </div>
-    <div class="mas-item" onclick="location.href='mifinanza-prestamos.html'">
-      <div class="mas-icon">🤝</div>
-      <div class="mas-label">Préstamos</div>
-      <div class="mas-arrow">›</div>
-    </div>
-    <div class="mas-item" onclick="location.href='mifinanza-viajes.html'" style="display:none">
-      <div class="mas-icon">✈️</div>
-      <div class="mas-label">Viajes</div>
-      <div class="mas-arrow">›</div>
-    </div>
-    <div class="mas-item" onclick="location.href='mifinanza-perfil.html'">
-      <div class="mas-icon">👤</div>
-      <div class="mas-label">Perfil</div>
-      <div class="mas-arrow">›</div>
-    </div>
-    <button class="btn-cancelar" onclick="cerrarPanelMas()">Cancelar</button>
-  </div>
-</div>
-
 <!-- Modal nueva meta -->
 <div class="modal-overlay" id="modal">
   <div class="modal">
@@ -1657,7 +1551,6 @@
       .eq('id', metaFondoData.id)
   }
 
-
   async function eliminarFondo() {
     if (!metaFondoData) return
     if (!confirm(`¿Eliminar la meta "${metaFondoData.nombre}"?`)) return
@@ -2070,10 +1963,6 @@
   document.getElementById('modal-editar-meta').addEventListener('click', function(e) { if (e.target === this) cerrarModalEditarMeta() })
 
   cargarColchon()
-
-  function abrirPanelMas()  { document.getElementById('panel-mas').classList.add('visible') }
-  function cerrarPanelMas() { document.getElementById('panel-mas').classList.remove('visible') }
-  document.getElementById('panel-mas').addEventListener('click', function(e) { if (e.target === this) cerrarPanelMas() })
 
   function toggleBloque(nombre) {
     const detalle  = document.getElementById('detalle-' + nombre)
@@ -3798,11 +3687,6 @@
   </div>
 </div>
 
-<script>
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/sw.js');
-  }
-</script>
 <script src="js/nav.js"></script>
 </body>
 </html>
