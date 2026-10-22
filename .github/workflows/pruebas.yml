@@ -1,0 +1,19 @@
+# Pasa las pruebas de tests/ en cada subida: si algo se rompe, GitHub lo marca en rojo antes de publicar
+name: Pruebas
+on:
+  push:
+  pull_request:
+jobs:
+  pruebas:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: tests
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm ci
+      - run: npx playwright@1.56.1 install --with-deps chromium
+      - run: npm test

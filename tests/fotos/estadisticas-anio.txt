@@ -1,0 +1,137 @@
+Estadísticas
+Entiende tus patrones de gasto
+Por período
+Por mes
+Año completo
+TIRASTE DEL AHORRO
+−536 €
+en 10 meses
+Gastaste de más el 4 % de lo que entró
+Total ingresos
+13.920 €
+en el año
+Total gastos
+14.456 €
+en el año
+¿A DÓNDE VA TU DINERO?
+10 meses
+14.456 €
+GASTADO
+CATEGORÍA
+%
+MEDIA/MES
+TOTAL
+🏠 Alquiler
+38
+543 €
+5.434 €
+🛒 Supermercado
+13
+194 €
+1.935 €
+💳 Crédito
+12
+180 €
+1.800 €
+⛽ Gasolina
+9
+134 €
+1.340 €
+🌍 Remesas
+7
+103 €
+1.030 €
+⚠️ Gastos Imprevistos
+7
+96 €
+955 €
+🎉 Salidas
+5
+71 €
+706 €
+💡 Luz
+3
+46 €
+455 €
+🏋️ Gym
+2
+25 €
+250 €
+🚗 Vehículo
+2
+25 €
+248 €
+📺 Suscripción
+1
+15 €
+153 €
+🧴 Cuidado personal
+1
+15 €
+150 €
+EVOLUCIÓN POR CATEGORÍA
+🏠 Alquiler
+🛒 Supermercado
+💳 Crédito
+⛽ Gasolina
+🌍 Remesas
+⚠️ Gastos Imprevistos
+🎉 Salidas
+💡 Luz
+🏋️ Gym
+🚗 Vehículo
+📺 Suscripción
+🧴 Cuidado personal
+🛒 Supermercado
+⚠️ Gastos Imprevistos
+⛽ Gasolina
+🎉 Salidas
+🌍 Remesas
+🧴 Cuidado personal
+🏠 Alquiler
+💡 Luz
+🏋️ Gym
+💳 Crédito
+🚗 Vehículo
+📺 Suscripción
+418 €
+Ene
+418 €
+Feb
+418 €
+Mar
+418 €
+Abr
+418 €
+May
+418 €
+Jun
+836 €
+Jul
+836 €
+Ago
+836 €
+Sep
+418 €
+Oct
+Promedio 543 €/mes
+Mes más alto
+Sobre el promedio
+Bajo el promedio
+
+Tu mejor mes fue enero: ahorraste 306 €. En 4 meses gastaste más de lo que entró (Jun, Jul, Ago, Sep).
+
+ÚLTIMA VEZ Y FRECUENCIA
+Gasto
+Ingreso
+Gasto fijo
+Importar CSV
+MENÚ
+Metas
+Gastos fijos
+Préstamos
+Perfil
+Inicio
+Movim.
+Estadíst.
+Menú

@@ -1,0 +1,12 @@
+{
+  "name": "mifinanzas-pruebas",
+  "private": true,
+  "description": "Pruebas de MiFinanzas en un navegador real, con Supabase simulado",
+  "scripts": {
+    "test": "node run.js",
+    "actualizar": "node run.js --actualizar"
+  },
+  "devDependencies": {
+    "playwright-core": "1.56.1"
+  }
+}

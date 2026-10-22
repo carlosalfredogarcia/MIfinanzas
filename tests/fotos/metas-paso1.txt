@@ -1,0 +1,81 @@
+Mis metas
+Entiende tu dinero, haz tu plan y cúmplelo
+1
+Tu dinero
+2
+Tu plan
+3
+Tu meta
+4
+Seguimiento
+PASO 1 DE 4
+Tu dinero real
+
+Antes de ponerte una meta, entiende tu dinero: lo que entra y lo que de verdad gastas de media, no lo que crees que gastas.
+
+INGRESOS
+›
+Restablecer
+LO QUE GASTAS DE VERDAD
+media de Jul, Ago, Sep
+🏠
+Alquiler
+NECESARIO
+836 €
+⛽
+Gasolina
+203 €
+🛒
+Supermercado
+NECESARIO
+193 €
+💳
+Crédito
+180 €
+🎉
+Salidas
+120 €
+🌍
+Remesas
+91 €
+⚠️
+Gastos Imprevistos
+74 €
+💡
+Luz
+46 €
+🏋️
+Gym
+25 €
+📺
+Suscripción
+20 €
+🚗
+Vehículo
+15 €
+🧴
+Cuidado personal
+15 €
+Total al mes
+1.818 €
+CON TUS GASTOS DE HOY
+−438 € al mes
+
+Estás gastando más de lo que ingresas. En el siguiente paso vemos cómo darle la vuelta.
+
+Siguiente: hacer mi plan
+→
+Nueva meta
+Gasto
+Ingreso
+Gasto fijo
+Importar CSV
+MENÚ
+Metas
+Gastos fijos
+Préstamos
+Perfil
+Inicio
+Movim.
+Estadíst.
+Menú

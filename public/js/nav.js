@@ -17,7 +17,7 @@
   // Apunte rápido de gastos (apunte.js): se abre encima de cualquier pantalla, sin cambiar de página
   if (!window.mfApunte) {
     const s = document.createElement('script')
-    s.src = 'apunte.js'
+    s.src = 'js/apunte.js'
     document.head.appendChild(s)
   }
 

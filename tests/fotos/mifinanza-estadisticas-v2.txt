@@ -1,0 +1,78 @@
+Estadísticas
+Entiende tus patrones de gasto
+Por período
+Por mes
+Año completo
+Oct
+Sep
+Ago
+Jul
+Jun
+May
+Abr
+Mar
+Feb
+Ene
+Nov
+Dic
+AHORRASTE ESTE MES
++55 €
+Octubre 2026
+Guardaste el 4 % de lo que entró
+Ingresos
+1.380 €
+Octubre
+Gastos
+1.326 €
+Octubre
+¿A DÓNDE VA TU DINERO?
+Octubre 2026
+1.326 €
+GASTADO
+CATEGORÍA
+%
+TOTAL
+🏠 Alquiler
+32
+418 €
+🌍 Remesas
+16
+211 €
+🛒 Supermercado
+15
+195 €
+💳 Crédito
+14
+180 €
+🎉 Salidas
+8
+110 €
+⚠️ Gastos Imprevistos
+8
+100 €
+💡 Luz
+3
+46 €
+⛽ Gasolina
+2
+26 €
+🏋️ Gym
+2
+25 €
+🧴 Cuidado personal
+1
+15 €
+ÚLTIMA VEZ Y FRECUENCIA
+Gasto
+Ingreso
+Gasto fijo
+Importar CSV
+MENÚ
+Metas
+Gastos fijos
+Préstamos
+Perfil
+Inicio
+Movim.
+Estadíst.
+Menú

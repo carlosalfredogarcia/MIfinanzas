@@ -1,3 +1,7 @@
+[build]
+  # Solo se publica public/: el código del servidor, el SQL, las pruebas y la documentación no son accesibles desde la web
+  publish = "public"
+
 [build.processing.html]
   pretty_urls = false
 
