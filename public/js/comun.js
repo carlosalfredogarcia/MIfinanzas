@@ -8,13 +8,14 @@
 
   // Importe en formato español con la moneda del usuario: 1.234,56 € · $1.234,56.
   // decimales: número fijo; si se omite, 0 cuando es entero y 2 cuando no.
-  function dinero(n, decimales) {
+  // moneda: otra distinta de la del usuario (p. ej. la de un préstamo).
+  function dinero(n, decimales, moneda) {
     const v = parseFloat(n) || 0
     const d = decimales ?? (Math.abs(v - Math.round(v)) < 0.005 ? 0 : 2)
     const [ent, frac] = Math.abs(v).toFixed(d).split('.')
     const num = ent.replace(/\B(?=(\d{3})+(?!\d))/g, '.') + (frac ? ',' + frac : '')
     const signo = v < 0 ? '−' : ''
-    const mon = window.moneda || localStorage.getItem('moneda') || '$'
+    const mon = moneda || window.moneda || localStorage.getItem('moneda') || '$'
     // Espacio que no se parte: el € nunca salta solo a la línea siguiente
     return mon === '€' ? signo + num + ' €' : signo + mon + num
   }

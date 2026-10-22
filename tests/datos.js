@@ -39,11 +39,25 @@ const perfil = [{
 
 const metas = [{ id: 7, nombre: 'Viaje a Japón', icono: '✈️', monto_objetivo: 1351.84, monto_actual: 0, fecha_inicio: '2026-01-01', fecha_limite: '2026-12-01', es_principal: true, usuario_id: 'u1' }]
 
+// Préstamos: Juan me debe (con un préstamo adicional y abonos), María ya pagó y a Pedro le debo
+const prestamos = [
+  { id: 'pr1', nombre: 'Juan', tipo: 'preste', monto_total: 600, fecha_inicio: '2026-07-10', moneda: '€', activo: true, usuario_id: 'u1', created_at: '3' },
+  { id: 'pr2', nombre: 'María', tipo: 'preste', monto_total: 200, fecha_inicio: '2026-05-01', moneda: '€', activo: false, usuario_id: 'u1', created_at: '1' },
+  { id: 'pr3', nombre: 'Pedro', tipo: 'debo', monto_total: 300, fecha_inicio: '2026-09-15', moneda: '€', activo: true, usuario_id: 'u1', created_at: '2' },
+]
+const prestamos_pagos = [
+  { id: 'pg1', prestamo_id: 'pr1', fecha: '2026-08-20', descripcion: 'Para el taller', monto: 100, tipo: 'prestado', usuario_id: 'u1' },
+  { id: 'pg2', prestamo_id: 'pr1', fecha: '2026-09-01', descripcion: 'Bizum', monto: 150, tipo: 'abono', usuario_id: 'u1' },
+  { id: 'pg3', prestamo_id: 'pr1', fecha: '2026-10-05', descripcion: '', monto: 50, tipo: 'abono', usuario_id: 'u1' },
+  { id: 'pg4', prestamo_id: 'pr2', fecha: '2026-06-01', descripcion: '', monto: 200, tipo: 'abono', usuario_id: 'u1' },
+  { id: 'pg5', prestamo_id: 'pr3', fecha: '2026-10-15', descripcion: 'Efectivo', monto: 100, tipo: 'abono', usuario_id: 'u1' },
+]
+
 const completo = () => JSON.parse(JSON.stringify({
   gastos, ingresos, gastos_fijos, perfil, metas,
   categoria_tipo: [{ categoria: '🏠 Alquiler', tipo: 'necesario', es_fijo: false }, { categoria: '🛒 Supermercado', tipo: 'necesario', es_fijo: false }],
   user_gasto_plan: [], user_preferences: [], user_budget_mode: [], colchon_movimientos: [],
-  prestamos: [], prestamos_pagos: [], viajes: [], viajes_items: [],
+  prestamos, prestamos_pagos, viajes: [], viajes_items: [],
 }))
 const vacio = () => ({ gastos: [], ingresos: [], gastos_fijos: [], perfil: [{ id: 'p1', usuario_id: 'u1', nombre: '', moneda: '€', categorias: '' }], metas: [] })
 

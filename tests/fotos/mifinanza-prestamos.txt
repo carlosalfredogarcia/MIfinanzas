@@ -1,11 +1,26 @@
 Préstamos
-Lo que prestas y lo que debes
-TOTAL QUE TE DEBEN
-$0
-📥
-Me deben
-Debo
-Nadie te debe nada todavía.
+
+Lo que prestas y lo que debes, siempre claro
+
+TE DEBEN
+400 €
+1 persona
+DEBES
+200 €
+1 persona
+A tu favor
+200 €
+Me deben 1
+Debo 1
+J
+Juan
+Último abono hace 16 días
+400 €
+te debe
+Devuelto 200 € de 600 €
+33 %
+SALDADOS (1)
+Deshacer
 Nuevo préstamo
 Gasto
 Ingreso

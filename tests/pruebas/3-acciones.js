@@ -168,4 +168,36 @@ module.exports = [
       await pg.context().close(); await pg2.context().close()
     },
   },
+  {
+    nombre: 'préstamos: abono, saldar y estado de cuenta en PDF',
+    async prueba(t) {
+      const pg = await t.abrir('mifinanza-prestamos.html', { datos: completo() })
+      const texto = await t.textoVisible(pg)
+      t.contiene(texto, 'TE DEBEN\n400 €'.replace(' €', '\u00a0€'))
+      // Abono de todo lo pendiente: queda saldado (con Deshacer)
+      await pg.click('[data-id="pr1"]'); await pg.waitForTimeout(400)
+      await pg.click('#d-abono'); await pg.waitForTimeout(400)
+      await pg.click('#f-todo button')
+      t.igual(await pg.$eval('#f-monto', e => e.value), '400')
+      await pg.click('#f-ok'); await pg.waitForTimeout(600)
+      const ins = await pg.evaluate(() => window.__INS__.at(-1))
+      t.igual(ins.table, 'prestamos_pagos'); t.igual(ins.v[0].tipo, 'abono'); t.igual(ins.v[0].monto, 400)
+      t.igual((await pg.evaluate(() => window.__UPD__.at(-1))).v, { activo: false })
+      t.contiene(await pg.$eval('#toast', e => e.textContent), 'Juan ya no te debe nada')
+      // PDF: se genera en el móvil y lleva los movimientos con su saldo
+      await pg.click('#d-pdf'); await pg.waitForTimeout(1500)
+      const b64 = await pg.evaluate(async () => { const b = window.__ULTIMO_PDF__; if (!b) return null; const buf = new Uint8Array(await b.arrayBuffer()); let s = ''; for (const x of buf) s += String.fromCharCode(x); return btoa(s) })
+      t.ok(b64, 'No se generó el PDF')
+      const fs = require('fs'), path = require('path')
+      fs.mkdirSync(path.join(__dirname, '..', 'capturas'), { recursive: true })
+      fs.writeFileSync(path.join(__dirname, '..', 'capturas', 'estado-de-cuenta.pdf'), Buffer.from(b64, 'base64'))
+      t.ok(Buffer.from(b64, 'base64').slice(0, 5).toString() === '%PDF-', 'No es un PDF')
+      // Resumen por WhatsApp
+      const resumen = await pg.evaluate(() => textoResumen(prestamos.find(p => p.id === 'pr3')))
+      t.contiene(resumen, 'Te paso cómo voy con lo que te debo')
+      t.contiene(resumen, 'Pendiente: *200\u00a0€*')
+      t.sinErrores(pg)
+      await pg.context().close()
+    },
+  },
 ]

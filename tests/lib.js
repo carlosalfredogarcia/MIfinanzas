@@ -33,6 +33,8 @@ async function abrir(pagina, { datos = {}, ancho = 390, alto = 844, espera = 180
       const f = path.join(PUBLIC, decodeURIComponent(u.pathname))
       return fs.existsSync(f) && fs.statSync(f).isFile() && u.pathname !== '/sw.js' ? r.fulfill({ path: f }) : r.fulfill({ status: 404, body: '' })
     }
+    // jsPDF (PDF de Préstamos) desde el propio proyecto, sin depender de internet
+    if (u.hostname === 'cdnjs.cloudflare.com' && u.pathname.includes('jspdf')) return r.fulfill({ path: require.resolve('jspdf/dist/jspdf.umd.min.js') })
     // Fuentes y librerías externas: no hacen falta para probar
     return r.fulfill({ status: 204, body: '' })
   })

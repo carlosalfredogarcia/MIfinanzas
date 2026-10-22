@@ -4,8 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>MiFinanza – Préstamos</title>
-<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
-<script src="js/datepicker.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/prestamos.css">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="/icon-192.png">
@@ -13,97 +12,42 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="MiFinanza">
-<meta name="theme-color" content="#58a6ff">
+<meta name="theme-color" content="#0a0e1a">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="js/auth.js"></script>
 <script src="js/comun.js"></script>
 </head>
 <body>
 <div class="phone">
+  <div class="blob blob-g" aria-hidden="true"></div>
+  <div class="blob blob-r" aria-hidden="true"></div>
 
-  <div class="header">
-    <div class="header-title">Préstamos</div>
-    <div class="header-sub">Lo que prestas y lo que debes</div>
+  <header class="header">
+    <h1>Préstamos</h1>
+    <p>Lo que prestas y lo que debes, siempre claro</p>
+  </header>
+
+  <section class="resumen" id="resumen" aria-label="Resumen"></section>
+
+  <div class="pestanas" role="tablist" aria-label="Préstamos">
+    <button type="button" role="tab" id="tab-preste" data-tab="preste" aria-selected="true">Me deben</button>
+    <button type="button" role="tab" id="tab-debo" data-tab="debo" aria-selected="false">Debo</button>
   </div>
 
-  <div class="banner-pendiente">
-    <div>
-      <div class="banner-label" id="banner-label">Total que te deben</div>
-      <div class="banner-valor" id="banner-valor">$0</div>
-    </div>
-    <div class="banner-icon" id="banner-icon">📥</div>
-  </div>
-
-  <div class="tabs">
-    <div class="tab active" id="tab-preste" onclick="setTab('preste')">Me deben</div>
-    <div class="tab" id="tab-debo" onclick="setTab('debo')">Debo</div>
-  </div>
-
-  <div class="lista-wrap">
-    <div id="lista-prestamos"><div class="loading">Cargando...</div></div>
-  </div>
-
-  <div class="spacer"></div>
-</div>
-<!-- Modal nuevo préstamo -->
-<div class="modal-overlay" id="modal-nuevo">
-  <div class="modal">
-    <div class="modal-handle"></div>
-    <div class="modal-title">Nuevo préstamo</div>
-    <div class="fld"><label class="lbl">Nombre</label><input type="text" id="np-nombre" class="inp" placeholder="Ej: Juan, María..."></div>
-    <div class="fld"><label class="lbl">Tipo</label>
-      <select id="np-tipo" class="inp">
-        <option value="preste">📥 Me deben</option>
-        <option value="debo">📤 Debo</option>
-      </select>
-    </div>
-    <div class="fld"><label class="lbl">Monto total</label><input type="number" id="np-monto" class="inp" placeholder="$0.00"></div>
-    <div class="fld"><label class="lbl">Fecha de inicio</label><span class="dp-wrap"><input type="hidden" id="np-fecha" class="dp-real-input"><button type="button" class="inp dp-btn" data-dp-for="np-fecha" onclick="openDatePicker('np-fecha')"><span class="dp-txt" data-empty="true">Seleccionar fecha</span><svg class="dp-cal-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="16" height="15" rx="2"/><path d="M2 8h16M7 1v4M13 1v4"/></svg></button></span></div>
-    <div class="fld" style="margin-bottom:18px"><label class="lbl">Moneda</label>
-      <select id="np-moneda" class="inp">
-        <option value="$">$ — Dólar</option>
-        <option value="€">€ — Euro</option>
-        <option value="Bs">Bs — Bolívar</option>
-      </select>
-    </div>
-    <button class="btn-ok" onclick="guardarPrestamo()">Guardar préstamo</button>
-    <button class="btn-no" onclick="cerrarModalNuevo()">Cancelar</button>
-  </div>
+  <section id="lista" aria-live="polite"><div class="cargando">Cargando…</div></section>
 </div>
 
-<!-- Modal añadir pago -->
-<div class="modal-overlay" id="modal-pago">
-  <div class="modal">
-    <div class="modal-handle"></div>
-    <div class="modal-title">Añadir pago</div>
-    <div class="fld"><label class="lbl">Tipo</label>
-      <select id="pago-tipo" class="inp">
-        <option value="abono">↓ Abono</option>
-        <option value="prestado">↑ Préstamo adicional</option>
-      </select>
-    </div>
-    <div class="fld"><label class="lbl">Fecha</label><span class="dp-wrap"><input type="hidden" id="pago-fecha" class="dp-real-input"><button type="button" class="inp dp-btn" data-dp-for="pago-fecha" onclick="openDatePicker('pago-fecha')"><span class="dp-txt" data-empty="true">Seleccionar fecha</span><svg class="dp-cal-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="16" height="15" rx="2"/><path d="M2 8h16M7 1v4M13 1v4"/></svg></button></span></div>
-    <div class="fld"><label class="lbl">Descripción</label><input type="text" id="pago-descripcion" class="inp" placeholder="Ej: Abono, Transferencia..."></div>
-    <div class="fld" style="margin-bottom:18px"><label class="lbl">Monto</label><input type="number" id="pago-monto" class="inp" placeholder="$0.00"></div>
-    <button class="btn-ok" onclick="guardarPago()">Guardar pago</button>
-    <button class="btn-no" onclick="cerrarModalPago()">Cancelar</button>
-  </div>
+<!-- Hoja reutilizable: nuevo préstamo, detalle, abono, editar -->
+<div id="hoja-raiz">
+  <div class="h-fondo" data-cerrar></div>
+  <section class="hoja" role="dialog" aria-modal="true" aria-labelledby="h-tit" inert>
+    <div class="h-asa"></div>
+    <div class="h-cab"><span class="h-tit" id="h-tit"></span><button type="button" class="h-x" data-cerrar aria-label="Cerrar">×</button></div>
+    <div id="h-cuerpo"></div>
+  </section>
 </div>
 
-<!-- Modal editar movimiento -->
-<div class="modal-overlay" id="modal-editar-pago">
-  <div class="modal">
-    <div class="modal-handle"></div>
-    <div class="modal-title">Editar movimiento</div>
-    <div class="fld"><label class="lbl">Fecha</label><span class="dp-wrap"><input type="hidden" id="ep-fecha" class="dp-real-input"><button type="button" class="inp dp-btn" data-dp-for="ep-fecha" onclick="openDatePicker('ep-fecha')"><span class="dp-txt" data-empty="true">Seleccionar fecha</span><svg class="dp-cal-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="16" height="15" rx="2"/><path d="M2 8h16M7 1v4M13 1v4"/></svg></button></span></div>
-    <div class="fld"><label class="lbl">Descripción</label><input type="text" id="ep-descripcion" class="inp"></div>
-    <div class="fld" style="margin-bottom:18px"><label class="lbl">Monto</label><input type="number" id="ep-monto" class="inp"></div>
-    <button class="btn-ok" onclick="guardarEdicionPago()">Guardar cambios</button>
-    <button class="btn-no" onclick="cerrarModalEditarPago()">Cancelar</button>
-  </div>
-</div>
-
-<div class="toast" id="toast"></div>
+<div class="toast" id="toast" role="status" aria-live="polite"><span></span><button type="button">Deshacer</button></div>
 
 <script src="js/prestamos.js"></script>
 <script src="js/nav.js"></script>
