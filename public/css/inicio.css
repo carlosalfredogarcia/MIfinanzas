@@ -167,6 +167,7 @@ button:focus-visible, a:focus-visible { outline: 2px solid #a5b4fc; outline-offs
   font-size: 15px; font-weight: 800; color: var(--accent-soft);
   background: rgba(99,102,241,.16); border: 1px solid rgba(99,102,241,.3);
 }
+.fijo-icon.es-emoji { font-size: 20px; }
 .fijo-name { font-size: 15px; font-weight: 700; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .fijo-amount { font-size: 15px; font-weight: 800; color: var(--red-txt); text-align: right; white-space: nowrap; }
 .fijo-bar-track { height: 6px; border-radius: 999px; background: #1f2937; overflow: hidden; }

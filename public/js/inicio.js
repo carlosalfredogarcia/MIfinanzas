@@ -179,7 +179,10 @@ async function cargarDashboard() {
       <div class="fijo-bar-track"><div class="fijo-bar-fill" style="width:${pct.toFixed(1)}%"></div></div>
       <span class="fijo-pct num">${pctTxt(pct)}</span>
     `
-    div.querySelector('.fijo-icon').textContent = (f.nombre || '?').trim()[0].toUpperCase()
+    // El emoji de su categoría; si la categoría no tiene, la inicial del nombre
+    const icono = div.querySelector('.fijo-icon'), e = MF.emoji(f.categoria, '')
+    icono.textContent = e || (f.nombre || '?').trim()[0].toUpperCase()
+    icono.classList.toggle('es-emoji', !!e)
     div.querySelector('.fijo-name').textContent = f.nombre
     listaFijos.appendChild(div)
   })
