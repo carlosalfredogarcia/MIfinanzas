@@ -34,5 +34,18 @@
     signOut: () => Promise.resolve({}),
     resetPasswordForEmail: (e, o) => { window.__RESET__ = [e, o]; return Promise.resolve({ error: null }); },
   };
-  window.supabase = { createClient: () => new Proxy({ from: q, auth, rpc: () => Promise.resolve({ data: null, error: null }) }, { get: (t, k) => k in t ? t[k] : () => ({}) }) };
+  // Archivos (comprobantes): los guardados vienen en __DATA__.__archivos; las subidas se anotan en __SUBIDOS__.
+  // Con window.__SIN_BUCKET__ simula que aún no se ejecutó el SQL que crea el espacio.
+  const sinBucket = () => window.__SIN_BUCKET__ ? { data: null, error: { message: 'Bucket not found' } } : null
+  const storage = { from: () => ({
+    list: async () => sinBucket() || { data: (D.__archivos || []).map(name => ({ name })), error: null },
+    upload: async (path, blob) => { (window.__SUBIDOS__ = window.__SUBIDOS__ || []).push({ path, tipo: blob.type, bytes: blob.size }); return sinBucket() || { data: { path }, error: null } },
+    remove: async paths => { (window.__QUITADOS__ = window.__QUITADOS__ || []).push(...paths); return { data: null, error: null } },
+    createSignedUrl: async () => {
+      const c = document.createElement('canvas'); c.width = 60; c.height = 90
+      const g = c.getContext('2d'); g.fillStyle = '#10b981'; g.fillRect(0, 0, 60, 90)
+      return { data: { signedUrl: c.toDataURL('image/jpeg') }, error: null }
+    },
+  }) };
+  window.supabase = { createClient: () => new Proxy({ from: q, auth, storage, rpc: () => Promise.resolve({ data: null, error: null }) }, { get: (t, k) => k in t ? t[k] : () => ({}) }) };
 })();

@@ -200,4 +200,43 @@ module.exports = [
       await pg.context().close()
     },
   },
+  {
+    nombre: 'préstamos: comprobantes opcionales y en el PDF',
+    async prueba(t) {
+      const fs = require('fs'), path = require('path')
+      const pg = await t.abrir('mifinanza-prestamos.html', { datos: completo() })
+      await pg.click('[data-id="pr1"]'); await pg.waitForTimeout(400)
+      t.contiene(await pg.$eval('.linea', e => e.innerText), '📎 comprobante')
+      // Abono con una foto: se reduce a JPEG y se guarda con el id del movimiento
+      await pg.click('#d-abono'); await pg.waitForTimeout(400)
+      await pg.keyboard.type('20')
+      const png = await pg.evaluate(() => { const c = document.createElement('canvas'); c.width = 3000; c.height = 2000; c.getContext('2d').fillRect(0, 0, 10, 10); return c.toDataURL('image/png').split(',')[1] })
+      await pg.setInputFiles('#f-archivo', { name: 'bizum.png', mimeType: 'image/png', buffer: Buffer.from(png, 'base64') })
+      t.contiene(await pg.$eval('#f-comp', e => e.textContent), 'bizum.png')
+      await pg.click('#f-ok'); await pg.waitForTimeout(800)
+      const sub = await pg.evaluate(() => window.__SUBIDOS__.at(-1))
+      t.igual([sub.path, sub.tipo], ['u1/prestamos/nuevo-1.jpg', 'image/jpeg'])
+      // PDF con los comprobantes: una página más por foto
+      await pg.check('#d-con-comp').catch(() => pg.click('.interruptor'))
+      await pg.click('#d-pdf'); await pg.waitForTimeout(2000)
+      const b64 = await pg.evaluate(async () => { const buf = new Uint8Array(await window.__ULTIMO_PDF__.arrayBuffer()); let s = ''; for (const x of buf) s += String.fromCharCode(x); return btoa(s) })
+      const pdf = Buffer.from(b64, 'base64')
+      fs.writeFileSync(path.join(__dirname, '..', 'capturas', 'estado-con-comprobantes.pdf'), pdf)
+      const paginas = (pdf.toString('latin1').match(/\/Type \/Page[^s]/g) || []).length
+      t.igual(paginas, 3, 'El PDF debería tener el estado de cuenta y 2 comprobantes')
+      t.sinErrores(pg)
+      await pg.context().close()
+      // Sin el SQL del lunes: aviso claro en vez de error
+      const pg2 = await t.abrir('mifinanza-prestamos.html', { datos: completo() })
+      await pg2.evaluate(() => { window.__SIN_BUCKET__ = true })
+      await pg2.click('#tab-debo'); await pg2.click('[data-id="pr3"]'); await pg2.waitForTimeout(400)
+      await pg2.click('#d-abono'); await pg2.waitForTimeout(400)
+      await pg2.keyboard.type('10')
+      await pg2.setInputFiles('#f-archivo', { name: 'b.png', mimeType: 'image/png', buffer: Buffer.from(png, 'base64') })
+      await pg2.click('#f-ok'); await pg2.waitForTimeout(800)
+      t.contiene(await pg2.$eval('#toast', e => e.textContent), 'aún no están activados')
+      t.sinErrores(pg2)
+      await pg2.context().close()
+    },
+  },
 ]

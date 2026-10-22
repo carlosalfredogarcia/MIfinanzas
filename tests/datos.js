@@ -58,6 +58,7 @@ const completo = () => JSON.parse(JSON.stringify({
   categoria_tipo: [{ categoria: '🏠 Alquiler', tipo: 'necesario', es_fijo: false }, { categoria: '🛒 Supermercado', tipo: 'necesario', es_fijo: false }],
   user_gasto_plan: [], user_preferences: [], user_budget_mode: [], colchon_movimientos: [],
   prestamos, prestamos_pagos, viajes: [], viajes_items: [],
+  __archivos: ['pg2.jpg'],  // comprobante del Bizum de Juan
 }))
 const vacio = () => ({ gastos: [], ingresos: [], gastos_fijos: [], perfil: [{ id: 'p1', usuario_id: 'u1', nombre: '', moneda: '€', categorias: '' }], metas: [] })
 

@@ -143,6 +143,17 @@ button, input { font-family: inherit; }
 .nota { font-size: 12.5px; color: var(--subtext); line-height: 1.5; text-align: center; margin-top: 8px; }
 .sugerencias { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
 
+.comp { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.comp .chip { margin: 0; }
+.comp-nombre { flex: 1 1 100%; font-size: 13.5px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.btn-adjuntar { width: 100%; border: 1px dashed var(--border2); background: none; color: var(--subtext); border-radius: 14px; padding: 12px; font-size: 13.5px; font-weight: 700; cursor: pointer; }
+.interruptor { display: flex; align-items: center; gap: 10px; font-size: 13px; font-weight: 700; color: var(--subtext); margin: 10px 2px 0; cursor: pointer; }
+.interruptor input { position: absolute; opacity: 0; pointer-events: none; }
+.interruptor span { width: 36px; height: 20px; border-radius: 99px; background: var(--card2); border: 1px solid var(--border2); position: relative; flex: none; transition: background .2s; }
+.interruptor span::after { content: ''; position: absolute; top: 2px; left: 2px; width: 14px; height: 14px; border-radius: 50%; background: var(--subtext); transition: transform .2s, background .2s; }
+.interruptor input:checked + span { background: color-mix(in srgb, var(--green) 30%, transparent); border-color: var(--green); }
+.interruptor input:checked + span::after { transform: translateX(16px); background: var(--green-txt); }
+.interruptor input:focus-visible + span { outline: 2px solid var(--indigo-txt); outline-offset: 2px; }
 .toast { position: fixed; left: 50%; bottom: calc(110px + env(safe-area-inset-bottom)); z-index: 302; transform: translate(-50%, 20px); opacity: 0; pointer-events: none; transition: all .22s;
   display: flex; align-items: center; gap: 14px; white-space: nowrap; background: var(--card2); border: 1px solid var(--border2); border-radius: 14px; padding: 12px 14px 12px 16px; font-size: 14px; font-weight: 700; box-shadow: 0 14px 30px rgba(0,0,0,.5); max-width: calc(100vw - 32px); }
 .toast.ver { opacity: 1; transform: translate(-50%, 0); pointer-events: auto; }

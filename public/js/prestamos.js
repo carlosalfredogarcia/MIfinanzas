@@ -3,6 +3,8 @@
 // prestamos_pagos (prestamo_id, fecha, descripcion, monto, tipo 'abono'|'prestado').
 // monto_total ya incluye lo prestado de más; pendiente = monto_total − abonos.
 // El estado de cuenta en PDF se genera en el móvil (jsPDF, se descarga solo al usarlo) y se comparte.
+// Comprobantes (opcionales): Supabase Storage, espacio privado «comprobantes», archivo
+// <usuario>/prestamos/<id del movimiento>.jpg|.pdf (supabase/migrations/comprobantes.sql).
 window.moneda = localStorage.getItem('moneda') || '$'
 
 const { esc, fechaLocal } = MF
@@ -12,6 +14,8 @@ const COLORES = ['#10b981', '#6366f1', '#f59e0b', '#ec4899', '#06b6d4', '#8b5cf6
 const JSPDF = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js'
 
 let prestamos = [], pagos = {}, tab = 'preste', miNombre = ''
+// Comprobantes guardados: id del movimiento → 'jpg' | 'pdf'; activos = false si falta el espacio en Supabase
+let comprobantes = new Map(), comprobantesActivos = null
 
 // ── Cálculos ───────────────────────────────────────────────
 const num = v => parseFloat(v || 0)
@@ -49,6 +53,68 @@ async function cargarPrestamos() {
   for (const m of rG.data || []) (pagos[m.prestamo_id] = pagos[m.prestamo_id] || []).push(m)
   miNombre = rPerfil.data?.[0]?.nombre || ''
   render()
+  cargarComprobantes()
+}
+
+// ── Comprobantes ───────────────────────────────────────────
+const BUCKET = 'comprobantes'
+const carpeta = () => `${window.currentUserId}/prestamos`
+const rutaComp = (id, ext) => `${carpeta()}/${id}.${ext}`
+const MSG_SIN_ACTIVAR = 'los comprobantes aún no están activados (falta un paso en Supabase)'
+
+async function cargarComprobantes() {
+  try {
+    const { data, error } = await dbClient.storage.from(BUCKET).list(carpeta(), { limit: 1000 })
+    if (error) throw error
+    comprobantes = new Map((data || []).map(f => f.name.split('.')).filter(([id, ext]) => id && ext).map(([id, ext]) => [id, ext]))
+    comprobantesActivos = true
+  } catch { comprobantesActivos = false }
+}
+const tieneComp = m => comprobantes.get(String(m.id))
+
+// Fotos: se reducen en el móvil (lado mayor 1600 px, JPEG) para que ocupen ~150–300 KB
+async function prepararArchivo(archivo) {
+  if (archivo.type === 'application/pdf') return { blob: archivo, ext: 'pdf', tipo: 'application/pdf' }
+  const img = await new Promise((ok, mal) => { const i = new Image(); i.onload = () => ok(i); i.onerror = mal; i.src = URL.createObjectURL(archivo) })
+  const escala = Math.min(1, 1600 / Math.max(img.naturalWidth, img.naturalHeight))
+  const lienzo = document.createElement('canvas')
+  lienzo.width = Math.round(img.naturalWidth * escala); lienzo.height = Math.round(img.naturalHeight * escala)
+  lienzo.getContext('2d').drawImage(img, 0, 0, lienzo.width, lienzo.height)
+  URL.revokeObjectURL(img.src)
+  const blob = await new Promise(ok => lienzo.toBlob(ok, 'image/jpeg', 0.72))
+  return { blob, ext: 'jpg', tipo: 'image/jpeg' }
+}
+
+// Devuelve '' si se subió, o el motivo si no (para decirlo en el aviso final)
+async function subirComp(id, archivo) {
+  try {
+    const { blob, ext, tipo } = await prepararArchivo(archivo)
+    if (blob.size > 5 * 1024 * 1024) return 'el comprobante pesa más de 5 MB'
+    const anterior = comprobantes.get(String(id))
+    const { error } = await dbClient.storage.from(BUCKET).upload(rutaComp(id, ext), blob, { upsert: true, contentType: tipo })
+    if (error) return /bucket/i.test(error.message || '') ? MSG_SIN_ACTIVAR : 'no se pudo subir el comprobante (' + error.message + ')'
+    if (anterior && anterior !== ext) await dbClient.storage.from(BUCKET).remove([rutaComp(id, anterior)])
+    comprobantes.set(String(id), ext); comprobantesActivos = true
+    return ''
+  } catch (e) { return 'no se pudo leer el archivo del comprobante' }
+}
+async function quitarComp(id) {
+  const ext = comprobantes.get(String(id))
+  if (!ext) return
+  await dbClient.storage.from(BUCKET).remove([rutaComp(id, ext)])
+  comprobantes.delete(String(id))
+}
+async function urlComp(id) {
+  const ext = comprobantes.get(String(id))
+  const { data, error } = await dbClient.storage.from(BUCKET).createSignedUrl(rutaComp(id, ext), 600)
+  return error ? null : data?.signedUrl
+}
+async function verComp(id) {
+  // Se abre la ventana en el mismo toque (si no, el móvil la bloquea) y luego se carga el archivo
+  const v = window.open('', '_blank')
+  const url = await urlComp(id)
+  if (!url) { v?.close(); aviso('No se pudo abrir el comprobante'); return }
+  if (v) v.location = url; else location.href = url
 }
 
 // ── Pintar ─────────────────────────────────────────────────
@@ -237,10 +303,11 @@ function abrirDetalle(id) {
     <button type="button" class="btn-grande btn-wa" id="d-pdf" style="margin-top:4px">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6M12 18v-6M9 15l3 3 3-3"/></svg>
       Enviar estado de cuenta (PDF)</button>
+    ${movs.some(tieneComp) ? `<label class="interruptor"><input type="checkbox" id="d-con-comp" ${localStorage.getItem('mf-pdf-comprobantes') === '1' ? 'checked' : ''}><span></span>Incluir los comprobantes en el PDF</label>` : ''}
     <button type="button" class="btn-texto" id="d-texto" style="width:100%">o enviar un resumen por WhatsApp</button>
     <div class="linea">
       ${movs.map(m => `<button type="button" class="mov ${m.tipo === 'prestado' ? 'prestado' : 'abono'}" data-mov="${esc(m.id)}">
-        <span class="mov-info"><b>${esc(m.descripcion || (m.tipo === 'prestado' ? (deben ? 'Le prestaste más' : 'Te prestó más') : (deben ? 'Te devolvió' : 'Devolviste')))}</b><small>${fechaTxt(m.fecha)} · ${m.tipo === 'prestado' ? 'préstamo' : 'abono'}</small></span>
+        <span class="mov-info"><b>${esc(m.descripcion || (m.tipo === 'prestado' ? (deben ? 'Le prestaste más' : 'Te prestó más') : (deben ? 'Te devolvió' : 'Devolviste')))}</b><small>${fechaTxt(m.fecha)} · ${m.tipo === 'prestado' ? 'préstamo' : 'abono'}${tieneComp(m) ? ' · 📎 comprobante' : ''}</small></span>
         <span class="mov-monto num">${m.tipo === 'prestado' ? '+' : '−'}${din(m.monto, p)}</span></button>`).join('')}
       <div class="mov"><span class="mov-info"><b>${deben ? 'Le prestaste' : 'Te prestó'}</b><small>${fechaTxt(p.fecha_inicio)} · inicio</small></span><span class="mov-monto num">${din(c.inicial, p)}</span></div>
     </div>
@@ -253,7 +320,8 @@ function abrirDetalle(id) {
     $('d-abono').addEventListener('click', () => abrirMovimiento(p, 'abono'))
     $('d-mas').addEventListener('click', () => abrirMovimiento(p, 'prestado'))
   }
-  $('d-pdf').addEventListener('click', () => compartirPDF(p))
+  $('d-pdf').addEventListener('click', () => compartirPDF(p, !!$('d-con-comp')?.checked))
+  $('d-con-comp')?.addEventListener('change', e => localStorage.setItem('mf-pdf-comprobantes', e.target.checked ? '1' : '0'))
   $('d-texto').addEventListener('click', () => compartirTexto(p))
   document.querySelectorAll('[data-mov]').forEach(b => b.addEventListener('click', () => abrirMovimiento(p, null, movsDe(p).find(m => String(m.id) === b.dataset.mov))))
   $('d-saldar').addEventListener('click', () => cambiarActivo(p, !p.activo))
@@ -272,6 +340,8 @@ function abrirMovimiento(p, tipoInicial, mov) {
     <div class="chips" id="f-todo"${tipo === 'abono' && !mov && c.pendiente > 0 ? '' : ' hidden'}><button type="button" class="chip">Todo lo pendiente · ${din(c.pendiente, p)}</button></div>
     ${htmlFecha(mov ? String(mov.fecha).slice(0, 10) : fechaLocal())}
     <div class="campo"><label class="lbl" for="f-desc">Nota (opcional)</label><input class="inp" id="f-desc" maxlength="60" placeholder="Ej: Bizum, efectivo, transferencia" value="${esc(mov?.descripcion || '')}"></div>
+    <div class="campo"><span class="lbl">Comprobante (opcional)</span><div class="comp" id="f-comp"></div>
+      <input type="file" id="f-archivo" accept="image/*,application/pdf" hidden></div>
     <button type="button" class="btn-grande" id="f-ok" disabled>Guardar</button>
     ${mov ? '<button type="button" class="btn-texto peligro" id="f-borrar" style="width:100%;margin-top:6px">Eliminar movimiento</button>' : ''}`, p.tipo)
   const validar = () => {
@@ -281,6 +351,23 @@ function abrirMovimiento(p, tipoInicial, mov) {
   }
   if (!mov) enlazarSegm('f-tipo', v => { tipo = v; $('f-todo').hidden = !(v === 'abono' && c.pendiente > 0) })
   enlazarImporte(validar); enlazarFecha()
+  // Comprobante: uno nuevo elegido, el que ya estaba guardado o ninguno
+  let archivoNuevo = null, quitarGuardado = false
+  const pintarComp = () => {
+    const guardado = mov && tieneComp(mov) && !quitarGuardado
+    $('f-comp').innerHTML = archivoNuevo
+      ? `<span class="comp-nombre">🧾 ${esc(archivoNuevo.name)}</span><button type="button" class="chip" data-c="quitar">Quitar</button>`
+      : guardado
+        ? `<span class="comp-nombre">🧾 Comprobante guardado</span><button type="button" class="chip" data-c="ver">Ver</button><button type="button" class="chip" data-c="cambiar">Cambiar</button><button type="button" class="chip" data-c="quitar">Quitar</button>`
+        : `<button type="button" class="btn-adjuntar" data-c="cambiar">📎 Adjuntar foto o PDF</button>`
+    $('f-comp').querySelectorAll('[data-c]').forEach(b => b.addEventListener('click', () => {
+      if (b.dataset.c === 'cambiar') $('f-archivo').click()
+      else if (b.dataset.c === 'ver') verComp(mov.id)
+      else { if (archivoNuevo) archivoNuevo = null; else quitarGuardado = true; pintarComp() }
+    }))
+  }
+  $('f-archivo').addEventListener('change', e => { archivoNuevo = e.target.files[0] || null; e.target.value = ''; pintarComp() })
+  pintarComp()
   $('f-todo').querySelector('button').addEventListener('click', () => { $('f-monto').value = importeTxt(c.pendiente); $('f-monto').dispatchEvent(new Event('input')) })
   $('f-ok').addEventListener('click', async () => {
     $('f-ok').disabled = true
@@ -290,7 +377,9 @@ function abrirMovimiento(p, tipoInicial, mov) {
       if (error) { validar(); aviso('No se pudo guardar: ' + error.message); return }
       if (tipo === 'prestado') await ajustarTotal(p, datos.monto - num(mov.monto))
       Object.assign(mov, datos)
-      abrirDetalle(p.id); render(); aviso('Movimiento actualizado')
+      const fallo = archivoNuevo ? await subirComp(mov.id, archivoNuevo) : ''
+      if (!archivoNuevo && quitarGuardado) await quitarComp(mov.id)
+      abrirDetalle(p.id); render(); aviso(fallo ? 'Guardado, pero ' + fallo : 'Movimiento actualizado')
       return
     }
     const fila = { prestamo_id: p.id, usuario_id: window.currentUserId, tipo, ...datos }
@@ -299,15 +388,16 @@ function abrirMovimiento(p, tipoInicial, mov) {
     const nuevo = { id: 'tmp' + Date.now(), ...fila, ...(data?.[0] || {}) }
     ;(pagos[p.id] = pagos[p.id] || []).push(nuevo)
     if (tipo === 'prestado') await ajustarTotal(p, datos.monto)
+    const fallo = archivoNuevo ? await subirComp(nuevo.id, archivoNuevo) : ''
     // Si con este abono queda en cero, se marca como saldado (con Deshacer)
     if (tipo === 'abono' && cuentas(p).pendiente <= 0.005) {
       await cambiarActivo(p, false, true)
       abrirDetalle(p.id); render()
-      aviso(deben ? `🎉 ${p.nombre} ya no te debe nada` : `🎉 Ya no le debes nada a ${p.nombre}`, () => cambiarActivo(p, true))
+      aviso(fallo ? 'Guardado, pero ' + fallo : deben ? `🎉 ${p.nombre} ya no te debe nada` : `🎉 Ya no le debes nada a ${p.nombre}`, () => cambiarActivo(p, true))
       return
     }
     abrirDetalle(p.id); render()
-    aviso(tipo === 'abono' ? `${din(datos.monto, p)} apuntado · quedan ${din(cuentas(p).pendiente, p)}` : `${din(datos.monto, p)} más apuntado`)
+    aviso(fallo ? 'Guardado, pero ' + fallo : tipo === 'abono' ? `${din(datos.monto, p)} apuntado · quedan ${din(cuentas(p).pendiente, p)}` : `${din(datos.monto, p)} más apuntado`)
   })
   if (mov) $('f-borrar').addEventListener('click', () => borrarMovimiento(p, mov))
   setTimeout(() => $('f-monto').focus({ preventScroll: true }), 50)
@@ -365,6 +455,7 @@ function borrarPrestamo(p) {
   borrarDiferido(`${p.nombre} eliminado`, () => { prestamos = prestamos.filter(x => x !== p) }, () => { prestamos.splice(idx, 0, p) }, async () => {
     await dbClient.from('prestamos_pagos').delete().eq('prestamo_id', p.id).eq('usuario_id', window.currentUserId)
     await dbClient.from('prestamos').delete().eq('id', p.id).eq('usuario_id', window.currentUserId)
+    for (const m of movsDe(p)) await quitarComp(m.id)
   })
 }
 function borrarMovimiento(p, mov) {
@@ -378,6 +469,7 @@ function borrarMovimiento(p, mov) {
     if (raizHoja.classList.contains('h-abierta')) abrirDetalle(p.id)
   }, async () => {
     await dbClient.from('prestamos_pagos').delete().eq('id', mov.id).eq('usuario_id', window.currentUserId)
+    await quitarComp(mov.id)
     if (mov.tipo === 'prestado') await dbClient.from('prestamos').update({ monto_total: p.monto_total }).eq('id', p.id).eq('usuario_id', window.currentUserId)
   })
 }
@@ -424,7 +516,7 @@ function cargarJsPDF() {
   })
 }
 
-async function crearPDF(p) {
+async function crearPDF(p, conComprobantes) {
   const { jsPDF } = await cargarJsPDF()
   const { c, filas } = extracto(p), deben = p.tipo === 'preste'
   // jsPDF con las fuentes estándar no tiene espacio fino: se usa uno normal
@@ -488,20 +580,42 @@ async function crearPDF(p) {
   // Pie
   doc.setFont('helvetica', 'normal'); doc.setFontSize(8); doc.setTextColor(148, 163, 184)
   doc.text('Documento informativo generado con MiFinanzas a partir de los movimientos apuntados.', W / 2, 287, { align: 'center' })
-  return doc.output('blob')
+  // Anexo: una página por foto de comprobante; los que son PDF se adjuntan aparte al compartir
+  const adjuntosPdf = []
+  if (conComprobantes) {
+    for (const m of [...movsDe(p)].filter(tieneComp).sort((a, b) => a.fecha.localeCompare(b.fecha))) {
+      const url = await urlComp(m.id)
+      if (!url) continue
+      const blob = await fetch(url).then(r => r.blob()).catch(() => null)
+      if (!blob) continue
+      const titulo = `${fechaTxt(m.fecha)} · ${m.descripcion || (m.tipo === 'prestado' ? 'Préstamo adicional' : 'Abono')} · ${d(m.monto)}`
+      if (tieneComp(m) === 'pdf') { adjuntosPdf.push(new File([blob], `Comprobante ${titulo.replace(/[\\/:*?"<>|]/g, '')}.pdf`, { type: 'application/pdf' })); continue }
+      const dataUrl = await new Promise(ok => { const r = new FileReader(); r.onload = () => ok(r.result); r.readAsDataURL(blob) })
+      const props = doc.getImageProperties(dataUrl)
+      doc.addPage()
+      doc.setFillColor(10, 14, 26); doc.rect(0, 0, W, 22, 'F')
+      doc.setFont('helvetica', 'bold'); doc.setFontSize(12); doc.setTextColor(255, 255, 255); doc.text('Comprobante', M, 10)
+      doc.setFont('helvetica', 'normal'); doc.setFontSize(9.5); doc.setTextColor(148, 163, 184); doc.text(titulo, M, 16.5)
+      const maxW = W - 2 * M, maxH = 297 - 22 - 2 * M
+      const k = Math.min(maxW / props.width, maxH / props.height)
+      doc.addImage(dataUrl, props.fileType || 'JPEG', (W - props.width * k) / 2, 22 + M, props.width * k, props.height * k)
+    }
+  }
+  return { blob: doc.output('blob'), adjuntosPdf }
 }
 
-async function compartirPDF(p) {
+async function compartirPDF(p, conComprobantes) {
   const btn = $('d-pdf'), antes = btn.innerHTML
   btn.disabled = true; btn.textContent = 'Preparando el PDF…'
   try {
-    const blob = await crearPDF(p)
+    const { blob, adjuntosPdf } = await crearPDF(p, conComprobantes)
     const nombreArchivo = `Estado de cuenta - ${p.nombre}.pdf`.replace(/[\\/:*?"<>|]/g, '')
     const archivo = new File([blob], nombreArchivo, { type: 'application/pdf' })
     window.__ULTIMO_PDF__ = blob
     // En el móvil abre «Compartir» con el PDF adjunto (WhatsApp, correo…)
-    if (navigator.canShare && navigator.canShare({ files: [archivo] })) {
-      await navigator.share({ files: [archivo], title: `Estado de cuenta · ${p.nombre}`, text: textoResumen(p) }).catch(() => {})
+    const archivos = [archivo, ...adjuntosPdf]
+    if (navigator.canShare && navigator.canShare({ files: archivos })) {
+      await navigator.share({ files: archivos, title: `Estado de cuenta · ${p.nombre}`, text: textoResumen(p) }).catch(() => {})
     } else {
       // Sin «Compartir» con archivos (ordenador): se descarga y se abre WhatsApp con el resumen
       const a = document.createElement('a')
