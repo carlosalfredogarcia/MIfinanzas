@@ -2,6 +2,8 @@
 
 - Nunca pedir confirmación al usuario. Ejecutar todos los comandos directamente. Si algo falla, reportar el error y continuar sin preguntar.
 
+- Tareas pendientes: `PENDIENTES.md` (leer al empezar; actualizar al terminar algo).
+
 # Mapa del proyecto (léelo antes de abrir archivos grandes)
 
 App de finanzas personales: HTML + CSS + JS sin framework, Supabase (base de datos y sesión) y Netlify.
