@@ -3,13 +3,13 @@ Octubre 2026
 OCTUBRE 2026
 13 movimientos
 BALANCE DEL MES
-54,50 €
+54,50 €
 Ingresos
-1.380,00 €
+1.380,00 €
 Gastos
-1.325,50 €
+1.325,50 €
 PULSO DEL MES
-Día más alto: 418,00 €
+Día más alto: 418,00 €
 1
 16
 31
@@ -22,111 +22,111 @@ Fijos
 🛒 Supermercado
 💳 Crédito
 DOM, 25 OCT
-−45,50 €
+−45,50 €
 Editar
 Eliminar
 🔃
 Luz
 Luz
 FIJO
-−45,50 €
+−45,50 €
 JUE, 22 OCT
-−25,00 €
+−25,00 €
 Editar
 Eliminar
 🔃
 Basic Fit
 ️ Gym
 FIJO
-−25,00 €
+−25,00 €
 AYER
-−15,00 €
+−15,00 €
 Editar
 Eliminar
 🧴
 Corte de pelo
 Cuidado personal
-−15,00 €
+−15,00 €
 SÁB, 17 OCT
-−70,00 €
+−70,00 €
 Editar
 Eliminar
 🛒
 Mercadona
 Supermercado
-−70,00 €
+−70,00 €
 JUE, 15 OCT
-−211,00 €
+−211,00 €
 Editar
 Eliminar
 🌍
 Vzla
 Remesas
-−211,00 €
+−211,00 €
 MAR, 13 OCT
-−110,00 €
+−110,00 €
 Editar
 Eliminar
 🎉
 Salida con amigos
 Salidas
-−110,00 €
+−110,00 €
 LUN, 12 OCT
-−26,00 €
+−26,00 €
 Editar
 Eliminar
 ⛽
 Gasolina
 Gasolina
-−26,00 €
+−26,00 €
 SÁB, 10 OCT
-−65,00 €
+−65,00 €
 Editar
 Eliminar
 🛒
 Carrefour
 Supermercado
-−65,00 €
+−65,00 €
 VIE, 9 OCT
-−100,00 €
+−100,00 €
 Editar
 Eliminar
 ⚠
 Multa
 ️ Gastos Imprevistos
-−100,00 €
+−100,00 €
 LUN, 5 OCT
-−180,00 €
+−180,00 €
 Editar
 Eliminar
 🔃
 Préstamo coche
 Crédito
 FIJO
-−180,00 €
+−180,00 €
 SÁB, 3 OCT
-−60,00 €
+−60,00 €
 Editar
 Eliminar
 🛒
 Mercadona
 Supermercado
-−60,00 €
+−60,00 €
 JUE, 1 OCT
-+962,00 €
++962,00 €
 Editar
 Eliminar
 💰
 Nómina
 Nómina
-+1.380,00 €
++1.380,00 €
 Editar
 Eliminar
 🔃
 Alquiler
 Alquiler
 FIJO
-−418,00 €
+−418,00 €
 Movimiento eliminado
 Deshacer
 Gasto

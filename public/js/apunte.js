@@ -5,20 +5,15 @@
 // con "Deshacer" durante unos segundos.
 // Todo se calcula en el navegador con los gastos de los últimos 90 días (sin IA).
 ;(function () {
-  const CATS_DEFAULT = '🏠 Alquiler,💳 Crédito,📱 Línea,🏋️ Gym,⛽ Gasolina,💻 Tecnología,❤️ Salud,👕 Ropa,🎉 Salidas,🌍 Remesas,⚠️ Gastos Imprevistos,📋 Trámite,🚗 Vehículo,📦 Otros,🛒 Supermercado,💧 Agua,🧴 Cuidado personal,📺 Suscripción,💡 Luz,🌐 Internet'
+  const CATS_DEFAULT = MF.CATS_GASTO
   const TOP_CATS = 7
   // Funciones de recarga de cada pantalla, para que el gasto nuevo aparezca sin recargar la página
   const RECARGAS = ['cargarMovimientos', 'cargarDashboard', 'recargarDatos']
 
   const moneda = () => window.moneda || localStorage.getItem('moneda') || '€'
-  const fmt = n => {
-    const num = Number(n).toLocaleString('es-ES', { minimumFractionDigits: n % 1 ? 2 : 0, maximumFractionDigits: 2 })
-    return moneda() === '€' ? num + ' €' : moneda() + num
-  }
-  const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c])
-  const fechaLocal = (d = new Date()) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
-  const sinEmoji = c => c.replace(/^[^\p{L}\p{N}]+/u, '').trim()
-  const emoji = c => (c.match(/^[^\p{L}\p{N}\s]+/u) || [''])[0]
+  const fmt = n => MF.dinero(n)
+  const { esc, fechaLocal, sinEmoji } = MF
+  const emoji = c => MF.emoji(c, '')
   const importeTxt = n => (n % 1 ? n.toFixed(2) : String(n)).replace('.', ',')
   const parseImporte = v => parseFloat(String(v).replace(/\s/g, '').replace(/\.(?=\d{3}(\D|$))/g, '').replace(',', '.'))
 

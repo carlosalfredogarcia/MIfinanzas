@@ -28,7 +28,7 @@
   }
   const usuario = { id: 'u1', email: 'prueba@correo.com' };
   const auth = {
-    getSession: () => Promise.resolve({ data: { session: { access_token: 't', user: usuario } } }),
+    getSession: () => Promise.resolve({ data: { session: window.__SIN_SESION__ ? null : { access_token: 't', user: usuario } } }),
     getUser: () => Promise.resolve({ data: { user: usuario } }),
     onAuthStateChange() { return { data: { subscription: { unsubscribe() {} } } }; },
     signOut: () => Promise.resolve({}),

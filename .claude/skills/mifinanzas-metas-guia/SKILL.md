@@ -63,8 +63,8 @@ El recorrido que hace el usuario hoy, y que el diseño debe convertir en pasos c
 
 ## Contrato técnico (no romper)
 
-- Archivo: `mifinanza-metas.html` (HTML + CSS + JS sin framework; Supabase por CDN, `auth.js`,
-  `datepicker.js`, barra y + en `nav.js`).
+- Archivos: `public/mifinanza-metas.html` (estructura), `public/css/metas.css` y `public/js/metas.js`
+  (sin framework; Supabase por CDN, `js/auth.js`, `js/comun.js`, `js/datepicker.js`, barra y + en `js/nav.js`).
 - Tablas y lo que se usa de ellas (no cambiar estructura sin permiso):
   - `metas`: `nombre, icono, monto_objetivo, monto_actual, fecha_inicio, fecha_limite, es_principal`.
   - `colchon_movimientos`: entradas y retiradas del colchón (`tipo, monto, descripcion, fecha, activo`).
@@ -85,7 +85,7 @@ El recorrido que hace el usuario hoy, y que el diseño debe convertir en pasos c
 
 ## Proceso
 
-1. Leer el archivo entero (más de 3.000 líneas) antes de tocarlo.
-2. Rediseñar por pasos, probando cada uno con datos de prueba a 360 y 390 px: cargar, cambiar
-   tipo de ahorro, ajustar categorías, crear y editar meta, repartir, colchón.
+1. Leer `CLAUDE.md` (mapa) y buscar en `js/metas.js` solo las funciones que hagan falta.
+2. Rediseñar por pasos y pasar `cd tests && npm test` (incluye los 4 pasos); probar a mano cambiar
+   tipo de ahorro, ajustar categorías, crear y editar meta y repartir.
 3. Enseñar capturas y publicar en `main` cuando el usuario lo apruebe.

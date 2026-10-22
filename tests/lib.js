@@ -14,9 +14,10 @@ async function lanzar() {
 }
 async function cerrarNavegador() { if (navegador) await navegador.close() }
 
-async function abrir(pagina, { datos = {}, ancho = 390, alto = 844, espera = 1800 } = {}) {
+async function abrir(pagina, { datos = {}, ancho = 390, alto = 844, espera = 1800, sinSesion = false } = {}) {
   const ctx = await (await lanzar()).newContext({ viewport: { width: ancho, height: alto }, deviceScaleFactor: 1, locale: 'es-ES', timezoneId: 'Europe/Madrid' })
-  await ctx.addInitScript(([d, hoy]) => {
+  await ctx.addInitScript(([d, hoy, sinSesion]) => {
+    window.__SIN_SESION__ = sinSesion
     // Fecha fija para que los resultados no cambien según el día en que se ejecuten
     const fija = new Date(hoy).getTime(), Real = Date
     class Fecha extends Real { constructor(...a) { super(...(a.length ? a : [fija])) } static now() { return fija } }
@@ -24,7 +25,7 @@ async function abrir(pagina, { datos = {}, ancho = 390, alto = 844, espera = 180
     window.__DATA__ = d
     localStorage.setItem('moneda', '€')
     if (!navigator.clipboard) Object.defineProperty(navigator, 'clipboard', { value: { readText: async () => window.__CLIP || '', writeText: async t => { window.__CLIP = t } } })
-  }, [datos, HOY])
+  }, [datos, HOY, sinSesion])
   await ctx.route('**/*', r => {
     const u = new URL(r.request().url())
     if (u.hostname === 'cdn.jsdelivr.net' && u.pathname.includes('supabase')) return r.fulfill({ contentType: 'text/javascript', body: STUB })

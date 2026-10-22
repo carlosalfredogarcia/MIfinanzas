@@ -25,8 +25,9 @@ Cualquier rediseño mantiene estas cuatro cosas y las hace más fáciles de leer
 
 ## Stack y contrato
 
-- Un archivo: `mifinanza-estadisticas-v2.html`. HTML + CSS + JS sin framework, Supabase por CDN
-  (`dbClient`), sesión en `auth.js`, barra y botón + en `nav.js`.
+- Archivos: `public/mifinanza-estadisticas-v2.html` (estructura), `public/css/estadisticas.css` (estilos) y
+  `public/js/estadisticas.js` (lógica). Sin framework; Supabase por CDN (`dbClient`), sesión en `js/auth.js`,
+  utilidades en `js/comun.js` (`MF.dinero`…), barra y botón + en `js/nav.js`.
 - Lee `gastos`, `ingresos`, `gastos_fijos`; edita `gastos` y `gastos_fijos`. No cambiar tablas ni consultas.
 - Modelo en memoria: `datos` = un objeto por mes, del más reciente al más antiguo:
   `{ key:'2026-10', mes, mesNombre, mesNum, anio, ingresos, gastos, cats:{cat:total}, movs:{cat:[{id,tipo,label,fecha,monto,categoria}]} }`.
@@ -74,8 +75,8 @@ en la página para centrar chips).
 
 ## Proceso
 
-1. Leer el archivo entero y `inicio.html` como referencia.
+1. Leer `CLAUDE.md` (mapa) y solo las partes de los archivos que hagan falta.
 2. Implementar en una rama, sin tocar consultas ni nombres del contrato.
-3. Probar con datos de prueba a 360 y 390 px: los tres modos, abrir categoría, editar
-   un movimiento, buscador, chips de evolución, sin errores ni scroll horizontal.
+3. `cd tests && npm test` (pantallas a 360 y 412 px, los tres modos y fotos de texto) y probar a mano
+   abrir categoría, editar un movimiento, buscador y chips de evolución.
 4. Enseñar capturas; publicar en `main` cuando el usuario lo diga.

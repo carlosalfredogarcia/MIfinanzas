@@ -16,4 +16,12 @@ module.exports = PANTALLAS.map(p => ({
       await pg.context().close()
     }
   },
-}))
+})).concat([{
+  nombre: 'acceso (sin sesión)',
+  async prueba(t) {
+    const pg = await t.abrir('index.html', { sinSesion: true })
+    t.sinErrores(pg)
+    t.foto('acceso', await t.textoVisible(pg))
+    await pg.context().close()
+  },
+}])

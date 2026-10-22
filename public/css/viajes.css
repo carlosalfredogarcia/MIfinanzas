@@ -1,0 +1,82 @@
+/* mifinanza-viajes.html */
+:root {
+  --bg: #0d1117;
+  --card: #161b22;
+  --card2: #21262d;
+  --accent: #58a6ff;
+  --danger: #f85149;
+  --success: #3fb950;
+  --text: #e6edf3;
+  --subtext: #8b949e;
+  --border: #21262d;
+  --border2: #30363d;
+}
+html { visibility: hidden }
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { height: 100%; }
+body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; min-height: 100vh; display: flex; justify-content: center; }
+.phone { width: 390px; min-height: 100vh; background: var(--bg); }
+
+.header { padding: 52px 24px 16px; animation: fadeUp 0.4s ease both; }
+.header-title { font-family: 'DM Sans', sans-serif; font-size: 26px; font-weight: 700; color: var(--text); }
+.header-sub { font-size: 13px; color: var(--subtext); margin-top: 2px; }
+
+.lista-wrap { padding: 0 24px; animation: fadeUp 0.4s 0.1s ease both; opacity: 0; }
+.loading { text-align: center; color: var(--subtext); font-size: 13px; padding: 30px 0; }
+
+.viaje-card { display: flex; align-items: center; gap: 12px; background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 14px; margin-bottom: 10px; cursor: pointer; transition: opacity 0.15s; }
+.viaje-card:active { opacity: 0.7; }
+.viaje-icon { width: 42px; height: 42px; border-radius: 13px; background: var(--card2); display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
+.viaje-info { flex: 1; min-width: 0; }
+.viaje-nombre { font-size: 15px; font-weight: 600; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.viaje-fecha { font-size: 12px; color: var(--subtext); margin-top: 2px; }
+.viaje-balance { font-family: 'Roboto', sans-serif; font-size: 14px; font-weight: 700; flex-shrink: 0; }
+.viaje-balance.positivo { color: #3fb950; }
+.viaje-balance.negativo { color: #f85149; }
+
+/* VISTA DETALLE */
+.detalle-header { padding: 52px 24px 16px; animation: fadeUp 0.4s ease both; }
+.detalle-top-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+.btn-volver { font-size: 13px; color: var(--accent); cursor: pointer; font-weight: 600; }
+.btn-eliminar-viaje { font-size: 11px; color: var(--danger); cursor: pointer; background: rgba(248,81,73,0.1); border: 1px solid rgba(248,81,73,0.2); border-radius: 8px; padding: 6px 10px; font-family: 'DM Sans', sans-serif; }
+.detalle-nombre { font-family: 'DM Sans', sans-serif; font-size: 22px; font-weight: 700; color: var(--text); }
+.detalle-fecha { font-size: 12px; color: var(--subtext); margin-top: 2px; }
+
+.resumen-row { margin: 0 24px 16px; display: flex; gap: 10px; animation: fadeUp 0.4s 0.05s ease both; opacity: 0; }
+.res-item { flex: 1; background: var(--card); border-radius: 16px; padding: 13px 10px; border: 1px solid var(--border); text-align: center; }
+.res-label { font-size: 9px; color: var(--subtext); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 5px; }
+.res-value { font-family: 'Roboto', sans-serif; font-size: 15px; font-weight: 700; }
+
+.tabs { margin: 0 24px 16px; display: flex; background: var(--card); border-radius: 14px; padding: 4px; gap: 4px; border: 1px solid var(--border); animation: fadeUp 0.4s 0.1s ease both; opacity: 0; }
+.tab { flex: 1; text-align: center; padding: 10px 6px; border-radius: 10px; font-size: 12px; font-weight: 600; color: var(--subtext); cursor: pointer; transition: all 0.2s; }
+.tab.active { background: rgba(88,166,255,0.15); color: var(--accent); }
+
+.item-row { display: flex; align-items: center; gap: 10px; background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 12px 14px; margin-bottom: 8px; }
+.item-desc { flex: 1; font-size: 14px; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.item-monto { font-family: 'Roboto', sans-serif; font-size: 14px; font-weight: 700; color: var(--text); flex-shrink: 0; }
+.item-acciones { display: flex; gap: 8px; flex-shrink: 0; }
+.item-btn { cursor: pointer; font-size: 14px; opacity: 0.75; transition: opacity 0.15s; }
+.item-btn:hover { opacity: 1; }
+
+.btn-add-item { width: 100%; background: var(--card2); border: 1px dashed var(--border2); border-radius: 14px; padding: 12px; color: var(--accent); font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 600; cursor: pointer; margin-top: 4px; }
+.btn-add-item:hover { border-color: var(--accent); }
+
+.spacer { height: 120px; }
+@keyframes fadeUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+
+.inp { width: 100%; background: var(--card2); border: 1px solid var(--border2); border-radius: 12px; padding: 12px 14px; color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 15px; outline: none; transition: border-color 0.15s; }
+.inp:focus { border-color: var(--accent); }
+.lbl { font-size: 11px; color: var(--subtext); text-transform: uppercase; letter-spacing: 0.08em; display: block; margin-bottom: 6px; }
+.fld { margin-bottom: 12px; }
+.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.75); backdrop-filter: blur(8px); z-index: 200; display: none; align-items: flex-end; justify-content: center; }
+.modal { width: 390px; background: var(--card); border-radius: 28px 28px 0 0; padding: 24px 24px 40px; border-top: 1px solid var(--border2); }
+.modal-handle { width: 40px; height: 4px; background: rgba(255,255,255,0.08); border-radius: 100px; margin: 0 auto 20px; }
+.modal-title { font-family: 'DM Sans', sans-serif; font-size: 18px; font-weight: 700; color: var(--text); margin-bottom: 18px; }
+.btn-ok { width: 100%; background: var(--accent); color: #0d1117; border: none; border-radius: 14px; padding: 15px; font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 700; cursor: pointer; margin-bottom: 8px; transition: opacity 0.2s; }
+.btn-ok:hover { opacity: 0.9; }
+.btn-no { width: 100%; background: none; border: none; color: var(--subtext); font-size: 14px; cursor: pointer; padding: 10px; font-family: 'DM Sans', sans-serif; }
+
+.toast { position: fixed; top: 24px; left: 50%; transform: translateX(-50%) translateY(-80px); background: var(--card); border: 1px solid var(--border2); border-radius: 14px; padding: 12px 20px; font-size: 13px; color: var(--text); z-index: 300; transition: transform 0.3s ease; white-space: nowrap; }
+.toast.show { transform: translateX(-50%) translateY(0); }
+.toast.ok  { border-color: rgba(88,166,255,0.4); color: var(--accent); }
+.toast.err { border-color: rgba(248,81,73,0.4);  color: var(--danger); }

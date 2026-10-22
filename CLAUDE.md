@@ -9,21 +9,22 @@ Solo `public/` se publica en la web; lo demás nunca llega al navegador.
 
 ```
 public/                     lo que ve el usuario (Netlify publica esta carpeta)
-  index.html                acceso y registro; recuperar contraseña
-  inicio.html               panel: saldo del mes, salud financiera, fijos, sparkline
-  mifinanza-movimientos.html lista del mes, buscar, filtros, detalle, editar, importar CSV/XLS, descargar
-  mifinanza-estadisticas-v2.html por mes / período / año, anillo de categorías, evolución, última vez
-  mifinanza-metas.html      4 pasos: tu dinero → tu plan → tu meta (semáforo) → seguimiento
-  mifinanza-fijos.html      gastos fijos: resumen, próximos cobros, duplicados, sugerencias
-  mifinanza-prestamos.html  préstamos a/de otras personas
-  mifinanza-perfil.html     nombre, moneda, plan, categorías (renombrar/juntar), cuenta, soporte WhatsApp
-  mifinanza-viajes.html     oculta en el menú
-  landing*.html, privacidad.html
-  js/auth.js                crea window.dbClient y window.currentUserId; redirige si no hay sesión
+  <pantalla>.html           solo la estructura; sus estilos en css/<nombre>.css y su lógica en js/<nombre>.js
+    index.html               → acceso        acceso y registro; recuperar contraseña
+    inicio.html              → inicio        panel: saldo del mes, salud financiera, fijos, sparkline
+    mifinanza-movimientos    → movimientos   lista del mes, buscar, filtros, detalle, editar, importar CSV/XLS, descargar
+    mifinanza-estadisticas-v2→ estadisticas  por mes / período / año, anillo de categorías, evolución, última vez
+    mifinanza-metas          → metas         4 pasos: tu dinero → tu plan → tu meta (semáforo) → seguimiento
+    mifinanza-fijos          → fijos         gastos fijos: resumen, próximos cobros, duplicados, sugerencias
+    mifinanza-prestamos      → prestamos     préstamos a/de otras personas
+    mifinanza-perfil         → perfil        nombre, moneda, plan, categorías (renombrar/juntar), cuenta, soporte WhatsApp
+    mifinanza-viajes         → viajes        oculta en el menú
+  js/auth.js                crea window.dbClient y window.currentUserId; redirige si no hay sesión; registra sw.js
+  js/comun.js               window.MF: CATS_DEFAULT, CATS_GASTO, dinero(n, decimales), esc, fechaLocal, sinEmoji, emoji
   js/nav.js                 barra inferior, botón + y menú (todas las pantallas)
   js/apunte.js              hoja de apunte rápido de un gasto (la abre nav.js)
   js/datepicker.js          selector de fechas
-  sw.js, manifest.json, .well-known/ (app Android)
+  landing*.html, privacidad.html, sw.js, manifest.json, .well-known/ (app Android)
 netlify/functions/          servidor: import-csv.js (IA para extractos, usa ANTHROPIC_API_KEY)
 supabase/migrations/        SQL que se ejecuta a mano en el SQL Editor de Supabase
 tests/                      pruebas en Chromium con Supabase simulado (ver abajo)
@@ -42,8 +43,10 @@ tests/                      pruebas en Chromium con Supabase simulado (ver abajo
 
 ## Convenciones
 
-- Textos en español, cercanos y claros. Importes en formato español (1.234,56 €) con `window.moneda`
-  (€ detrás con espacio fino; otros símbolos delante). Porcentajes sin decimales.
+- Textos en español, cercanos y claros. Importes siempre con `MF.dinero` (1.234,56 € con `window.moneda`;
+  € detrás con espacio que no se parte, otros símbolos delante). Porcentajes sin decimales.
+- Nada repetido entre pantallas: si algo sirve a dos o más, va a `js/comun.js` (o a `js/nav.js` si es de la barra).
+- Orden de carga en cada pantalla: supabase (CDN) → js/auth.js → js/comun.js → [js/datepicker.js] → js/<pantalla>.js → js/nav.js.
 - Diseño: fondo #0a0e1a, tarjetas #111827, bordes #1f2937, esmeralda #10b981, rojo #ef4444, índigo #6366f1,
   dorado #f59e0b; letra Manrope; cifras con tabular-nums; hojas que suben desde abajo con «Deshacer» en vez de alertas.
 - Ningún cálculo usa la IA salvo la importación de extractos (cuesta dinero: no añadir llamadas sin permiso).

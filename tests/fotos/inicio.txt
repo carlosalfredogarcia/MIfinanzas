@@ -3,7 +3,7 @@ Hola, Carlos
 C
 OCTUBRE 2026
 SALDO ACTUAL
-54,50 €
+54,50 €
 May
 Jun
 Jul
@@ -11,43 +11,43 @@ Ago
 Sep
 Oct
 Ingresos
-1.380,00 €
+1.380,00 €
 Gastos
-1.325,50 €
+1.325,50 €
 SALUD FINANCIERA
 96,1 %
 gastado
 Al límite
 
-Te quedan 54,50 € hasta fin de mes.
+Te quedan 54,50 € hasta fin de mes.
 
 Bajo control · <80 %
 80–95
 95+
 GASTOS FIJOS
-668,50 € /mes
+668,50 € /mes
 A
 Alquiler
-418,00 €
+418,00 €
 62,5 %
 P
 Préstamo coche
-180,00 €
+180,00 €
 26,9 %
 L
 Luz
-45,50 €
+45,50 €
 6,8 %
 B
 Basic Fit
-25,00 €
+25,00 €
 3,7 %
 ÚLTIMO MOVIMIENTO
 Ver todos →
 🧴
 Corte de pelo
 Cuidado personal · Ayer
-−15,00 €
+−15,00 €
 Gasto
 Ingreso
 Gasto fijo
