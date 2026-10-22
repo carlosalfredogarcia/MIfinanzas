@@ -205,25 +205,6 @@ button:focus-visible, a:focus-visible { outline: 2px solid #a5b4fc; outline-offs
 .spacer { height: 140px; flex-shrink: 0; }
 
 /* Formularios */
-.inp { width:100%; background:var(--card2); border:1px solid var(--border); border-radius:12px; padding:12px 14px; color:var(--text); font-family:'Manrope',sans-serif; font-size:15px; outline:none; }
-.inp:focus { border-color: var(--accent); }
-.lbl { font-size:11px; color:var(--sub); text-transform:uppercase; letter-spacing:0.08em; display:block; margin-bottom:6px; font-weight:700; }
-.fld { margin-bottom:12px; }
-.toast { position:fixed; top:24px; left:50%; transform:translateX(-50%) translateY(-80px); background:var(--card); border:1px solid var(--border); border-radius:14px; padding:12px 20px; font-size:13px; color:var(--text); z-index:300; transition:transform 0.3s ease; white-space:nowrap; }
-.toast.show { transform:translateX(-50%) translateY(0); }
-.toast.ok { border-color:rgba(16,185,129,0.4); color:var(--green-txt); }
-.modal-base { position:fixed; inset:0; background:rgba(0,0,0,0.8); backdrop-filter:blur(8px); z-index:200; display:none; align-items:flex-end; justify-content:center; }
-.modal-box { width:390px; max-width:100%; background:var(--card); border-radius:28px 28px 0 0; padding:24px 24px 40px; border-top:1px solid var(--card-border); }
-.modal-handle { width:40px; height:4px; background:rgba(255,255,255,0.08); border-radius:100px; margin:0 auto 20px; }
-.modal-title { font-family:'Manrope',sans-serif; font-size:18px; font-weight:800; color:var(--text); margin-bottom:18px; }
-.btn-ok { width:100%; border:none; border-radius:14px; padding:15px; font-family:'Manrope',sans-serif; font-size:15px; font-weight:700; cursor:pointer; margin-bottom:8px; }
-.btn-no { width:100%; background:none; border:none; color:var(--sub); font-size:14px; cursor:pointer; padding:10px; font-family:'Manrope',sans-serif; }
-.dp-wrap { display:block; }
-.dp-btn { display:flex; align-items:center; justify-content:space-between; cursor:pointer; text-align:left; }
-.dp-txt { flex:1; color:var(--sub); }
-.dp-txt:not([data-empty="true"]) { color:var(--text); }
-.dp-cal-icon { width:18px; height:18px; color:var(--sub); flex-shrink:0; }
-.dp-real-input { display:none; }
 
 @media (max-width: 390px) {
   .phone { width: 100%; }

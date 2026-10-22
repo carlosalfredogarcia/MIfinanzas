@@ -63,19 +63,6 @@ select.inp { padding:9px 32px 9px 10px;font-size:14px;appearance:none;-webkit-ap
 .fld { margin-bottom:12px; }
 .inp.inp-error { border-color: var(--danger); }
 .fld-error { display:none; font-size:11px; color:var(--danger); margin-top:6px; }
-.cat-lbl-row { display:flex; justify-content:space-between; align-items:center; }
-.cat-add-btn { color:#6366f1; cursor:pointer; font-weight:600; font-size:11px; text-transform:uppercase; letter-spacing:0.08em; }
-.cat-nueva-panel { margin-top:8px; }
-.cat-nueva-row { display:flex; gap:8px; }
-.cat-input-wrap { position:relative; display:flex; align-items:center; gap:8px; margin-bottom:8px; }
-.cat-input-wrap .inp { margin-bottom:0; flex:1; }
-.btn-emoji-picker { flex-shrink:0; width:42px; height:42px; background:var(--card2); border:1px solid var(--border); border-radius:10px; font-size:18px; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:border-color 0.15s; }
-.btn-emoji-picker:hover { border-color:#6366f1; }
-.emoji-picker-pop { position:absolute; bottom:calc(100% + 6px); left:0; right:0; background:#151d2e; border:1px solid #263248; border-radius:16px; padding:10px; z-index:600; display:grid; grid-template-columns:repeat(8,1fr); gap:4px; box-shadow:0 8px 32px rgba(0,0,0,0.6); }
-.emoji-picker-pop button { background:none; border:none; font-size:20px; cursor:pointer; padding:4px; border-radius:8px; line-height:1; transition:background 0.12s; }
-.emoji-picker-pop button:hover { background:rgba(255,255,255,0.1); }
-.btn-cat-add { flex:1; background:#6366f1; color:#fff; border:none; border-radius:10px; padding:10px; font-family:'Manrope',sans-serif; font-size:13px; font-weight:700; cursor:pointer; }
-.btn-cat-cancel { flex:1; background:none; border:1px solid var(--border2); border-radius:10px; padding:10px; color:var(--subtext); font-family:'Manrope',sans-serif; font-size:13px; cursor:pointer; }
 .toast { position: fixed; top: 24px; left: 50%; transform: translateX(-50%) translateY(-80px); background: var(--card); border: 1px solid var(--border2); border-radius: 14px; padding: 12px 20px; font-size: 13px; color: var(--text); z-index: 300; transition: transform 0.3s ease; white-space: nowrap; }
 .toast.show { transform: translateX(-50%) translateY(0); }
 .toast.ok { border-color: rgba(99,102,241,0.4); color: #6366f1; }

@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>MiFinanza – Dashboard</title>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<script src="js/datepicker.js"></script>
 <link rel="stylesheet" href="css/inicio.css">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="/icon-192.png">
@@ -128,47 +127,6 @@
 
   <div class="spacer"></div>
 </div>
-<!-- MODAL: NUEVO INGRESO -->
-<div class="modal-base" id="modal-ingreso">
-  <div class="modal-box">
-    <div class="modal-handle"></div>
-    <div class="modal-title">Nuevo ingreso</div>
-    <div class="fld"><label class="lbl">Fecha</label><span class="dp-wrap"><input type="hidden" id="i-fecha" class="dp-real-input"><button type="button" class="inp dp-btn" data-dp-for="i-fecha" onclick="openDatePicker('i-fecha')"><span class="dp-txt" data-empty="true">Seleccionar fecha</span><svg class="dp-cal-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="16" height="15" rx="2"/><path d="M2 8h16M7 1v4M13 1v4"/></svg></button></span></div>
-    <div class="fld"><label class="lbl">Concepto</label><input type="text" id="i-concepto" class="inp" placeholder="Ej: Nómina, Freelance..."></div>
-    <div class="fld"><label class="lbl">Tipo</label>
-      <select id="i-tipo" class="inp">
-        <option>💼 Nómina</option><option>💵 Efectivo</option><option>⭐ Extra</option><option>📦 Otro</option>
-      </select>
-    </div>
-    <div class="fld" style="margin-bottom:18px"><label class="lbl">Monto</label><input type="number" id="i-monto" class="inp" placeholder="$0.00"></div>
-    <button onclick="guardarIngreso()" class="btn-ok" style="background:var(--green);color:#0d1117">Guardar ingreso</button>
-    <button onclick="cerrarIngreso()" class="btn-no">Cancelar</button>
-  </div>
-</div>
-
-<!-- MODAL: NUEVO GASTO FIJO -->
-<div class="modal-base" id="modal-fijo">
-  <div class="modal-box">
-    <div class="modal-handle"></div>
-    <div class="modal-title">Nuevo gasto fijo</div>
-    <div class="fld"><label class="lbl">Nombre</label><input type="text" id="f-nombre" class="inp" placeholder="Ej: Alquiler, Netflix..."></div>
-    <div class="fld"><label class="lbl">Categoría</label>
-      <select id="f-categoria" class="inp">
-        <option>🏠 Alquiler</option><option>📱 Línea</option><option>🌍 Remesas</option>
-        <option>💻 Tecnología</option><option>🏋️ Gym</option><option>❤️ Salud</option>
-        <option>💳 Crédito</option><option>📦 Otros</option>
-      </select>
-    </div>
-    <div class="fld"><label class="lbl">Monto</label><input type="number" id="f-monto" class="inp" placeholder="$0.00"></div>
-    <div class="fld"><label class="lbl">Fecha de inicio</label><span class="dp-wrap"><input type="hidden" id="f-fecha" class="dp-real-input"><button type="button" class="inp dp-btn" data-dp-for="f-fecha" onclick="openDatePicker('f-fecha')"><span class="dp-txt" data-empty="true">Seleccionar fecha</span><svg class="dp-cal-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="16" height="15" rx="2"/><path d="M2 8h16M7 1v4M13 1v4"/></svg></button></span></div>
-    <div class="fld" style="margin-bottom:18px"><label class="lbl">Fecha fin</label><span class="dp-wrap"><input type="hidden" id="f-fecha-fin" class="dp-real-input"><button type="button" class="inp dp-btn" data-dp-for="f-fecha-fin" onclick="openDatePicker('f-fecha-fin')"><span class="dp-txt" data-empty="true">Seleccionar fecha</span><svg class="dp-cal-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="16" height="15" rx="2"/><path d="M2 8h16M7 1v4M13 1v4"/></svg></button></span></div>
-    <button onclick="guardarFijo()" class="btn-ok" style="background:var(--accent);color:#fff">Guardar gasto fijo</button>
-    <button onclick="cerrarGastoFijo()" class="btn-no">Cancelar</button>
-  </div>
-</div>
-
-<div class="toast" id="toast"></div>
-
 <script src="js/inicio.js"></script>
 <script src="js/nav.js"></script>
 </body>

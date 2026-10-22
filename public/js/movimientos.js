@@ -467,12 +467,6 @@ document.getElementById('modal-detalle').addEventListener('click', function (e) 
 
 const hoy = new Date().toISOString().split('T')[0];
 
-async function abrirGasto()     { document.getElementById('g-fecha').value = hoy; await cargarCategoriasPerfil(); document.getElementById('modal-gasto').style.display = 'flex'; }
-function cerrarGasto()     { document.getElementById('modal-gasto').style.display = 'none'; }
-function abrirIngreso()    { document.getElementById('i-fecha').value = hoy; document.getElementById('modal-ingreso').style.display = 'flex'; }
-function cerrarIngreso()   { document.getElementById('modal-ingreso').style.display = 'none'; }
-async function abrirGastoFijo() { ocultarErrorFecha('f'); await cargarCategoriasPerfil(); document.getElementById('modal-fijo').style.display = 'flex'; }
-function cerrarGastoFijo() { document.getElementById('modal-fijo').style.display = 'none'; }
 
 function abrirBorrarTodo() {
 
@@ -529,7 +523,7 @@ function fmtFechaCorta(s) {
 }
 
 function abrirRevisionVoz(movimientos) {
-  const categorias = Array.from(document.getElementById('g-categoria').options).map(o => o.textContent);
+  const categorias = categoriasPerfil;
   const ci = 'background:#0a0e1a;border:1px solid #263248;border-radius:8px;padding:6px 8px;color:#f1f5f9;font-size:13px;font-family:\'Manrope\',sans-serif;outline:none;box-sizing:border-box;';
   const cont = document.getElementById('revision-voz-lista');
   cont.innerHTML = movimientos.map((g, i) => {
@@ -798,7 +792,7 @@ async function continuarImportacion() {
     if (!token) { alert('Sesión expirada, vuelve a iniciar sesión.'); return; }
 
     await cargarCategoriasPerfil();
-    const categorias = Array.from(document.getElementById('g-categoria').options).map(o => o.textContent);
+    const categorias = categoriasPerfil;
     const resp = await fetch('/.netlify/functions/import-csv', {
       method: 'POST',
       headers: { 'content-type': 'application/json', authorization: 'Bearer ' + token },
@@ -827,27 +821,7 @@ async function continuarImportacion() {
   }
 }
 
-async function guardarGasto() {
-  const fecha       = document.getElementById('g-fecha').value;
-  const descripcion = document.getElementById('g-descripcion').value.trim();
-  const categoria   = document.getElementById('g-categoria').value;
-  const monto       = parseFloat(document.getElementById('g-monto').value);
-  if (!descripcion || isNaN(monto)) { alert('Completa descripción y monto'); return; }
-  const { error } = await dbClient.from('gastos').insert([{ fecha, descripcion, categoria, monto, usuario_id: window.currentUserId, origen: 'manual' }]);
-  if (error) { alert('Error: ' + error.message); }
-  else { alert('✅ Gasto guardado'); cerrarGasto(); cargarMovimientos(); }
-}
 
-async function guardarIngreso() {
-  const fecha    = document.getElementById('i-fecha').value;
-  const concepto = document.getElementById('i-concepto').value.trim();
-  const tipo     = document.getElementById('i-tipo').value;
-  const monto    = parseFloat(document.getElementById('i-monto').value);
-  if (!concepto || isNaN(monto)) { alert('Completa concepto y monto'); return; }
-  const { error } = await dbClient.from('ingresos').insert([{ fecha, concepto, tipo, monto, usuario_id: window.currentUserId, origen: 'manual' }]);
-  if (error) { alert('Error: ' + error.message); }
-  else { alert('✅ Ingreso guardado'); cerrarIngreso(); cargarMovimientos(); }
-}
 
 function mostrarErrorFecha(prefix) {
   document.getElementById(prefix + '-fecha').classList.add('inp-error');
@@ -859,26 +833,6 @@ function ocultarErrorFecha(prefix) {
   document.getElementById(prefix + '-fecha-error').style.display = 'none';
 }
 
-async function guardarFijo() {
-  const fechaVal = document.getElementById('f-fecha').value.trim();
-  if (!fechaVal) {
-    document.getElementById('f-fecha-error').textContent = 'La fecha de inicio es obligatoria';
-    document.getElementById('f-fecha-error').style.display = 'block';
-    return;
-  }
-  ocultarErrorFecha('f');
-
-  const nombre    = document.getElementById('f-nombre').value.trim();
-  const categoria = document.getElementById('f-categoria').value;
-  const monto     = parseFloat(document.getElementById('f-monto').value);
-  const fecha     = fechaVal;
-  const fechaFin  = document.getElementById('f-fecha-fin').value || null;
-  if (!nombre || isNaN(monto)) { alert('Completa todos los campos'); return; }
-  const dia = new Date(fecha).getDate();
-  const { error } = await dbClient.from('gastos_fijos').insert([{ nombre, categoria, monto, dia_del_mes: dia, activo: true, fecha_inicio: fecha, fecha_fin: fechaFin, usuario_id: window.currentUserId }]);
-  if (error) { alert('Error: ' + error.message); }
-  else { alert('✅ Gasto fijo guardado'); cerrarGastoFijo(); cargarMovimientos(); }
-}
 
 let editando = null;
 
@@ -974,10 +928,12 @@ function abrirEditarIdx(idx) {
 
 actualizarMesLabel();
 
-document.getElementById('f-fecha').addEventListener('input', () => ocultarErrorFecha('f'));
 document.getElementById('e-fecha').addEventListener('input', () => ocultarErrorFecha('e'));
 
 const CATS_DEFAULT = MF.CATS_DEFAULT
+// Categorías del usuario ordenadas; las usan la edición y la revisión de la importación
+const ordenCat = s => s.replace(/^[^\p{L}]+/u, '').toLowerCase()
+let categoriasPerfil = CATS_DEFAULT.split(',').sort((a, b) => ordenCat(a).localeCompare(ordenCat(b), 'es'))
 
 async function cargarCategoriasPerfil() {
   const uid = window.currentUserId;
@@ -987,9 +943,9 @@ async function cargarCategoriasPerfil() {
   const cats = [...new Set(catsStr.split(',').map(c => c.trim()).filter(Boolean))];
   const defaults = CATS_DEFAULT.split(',').map(c => c.trim());
   const allCats = cats.concat(defaults.filter(d => !cats.includes(d)));
-  const sk = s => s.replace(/^[^\p{L}]+/u, '').toLowerCase();
-  allCats.sort((a, b) => sk(a).localeCompare(sk(b), 'es'));
-  ['g-categoria', 'f-categoria', 'e-categoria', 'e-cat-fijo'].forEach(id => {
+  allCats.sort((a, b) => ordenCat(a).localeCompare(ordenCat(b), 'es'));
+  categoriasPerfil = allCats;
+  ['e-categoria', 'e-cat-fijo'].forEach(id => {
     const sel = document.getElementById(id);
     if (sel) sel.innerHTML = allCats.map(c => `<option>${c}</option>`).join('');
   });
@@ -1002,100 +958,14 @@ function toast(msg, tipo = 'ok') {
   setTimeout(() => { t.className = 'toast'; }, 2500);
 }
 
-let nuevaCatTarget = null;
-let _catPanelSuffix = '';
 
-function toggleNuevaCat(targetId, suffix) {
-  nuevaCatTarget = targetId;
-  _catPanelSuffix = suffix || '';
-  const panel = document.getElementById('panel-nueva-cat' + _catPanelSuffix);
-  panel.style.display = 'block';
-  document.getElementById('nueva-cat-input' + _catPanelSuffix).value = '';
-  cerrarEmojiPicker();
-  document.getElementById('nueva-cat-input' + _catPanelSuffix).focus();
-}
 
-function cerrarNuevaCat() {
-  document.getElementById('panel-nueva-cat' + _catPanelSuffix).style.display = 'none';
-  document.getElementById('nueva-cat-input' + _catPanelSuffix).value = '';
-  cerrarEmojiPicker();
-}
 
-const EMOJIS_PICKER = [
-  '🍔','🍕','🍜','☕','🛒','🍺','🎂','🥗',
-  '🚗','🚌','✈️','⛽','🚕','🏍️','🚂','🛵',
-  '🏠','💡','🔧','📺','🛋️','🏡','🧹','🚿',
-  '🎮','🎬','🎵','📚','🎨','🎭','🏋️','⚽',
-  '❤️','💊','🏥','🧘','🦷','👓','🩺','💉',
-  '👕','👗','👟','💄','🕶️','👜','🧴','💍',
-  '💳','💰','📱','💻','🖨️','📷','⌚','🔋',
-  '📋','🎁','🏦','✂️','📦','⚠️','🌍','🔑',
-]
 
-function toggleEmojiPicker(e, suffix) {
-  e.stopPropagation()
-  const sfx = suffix !== undefined ? suffix : _catPanelSuffix
-  const pop = document.getElementById('emoji-picker-pop' + sfx)
-  if (pop.style.display !== 'none') { cerrarEmojiPicker(); return }
-  if (!pop.innerHTML) {
-    pop.innerHTML = EMOJIS_PICKER.map(em =>
-      `<button type="button" onclick="seleccionarEmoji('${em}','${sfx}')">${em}</button>`
-    ).join('')
-  }
-  pop.style.display = 'grid'
-}
 
-function cerrarEmojiPicker() {
-  ['emoji-picker-pop', 'emoji-picker-pop-fijo'].forEach(id => {
-    const el = document.getElementById(id)
-    if (el) el.style.display = 'none'
-  })
-}
 
-function seleccionarEmoji(emoji, suffix) {
-  const sfx = suffix !== undefined ? suffix : _catPanelSuffix
-  const inp = document.getElementById('nueva-cat-input' + sfx)
-  const texto = inp.value.replace(/^\S+\s*/, '').trim()
-  inp.value = emoji + (texto ? ' ' + texto : '')
-  cerrarEmojiPicker()
-  inp.focus()
-}
 
-document.addEventListener('click', e => {
-  if (!e.target.closest('.cat-input-wrap')) cerrarEmojiPicker()
-})
 
-async function guardarNuevaCategoria() {
-  const nueva = document.getElementById('nueva-cat-input' + _catPanelSuffix).value.trim();
-  if (!nueva) { alert('Escribe una categoría'); return; }
-  const uid = window.currentUserId;
-  if (!uid) return;
-
-  const { data: rows } = await dbClient.from('perfil').select('id, categorias').eq('usuario_id', uid).limit(1);
-  const perfilRow = rows?.[0];
-  const catsStr = perfilRow?.categorias || CATS_DEFAULT;
-  const cats = catsStr.split(',').map(c => c.trim()).filter(Boolean);
-  if (cats.includes(nueva)) { alert('Esa categoría ya existe'); return; }
-  cats.push(nueva);
-  const nuevaLista = cats.join(',');
-
-  let error;
-  if (perfilRow) {
-    ({ error } = await dbClient.from('perfil').update({ categorias: nuevaLista }).eq('id', perfilRow.id));
-  } else {
-    ({ error } = await dbClient.from('perfil').insert({ usuario_id: uid, categorias: nuevaLista }));
-  }
-  if (error) { alert('Error: ' + error.message); return; }
-
-  ['g-categoria', 'f-categoria', 'e-categoria', 'e-cat-fijo'].forEach(id => {
-    const sel = document.getElementById(id);
-    if (sel) sel.innerHTML += `<option>${nueva}</option>`;
-  });
-  if (nuevaCatTarget) document.getElementById(nuevaCatTarget).value = nueva;
-
-  cerrarNuevaCat();
-  toast('✅ Categoría añadida');
-}
 
 async function abrirImportarCSV() {
 
@@ -1218,7 +1088,7 @@ async function procesarArchivoCSV(input) {
       return;
     }
     await cargarCategoriasPerfil();
-    const categorias = Array.from(document.getElementById('g-categoria').options).map(o => o.textContent);
+    const categorias = categoriasPerfil;
     const resp = await fetch('/.netlify/functions/import-csv', {
       method: 'POST',
       headers: { 'content-type': 'application/json', authorization: 'Bearer ' + token },
