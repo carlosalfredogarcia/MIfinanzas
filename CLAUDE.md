@@ -22,7 +22,7 @@ public/                     lo que ve el usuario (Netlify publica esta carpeta)
   js/auth.js                crea window.dbClient y window.currentUserId; redirige si no hay sesión; registra sw.js
   js/comun.js               window.MF: CATS_DEFAULT, CATS_GASTO, dinero(n, decimales), esc, fechaLocal, sinEmoji, emoji
   js/nav.js                 barra inferior, botón + y menú (todas las pantallas)
-  js/apunte.js              hoja de apunte rápido de un gasto (la abre nav.js)
+  js/apunte.js              hoja rápida de gasto o ingreso (la abre nav.js); se abre rellena con ?texto= o ?accion=gasto&importe=&comercio=
   js/datepicker.js          selector de fechas
   landing*.html, privacidad.html, sw.js, manifest.json, .well-known/ (app Android)
 netlify/functions/          servidor: import-csv.js (IA para extractos, usa ANTHROPIC_API_KEY)
