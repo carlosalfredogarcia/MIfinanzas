@@ -15,7 +15,7 @@ Ingresos
 Gastos
 1.325,50 €
 SALUD FINANCIERA
-96,1 %
+96 %
 gastado
 Al límite
 
@@ -29,19 +29,19 @@ GASTOS FIJOS
 🏠
 Alquiler
 418,00 €
-62,5 %
+63 %
 💳
 Préstamo coche
 180,00 €
-26,9 %
+27 %
 💡
 Luz
 45,50 €
-6,8 %
+7 %
 🏋️
 Basic Fit
 25,00 €
-3,7 %
+4 %
 ÚLTIMO MOVIMIENTO
 Ver todos →
 🧴

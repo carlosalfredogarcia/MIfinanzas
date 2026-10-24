@@ -14,7 +14,7 @@ const _color = localStorage.getItem('color'); if(_color) document.documentElemen
 // Importe en formato español (1.529,29) con la moneda del usuario; el € va detrás.
 // Siempre con céntimos
 const fmt = n => MF.dinero(n, 2)
-const pctTxt = p => p.toFixed(1).replace('.', ',') + ' %'
+const pctTxt = p => Math.round(p) + ' %'
 const meses = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre']
 const hoy = new Date().toISOString().split('T')[0]
 let mesVer = new Date().getMonth()

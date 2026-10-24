@@ -70,6 +70,9 @@ Qué guardamos y para qué
 ↩️
 Cerrar sesión
 🗑️
+Borrar todos mis movimientos
+Gastos, ingresos y fijos del historial
+❌
 Borrar mi cuenta y mis datos
 MiFinanzas
 Deshacer

@@ -24,9 +24,6 @@ Lista viva: al empezar una conversación nueva, leer esto y `CLAUDE.md`. Al term
   `inicio.html?accion=gasto&importe=…&comercio=…`. Si usa la app de Play (TWA com.mifinanza.app),
   añadir shareTarget en su configuración para «Compartir con MiFinanza».
 - Mensaje para los testers de Google Play (qué es, cómo apuntarse, qué probar).
-- Detalles de coherencia: porcentajes sin decimales en Inicio (96,1 %); tarjetas de Inicio que
-  lleven a su pantalla (Gastos fijos, Metas); «Borrar todos mis movimientos» en Perfil
-  (la función `abrirBorrarTodo` de Movimientos ya no tiene botón).
 - Borrado de cuenta automático (hoy se pide por WhatsApp): necesita `SUPABASE_SERVICE_ROLE_KEY`.
 - Versión en inglés (archivo de traducciones + selector en Perfil).
 - Vídeo demo con la voz del usuario (Remotion, repo estetica-web/video) cuando mande el audio.

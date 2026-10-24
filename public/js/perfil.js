@@ -233,6 +233,41 @@ $('btn-clave').addEventListener('click', async () => {
   aviso(error ? 'No se pudo enviar: ' + error.message : 'Te enviamos un enlace a ' + correo)
 })
 $('btn-salir').addEventListener('click', async () => { await dbClient.auth.signOut(); location.replace('index.html') })
+$('btn-borrar-movs').addEventListener('click', () => {
+  abrirHoja('Borrar todos mis movimientos', `
+    <p class="h-txt">Se eliminarán todos tus gastos, ingresos y gastos fijos. Esta acción no se puede deshacer.</p>
+    <p class="h-txt">Escribe <strong>CONFIRMAR</strong> para continuar.</p>
+    <input type="text" id="borrar-movs-input" placeholder="CONFIRMAR" autocomplete="off" style="display:block;width:100%;box-sizing:border-box;margin-bottom:12px;background:#111827;border:1px solid #1f2937;border-radius:10px;padding:10px 12px;color:#f1f5f9;font-size:15px;font-family:Manrope,sans-serif;outline:none">
+    <button id="borrar-movs-btn" class="btn-grande rojo" style="opacity:0.4;pointer-events:none" onclick="ejecutarBorrarMovs()">🗑 Eliminar todos los movimientos</button>`)
+  setTimeout(() => {
+    const inp = document.getElementById('borrar-movs-input')
+    const btn = document.getElementById('borrar-movs-btn')
+    if (inp && btn) inp.addEventListener('input', () => {
+      const ok = inp.value === 'CONFIRMAR'
+      btn.style.opacity = ok ? '1' : '0.4'
+      btn.style.pointerEvents = ok ? 'auto' : 'none'
+    })
+  }, 100)
+})
+window.ejecutarBorrarMovs = async function() {
+  const inp = document.getElementById('borrar-movs-input')
+  if (!inp || inp.value !== 'CONFIRMAR') return
+  cerrarHoja()
+  const uid = window.currentUserId
+  if (!uid) { aviso('No se pudo identificar el usuario'); return }
+  aviso('Eliminando movimientos…')
+  try {
+    const [r1, r2, r3] = await Promise.all([
+      dbClient.from('gastos').delete().eq('usuario_id', uid),
+      dbClient.from('ingresos').delete().eq('usuario_id', uid),
+      dbClient.from('gastos_fijos').delete().eq('usuario_id', uid)
+    ])
+    if (r1.error || r2.error || r3.error) throw new Error('Error en Supabase')
+    aviso('✅ Todos los movimientos eliminados')
+  } catch (e) {
+    aviso('❌ Error al eliminar: ' + e.message)
+  }
+}
 $('btn-borrar').addEventListener('click', () => {
   const texto = `Hola, quiero borrar mi cuenta de MiFinanzas y todos mis datos.\n\nCuenta: ${correo}`
   abrirHoja('Borrar mi cuenta', `
