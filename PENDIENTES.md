@@ -18,7 +18,7 @@ Lista viva: al empezar una conversación nueva, leer esto y `CLAUDE.md`. Al term
 3. **Google Play**: enviar los enlaces de la prueba cerrada a los testers (faltan 11). Deben seguir
    apuntados 14 días seguidos; luego pedir acceso a producción.
 
-## Hecho, sin publicar (rama `ccr-4967aa0c-06n1bi`, falta el visto bueno para subir a `main`)
+## Publicado en `main` (25/10/2026)
 
 - Pantalla de acceso nueva (Manrope, luces, logo propio, cristal, ver contraseña, avisos amables).
   Pendiente opcional: cambiar `icon-192.png`/`icon-512.png` y el color verde lima de `manifest.json`
