@@ -91,24 +91,6 @@ body {
 @property --giro { syntax: '<angle>'; initial-value: 0deg; inherits: false; }
 @keyframes giro { to { --giro: 360deg; } }
 
-/* Chips flotantes de adorno */
-.chip {
-  position: absolute; z-index: 2; display: flex; align-items: center; gap: 8px; padding: 8px 11px 8px 8px; border-radius: 14px;
-  background: rgba(17,24,39,.55); border: 1px solid rgba(255,255,255,.12);
-  -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px);
-  box-shadow: 0 14px 30px -12px rgba(0,0,0,.7), inset 0 1px 0 rgba(255,255,255,.08);
-  text-align: left; animation: chip-flota 6s ease-in-out infinite;
-}
-.chip span { display: flex; flex-direction: column; line-height: 1.15; }
-.chip span::before { content: attr(data-t); font-size: 10.5px; font-weight: 600; color: var(--sub); }
-.chip span::after { content: attr(data-v); font-size: 13px; font-weight: 800; color: var(--white); font-variant-numeric: tabular-nums; }
-.c1 { top: -4px; left: -10px; transform: rotate(-6deg); }
-.c1 span::after { color: var(--green-txt); }
-.c2 { top: 44px; right: -10px; transform: rotate(5deg); animation-delay: -3s; }
-.c2 svg { width: 38px; height: 18px; fill: none; stroke: var(--indigo-txt); stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; filter: drop-shadow(0 0 6px rgba(129,140,248,.8)); }
-.chip-ico { width: 24px; height: 24px; border-radius: 8px; display: grid; place-items: center; background: linear-gradient(135deg, #10b981, #059669); box-shadow: 0 0 14px rgba(16,185,129,.6); }
-.chip-ico::before { content: ''; width: 0; height: 0; border-left: 5px solid transparent; border-right: 5px solid transparent; border-bottom: 7px solid #fff; }
-@keyframes chip-flota { 50% { translate: 0 -8px; } }
 .logo-title {
   font-size: 36px; font-weight: 800; letter-spacing: -.03em; line-height: 1.1;
   background: linear-gradient(100deg, #fff 0%, #fff 30%, #6ee7b7 45%, #a5b4fc 60%, #fff 75%, #fff 100%) 0 0 / 250% 100%;
@@ -274,10 +256,9 @@ body {
   .logo { margin-bottom: 18px; }
   .logo-icon { width: 60px; height: 60px; margin-bottom: 12px; }
   .logo-title { font-size: 30px; }
-  .chip { display: none; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .luz, .aurora, .estrellas, .chip, .logo-icon, .logo-icon::before, .logo-icon::after, .logo-title, .cristal::before, .btn-main, .btn-main::after, .loading-logo { animation: none; }
+  .luz, .aurora, .estrellas, .logo-icon, .logo-icon::before, .logo-icon::after, .logo-title, .cristal::before, .btn-main, .btn-main::after, .loading-logo { animation: none; }
   .anim, .form-section, .error-msg.visible { animation-duration: .01s; }
 }

@@ -20,7 +20,7 @@ Lista viva: al empezar una conversación nueva, leer esto y `CLAUDE.md`. Al term
 
 ## Publicado en `main` (25/10/2026)
 
-- Pantalla de acceso nueva (Manrope, luces, logo propio, cristal, ver contraseña, avisos amables).
+- Pantalla de acceso nueva (Manrope, aurora y luces vivas, logo propio, cristal con borde de luz, ver contraseña, avisos amables).
   Pendiente opcional: cambiar `icon-192.png`/`icon-512.png` y el color verde lima de `manifest.json`
   por el logo nuevo.
 - Inicio: porcentajes sin decimales; Saldo → Movimientos, Salud → Metas, Fijos → Gastos fijos.
