@@ -239,4 +239,30 @@ module.exports = [
       await pg2.context().close()
     },
   },
+  {
+    nombre: 'perfil: «Borrar todos mis movimientos» abre la confirmación de Movimientos',
+    async prueba(t) {
+      const pg = await t.abrir('mifinanza-perfil.html', { datos: completo() })
+      await pg.click('a.fila:has-text("Borrar todos mis movimientos")'); await pg.waitForTimeout(1800)
+      t.ok(pg.url().endsWith('/mifinanza-movimientos.html'), 'No llegó a Movimientos: ' + pg.url())
+      t.igual(await pg.$eval('#modal-borrar-1', m => m.style.display), 'flex', 'No se abrió la confirmación')
+      t.sinErrores(pg)
+      await pg.context().close()
+    },
+  },
+  {
+    nombre: 'acceso: mostrar y ocultar la contraseña, aviso amable si falta algo',
+    async prueba(t) {
+      const pg = await t.abrir('index.html', { sinSesion: true })
+      const tipo = () => pg.$eval('#login-pass', i => i.type)
+      await pg.click('#form-entrar .ojo')
+      t.igual(await tipo(), 'text')
+      await pg.click('#form-entrar .ojo')
+      t.igual(await tipo(), 'password')
+      await pg.click('#form-entrar .btn-main')
+      t.igual(await pg.$eval('#error-msg', e => e.textContent), 'Escribe tu correo y tu contraseña para entrar.')
+      t.sinErrores(pg)
+      await pg.context().close()
+    },
+  },
 ]

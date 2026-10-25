@@ -35,11 +35,12 @@ function abrirModalCSV() {
   document.getElementById('modal-csv-rango').style.display = 'flex'
 }
 
-// Llegada desde Perfil → «Descargar mis movimientos»
-if (location.hash === '#descargar') {
+// Llegada desde Perfil → «Descargar mis movimientos» (#descargar) o «Borrar todos mis movimientos» (#borrar-todo)
+if (location.hash === '#descargar' || location.hash === '#borrar-todo') {
+  const abrir = location.hash === '#descargar' ? () => abrirModalCSV() : () => abrirBorrarTodo()
   history.replaceState(null, '', location.pathname)
   let n = 0
-  const iv = setInterval(() => { if (window.currentUserId) { clearInterval(iv); abrirModalCSV() } else if (++n > 100) clearInterval(iv) }, 100)
+  const iv = setInterval(() => { if (window.currentUserId) { clearInterval(iv); abrir() } else if (++n > 100) clearInterval(iv) }, 100)
 }
 
 function cerrarModalCSV() {

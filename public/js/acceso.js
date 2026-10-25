@@ -19,7 +19,7 @@ async function inicializar() {
     const { error } = await dbClient.auth.exchangeCodeForSession(pkceCode)
     if (error) {
       document.getElementById('loading').classList.remove('visible')
-      mostrarError('El enlace expiró o ya fue usado. Solicita uno nuevo.')
+      mostrarError('Este enlace ya no sirve: caducó o ya se usó. Pide uno nuevo y lo tendrás en tu correo en un momento.')
       return
     }
     // Éxito: onAuthStateChange decide si es PASSWORD_RECOVERY o redirige al inicio
@@ -74,9 +74,34 @@ function setTab(tab) {
   ocultarExito()
 }
 
+// Traduce los errores de Supabase a mensajes cercanos
+function mensajeAmable(error) {
+  const m = (error && error.message || '').toLowerCase()
+  if (m.includes('invalid login') || m.includes('invalid credentials')) return 'El correo o la contraseña no coinciden. Revísalos con calma e inténtalo de nuevo.'
+  if (m.includes('already registered') || m.includes('already been registered')) return 'Este correo ya tiene una cuenta. Entra desde la pestaña «Entrar».'
+  if (m.includes('not confirmed')) return 'Aún no has confirmado tu correo. Busca nuestro mensaje en tu bandeja de entrada (o en spam).'
+  if (m.includes('rate limit') || m.includes('too many') || m.includes('security purposes')) return 'Has hecho varios intentos seguidos. Espera un minuto y vuelve a probar.'
+  if (m.includes('fetch') || m.includes('network')) return 'No hay conexión. Comprueba tu internet e inténtalo otra vez.'
+  if (m.includes('invalid') && m.includes('email') || m.includes('validate email')) return 'Ese correo no parece válido. Revisa que esté bien escrito.'
+  if (m.includes('should be different') || m.includes('same password')) return 'La nueva contraseña tiene que ser distinta de la anterior.'
+  if (m.includes('password')) return 'La contraseña debe tener al menos 6 caracteres.'
+  return 'Algo no ha salido bien. Inténtalo de nuevo en un momento.'
+}
+
+// Ojo de los campos de contraseña
+function verClave(btn) {
+  const inp = btn.parentElement.querySelector('input')
+  const ver = inp.type === 'password'
+  inp.type = ver ? 'text' : 'password'
+  btn.classList.toggle('ver', ver)
+  btn.setAttribute('aria-label', ver ? 'Ocultar contraseña' : 'Mostrar contraseña')
+}
+
 function mostrarError(msg) {
   const el = document.getElementById('error-msg')
   el.textContent = msg
+  el.classList.remove('visible')
+  void el.offsetWidth  // vuelve a lanzar la animación si el aviso ya estaba a la vista
   el.classList.add('visible')
 }
 
@@ -111,7 +136,7 @@ async function migrarDatosExistentes(userId) {
 async function iniciarSesion() {
   const email = document.getElementById('login-email').value.trim()
   const pass  = document.getElementById('login-pass').value
-  if (!email || !pass) { mostrarError('Ingresa tu correo y contraseña'); return }
+  if (!email || !pass) { mostrarError('Escribe tu correo y tu contraseña para entrar.'); return }
 
   ocultarError()
   mostrarCarga('Verificando...', '')
@@ -120,12 +145,7 @@ async function iniciarSesion() {
 
   if (error) {
     document.getElementById('loading').classList.remove('visible')
-    const msg = error.message.toLowerCase()
-    if (msg.includes('invalid login') || msg.includes('invalid credentials')) {
-      mostrarError('Correo o contraseña incorrectos')
-    } else {
-      mostrarError(error.message)
-    }
+    mostrarError(mensajeAmable(error))
     return
   }
 
@@ -138,9 +158,9 @@ async function crearCuenta() {
   const email = document.getElementById('reg-email').value.trim()
   const pass  = document.getElementById('reg-pass').value
   const pass2 = document.getElementById('reg-pass2').value
-  if (!email || !pass)  { mostrarError('Completa todos los campos'); return }
-  if (pass !== pass2)   { mostrarError('Las contraseñas no coinciden'); return }
-  if (pass.length < 6)  { mostrarError('La contraseña debe tener al menos 6 caracteres'); return }
+  if (!email || !pass)  { mostrarError('Rellena tu correo y una contraseña para crear la cuenta.'); return }
+  if (pass !== pass2)   { mostrarError('Las dos contraseñas no coinciden. Vuelve a escribirlas.'); return }
+  if (pass.length < 6)  { mostrarError('La contraseña debe tener al menos 6 caracteres.'); return }
 
   ocultarError()
   mostrarCarga('Creando tu cuenta...', '')
@@ -149,11 +169,7 @@ async function crearCuenta() {
 
   if (error) {
     document.getElementById('loading').classList.remove('visible')
-    if (error.message.toLowerCase().includes('already registered')) {
-      mostrarError('Este correo ya tiene una cuenta. Usa la pestaña "Entrar".')
-    } else {
-      mostrarError(error.message)
-    }
+    mostrarError(mensajeAmable(error))
     return
   }
 
@@ -174,28 +190,28 @@ async function crearCuenta() {
 
 async function enviarRecuperacion() {
   const email = document.getElementById('rec-email').value.trim()
-  if (!email) { mostrarError('Ingresa tu correo'); return }
+  if (!email) { mostrarError('Escribe el correo con el que te registraste.'); return }
   ocultarError()
   mostrarCarga('Enviando enlace...', '')
   const { error } = await dbClient.auth.resetPasswordForEmail(email, {
     redirectTo: 'https://dulcet-raindrop-bf51bd.netlify.app/index.html'
   })
   document.getElementById('loading').classList.remove('visible')
-  if (error) { mostrarError(error.message); return }
+  if (error) { mostrarError(mensajeAmable(error)); return }
   mostrarExito('Enlace enviado. Revisa tu correo y haz clic en el enlace para restablecer tu contraseña.')
 }
 
 async function guardarNuevaClave() {
   const pass  = document.getElementById('nueva-pass').value
   const pass2 = document.getElementById('nueva-pass2').value
-  if (!pass)           { mostrarError('Ingresa la nueva contraseña'); return }
-  if (pass.length < 6) { mostrarError('La contraseña debe tener al menos 6 caracteres'); return }
-  if (pass !== pass2)  { mostrarError('Las contraseñas no coinciden'); return }
+  if (!pass)           { mostrarError('Escribe tu nueva contraseña.'); return }
+  if (pass.length < 6) { mostrarError('La contraseña debe tener al menos 6 caracteres.'); return }
+  if (pass !== pass2)  { mostrarError('Las dos contraseñas no coinciden. Vuelve a escribirlas.'); return }
   ocultarError()
   mostrarCarga('Guardando contraseña...', '')
   const { error } = await dbClient.auth.updateUser({ password: pass })
   document.getElementById('loading').classList.remove('visible')
-  if (error) { mostrarError(error.message); return }
+  if (error) { mostrarError(mensajeAmable(error)); return }
   mostrarCarga('¡Contraseña actualizada!', 'Entrando a tu cuenta...')
   setTimeout(() => window.location.replace('inicio.html'), 1500)
 }
@@ -203,6 +219,8 @@ async function guardarNuevaClave() {
 // Enter para enviar el formulario activo
 document.addEventListener('keydown', function(e) {
   if (e.key !== 'Enter') return
+  if (e.target.classList && e.target.classList.contains('tab')) { e.target.click(); return }
+  if (e.target.tagName === 'BUTTON' || e.target.tagName === 'A') return
   if (document.getElementById('form-entrar').classList.contains('active'))           iniciarSesion()
   else if (document.getElementById('form-crear').classList.contains('active'))       crearCuenta()
   else if (document.getElementById('form-recuperacion').classList.contains('active')) enviarRecuperacion()

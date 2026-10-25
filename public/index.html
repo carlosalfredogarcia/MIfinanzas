@@ -4,7 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>MiFinanza – Entrar</title>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/acceso.css">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="/icon-192.png">
@@ -12,94 +14,141 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="MiFinanza">
-<meta name="theme-color" content="#b8f564">
+<meta name="theme-color" content="#0a0e1a">
 </head>
 <body>
-<div class="phone">
-  <div class="logo">
-    <div class="logo-icon">💰</div>
-    <div class="logo-title">MiFinanza</div>
-    <div class="logo-sub">Tu dinero, bajo control</div>
-  </div>
-
-  <div class="tabs" id="tabs">
-    <div class="tab active" id="tab-entrar" onclick="setTab('entrar')">Entrar</div>
-    <div class="tab" id="tab-crear" onclick="setTab('crear')">Crear cuenta</div>
-  </div>
-
-  <div class="success-msg" id="success-msg"></div>
-  <div class="error-msg" id="error-msg"></div>
-
-  <!-- Formulario login -->
-  <div class="form-section active" id="form-entrar">
-    <div class="fld">
-      <label class="lbl">Correo</label>
-      <input type="email" id="login-email" class="inp" placeholder="tu@correo.com" autocomplete="email">
-    </div>
-    <div class="fld" style="margin-bottom:18px">
-      <label class="lbl">Contraseña</label>
-      <input type="password" id="login-pass" class="inp" placeholder="••••••••" autocomplete="current-password">
-    </div>
-    <button class="btn-main" style="background:var(--accent);color:#0f0f13" onclick="iniciarSesion()">Entrar</button>
-    <button class="btn-link" onclick="setTab('recuperacion')">¿Olvidaste tu contraseña?</button>
-  </div>
-
-  <!-- Formulario registro -->
-  <div class="form-section" id="form-crear">
-    <div class="fld">
-      <label class="lbl">Correo</label>
-      <input type="email" id="reg-email" class="inp" placeholder="tu@correo.com" autocomplete="email">
-    </div>
-    <div class="fld">
-      <label class="lbl">Contraseña</label>
-      <input type="password" id="reg-pass" class="inp" placeholder="Mínimo 6 caracteres" autocomplete="new-password">
-    </div>
-    <div class="fld" style="margin-bottom:18px">
-      <label class="lbl">Confirmar contraseña</label>
-      <input type="password" id="reg-pass2" class="inp" placeholder="Repite la contraseña" autocomplete="new-password">
-    </div>
-    <button class="btn-main" style="background:var(--accent2);color:#0f0f13" onclick="crearCuenta()">Crear cuenta</button>
-  </div>
-
-  <!-- Recuperación de contraseña -->
-  <div class="form-section" id="form-recuperacion">
-    <div class="rec-header">
-      <div class="rec-icon">🔑</div>
-      <div class="rec-title">¿Olvidaste tu contraseña?</div>
-      <div class="rec-sub">Te enviamos un enlace a tu correo</div>
-    </div>
-    <div class="fld" style="margin-bottom:18px">
-      <label class="lbl">Correo</label>
-      <input type="email" id="rec-email" class="inp" placeholder="tu@correo.com" autocomplete="email">
-    </div>
-    <button class="btn-main" style="background:var(--accent);color:#0f0f13" onclick="enviarRecuperacion()">Enviar enlace</button>
-    <button class="btn-link" onclick="setTab('entrar')">← Volver</button>
-  </div>
-
-  <!-- Nueva contraseña (retorno desde email) -->
-  <div class="form-section" id="form-nueva-clave">
-    <div class="rec-header">
-      <div class="rec-icon">🔒</div>
-      <div class="rec-title">Nueva contraseña</div>
-      <div class="rec-sub">Elige una contraseña segura</div>
-    </div>
-    <div class="fld">
-      <label class="lbl">Nueva contraseña</label>
-      <input type="password" id="nueva-pass" class="inp" placeholder="Mínimo 6 caracteres" autocomplete="new-password">
-    </div>
-    <div class="fld" style="margin-bottom:18px">
-      <label class="lbl">Confirmar contraseña</label>
-      <input type="password" id="nueva-pass2" class="inp" placeholder="Repite la contraseña" autocomplete="new-password">
-    </div>
-    <button class="btn-main" style="background:var(--accent);color:#0f0f13" onclick="guardarNuevaClave()">Guardar contraseña</button>
-  </div>
-</div>
+<!-- Logo reutilizable (marca y pantalla de carga) -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <linearGradient id="logo-fondo" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#10b981"/>
+      <stop offset="1" stop-color="#6366f1"/>
+    </linearGradient>
+    <linearGradient id="logo-brillo" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#fff" stop-opacity=".35"/>
+      <stop offset=".5" stop-color="#fff" stop-opacity="0"/>
+    </linearGradient>
+    <symbol id="logo" viewBox="0 0 64 64">
+      <rect width="64" height="64" rx="18" fill="url(#logo-fondo)"/>
+      <rect width="64" height="64" rx="18" fill="url(#logo-brillo)"/>
+      <path d="M15 45V22l12 13 10-11 12-6" fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M41 16.5 49 18l-2.6 7.6" fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+    </symbol>
+  </defs>
+</svg>
 
 <div class="loading-overlay visible" id="loading">
-  <div class="loading-spinner"></div>
+  <div class="loading-logo"><svg aria-hidden="true"><use href="#logo"/></svg></div>
   <div class="loading-text" id="loading-text">Verificando...</div>
   <div class="loading-sub" id="loading-sub"></div>
 </div>
+
+<div class="fondo" aria-hidden="true">
+  <span class="luz l1"></span><span class="luz l2"></span><span class="luz l3"></span>
+  <span class="rejilla"></span>
+</div>
+
+<main class="phone">
+  <div class="logo anim">
+    <div class="logo-icon"><svg aria-hidden="true"><use href="#logo"/></svg></div>
+    <h1 class="logo-title">MiFinanza</h1>
+    <div class="logo-sub">Tu dinero, bajo control</div>
+  </div>
+
+  <section class="cristal anim">
+    <div class="tabs" id="tabs" role="tablist">
+      <div class="tab active" id="tab-entrar" role="tab" tabindex="0" onclick="setTab('entrar')">Entrar</div>
+      <div class="tab" id="tab-crear" role="tab" tabindex="0" onclick="setTab('crear')">Crear cuenta</div>
+    </div>
+
+    <div class="success-msg" id="success-msg" role="status"></div>
+    <div class="error-msg" id="error-msg" role="alert"></div>
+
+    <!-- Formulario login -->
+    <div class="form-section active" id="form-entrar">
+      <div class="fld">
+        <label class="lbl" for="login-email">Correo</label>
+        <input type="email" id="login-email" class="inp" placeholder="tu@correo.com" autocomplete="email" inputmode="email">
+      </div>
+      <div class="fld">
+        <label class="lbl" for="login-pass">Contraseña</label>
+        <div class="inp-wrap">
+          <input type="password" id="login-pass" class="inp" placeholder="••••••••" autocomplete="current-password">
+          <button type="button" class="ojo" aria-label="Mostrar contraseña" onclick="verClave(this)"></button>
+        </div>
+      </div>
+      <button class="btn-main" onclick="iniciarSesion()"><span>Entrar</span></button>
+      <button class="btn-link" onclick="setTab('recuperacion')">¿Olvidaste tu contraseña?</button>
+    </div>
+
+    <!-- Formulario registro -->
+    <div class="form-section" id="form-crear">
+      <div class="fld">
+        <label class="lbl" for="reg-email">Correo</label>
+        <input type="email" id="reg-email" class="inp" placeholder="tu@correo.com" autocomplete="email" inputmode="email">
+      </div>
+      <div class="fld">
+        <label class="lbl" for="reg-pass">Contraseña</label>
+        <div class="inp-wrap">
+          <input type="password" id="reg-pass" class="inp" placeholder="Mínimo 6 caracteres" autocomplete="new-password">
+          <button type="button" class="ojo" aria-label="Mostrar contraseña" onclick="verClave(this)"></button>
+        </div>
+      </div>
+      <div class="fld">
+        <label class="lbl" for="reg-pass2">Confirmar contraseña</label>
+        <div class="inp-wrap">
+          <input type="password" id="reg-pass2" class="inp" placeholder="Repite la contraseña" autocomplete="new-password">
+          <button type="button" class="ojo" aria-label="Mostrar contraseña" onclick="verClave(this)"></button>
+        </div>
+      </div>
+      <button class="btn-main" onclick="crearCuenta()"><span>Crear cuenta</span></button>
+    </div>
+
+    <!-- Recuperación de contraseña -->
+    <div class="form-section" id="form-recuperacion">
+      <div class="rec-header">
+        <div class="rec-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="15" r="4"/><path d="m10.8 12.2 8.7-8.7M17 6l2.5 2.5M14.5 8.5 17 11"/></svg></div>
+        <div class="rec-title">¿Olvidaste tu contraseña?</div>
+        <div class="rec-sub">Te enviamos un enlace a tu correo</div>
+      </div>
+      <div class="fld">
+        <label class="lbl" for="rec-email">Correo</label>
+        <input type="email" id="rec-email" class="inp" placeholder="tu@correo.com" autocomplete="email" inputmode="email">
+      </div>
+      <button class="btn-main" onclick="enviarRecuperacion()"><span>Enviar enlace</span></button>
+      <button class="btn-link" onclick="setTab('entrar')">← Volver</button>
+    </div>
+
+    <!-- Nueva contraseña (retorno desde email) -->
+    <div class="form-section" id="form-nueva-clave">
+      <div class="rec-header">
+        <div class="rec-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2.5"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg></div>
+        <div class="rec-title">Nueva contraseña</div>
+        <div class="rec-sub">Elige una contraseña segura</div>
+      </div>
+      <div class="fld">
+        <label class="lbl" for="nueva-pass">Nueva contraseña</label>
+        <div class="inp-wrap">
+          <input type="password" id="nueva-pass" class="inp" placeholder="Mínimo 6 caracteres" autocomplete="new-password">
+          <button type="button" class="ojo" aria-label="Mostrar contraseña" onclick="verClave(this)"></button>
+        </div>
+      </div>
+      <div class="fld">
+        <label class="lbl" for="nueva-pass2">Confirmar contraseña</label>
+        <div class="inp-wrap">
+          <input type="password" id="nueva-pass2" class="inp" placeholder="Repite la contraseña" autocomplete="new-password">
+          <button type="button" class="ojo" aria-label="Mostrar contraseña" onclick="verClave(this)"></button>
+        </div>
+      </div>
+      <button class="btn-main" onclick="guardarNuevaClave()"><span>Guardar contraseña</span></button>
+    </div>
+  </section>
+
+  <a class="confianza anim" href="privacidad.html">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 5 6v5c0 4.5 3 8.3 7 10 4-1.7 7-5.5 7-10V6l-7-3Z"/><path d="m9 12 2 2 4-4"/></svg>
+    <span><b>Tus datos, privados y seguros</b><small>Cifrados y solo para ti. Nunca los vendemos.</small></span>
+  </a>
+</main>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="js/acceso.js"></script>

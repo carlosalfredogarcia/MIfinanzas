@@ -18,15 +18,20 @@ Lista viva: al empezar una conversación nueva, leer esto y `CLAUDE.md`. Al term
 3. **Google Play**: enviar los enlaces de la prueba cerrada a los testers (faltan 11). Deben seguir
    apuntados 14 días seguidos; luego pedir acceso a producción.
 
+## Hecho, sin publicar (rama `ccr-4967aa0c-06n1bi`, falta el visto bueno para subir a `main`)
+
+- Pantalla de acceso nueva (Manrope, luces, logo propio, cristal, ver contraseña, avisos amables).
+  Pendiente opcional: cambiar `icon-192.png`/`icon-512.png` y el color verde lima de `manifest.json`
+  por el logo nuevo.
+- Inicio: porcentajes sin decimales; Saldo → Movimientos, Salud → Metas, Fijos → Gastos fijos.
+- Perfil: «Borrar todos mis movimientos» (abre la confirmación de Movimientos con `#borrar-todo`).
+
 ## De Claude (cuando el usuario lo pida)
 
 - Atajo de iPhone «Al pagar con Wallet» (o MacroDroid en Android) que abra
   `inicio.html?accion=gasto&importe=…&comercio=…`. Si usa la app de Play (TWA com.mifinanza.app),
   añadir shareTarget en su configuración para «Compartir con MiFinanza».
 - Mensaje para los testers de Google Play (qué es, cómo apuntarse, qué probar).
-- Detalles de coherencia: porcentajes sin decimales en Inicio (96,1 %); tarjetas de Inicio que
-  lleven a su pantalla (Gastos fijos, Metas); «Borrar todos mis movimientos» en Perfil
-  (la función `abrirBorrarTodo` de Movimientos ya no tiene botón).
 - Borrado de cuenta automático (hoy se pide por WhatsApp): necesita `SUPABASE_SERVICE_ROLE_KEY`.
 - Versión en inglés (archivo de traducciones + selector en Perfil).
 - Vídeo demo con la voz del usuario (Remotion, repo estetica-web/video) cuando mande el audio.
