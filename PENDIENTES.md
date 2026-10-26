@@ -29,6 +29,15 @@ Lista viva: al empezar una conversación nueva, leer esto y `CLAUDE.md`. Al term
 - Inicio: porcentajes sin decimales; Saldo → Movimientos, Salud → Metas, Fijos → Gastos fijos.
 - Perfil: «Borrar todos mis movimientos» (abre la confirmación de Movimientos con `#borrar-todo`).
 
+## Campaña del kit (300 kits a guarderías, QR → página del kit → MiFinanza)
+
+- Página nueva en `kit/` hecha y aprobada en textos. Falta que el usuario, en Netlify, conecte el sitio
+  `alfrega-kit` al repositorio (Base directory `kit`), o lo suba arrastrando la carpeta `kit/`.
+- Confirmar adónde lleva el QR impreso: el usuario dijo `kit-seguridad-infantil.netlify.app` (da 404);
+  la que funciona es `alfrega-kit.netlify.app`.
+- Vídeo de Carlos (20–30 s, vertical): subirlo como `kit/img/carlos.mp4` y activar el <video> de «Un mensaje para ti».
+- Siguientes pasos de la estrategia: enlace distinto por guardería (`?desde=kit-<guarderia>`) para medir.
+
 ## De Claude (cuando el usuario lo pida)
 
 - Atajo de iPhone «Al pagar con Wallet» (o MacroDroid en Android) que abra

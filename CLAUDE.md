@@ -29,6 +29,8 @@ public/                     lo que ve el usuario (Netlify publica esta carpeta)
   js/idioma.js (+ idioma-en.js)  app en inglés: traduce en el navegador lo que se ve con el diccionario de idioma-en.js;
                             el idioma se elige en Perfil (o en la pantalla de acceso) y se guarda en el móvil
   landing*.html, privacidad.html, sw.js, manifest.json, .well-known/ (app Android)
+kit/                        página del QR del Kit de Seguridad Infantil (ALFREGA, otro sitio de Netlify:
+                            alfrega-kit.netlify.app, Base directory = kit); lleva a landing-cine.html?desde=kit
 netlify/functions/          servidor: import-csv.js (IA para extractos, usa ANTHROPIC_API_KEY)
 supabase/migrations/        SQL que se ejecuta a mano en el SQL Editor de Supabase
 tests/                      pruebas en Chromium con Supabase simulado (ver abajo)

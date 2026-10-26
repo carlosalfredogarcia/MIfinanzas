@@ -1,0 +1,4 @@
+# Página del QR del Kit de Seguridad Infantil (ALFREGA).
+# En Netlify, el sitio del kit usa como «Base directory» esta carpeta (kit), así que publica solo esto.
+[build]
+  publish = "."

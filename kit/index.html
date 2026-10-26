@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>ALFREGA · Kit de Seguridad Infantil</title>
+<meta name="description" content="6 cerraduras + 8 protectores de enchufe. Sin herramientas, en segundos.">
+<meta name="theme-color" content="#1A2E22">
+<link rel="icon" href="img/alfrega-logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&family=Manrope:wght@500;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --green: #4A8C65; --green-lt: #8FDBA8; --mint: #EBF5EE; --dark: #1A2E22;
+    --text: #2D3E35; --muted: #5A7060; --cream: #F6FAF7;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Nunito', system-ui, sans-serif; background: var(--cream); color: var(--text); line-height: 1.55; -webkit-font-smoothing: antialiased; }
+  .ancho { max-width: 560px; margin: 0 auto; padding: 0 20px; }
+
+  /* Portada */
+  .hero {
+    position: relative; overflow: hidden; color: #fff; text-align: center;
+    background: linear-gradient(150deg, #1A2E22 0%, #2E5C3E 60%, #3E7A52 100%);
+    padding: calc(30px + env(safe-area-inset-top)) 0 64px;
+  }
+  .hero::before { content: ''; position: absolute; inset: 0; pointer-events: none; background: radial-gradient(ellipse at 75% 15%, rgba(143,219,168,.25), transparent 60%); }
+  .marca { position: relative; display: inline-flex; align-items: center; gap: 10px; padding: 6px 16px 6px 8px; border-radius: 40px; background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.2); font-weight: 900; letter-spacing: 2px; font-size: 15px; }
+  .marca img { width: 30px; height: 30px; }
+  .hero h1 { position: relative; margin: 28px 0 14px; font-size: clamp(30px, 8vw, 46px); font-weight: 900; line-height: 1.1; letter-spacing: -.5px; }
+  .hero h1 span { color: var(--green-lt); }
+  .hero p { position: relative; font-size: 17px; font-weight: 600; color: rgba(255,255,255,.85); }
+  .hero p b { color: #fff; }
+
+  /* Vídeo (se carga al tocar, para que la página abra rápido) */
+  .video {
+    position: relative; margin: -40px auto 0; aspect-ratio: 16 / 9; border-radius: 20px; overflow: hidden; cursor: pointer;
+    background: #000 center / cover no-repeat; box-shadow: 0 20px 44px -16px rgba(26,46,34,.55); border: 0; display: block; width: 100%;
+  }
+  .video::after { content: ''; position: absolute; inset: 0; background: linear-gradient(transparent 40%, rgba(0,0,0,.45)); }
+  .video .play { position: absolute; z-index: 1; left: 50%; top: 50%; width: 72px; height: 72px; margin: -36px 0 0 -36px; border-radius: 50%; background: rgba(255,255,255,.95); box-shadow: 0 10px 30px rgba(0,0,0,.35); display: grid; place-items: center; transition: transform .2s; }
+  .video:active .play { transform: scale(.94); }
+  .video .play::before { content: ''; margin-left: 6px; border-left: 22px solid var(--green); border-top: 14px solid transparent; border-bottom: 14px solid transparent; }
+  .video .etq { position: absolute; z-index: 1; left: 16px; bottom: 14px; color: #fff; font-weight: 800; font-size: 15px; text-shadow: 0 2px 8px rgba(0,0,0,.5); }
+  .video iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+
+  /* Carrusel de fotos */
+  .titulo { text-align: center; font-size: 22px; font-weight: 900; color: var(--dark); margin: 44px 0 6px; }
+  .sub { text-align: center; color: var(--muted); font-weight: 600; margin-bottom: 18px; }
+  .carrusel { display: flex; gap: 12px; overflow-x: auto; scroll-snap-type: x mandatory; padding: 4px 20px 10px; scrollbar-width: none; -webkit-overflow-scrolling: touch; max-width: 560px; margin: 0 auto; }
+  .carrusel::-webkit-scrollbar { display: none; }
+  .carrusel img { flex: none; width: 86%; aspect-ratio: 1; object-fit: cover; border-radius: 18px; scroll-snap-align: center; background: #fff; box-shadow: 0 10px 26px -14px rgba(26,46,34,.45); }
+  .puntos { display: flex; justify-content: center; gap: 7px; margin-top: 8px; }
+  .puntos i { width: 7px; height: 7px; border-radius: 4px; background: #C7DCCD; transition: width .25s, background .25s; }
+  .puntos i.on { width: 20px; background: var(--green); }
+
+  /* Mensaje de Carlos */
+  .mensaje { margin-top: 44px; background: #fff; border-radius: 24px; padding: 26px 22px; box-shadow: 0 14px 34px -20px rgba(26,46,34,.5); border: 1px solid #E0EDE4; }
+  .mensaje h2 { font-size: 20px; font-weight: 900; color: var(--dark); margin-bottom: 12px; }
+  .mensaje video { width: 100%; border-radius: 16px; margin-bottom: 16px; background: #000; display: block; }
+  .mensaje p { font-size: 17px; font-weight: 600; color: var(--text); }
+  .firma { display: flex; align-items: center; gap: 10px; margin-top: 16px; font-weight: 800; color: var(--green); }
+  .firma span { width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; background: var(--mint); color: var(--green); font-weight: 900; }
+
+  /* MiFinanza: con su propio estilo (azul noche, esmeralda e índigo) */
+  .app {
+    position: relative; overflow: hidden; margin: 28px 0 0; padding: 28px 22px 24px; border-radius: 26px; color: #e5e7eb;
+    background: radial-gradient(circle at 15% 0%, rgba(16,185,129,.35), transparent 50%), radial-gradient(circle at 100% 100%, rgba(99,102,241,.45), transparent 55%), #0a0e1a;
+    font-family: 'Manrope', system-ui, sans-serif; box-shadow: 0 20px 44px -18px rgba(10,14,26,.7);
+  }
+  .regalo { display: inline-block; padding: 5px 12px; border-radius: 30px; background: rgba(245,158,11,.16); color: #fcd34d; font-size: 13px; font-weight: 800; }
+  .app-cab { display: flex; align-items: center; gap: 14px; margin: 16px 0 12px; }
+  .app-cab img { width: 56px; height: 56px; border-radius: 16px; flex: none; box-shadow: 0 10px 24px -6px rgba(16,185,129,.55); }
+  .app h2 { font-size: 21px; font-weight: 800; line-height: 1.25; color: #fff; }
+  .app p { font-size: 16px; color: #cbd5e1; font-weight: 500; }
+  .app-btn {
+    display: block; margin-top: 20px; padding: 16px; border-radius: 16px; text-align: center; text-decoration: none;
+    font-weight: 800; font-size: 17px; color: #fff; background: linear-gradient(110deg, #10b981, #14b8a6, #6366f1);
+    box-shadow: 0 12px 28px -10px rgba(16,185,129,.8);
+  }
+  .app-nota { text-align: center; margin-top: 10px; font-size: 13.5px !important; color: #94a3b8 !important; }
+
+  footer { text-align: center; padding: 34px 20px calc(30px + env(safe-area-inset-bottom)); color: var(--muted); font-size: 13px; font-weight: 700; }
+
+  /* Aparecen al bajar */
+  .sube { opacity: 0; transform: translateY(18px); transition: opacity .7s, transform .7s cubic-bezier(.16,1,.3,1); }
+  .sube.ver { opacity: 1; transform: none; }
+  @media (prefers-reduced-motion: reduce) { .sube { opacity: 1; transform: none; transition: none; } }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="ancho">
+    <div class="marca"><img src="img/alfrega-logo.png" alt="">ALFREGA</div>
+    <h1>Su curiosidad no tiene límites. <span>Su seguridad, tampoco.</span></h1>
+    <p><b>6 cerraduras + 8 protectores de enchufe.</b><br>Sin herramientas, en segundos.</p>
+  </div>
+</header>
+
+<main>
+  <div class="ancho">
+    <button class="video" id="video" style="background-image:url('https://i.ytimg.com/vi/nrVjDorWcK8/hqdefault.jpg')" aria-label="Ver el vídeo de instalación">
+      <span class="play" aria-hidden="true"></span>
+      <span class="etq">Mira cómo se instala</span>
+    </button>
+  </div>
+
+  <h2 class="titulo sube">El kit en detalle</h2>
+  <p class="sub sube">Desliza para ver más →</p>
+  <div class="carrusel sube" id="carrusel">
+    <img src="img/1-kit.jpg" alt="El kit: 6 cerraduras de cajón y 8 protectores de enchufe">
+    <img src="img/2-versatil.jpg" alt="Sirve para puertas, cajones, gabinetes y la nevera" loading="lazy">
+    <img src="img/3-instalacion.jpg" alt="Instalación sin herramientas y cómo abrir y cerrar" loading="lazy">
+    <img src="img/6-enchufes.jpg" alt="Protectores de enchufe: fáciles de usar e instalar" loading="lazy">
+    <img src="img/4-detalles.jpg" alt="Medidas y adhesivo 3M" loading="lazy">
+    <img src="img/5-por-que.jpg" alt="Adhesivo 3M, materiales resistentes y no tóxicos" loading="lazy">
+  </div>
+  <div class="puntos" id="puntos" aria-hidden="true"></div>
+
+  <div class="ancho">
+    <section class="mensaje sube">
+      <h2>Un mensaje para ti</h2>
+      <!-- Vídeo de Carlos: cuando esté, subir img/carlos.mp4 (y img/carlos.jpg como portada) y quitar este comentario:
+      <video src="img/carlos.mp4" poster="img/carlos.jpg" controls playsinline preload="none"></video> -->
+      <p>Cuando un bebé empieza a gatear, lo descubre todo: cajones, puertas, enchufes… Este kit es para que pueda explorar seguro y tú estés un poco más tranquilo.</p>
+      <div class="firma"><span>C</span>Con cariño, Carlos</div>
+    </section>
+
+    <section class="app sube" aria-labelledby="app-t">
+      <span class="regalo">Y un regalo más 🎁</span>
+      <div class="app-cab">
+        <img src="img/mifinanza.svg" alt="MiFinanza">
+        <h2 id="app-t">Tú cuidas de tu bebé. MiFinanza cuida de tus cuentas.</h2>
+      </div>
+      <p>Con un bebé, los gastos cambian. MiFinanza es una app gratis para ver a dónde va tu dinero cada mes.</p>
+      <a class="app-btn" href="https://dulcet-raindrop-bf51bd.netlify.app/landing-cine.html?desde=kit">Descúbrela aquí →</a>
+      <p class="app-nota">Te lo explico todo en la página.</p>
+    </section>
+  </div>
+</main>
+
+<footer>ALFREGA — Kit de Seguridad Infantil</footer>
+
+<script>
+  // Vídeo de YouTube: solo se carga al tocarlo
+  document.getElementById('video').addEventListener('click', function () {
+    this.innerHTML = '<iframe src="https://www.youtube-nocookie.com/embed/nrVjDorWcK8?autoplay=1&rel=0&playsinline=1" title="Instalación del kit" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>'
+  }, { once: true })
+
+  // Puntos del carrusel
+  const car = document.getElementById('carrusel'), fotos = car.querySelectorAll('img'), puntos = document.getElementById('puntos')
+  puntos.innerHTML = [...fotos].map(() => '<i></i>').join('')
+  const marcar = () => {
+    const i = Math.round(car.scrollLeft / (fotos[1].offsetLeft - fotos[0].offsetLeft))
+    puntos.querySelectorAll('i').forEach((p, k) => p.classList.toggle('on', k === i))
+  }
+  car.addEventListener('scroll', marcar, { passive: true }); marcar()
+
+  // Las secciones aparecen al llegar a ellas
+  const io = 'IntersectionObserver' in window && new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('ver'); io.unobserve(e.target) } }), { threshold: .15 })
+  document.querySelectorAll('.sube').forEach(el => io ? io.observe(el) : el.classList.add('ver'))
+</script>
+</body>
+</html>
