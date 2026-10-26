@@ -44,5 +44,6 @@ Lista viva: al empezar una conversación nueva, leer esto y `CLAUDE.md`. Al term
   añadir shareTarget en su configuración para «Compartir con MiFinanza».
 - Mensaje para los testers de Google Play (qué es, cómo apuntarse, qué probar).
 - Borrado de cuenta automático (hoy se pide por WhatsApp): necesita `SUPABASE_SERVICE_ROLE_KEY`.
-- Vídeo demo: hecho sin voz (`cd tests && npm run video`, ~2 min, subtítulos en español). Cuando el
-  usuario mande su audio, ajustar los tiempos de cada escena a su voz y mezclarlo con ffmpeg.
+- Vídeo demo con voz (lo pidió para más adelante): 1) el usuario manda un CSV con los números exactos que
+  quiere que salgan → cargarlo en tests/datos-demo.js; 2) manda su nota de voz → reescribir las escenas de
+  tests/video-demo.js al ritmo de su voz, grabar (`npm run video`) y mezclar el audio con ffmpeg.
