@@ -1,5 +1,5 @@
-const CACHE = 'mifinanza-v12';
-const ASSETS = ['/icon-192.png', '/icon-512.png'];
+const CACHE = 'mifinanza-v13';
+const ASSETS = ['/icon-192.png', '/icon-512.png', '/apple-touch-icon.png', '/favicon.png', '/icon.svg'];
 
 self.addEventListener('install', e => {
   // skipWaiting incondicional: el nuevo SW toma control inmediatamente

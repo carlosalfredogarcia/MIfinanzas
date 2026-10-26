@@ -4,6 +4,11 @@ Lista viva: al empezar una conversación nueva, leer esto y `CLAUDE.md`. Al term
 
 ## Del usuario (en el ordenador)
 
+0. **Icono de la app de Google Play**: la web y la app instalada desde el navegador ya usan el logo
+   nuevo (`public/icon.svg`, `icon-512.png`), pero la app de Play (TWA com.mifinanza.app) lleva el
+   icono dentro: hay que volver a generarla (Bubblewrap o PWABuilder) con `icon-512.png` y subir
+   una versión nueva a Play Console.
+
 1. **Supabase → SQL Editor**: ejecutar `supabase/migrations/indices_rendimiento.sql` y
    `supabase/migrations/comprobantes.sql` (no cambian tablas ni datos; el segundo activa los
    comprobantes de Préstamos, que hasta entonces avisan «aún no están activados»).
@@ -21,8 +26,6 @@ Lista viva: al empezar una conversación nueva, leer esto y `CLAUDE.md`. Al term
 ## Publicado en `main` (25/10/2026)
 
 - Pantalla de acceso nueva (Manrope, aurora y luces vivas, logo propio, cristal con borde de luz, ver contraseña, avisos amables).
-  Pendiente opcional: cambiar `icon-192.png`/`icon-512.png` y el color verde lima de `manifest.json`
-  por el logo nuevo.
 - Inicio: porcentajes sin decimales; Saldo → Movimientos, Salud → Metas, Fijos → Gastos fijos.
 - Perfil: «Borrar todos mis movimientos» (abre la confirmación de Movimientos con `#borrar-todo`).
 
