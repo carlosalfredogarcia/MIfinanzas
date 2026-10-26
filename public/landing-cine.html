@@ -73,13 +73,23 @@
   /* Tres móviles flotando en 3D */
   .escena { position: relative; width: 100%; max-width: 760px; height: clamp(420px, 120vw, 600px); margin-top: 46px; perspective: 1400px; animation: entra 1.4s 1.2s both; }
   .grupo { position: absolute; inset: 0; transform-style: preserve-3d; transition: transform .25s ease-out; }
-  .movil { position: absolute; aspect-ratio: 390 / 844; border-radius: 40px; padding: 9px; background: linear-gradient(160deg, #2c3549, #0b101c); box-shadow: 0 50px 90px -30px rgba(0,0,0,.85), 0 0 0 1px rgba(255,255,255,.09); }
-  .movil img { width: 100%; height: 100%; object-fit: cover; object-position: top; border-radius: 32px; display: block; }
-  .movil::before { content: ''; position: absolute; z-index: 2; top: 17px; left: 50%; width: 72px; height: 20px; margin-left: -36px; border-radius: 20px; background: #05070d; }
-  .movil::after { content: ''; position: absolute; inset: 9px; border-radius: 32px; z-index: 1; pointer-events: none; background: linear-gradient(125deg, rgba(255,255,255,.16) 0%, transparent 35%); }
-  .m-centro { width: min(250px, 52vw); left: 50%; top: 0; margin-left: calc(min(250px, 52vw) / -2); transform: translateZ(80px); animation: flota 7s ease-in-out infinite; box-shadow: 0 50px 90px -30px rgba(0,0,0,.85), 0 0 0 1px rgba(255,255,255,.09), 0 0 120px -20px rgba(16,185,129,.55); z-index: 3; }
+  /* Móvil realista: marco metálico con grosor, botones, cristal con reflejo que se mueve */
+  .movil { position: absolute; aspect-ratio: 390 / 844; border-radius: 46px; padding: 11px;
+    background: linear-gradient(135deg, #6b7488 0%, #222a3b 14%, #0b0f19 48%, #1c2333 80%, #5d667b 100%);
+    box-shadow: inset 0 0 0 1.5px rgba(255,255,255,.22), inset 0 2px 2px rgba(255,255,255,.25), inset 0 -2px 3px rgba(0,0,0,.6),
+      var(--grosor, 3px 4px 0 #2b3244, 6px 8px 0 #171c2a, 9px 12px 0 #0d111b), 0 60px 100px -30px rgba(0,0,0,.9), 0 0 0 1px rgba(0,0,0,.6); }
+  .movil img { width: 100%; height: 100%; object-fit: cover; object-position: top; border-radius: 36px; display: block; box-shadow: 0 0 0 4px #04060b; }
+  .movil::before { content: ''; position: absolute; z-index: 2; top: 20px; left: 50%; width: 30%; height: 3.2%; margin-left: -15%; border-radius: 20px; background: #04060b; box-shadow: inset 0 0 0 1px rgba(255,255,255,.05); }
+  .movil::after { content: ''; position: absolute; inset: 11px; border-radius: 36px; z-index: 1; pointer-events: none;
+    background: linear-gradient(115deg, transparent calc(var(--gx, 30%) - 30%), rgba(255,255,255,.2) var(--gx, 30%), transparent calc(var(--gx, 30%) + 22%)), linear-gradient(180deg, rgba(255,255,255,.06), transparent 30%); }
+  .botones { position: absolute; inset: 0; pointer-events: none; }
+  .botones::before, .botones::after { content: ''; position: absolute; width: 4px; border-radius: 3px; background: linear-gradient(90deg, #12161f, #5d667b, #12161f); }
+  .botones::before { left: -3px; top: 20%; height: 12%; box-shadow: 0 calc(100% + 40px) 0 #3a4256; }
+  .botones::after { right: -3px; top: 26%; height: 15%; }
+  .reflejo { -webkit-box-reflect: below 16px linear-gradient(transparent 76%, rgba(255,255,255,.14)); }
+  .m-centro { width: min(250px, 52vw); left: 50%; top: 0; margin-left: calc(min(250px, 52vw) / -2); transform: translateZ(80px); animation: flota 7s ease-in-out infinite; box-shadow: inset 0 0 0 1.5px rgba(255,255,255,.22), inset 0 2px 2px rgba(255,255,255,.25), inset 0 -2px 3px rgba(0,0,0,.6), 0 3px 0 #2b3244, 0 6px 0 #171c2a, 0 9px 0 #0d111b, 0 60px 100px -30px rgba(0,0,0,.9), 0 0 130px -20px rgba(16,185,129,.55); z-index: 3; }
   .m-izq, .m-der { width: min(200px, 40vw); top: 60px; opacity: .85; filter: saturate(.9); }
-  .m-izq { left: 2%; transform: translateZ(-60px) rotateY(24deg) rotateZ(-4deg); animation: flota-i 8s ease-in-out infinite; }
+  .m-izq { --grosor: -3px 4px 0 #2b3244, -6px 8px 0 #171c2a, -9px 12px 0 #0d111b; left: 2%; transform: translateZ(-60px) rotateY(24deg) rotateZ(-4deg); animation: flota-i 8s ease-in-out infinite; }
   .m-der { right: 2%; transform: translateZ(-60px) rotateY(-24deg) rotateZ(4deg); animation: flota-d 9s ease-in-out infinite; }
   @keyframes flota { 50% { transform: translateZ(80px) translateY(-14px); } }
   @keyframes flota-i { 50% { transform: translateZ(-60px) rotateY(24deg) rotateZ(-4deg) translateY(-18px); } }
@@ -106,19 +116,22 @@
   /* ── La solución: móvil fijo que cambia de pantalla al bajar ── */
   .solucion { padding: 80px 0 40px; }
   .solucion .cab { text-align: center; margin-bottom: 30px; }
-  .historia { display: grid; gap: 0; position: relative; }
-  .pantalla-fija { position: sticky; top: 74px; z-index: 1; height: min(540px, 54vh); display: flex; justify-content: center; perspective: 1200px; pointer-events: none; }
-  .pantalla-fija .movil { position: relative; height: 100%; width: auto; transition: transform .8s cubic-bezier(.16,1,.3,1); box-shadow: 0 50px 90px -30px rgba(0,0,0,.85), 0 0 0 1px rgba(255,255,255,.09), 0 0 140px -30px var(--brillo, rgba(16,185,129,.6)); }
-  .pantalla-fija .movil img { position: absolute; inset: 9px; width: calc(100% - 18px); height: calc(100% - 18px); opacity: 0; transform: scale(1.04); transition: opacity .7s, transform .9s cubic-bezier(.16,1,.3,1); }
-  .pantalla-fija .movil img.on { opacity: 1; transform: none; }
-  .pasos { position: relative; z-index: 2; margin-top: -30vh; }
-  .paso { min-height: 78vh; display: flex; align-items: flex-end; justify-content: center; padding-bottom: 5vh; }
-  .paso:first-child { min-height: 60vh; }
-  .paso .caja { max-width: 440px; padding: 22px 22px 24px; border-radius: 24px; background: rgba(10,14,26,.9); border: 1px solid rgba(255,255,255,.1); backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px); box-shadow: 0 24px 50px -20px rgba(0,0,0,.8); opacity: 0; transform: translateY(30px) scale(.97); transition: opacity .6s, transform .8s cubic-bezier(.16,1,.3,1); }
-  .paso.activo .caja { opacity: 1; transform: none; }
-  .paso .etq { font-size: 12px; font-weight: 800; letter-spacing: .2em; text-transform: uppercase; color: var(--green-txt); }
-  .paso h3 { margin-top: 6px; font-size: clamp(24px, 6.5vw, 32px); font-weight: 800; line-height: 1.12; color: var(--white); letter-spacing: -.02em; }
-  .paso p { margin-top: 8px; font-size: 16.5px; color: #cbd5e1; }
+  .historia { position: relative; height: calc(6 * 80svh + 100svh); }
+  .fijo { position: sticky; top: 64px; height: calc(100svh - 64px); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 22px; padding: 10px 0 18px; }
+  .pantalla { flex: 1 1 auto; min-height: 0; max-height: 600px; display: flex; justify-content: center; perspective: 1300px; width: 100%; }
+  .pantalla .movil { position: relative; height: 100%; width: auto; transition: transform 1s cubic-bezier(.16,1,.3,1), box-shadow .8s;
+    box-shadow: inset 0 0 0 1.5px rgba(255,255,255,.22), inset 0 2px 2px rgba(255,255,255,.25), inset 0 -2px 3px rgba(0,0,0,.6), var(--grosor, 3px 4px 0 #2b3244, 6px 8px 0 #171c2a, 9px 12px 0 #0d111b), 0 60px 100px -30px rgba(0,0,0,.9), 0 0 150px -30px var(--brillo, rgba(16,185,129,.6)); }
+  .pantalla .movil img { position: absolute; inset: 11px; width: calc(100% - 22px); height: calc(100% - 22px); opacity: 0; transform: scale(1.05); transition: opacity .7s, transform 1s cubic-bezier(.16,1,.3,1); }
+  .pantalla .movil img.on { opacity: 1; transform: none; }
+  .textos { position: relative; flex: none; width: 100%; max-width: 460px; height: 150px; text-align: center; }
+  .texto { position: absolute; inset: 0; opacity: 0; transform: translateY(18px); filter: blur(6px); transition: opacity .6s, transform .8s cubic-bezier(.16,1,.3,1), filter .6s; pointer-events: none; }
+  .texto.on { opacity: 1; transform: none; filter: none; }
+  .texto .etq { font-size: 12px; font-weight: 800; letter-spacing: .2em; text-transform: uppercase; color: var(--green-txt); }
+  .texto h3 { margin-top: 4px; font-size: clamp(23px, 6.2vw, 34px); font-weight: 800; line-height: 1.12; color: var(--white); letter-spacing: -.02em; }
+  .texto p { margin-top: 6px; font-size: 16px; color: #cbd5e1; }
+  .progreso { display: flex; gap: 7px; justify-content: center; }
+  .progreso i { width: 7px; height: 7px; border-radius: 4px; background: rgba(255,255,255,.18); transition: width .3s, background .3s; }
+  .progreso i.on { width: 22px; background: var(--green-txt); }
 
   /* ── Confianza, instalar y final ── */
   .seccion { padding: 90px 0 30px; }
@@ -148,12 +161,12 @@
   .frase.sube.ver { transform: none; }
 
   @media (min-width: 900px) {
-    .historia { grid-template-columns: 1fr 1fr; }
-    .pantalla-fija { grid-column: 2; grid-row: 1; height: min(640px, 78vh); top: 90px; }
-    .pasos { grid-column: 1; grid-row: 1; margin-top: 0; }
-    .paso { align-items: center; justify-content: flex-start; padding: 0; min-height: 90vh; }
-    .paso:first-child { min-height: 80vh; }
-    .paso .caja { opacity: .3; }
+    .fijo { flex-direction: row-reverse; gap: 60px; top: 70px; height: calc(100vh - 70px); }
+    .pantalla { flex: none; width: auto; height: min(660px, 82vh); }
+    .textos { height: 220px; text-align: left; }
+    .texto h3 { font-size: 44px; }
+    .texto p { font-size: 18px; margin-top: 10px; }
+    .fijo .progreso { position: absolute; bottom: 26px; left: 0; right: 0; }
     .tarjetas { grid-template-columns: repeat(3, 1fr); }
   }
   @media (prefers-reduced-motion: reduce) {
@@ -187,7 +200,7 @@
       <div class="grupo" id="grupo">
         <div class="movil m-izq"><img src="img/landing/apuntar.webp" alt="" fetchpriority="high"></div>
         <div class="movil m-der"><img src="img/landing/estadisticas.webp" alt="" fetchpriority="high"></div>
-        <div class="movil m-centro"><img src="img/landing/inicio.webp" alt="Pantalla de inicio de MiFinanza" fetchpriority="high"></div>
+        <div class="movil m-centro reflejo"><img src="img/landing/inicio.webp" alt="Pantalla de inicio de MiFinanza" fetchpriority="high"></div>
       </div>
       <div class="halo"></div>
     </div>
@@ -209,24 +222,27 @@
       <span class="kicker sube">La solución</span>
       <h2 class="gran sube">Todo tu mes,<br>claro de un vistazo.</h2>
     </div>
-    <div class="historia">
-      <div class="pantalla-fija">
-        <div class="movil" id="movil-fijo">
-          <img class="on" src="img/landing/inicio.webp" alt="Inicio" data-brillo="rgba(16,185,129,.6)">
-          <img src="img/landing/apuntar.webp" alt="Apuntar un gasto" loading="lazy" data-brillo="rgba(239,68,68,.5)">
-          <img src="img/landing/importar.webp" alt="Importar el banco" loading="lazy" data-brillo="rgba(245,158,11,.45)">
-          <img src="img/landing/estadisticas.webp" alt="Estadísticas" loading="lazy" data-brillo="rgba(99,102,241,.65)">
-          <img src="img/landing/meta.webp" alt="Meta de ahorro" loading="lazy" data-brillo="rgba(16,185,129,.6)">
-          <img src="img/landing/fijos.webp" alt="Gastos fijos" loading="lazy" data-brillo="rgba(99,102,241,.65)">
+    <div class="historia" id="historia">
+      <div class="fijo">
+        <div class="pantalla">
+          <div class="movil reflejo" id="movil-fijo">
+            <img class="on" src="img/landing/inicio.webp" alt="Inicio" data-brillo="rgba(16,185,129,.6)">
+            <img src="img/landing/apuntar.webp" alt="Apuntar un gasto" loading="lazy" data-brillo="rgba(239,68,68,.5)">
+            <img src="img/landing/importar.webp" alt="Importar el banco" loading="lazy" data-brillo="rgba(245,158,11,.45)">
+            <img src="img/landing/estadisticas.webp" alt="Estadísticas" loading="lazy" data-brillo="rgba(99,102,241,.65)">
+            <img src="img/landing/meta.webp" alt="Meta de ahorro" loading="lazy" data-brillo="rgba(16,185,129,.6)">
+            <img src="img/landing/fijos.webp" alt="Gastos fijos" loading="lazy" data-brillo="rgba(99,102,241,.65)">
+          </div>
         </div>
-      </div>
-      <div class="pasos">
-        <div class="paso" data-i="0"><div class="caja"><span class="etq">Inicio</span><h3>Tu mes en una pantalla</h3><p>Lo que entra, lo que sale y lo que te queda hasta fin de mes. Y un número que te dice si vas bien.</p></div></div>
-        <div class="paso" data-i="1"><div class="caja"><span class="etq">Apuntar</span><h3>Un gasto en 3 toques</h3><p>Importe, categoría y listo. Tus gastos de siempre se repiten con un toque.</p></div></div>
-        <div class="paso" data-i="2"><div class="caja"><span class="etq">Importar</span><h3>Sube el extracto de tu banco</h3><p>La app clasifica cada movimiento. Tú solo revisas y guardas.</p></div></div>
-        <div class="paso" data-i="3"><div class="caja"><span class="etq">Entender</span><h3>Mira a dónde va tu dinero</h3><p>Por mes, por período o el año entero. Sin sorpresas.</p></div></div>
-        <div class="paso" data-i="4"><div class="caja"><span class="etq">Ahorrar</span><h3>Una meta que sí puedes cumplir</h3><p>Haz tu plan en 4 pasos con tus números reales y mira cómo avanza.</p></div></div>
-        <div class="paso" data-i="5"><div class="caja"><span class="etq">Fijos</span><h3>Los fijos, sin apuntarlos</h3><p>Alquiler, luz, guardería… cuentan solos cada mes y te avisa antes de cada cobro.</p></div></div>
+        <div class="textos">
+          <div class="texto on"><span class="etq">Inicio</span><h3>Tu mes en una pantalla</h3><p>Lo que entra, lo que sale y lo que te queda hasta fin de mes. Y un número que te dice si vas bien.</p></div>
+          <div class="texto"><span class="etq">Apuntar</span><h3>Un gasto en 3 toques</h3><p>Importe, categoría y listo. Tus gastos de siempre se repiten con un toque.</p></div>
+          <div class="texto"><span class="etq">Importar</span><h3>Sube el extracto de tu banco</h3><p>La app clasifica cada movimiento. Tú solo revisas y guardas.</p></div>
+          <div class="texto"><span class="etq">Entender</span><h3>Mira a dónde va tu dinero</h3><p>Por mes, por período o el año entero. Sin sorpresas.</p></div>
+          <div class="texto"><span class="etq">Ahorrar</span><h3>Una meta que sí puedes cumplir</h3><p>Haz tu plan en 4 pasos con tus números reales y mira cómo avanza.</p></div>
+          <div class="texto"><span class="etq">Fijos</span><h3>Los fijos, sin apuntarlos</h3><p>Alquiler, luz, guardería… cuentan solos cada mes y te avisa antes de cada cobro.</p></div>
+        </div>
+        <div class="progreso" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></div>
       </div>
     </div>
   </section>
@@ -305,18 +321,34 @@
   const io = 'IntersectionObserver' in window && new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('ver'); io.unobserve(e.target) } }), { threshold: .15 })
   document.querySelectorAll('.sube').forEach(el => io ? io.observe(el) : el.classList.add('ver'))
 
-  // El móvil fijo cambia de pantalla según el paso que se lee
+  // El móvil fijo cambia de pantalla y de texto según lo que se ha bajado dentro de la historia
   ;(() => {
-    const fotos = document.querySelectorAll('#movil-fijo img'), movil = document.getElementById('movil-fijo'), pasos = document.querySelectorAll('.paso')
+    const hist = document.getElementById('historia'), movil = document.getElementById('movil-fijo')
+    const fotos = movil.querySelectorAll('img'), textos = document.querySelectorAll('.texto'), puntos = document.querySelectorAll('.progreso i')
+    let actual = -1
     const activar = i => {
+      if (i === actual) return; actual = i
       fotos.forEach((f, k) => f.classList.toggle('on', k === i))
-      pasos.forEach((p, k) => p.classList.toggle('activo', k === i))
+      textos.forEach((t, k) => t.classList.toggle('on', k === i))
+      puntos.forEach((p, k) => p.classList.toggle('on', k === i))
       movil.style.setProperty('--brillo', fotos[i].dataset.brillo)
-      movil.style.transform = `rotateY(${i % 2 ? -8 : 8}deg) rotateX(4deg)`
+      movil.style.transform = `rotateY(${i % 2 ? -14 : 14}deg) rotateX(6deg) rotateZ(${i % 2 ? 1.5 : -1.5}deg)`
+      movil.style.setProperty('--grosor', i % 2 ? '3px 4px 0 #2b3244, 6px 8px 0 #171c2a, 9px 12px 0 #0d111b' : '-3px 4px 0 #2b3244, -6px 8px 0 #171c2a, -9px 12px 0 #0d111b')
     }
-    const obs = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) activar(+e.target.dataset.i) }), { rootMargin: '-45% 0px -45% 0px' })
-    pasos.forEach(p => obs.observe(p)); activar(0)
+    const alBajar = () => {
+      const r = hist.getBoundingClientRect(), recorrido = r.height - innerHeight
+      const k = Math.min(.999, Math.max(0, -r.top / recorrido))
+      activar(Math.floor(k * fotos.length))
+    }
+    addEventListener('scroll', alBajar, { passive: true }); addEventListener('resize', alBajar); alBajar()
   })()
+
+  // Botones laterales y reflejo del cristal que se mueve con el dedo o la inclinación
+  document.querySelectorAll('.movil').forEach(m => m.insertAdjacentHTML('afterbegin', '<span class="botones" aria-hidden="true"></span>'))
+  const reflejo = x => document.querySelectorAll('.movil').forEach(m => m.style.setProperty('--gx', (15 + x * 70) + '%'))
+  addEventListener('pointermove', e => reflejo(e.clientX / innerWidth), { passive: true })
+  addEventListener('deviceorientation', e => { if (e.gamma != null) reflejo(Math.max(0, Math.min(1, .5 + e.gamma / 60))) })
+  addEventListener('scroll', () => { if (!matchMedia('(pointer: fine)').matches) reflejo((scrollY / 900) % 1) }, { passive: true })
 
   // Brillo que sigue al dedo en las tarjetas
   document.querySelectorAll('.tarjeta').forEach(t => t.addEventListener('pointermove', e => {
