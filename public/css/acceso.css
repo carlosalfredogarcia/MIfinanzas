@@ -233,6 +233,12 @@ body {
 .confianza b { font-size: 14px; font-weight: 800; color: var(--text); }
 .confianza small { font-size: 12.5px; font-weight: 500; color: var(--sub); }
 
+/* Idioma */
+.idioma { display: flex; justify-content: center; align-items: center; gap: 6px; margin-top: 14px; color: #475569; font-size: 13px; }
+.idioma.anim { animation-delay: .34s; }
+.idioma button { background: none; border: 0; padding: 8px 6px; font: 700 13px Manrope, system-ui, sans-serif; color: var(--sub); cursor: pointer; }
+html:not([lang="en"]) .idioma [data-idioma="es"], html[lang="en"] .idioma [data-idioma="en"] { color: var(--green-txt); }
+
 /* ── Pantalla de carga ── */
 .loading-overlay {
   position: fixed; inset: 0; z-index: 999; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px;

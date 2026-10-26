@@ -16,7 +16,7 @@
 
   /* ── Constants ── */
   const MONTHS_ES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre']
-  const DAYS_ES   = ['L','M','X','J','V','S','D']
+  const DAYS_ES   = window.MF_IDIOMA === 'en' ? ['M','T','W','T','F','S','S'] : ['L','M','X','J','V','S','D']
   const CAL_SVG   = `<svg class="dp-cal-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="16" height="15" rx="2"/><path d="M2 8h16M7 1v4M13 1v4"/></svg>`
 
   /* ── State ── */

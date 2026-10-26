@@ -26,6 +26,8 @@ public/                     lo que ve el usuario (Netlify publica esta carpeta)
   js/nav.js                 barra inferior, botón + y menú (todas las pantallas)
   js/apunte.js              hoja rápida de gasto o ingreso (la abre nav.js); se abre rellena con ?texto= o ?accion=gasto&importe=&comercio=
   js/datepicker.js          selector de fechas
+  js/idioma.js (+ idioma-en.js)  app en inglés: traduce en el navegador lo que se ve con el diccionario de idioma-en.js;
+                            el idioma se elige en Perfil (o en la pantalla de acceso) y se guarda en el móvil
   landing*.html, privacidad.html, sw.js, manifest.json, .well-known/ (app Android)
 netlify/functions/          servidor: import-csv.js (IA para extractos, usa ANTHROPIC_API_KEY)
 supabase/migrations/        SQL que se ejecuta a mano en el SQL Editor de Supabase
@@ -48,7 +50,9 @@ tests/                      pruebas en Chromium con Supabase simulado (ver abajo
 - Textos en español, cercanos y claros. Importes siempre con `MF.dinero` (1.234,56 € con `window.moneda`;
   € detrás con espacio que no se parte, otros símbolos delante). Porcentajes sin decimales.
 - Nada repetido entre pantallas: si algo sirve a dos o más, va a `js/comun.js` (o a `js/nav.js` si es de la barra).
-- Orden de carga en cada pantalla: supabase (CDN) → js/auth.js → js/comun.js → [js/datepicker.js] → js/<pantalla>.js → js/nav.js.
+- Orden de carga en cada pantalla: js/idioma.js (en <head>, tras <title>) → supabase (CDN) → js/auth.js → js/comun.js → [js/datepicker.js] → js/<pantalla>.js → js/nav.js.
+- Inglés: las pantallas se escriben en español. Todo texto nuevo debe tener su traducción en js/idioma-en.js
+  (`cd tests && RECOGER=1 npm test` lista en tests/sin-traducir.txt lo que falta; la prueba «inglés» falla si queda algo).
 - Diseño: fondo #0a0e1a, tarjetas #111827, bordes #1f2937, esmeralda #10b981, rojo #ef4444, índigo #6366f1,
   dorado #f59e0b; letra Manrope; cifras con tabular-nums; hojas que suben desde abajo con «Deshacer» en vez de alertas.
 - Ningún cálculo usa la IA salvo la importación de extractos (cuesta dinero: no añadir llamadas sin permiso).

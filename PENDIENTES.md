@@ -36,5 +36,4 @@ Lista viva: al empezar una conversación nueva, leer esto y `CLAUDE.md`. Al term
   añadir shareTarget en su configuración para «Compartir con MiFinanza».
 - Mensaje para los testers de Google Play (qué es, cómo apuntarse, qué probar).
 - Borrado de cuenta automático (hoy se pide por WhatsApp): necesita `SUPABASE_SERVICE_ROLE_KEY`.
-- Versión en inglés (archivo de traducciones + selector en Perfil).
 - Vídeo demo con la voz del usuario (Remotion, repo estetica-web/video) cuando mande el audio.

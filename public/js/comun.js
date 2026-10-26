@@ -13,9 +13,12 @@
     const v = parseFloat(n) || 0
     const d = decimales ?? (Math.abs(v - Math.round(v)) < 0.005 ? 0 : 2)
     const [ent, frac] = Math.abs(v).toFixed(d).split('.')
-    const num = ent.replace(/\B(?=(\d{3})+(?!\d))/g, '.') + (frac ? ',' + frac : '')
+    // En inglés: 1,234.56 y el símbolo delante (€1,234.56)
+    const en = window.MF_IDIOMA === 'en'
+    const num = ent.replace(/\B(?=(\d{3})+(?!\d))/g, en ? ',' : '.') + (frac ? (en ? '.' : ',') + frac : '')
     const signo = v < 0 ? '−' : ''
     const mon = moneda || window.moneda || localStorage.getItem('moneda') || '$'
+    if (en) return signo + mon + num
     // Espacio que no se parte: el € nunca salta solo a la línea siguiente
     return mon === '€' ? signo + num + ' €' : signo + mon + num
   }

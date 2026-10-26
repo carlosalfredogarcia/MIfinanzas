@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>MiFinanza – Entrar</title>
+<script src="js/idioma.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -152,6 +153,12 @@
     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 5 6v5c0 4.5 3 8.3 7 10 4-1.7 7-5.5 7-10V6l-7-3Z"/><path d="m9 12 2 2 4-4"/></svg>
     <span><b>Tus datos, privados y seguros</b><small>Cifrados y solo para ti. Nunca los vendemos.</small></span>
   </a>
+
+  <div class="idioma anim" translate="no">
+    <button type="button" data-idioma="es" onclick="cambiarIdioma('es')">Español</button>
+    <span aria-hidden="true">·</span>
+    <button type="button" data-idioma="en" onclick="cambiarIdioma('en')">English</button>
+  </div>
 </main>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>

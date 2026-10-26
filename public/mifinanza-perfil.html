@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>MiFinanza – Perfil</title>
+<script src="js/idioma.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/perfil.css">
 <link rel="manifest" href="manifest.json">
@@ -55,6 +56,13 @@
         <span class="lbl">Moneda</span>
         <div class="chips" id="monedas" role="group" aria-label="Moneda"></div>
         <div class="guardado" id="guardado" aria-live="polite"></div>
+      </div>
+      <div class="bloque">
+        <span class="lbl">Idioma</span>
+        <div class="chips" id="idiomas" role="group" aria-label="Idioma" translate="no">
+          <button type="button" class="chip" data-idioma="es">🇪🇸 Español</button>
+          <button type="button" class="chip" data-idioma="en">🇬🇧 English</button>
+        </div>
       </div>
     </div>
   </section>

@@ -43,6 +43,12 @@ function pintarCabecera() {
   $('avatar').textContent = (n || correo || '?').charAt(0).toUpperCase()
 }
 
+// ── Idioma (se guarda en este móvil; js/idioma.js traduce la app) ──
+document.querySelectorAll('[data-idioma]').forEach(b => {
+  b.setAttribute('aria-pressed', b.dataset.idioma === window.MF_IDIOMA)
+  b.addEventListener('click', () => { if (b.dataset.idioma !== window.MF_IDIOMA) cambiarIdioma(b.dataset.idioma) })
+})
+
 // ── Nombre y moneda (se guardan solos) ─────────────────────
 async function guardarPerfil(cambios, msg) {
   const { error } = await dbClient.from('perfil').update(cambios).eq('usuario_id', uid)
