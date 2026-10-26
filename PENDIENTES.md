@@ -33,8 +33,7 @@ Lista viva: al empezar una conversación nueva, leer esto y `CLAUDE.md`. Al term
 
 - Página nueva en `kit/` hecha y aprobada en textos. Falta que el usuario, en Netlify, conecte el sitio
   `alfrega-kit` al repositorio (Base directory `kit`), o lo suba arrastrando la carpeta `kit/`.
-- Confirmar adónde lleva el QR impreso: el usuario dijo `kit-seguridad-infantil.netlify.app` (da 404);
-  la que funciona es `alfrega-kit.netlify.app`.
+- El QR impreso abre `alfrega-kit.netlify.app` (confirmado): al conectar ese sitio, las 300 cajas ya llevan a la página nueva.
 - Vídeo de Carlos (20–30 s, vertical): subirlo como `kit/img/carlos.mp4` y activar el <video> de «Un mensaje para ti».
 - Siguientes pasos de la estrategia: enlace distinto por guardería (`?desde=kit-<guarderia>`) para medir.
 
