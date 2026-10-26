@@ -30,7 +30,9 @@ public/                     lo que ve el usuario (Netlify publica esta carpeta)
                             el idioma se elige en Perfil (o en la pantalla de acceso) y se guarda en el móvil
   landing*.html, privacidad.html, sw.js, manifest.json, .well-known/ (app Android)
 kit/                        página del QR del Kit de Seguridad Infantil (ALFREGA, otro sitio de Netlify:
-                            alfrega-kit.netlify.app, Base directory = kit); lleva a landing-cine.html?desde=kit
+                            alfrega-kit.netlify.app, subido a mano, sin GitHub); lleva a landing-cine.html?desde=kit.
+                            Publicar con la clave del entorno: npx netlify-cli deploy --prod --dir kit --site alfrega-kit
+                            (usa NETLIFY_AUTH_TOKEN; sin la clave, pasar al usuario un .zip de kit/ para «choose a file»)
 netlify/functions/          servidor: import-csv.js (IA para extractos, usa ANTHROPIC_API_KEY)
 supabase/migrations/        SQL que se ejecuta a mano en el SQL Editor de Supabase
 tests/                      pruebas en Chromium con Supabase simulado (ver abajo)
