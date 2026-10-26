@@ -4,7 +4,8 @@
   "description": "Pruebas de MiFinanzas en un navegador real, con Supabase simulado",
   "scripts": {
     "test": "node run.js",
-    "actualizar": "node run.js --actualizar"
+    "actualizar": "node run.js --actualizar",
+    "video": "node video-demo.js"
   },
   "devDependencies": {
     "jspdf": "^2.5.1",

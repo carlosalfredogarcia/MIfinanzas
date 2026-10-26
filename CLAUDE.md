@@ -65,6 +65,7 @@ cd tests && npm install && npm test
 Abren cada pantalla con datos fijos (`tests/datos.js`) y fecha fija (21/10/2026) y comparan el texto con
 `tests/fotos/*.txt`. Si un cambio es intencionado: revisar la diferencia y `npm run actualizar`.
 `npm test -- metas` ejecuta solo las pruebas cuyo nombre contiene «metas».
+`npm run video` graba un vídeo demo de toda la app (tests/video-demo.js, sin IA: la importación es simulada).
 
 ## Publicar
 
