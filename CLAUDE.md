@@ -31,8 +31,12 @@ public/                     lo que ve el usuario (Netlify publica esta carpeta)
   landing*.html, privacidad.html, sw.js, manifest.json, .well-known/ (app Android)
 kit/                        página del QR del Kit de Seguridad Infantil (ALFREGA, otro sitio de Netlify:
                             alfrega-kit.netlify.app, subido a mano, sin GitHub); lleva a landing-cine.html?desde=kit.
-                            Publicar con la clave del entorno: npx netlify-cli deploy --prod --dir kit --site alfrega-kit
-                            (usa NETLIFY_AUTH_TOKEN; sin la clave, pasar al usuario un .zip de kit/ para «choose a file»)
+                            Publicar: la clave de Netlify está en «Secretos de red» del entorno (el proxy añade
+                            Authorization a api.netlify.com; no se ve). Subir un zip de kit/ por la API:
+                            cd kit && zip -r /tmp/kit.zip index.html img && curl -sS -X POST -H "Content-Type: application/zip"
+                            --data-binary @/tmp/kit.zip https://api.netlify.com/api/v1/sites/alfrega-kit.netlify.app/deploys
+                            y comprobar con curl que alfrega-kit.netlify.app sirve la página nueva.
+                            Sin clave (401): pasar al usuario el .zip de kit/ para «choose a file» en Netlify
 netlify/functions/          servidor: import-csv.js (IA para extractos, usa ANTHROPIC_API_KEY)
 supabase/migrations/        SQL que se ejecuta a mano en el SQL Editor de Supabase
 tests/                      pruebas en Chromium con Supabase simulado (ver abajo)
