@@ -39,9 +39,11 @@ Lista viva: al empezar una conversación nueva, leer esto y `CLAUDE.md`. Al term
 
 ## De Claude (cuando el usuario lo pida)
 
-- Atajo de iPhone «Al pagar con Wallet» (o MacroDroid en Android) que abra
-  `inicio.html?accion=gasto&importe=…&comercio=…`. Si usa la app de Play (TWA com.mifinanza.app),
-  añadir shareTarget en su configuración para «Compartir con MiFinanza».
+- Gasto desde la notificación del banco (Android, el usuario tiene Samsung): se le explicó MacroDroid
+  (disparador «Notificación recibida» de la app del banco o Google Wallet → «Abrir sitio web»
+  `https://dulcet-raindrop-bf51bd.netlify.app/inicio.html?titulo=[notification_title]&texto=[notification]`;
+  nav.js ya abre la hoja de gasto rellena con ?texto=). Pendiente: que mande captura de una notificación de su
+  banco para comprobar que `leerMensajeBanco` (js/apunte.js) saca bien importe y comercio, y ajustarlo.
 - Mensaje para los testers de Google Play (qué es, cómo apuntarse, qué probar).
 - Borrado de cuenta automático (hoy se pide por WhatsApp): necesita `SUPABASE_SERVICE_ROLE_KEY`.
 - Vídeo demo con voz (lo pidió para más adelante): 1) el usuario manda un CSV con los números exactos que
