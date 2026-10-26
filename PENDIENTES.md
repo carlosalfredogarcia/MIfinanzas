@@ -31,10 +31,8 @@ Lista viva: al empezar una conversación nueva, leer esto y `CLAUDE.md`. Al term
 
 ## Campaña del kit (300 kits a guarderías, QR → página del kit → MiFinanza)
 
-- Página nueva en `kit/` hecha y aprobada. Se le pasó al usuario `alfrega-kit.zip` para subirla a mano.
-- El usuario va a guardar la clave de Netlify en «Secretos de red» (api.netlify.com, Authorization: Bearer …).
-  En el chat nuevo: publicar `kit/` en alfrega-kit con la API (ver CLAUDE.md) y verificar con curl.
-  La clave caduca (90 días o la fecha que eligió): si da 401, pedirle que cree otra.
+- Página nueva en `kit/` publicada en alfrega-kit.netlify.app (26/10/2026) con la API de Netlify.
+  La clave está en «Secretos de red» (api.netlify.com, tipo Bearer) y caduca: si da 401, pedirle otra.
 - El QR impreso abre `alfrega-kit.netlify.app` (confirmado): al conectar ese sitio, las 300 cajas ya llevan a la página nueva.
 - Vídeo de Carlos (20–30 s, vertical): subirlo como `kit/img/carlos.mp4` y activar el <video> de «Un mensaje para ti».
 - Siguientes pasos de la estrategia: enlace distinto por guardería (`?desde=kit-<guarderia>`) para medir.
