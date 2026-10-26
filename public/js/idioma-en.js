@@ -183,6 +183,7 @@ window.MF_EN = {
     'Luz': 'Electricity',
     'Internet': 'Internet',
     'Nómina': 'Salary',
+    'Bebé': 'Baby',
     'Comida': 'Food',
     'Ocio': 'Leisure',
     'Gastos Varios': 'Miscellaneous',

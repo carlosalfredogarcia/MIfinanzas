@@ -5,7 +5,8 @@
   "scripts": {
     "test": "node run.js",
     "actualizar": "node run.js --actualizar",
-    "video": "node video-demo.js"
+    "video": "node video-demo.js",
+    "capturas": "node capturas-landing.js"
   },
   "devDependencies": {
     "jspdf": "^2.5.1",

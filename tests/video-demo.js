@@ -5,12 +5,11 @@
 const { chromium } = require('playwright-core')
 const fs = require('fs'), path = require('path')
 const PUB = path.join(__dirname, '..', 'public'), STUB = fs.readFileSync(path.join(__dirname, 'stub.js'), 'utf8')
-const { completo } = require('./datos')
+const { familia } = require('./datos-demo')
 const CHROME = process.env.CHROME_PATH || '/opt/pw-browsers/chromium-1194/chrome-linux/chrome'
 const OUT = path.resolve(process.argv[2] || path.join(__dirname, 'video')), IDIOMA = process.argv[3] || 'es'
-// Datos de ejemplo de las pruebas, con más ingresos: en el vídeo se ve a alguien que ahorra
-const DATOS = completo()
-for (const i of DATOS.ingresos || []) i.monto = Math.round(i.monto * 1.65)
+// Datos de ejemplo de una familia con bebé (los mismos que las capturas de la landing)
+const DATOS = familia()
 fs.mkdirSync(OUT, { recursive: true })
 const marcas = []  // [segundo, escena] para sincronizar luego la voz
 
@@ -83,7 +82,7 @@ fs.writeFileSync(path.join(OUT, 'extracto-banco.csv'), CSV)
   // 1. Acceso
   marca('acceso'); await ir('index.html'); await espera(1500)
   await cap('MiFinanza', 'Tu dinero, bajo control'); await espera(1500)
-  await toca('#login-email', 200); await pg.keyboard.type('carlos@correo.com', { delay: 45 })
+  await toca('#login-email', 200); await pg.keyboard.type('lucia@correo.com', { delay: 45 })
   await toca('#login-pass', 200); await pg.keyboard.type('••••••••'.replace(/•/g, 'a'), { delay: 45 })
   await toca('#form-entrar .btn-main', 200); await pg.evaluate(() => mostrarCarga('Cargando tu cuenta...', '')); await espera(1100)
 

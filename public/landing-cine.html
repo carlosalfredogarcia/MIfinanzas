@@ -3,1031 +3,222 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>MiFinanzas</title>
+<title>MiFinanza · Tu dinero, bajo control</title>
+<meta name="description" content="Apunta tus gastos en segundos, importa el extracto de tu banco y mira a dónde va cada euro. Gratis, en Android y iPhone.">
+<meta property="og:title" content="MiFinanza · Tu dinero, bajo control">
+<meta property="og:description" content="La app gratis para saber a dónde va tu dinero cada mes.">
+<meta property="og:image" content="img/landing/inicio.webp">
+<meta name="theme-color" content="#0a0e1a">
+<link rel="icon" href="/icon.svg" type="image/svg+xml">
+<link rel="icon" href="/favicon.png" sizes="48x48" type="image/png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Inter:wght@300;400;500;600&display=swap">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
 <style>
-:root {
-  --bg: #000000;
-  --bg2: #0a0a0a;
-  --card: #0d0d0d;
-  --border: #1a1a1a;
-  --text: #ffffff;
-  --sub: #8b949e;
-  --green: #3fb950;
-  --gold: #e3b341;
-  --glow: rgba(63,185,80,0.4);
-}
-
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-html { scroll-behavior: smooth; }
-
-body {
-  background: var(--bg);
-  color: var(--text);
-  font-family: 'Inter', sans-serif;
-  overflow-x: hidden;
-  line-height: 1.6;
-}
-
-/* ── PARTÍCULAS ── */
-#particles {
-  position: fixed;
-  top: 0; left: 0;
-  width: 100%; height: 100%;
-  pointer-events: none;
-  z-index: 0;
-}
-
-/* ── NAV ── */
-nav {
-  position: fixed;
-  top: 0; left: 0; right: 0;
-  z-index: 100;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 1.2rem max(24px, env(safe-area-inset-left, 0px));
-  background: linear-gradient(to bottom, rgba(0,0,0,0.9), transparent);
-  backdrop-filter: blur(4px);
-}
-
-.nav-logo {
-  font-family: 'Cinzel', serif;
-  font-size: 1.2rem;
-  font-weight: 700;
-  color: var(--green);
-  letter-spacing: 0.1em;
-  text-shadow: 0 0 20px var(--glow);
-}
-
-.nav-cta {
-  background: transparent;
-  border: 1px solid var(--green);
-  color: var(--green);
-  padding: 0.5rem 1.2rem;
-  font-family: 'Inter', sans-serif;
-  font-size: 0.85rem;
-  font-weight: 500;
-  cursor: pointer;
-  letter-spacing: 0.05em;
-  transition: all 0.3s;
-  text-decoration: none;
-  display: inline-block;
-}
-.nav-cta:hover {
-  background: var(--green);
-  color: #000;
-  box-shadow: 0 0 20px var(--glow);
-}
-
-/* ── HERO ── */
-#hero {
-  position: relative;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  padding: 6rem max(24px, env(safe-area-inset-left, 0px)) 4rem;
-  overflow: hidden;
-  z-index: 1;
-}
-
-.hero-ambient {
-  position: absolute;
-  bottom: -100px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 800px;
-  height: 400px;
-  background: radial-gradient(ellipse at center bottom, rgba(63,185,80,0.18) 0%, transparent 70%);
-  pointer-events: none;
-}
-
-.hero-ambient-top {
-  position: absolute;
-  top: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 600px;
-  height: 200px;
-  background: radial-gradient(ellipse at center top, rgba(63,185,80,0.06) 0%, transparent 70%);
-  pointer-events: none;
-}
-
-.hero-eyebrow {
-  font-family: 'Cinzel', serif;
-  font-size: 0.75rem;
-  letter-spacing: 0.3em;
-  color: var(--gold);
-  text-transform: uppercase;
-  margin-bottom: 2rem;
-  opacity: 0;
-  animation: fadeUp 0.8s ease 0.3s forwards;
-}
-
-.hero-title {
-  font-family: 'Cinzel', serif;
-  font-size: clamp(2rem, 6vw, 4.5rem);
-  font-weight: 900;
-  line-height: 1.1;
-  margin-bottom: 1.5rem;
-  text-wrap: balance;
-  max-width: 800px;
-}
-
-.hero-title .word {
-  display: inline-block;
-  opacity: 0;
-  transform: translateY(30px);
-  transition: opacity 0.5s ease, transform 0.5s ease;
-}
-
-.hero-title .word.visible {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-.hero-title .highlight {
-  color: var(--green);
-  text-shadow: 0 0 40px rgba(63,185,80,0.6);
-}
-
-.hero-sub {
-  font-size: clamp(1rem, 2vw, 1.2rem);
-  color: var(--sub);
-  max-width: 500px;
-  margin-bottom: 3rem;
-  opacity: 0;
-  animation: fadeUp 0.8s ease 1.2s forwards;
-  min-height: 1.8em;
-}
-
-.hero-cta {
-  display: inline-block;
-  background: var(--green);
-  color: #000;
-  font-family: 'Inter', sans-serif;
-  font-weight: 700;
-  font-size: 1rem;
-  letter-spacing: 0.05em;
-  padding: 1rem 2.5rem;
-  text-decoration: none;
-  position: relative;
-  opacity: 0;
-  animation: fadeUp 0.8s ease 1.8s forwards;
-  transition: all 0.3s;
-}
-
-.hero-cta::before {
-  content: '';
-  position: absolute;
-  inset: -3px;
-  background: var(--green);
-  z-index: -1;
-  opacity: 0.4;
-  animation: pulse 2s ease-in-out infinite;
-}
-
-@keyframes pulse {
-  0%, 100% { transform: scale(1); opacity: 0.4; }
-  50% { transform: scale(1.08); opacity: 0.15; }
-}
-
-.hero-cta:hover {
-  box-shadow: 0 0 40px rgba(63,185,80,0.6);
-  transform: translateY(-2px);
-}
-
-.hero-scroll {
-  position: absolute;
-  bottom: 2rem;
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.5rem;
-  opacity: 0;
-  animation: fadeUp 0.8s ease 2.5s forwards;
-}
-
-.hero-scroll span {
-  font-size: 0.7rem;
-  letter-spacing: 0.2em;
-  color: var(--sub);
-  text-transform: uppercase;
-}
-
-.scroll-line {
-  width: 1px;
-  height: 50px;
-  background: linear-gradient(to bottom, var(--green), transparent);
-  animation: scrollPulse 2s ease-in-out infinite;
-}
-
-@keyframes scrollPulse {
-  0%, 100% { opacity: 1; transform: scaleY(1); }
-  50% { opacity: 0.3; transform: scaleY(0.7); }
-}
-
-/* ── ANIMACIONES ENTRADA ── */
-@keyframes fadeUp {
-  to { opacity: 1; transform: translateY(0); }
-  from { opacity: 0; transform: translateY(30px); }
-}
-
-.reveal {
-  opacity: 0;
-  transform: translateY(40px);
-  transition: opacity 0.8s ease, transform 0.8s ease;
-}
-
-.reveal.visible {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-.reveal-delay-1 { transition-delay: 0.1s; }
-.reveal-delay-2 { transition-delay: 0.2s; }
-.reveal-delay-3 { transition-delay: 0.3s; }
-.reveal-delay-4 { transition-delay: 0.4s; }
-
-/* ── SECCIONES GENERALES ── */
-section {
-  position: relative;
-  z-index: 1;
-}
-
-.section-label {
-  font-family: 'Cinzel', serif;
-  font-size: 0.7rem;
-  letter-spacing: 0.4em;
-  color: var(--gold);
-  text-transform: uppercase;
-  display: block;
-  margin-bottom: 1rem;
-}
-
-/* ── PROBLEMA ── */
-#problema {
-  padding: 8rem max(24px, env(safe-area-inset-left, 0px));
-  background: var(--bg2);
-  border-top: 1px solid var(--border);
-}
-
-.problema-inner {
-  max-width: 700px;
-  margin: 0 auto;
-  text-align: center;
-}
-
-.problema-title {
-  font-family: 'Cinzel', serif;
-  font-size: clamp(1.8rem, 4vw, 3rem);
-  font-weight: 700;
-  margin-bottom: 3rem;
-  line-height: 1.2;
-  text-wrap: balance;
-}
-
-.problema-title em {
-  font-style: normal;
-  color: var(--gold);
-}
-
-.frases {
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-}
-
-.frase {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  text-align: left;
-  padding: 1.2rem 1.5rem;
-  border: 1px solid var(--border);
-  background: var(--card);
-  position: relative;
-  overflow: hidden;
-}
-
-.frase::before {
-  content: '';
-  position: absolute;
-  left: 0; top: 0; bottom: 0;
-  width: 3px;
-  background: var(--gold);
-}
-
-.frase-num {
-  font-family: 'Cinzel', serif;
-  font-size: 2rem;
-  font-weight: 900;
-  color: var(--gold);
-  opacity: 0.3;
-  min-width: 2rem;
-}
-
-.frase-text {
-  font-size: 1rem;
-  color: var(--sub);
-  line-height: 1.5;
-}
-
-.frase-text strong {
-  color: var(--text);
-  font-weight: 500;
-}
-
-/* ── SOLUCIÓN ── */
-#solucion {
-  padding: 8rem max(24px, env(safe-area-inset-left, 0px));
-  text-align: center;
-  overflow: hidden;
-}
-
-.solucion-title {
-  font-family: 'Cinzel', serif;
-  font-size: clamp(1.8rem, 4vw, 3rem);
-  font-weight: 700;
-  margin-bottom: 1rem;
-  text-wrap: balance;
-}
-
-.solucion-sub {
-  color: var(--sub);
-  max-width: 500px;
-  margin: 0 auto 4rem;
-}
-
-.phone-reveal {
-  position: relative;
-  display: inline-block;
-  margin-bottom: 4rem;
-}
-
-.phone-beam {
-  position: absolute;
-  top: -80px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 2px;
-  height: 80px;
-  background: linear-gradient(to bottom, transparent, var(--green));
-  box-shadow: 0 0 20px var(--green), 0 0 40px var(--glow);
-}
-
-.phone-beam::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 120px;
-  height: 120px;
-  background: radial-gradient(circle, rgba(63,185,80,0.3) 0%, transparent 70%);
-}
-
-.phone-frame {
-  width: min(260px, 70vw);
-  aspect-ratio: 9/19;
-  background: #0d0d0d;
-  border: 2px solid #222;
-  border-radius: 32px;
-  overflow: hidden;
-  position: relative;
-  box-shadow: 0 0 60px rgba(63,185,80,0.2), 0 40px 80px rgba(0,0,0,0.8);
-}
-
-.phone-screen {
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(135deg, #0d1117 0%, #161b22 100%);
-  display: flex;
-  flex-direction: column;
-  padding: 1rem 0.8rem 0.8rem;
-  gap: 0.5rem;
-}
-
-.ps-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 0.3rem;
-}
-.ps-greeting { font-size: 0.55rem; color: var(--sub); }
-.ps-name { font-size: 0.75rem; font-weight: 600; }
-
-.ps-balance-card {
-  background: linear-gradient(135deg, #1a2a1a, #0d1f0d);
-  border: 1px solid rgba(63,185,80,0.3);
-  border-radius: 10px;
-  padding: 0.7rem;
-  text-align: center;
-}
-.ps-balance-label { font-size: 0.45rem; color: var(--sub); margin-bottom: 0.2rem; }
-.ps-balance-num { font-size: 1.1rem; font-weight: 700; color: var(--green); }
-.ps-balance-sub { font-size: 0.4rem; color: var(--sub); margin-top: 0.1rem; }
-
-.ps-stats {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 0.4rem;
-}
-.ps-stat {
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 0.5rem;
-}
-.ps-stat-label { font-size: 0.4rem; color: var(--sub); }
-.ps-stat-val { font-size: 0.65rem; font-weight: 600; }
-.ps-stat-val.red { color: #f85149; }
-.ps-stat-val.green { color: var(--green); }
-
-.ps-recent { font-size: 0.45rem; color: var(--sub); font-weight: 500; margin-top: 0.2rem; }
-.ps-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0.4rem 0;
-  border-bottom: 1px solid var(--border);
-}
-.ps-item-name { font-size: 0.45rem; }
-.ps-item-amount { font-size: 0.45rem; font-weight: 600; }
-.ps-item-amount.neg { color: #f85149; }
-.ps-item-amount.pos { color: var(--green); }
-
-.vistas-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 1.5rem;
-  max-width: 800px;
-  margin: 0 auto;
-}
-
-.vista-card {
-  border: 1px solid var(--border);
-  background: var(--card);
-  padding: 1.5rem;
-  position: relative;
-  overflow: hidden;
-  text-align: left;
-  transition: border-color 0.3s, box-shadow 0.3s;
-}
-
-.vista-card:hover {
-  border-color: var(--green);
-  box-shadow: 0 0 30px rgba(63,185,80,0.1);
-}
-
-.vista-icon {
-  font-size: 1.5rem;
-  margin-bottom: 0.8rem;
-  display: block;
-}
-
-.vista-name {
-  font-family: 'Cinzel', serif;
-  font-size: 0.85rem;
-  font-weight: 700;
-  letter-spacing: 0.05em;
-  color: var(--green);
-  margin-bottom: 0.5rem;
-}
-
-.vista-desc {
-  font-size: 0.8rem;
-  color: var(--sub);
-  line-height: 1.5;
-}
-
-/* ── FEATURES ── */
-#features {
-  padding: 8rem max(24px, env(safe-area-inset-left, 0px));
-  background: var(--bg2);
-  border-top: 1px solid var(--border);
-}
-
-.features-title {
-  font-family: 'Cinzel', serif;
-  font-size: clamp(1.8rem, 4vw, 3rem);
-  font-weight: 700;
-  text-align: center;
-  margin-bottom: 4rem;
-  text-wrap: balance;
-}
-
-.features-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 1.5rem;
-  max-width: 1000px;
-  margin: 0 auto;
-}
-
-.feat-card {
-  border: 1px solid var(--border);
-  background: var(--card);
-  padding: 2rem;
-  position: relative;
-  overflow: hidden;
-  transition: border-color 0.3s, transform 0.3s;
-}
-
-.feat-card::after {
-  content: '';
-  position: absolute;
-  top: 0; left: 0; right: 0;
-  height: 1px;
-  background: linear-gradient(to right, transparent, var(--green), transparent);
-  opacity: 0;
-  transition: opacity 0.3s;
-}
-
-.feat-card:hover {
-  border-color: rgba(63,185,80,0.4);
-  transform: translateY(-4px);
-}
-
-.feat-card:hover::after {
-  opacity: 1;
-}
-
-.feat-icon {
-  font-size: 2rem;
-  margin-bottom: 1rem;
-  display: block;
-  filter: drop-shadow(0 0 8px var(--green));
-}
-
-.feat-title {
-  font-weight: 600;
-  font-size: 1rem;
-  margin-bottom: 0.5rem;
-  color: var(--text);
-}
-
-.feat-desc {
-  font-size: 0.85rem;
-  color: var(--sub);
-  line-height: 1.6;
-}
-
-/* ── CTA FINAL ── */
-#ctafinal {
-  padding: 10rem max(24px, env(safe-area-inset-left, 0px));
-  text-align: center;
-  position: relative;
-  overflow: hidden;
-}
-
-.cta-explosion {
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(ellipse at center, rgba(63,185,80,0.12) 0%, transparent 60%);
-  pointer-events: none;
-}
-
-.cta-explosion::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(ellipse at center, rgba(63,185,80,0.06) 0%, transparent 40%);
-  animation: breathe 4s ease-in-out infinite;
-}
-
-@keyframes breathe {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.2); }
-}
-
-.cta-title {
-  font-family: 'Cinzel', serif;
-  font-size: clamp(2rem, 5vw, 4rem);
-  font-weight: 900;
-  margin-bottom: 1rem;
-  line-height: 1.1;
-  position: relative;
-}
-
-.cta-title .line2 {
-  color: var(--green);
-  text-shadow: 0 0 60px rgba(63,185,80,0.5);
-}
-
-.cta-sub {
-  color: var(--sub);
-  font-size: 1rem;
-  max-width: 450px;
-  margin: 0 auto 2.5rem;
-  position: relative;
-}
-
-.cta-badges {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 1rem;
-  flex-wrap: wrap;
-  margin-bottom: 2rem;
-  position: relative;
-}
-
-.badge {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.6rem 1.2rem;
-  border: 1px solid var(--border);
-  background: var(--card);
-  font-size: 0.8rem;
-  color: var(--sub);
-  transition: border-color 0.3s;
-}
-
-.badge:hover { border-color: var(--green); }
-
-.badge-icon { font-size: 1.1rem; }
-
-.cta-btn-wrap {
-  position: relative;
-  display: inline-block;
-}
-
-.cta-btn {
-  display: inline-block;
-  background: var(--green);
-  color: #000;
-  font-family: 'Cinzel', serif;
-  font-weight: 700;
-  font-size: 1.1rem;
-  letter-spacing: 0.1em;
-  padding: 1.2rem 3rem;
-  text-decoration: none;
-  position: relative;
-  transition: all 0.3s;
-}
-
-.cta-btn::before {
-  content: '';
-  position: absolute;
-  inset: -4px;
-  background: var(--green);
-  z-index: -1;
-  opacity: 0.3;
-  animation: pulse 2s ease-in-out infinite;
-}
-
-.cta-btn:hover {
-  box-shadow: 0 0 60px rgba(63,185,80,0.5), 0 20px 40px rgba(0,0,0,0.5);
-  transform: translateY(-3px);
-}
-
-.cta-note {
-  margin-top: 1.5rem;
-  font-size: 0.75rem;
-  color: var(--sub);
-  opacity: 0.6;
-  position: relative;
-}
-
-/* ── FOOTER ── */
-footer {
-  padding: 2rem max(24px, env(safe-area-inset-left, 0px));
-  border-top: 1px solid var(--border);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 1rem;
-  position: relative;
-  z-index: 1;
-}
-
-.footer-logo {
-  font-family: 'Cinzel', serif;
-  font-size: 1rem;
-  color: var(--green);
-  font-weight: 700;
-}
-
-.footer-copy {
-  font-size: 0.75rem;
-  color: var(--sub);
-}
-
-/* ── GLITCH ── */
-@keyframes glitch {
-  0%, 90%, 100% { clip-path: none; transform: none; }
-  91% { clip-path: inset(20% 0 60% 0); transform: translateX(-3px); }
-  92% { clip-path: inset(60% 0 10% 0); transform: translateX(3px); }
-  93% { clip-path: inset(40% 0 30% 0); transform: translateX(-2px); }
-  94% { clip-path: none; transform: none; }
-}
-
-.glitch-num {
-  animation: glitch 6s ease-in-out infinite;
-  color: var(--gold);
-  font-weight: 700;
-  display: inline-block;
-}
+  :root {
+    --bg: #0a0e1a; --card: #111827; --border: #1f2937;
+    --green: #10b981; --green-txt: #34d399; --indigo: #6366f1; --indigo-txt: #a5b4fc; --gold: #f59e0b;
+    --text: #e5e7eb; --white: #fff; --sub: #94a3b8;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body { background: var(--bg); color: var(--text); font-family: 'Manrope', system-ui, sans-serif; line-height: 1.55; overflow-x: hidden; -webkit-font-smoothing: antialiased; }
+  a { color: inherit; }
+  .ancho { max-width: 1080px; margin: 0 auto; padding: 0 20px; }
+
+  /* Fondo con luces, como la pantalla de acceso */
+  .fondo { position: fixed; inset: 0; z-index: -1; overflow: hidden; pointer-events: none; }
+  .luz { position: absolute; border-radius: 50%; filter: blur(70px); opacity: .7; }
+  .l1 { width: 520px; height: 520px; top: -200px; left: -180px; background: radial-gradient(circle, rgba(16,185,129,.55), transparent 62%); animation: f1 16s ease-in-out infinite alternate; }
+  .l2 { width: 560px; height: 560px; top: 30%; right: -240px; background: radial-gradient(circle, rgba(99,102,241,.6), transparent 62%); animation: f2 19s ease-in-out infinite alternate; }
+  .l3 { width: 340px; height: 340px; bottom: -120px; left: 20%; background: radial-gradient(circle, rgba(245,158,11,.18), transparent 62%); animation: f1 22s ease-in-out infinite alternate-reverse; }
+  @keyframes f1 { to { transform: translate(120px, 140px) scale(1.15); } }
+  @keyframes f2 { to { transform: translate(-140px, -100px) scale(1.1); } }
+
+  /* Barra de arriba */
+  .nav { position: sticky; top: 0; z-index: 10; backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); background: rgba(10,14,26,.6); border-bottom: 1px solid rgba(255,255,255,.06); }
+  .nav .ancho { display: flex; align-items: center; justify-content: space-between; height: 64px; padding-top: env(safe-area-inset-top); }
+  .marca { display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 18px; color: var(--white); text-decoration: none; }
+  .marca img { width: 34px; height: 34px; border-radius: 10px; }
+  .nav-entrar { text-decoration: none; font-weight: 800; font-size: 14px; padding: 9px 16px; border-radius: 12px; border: 1px solid rgba(255,255,255,.14); background: rgba(255,255,255,.04); }
+
+  /* Portada */
+  .hero { padding: 56px 0 40px; display: grid; gap: 40px; align-items: center; }
+  .chip-kit { display: none; width: fit-content; margin-bottom: 18px; padding: 7px 14px; border-radius: 30px; background: rgba(245,158,11,.14); border: 1px solid rgba(245,158,11,.3); color: #fcd34d; font-weight: 800; font-size: 13.5px; }
+  .desde-kit .chip-kit { display: block; }
+  h1 { font-size: clamp(38px, 10vw, 64px); font-weight: 800; line-height: 1.04; letter-spacing: -.035em; color: var(--white); }
+  h1 span { background: linear-gradient(100deg, #6ee7b7, #a5b4fc); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+  .hero p { margin-top: 18px; font-size: 18px; color: #cbd5e1; max-width: 520px; }
+  .acciones { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 28px; }
+  .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 16px 26px; border-radius: 16px; font-weight: 800; font-size: 16.5px; text-decoration: none; transition: transform .15s, filter .2s; }
+  .btn:active { transform: scale(.97); }
+  .btn-main { color: #fff; background: linear-gradient(110deg, #10b981, #14b8a6, #6366f1); box-shadow: 0 14px 34px -10px rgba(16,185,129,.75), inset 0 1px 0 rgba(255,255,255,.25); }
+  .btn-main:hover { filter: brightness(1.08); }
+  .btn-sec { color: var(--text); border: 1px solid rgba(255,255,255,.14); background: rgba(255,255,255,.04); }
+  .confianza { display: flex; flex-wrap: wrap; gap: 8px 18px; margin-top: 22px; color: var(--sub); font-weight: 700; font-size: 14px; }
+  .confianza span::before { content: '✓'; color: var(--green-txt); margin-right: 6px; font-weight: 800; }
+
+  /* Móvil con captura real */
+  .movil { position: relative; width: min(300px, 78vw); margin: 0 auto; aspect-ratio: 390 / 844; border-radius: 44px; padding: 10px; background: linear-gradient(160deg, #2a3346, #0d1220); box-shadow: 0 40px 80px -30px rgba(0,0,0,.8), 0 0 0 1px rgba(255,255,255,.08), 0 0 90px -20px rgba(16,185,129,.4); }
+  .movil img { width: 100%; height: 100%; object-fit: cover; object-position: top; border-radius: 35px; display: block; }
+  .movil::before { content: ''; position: absolute; z-index: 1; top: 18px; left: 50%; width: 84px; height: 22px; margin-left: -42px; border-radius: 20px; background: #05070d; }
+  .hero .movil { transform: rotate(-3deg); animation: flota 6s ease-in-out infinite; }
+  @keyframes flota { 50% { transform: rotate(-3deg) translateY(-10px); } }
+
+  /* Funciones con capturas */
+  .seccion { padding: 64px 0; }
+  .titulo { text-align: center; font-size: clamp(28px, 7vw, 42px); font-weight: 800; line-height: 1.12; letter-spacing: -.02em; color: var(--white); }
+  .titulo-sub { text-align: center; color: var(--sub); font-size: 17px; margin: 12px auto 0; max-width: 560px; }
+  .funcion { display: grid; gap: 30px; align-items: center; padding: 48px 0; }
+  .etiqueta { display: inline-block; font-size: 12.5px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; color: var(--green-txt); margin-bottom: 10px; }
+  .funcion h3 { font-size: clamp(24px, 6vw, 34px); font-weight: 800; line-height: 1.15; color: var(--white); letter-spacing: -.02em; }
+  .funcion p { margin-top: 12px; font-size: 17px; color: #cbd5e1; max-width: 460px; }
+  .funcion .movil { width: min(270px, 72vw); }
+
+  /* Privacidad, idioma e instalación */
+  .tarjetas { display: grid; gap: 14px; margin-top: 34px; }
+  .tarjeta { padding: 22px; border-radius: 22px; background: rgba(17,24,39,.7); border: 1px solid var(--border); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
+  .tarjeta .ico { width: 44px; height: 44px; border-radius: 14px; display: grid; place-items: center; font-size: 22px; background: rgba(16,185,129,.12); border: 1px solid rgba(16,185,129,.25); margin-bottom: 14px; }
+  .tarjeta h4 { font-size: 18px; font-weight: 800; color: var(--white); }
+  .tarjeta p { margin-top: 6px; color: var(--sub); font-size: 15.5px; }
+  .tarjeta ol { margin: 8px 0 0 18px; color: #cbd5e1; font-size: 15.5px; }
+
+  .final { margin: 30px 0 0; padding: 44px 24px; border-radius: 30px; text-align: center; background: radial-gradient(circle at 20% 0%, rgba(16,185,129,.3), transparent 55%), radial-gradient(circle at 90% 100%, rgba(99,102,241,.4), transparent 55%), #0d1322; border: 1px solid rgba(255,255,255,.08); }
+  .final .acciones { justify-content: center; }
+  footer { text-align: center; padding: 40px 20px calc(30px + env(safe-area-inset-bottom)); color: #64748b; font-size: 14px; font-weight: 600; }
+  footer a { color: var(--sub); }
+
+  /* Aparecen al bajar */
+  .sube { opacity: 0; transform: translateY(26px); transition: opacity .8s, transform .8s cubic-bezier(.16,1,.3,1); }
+  .sube.ver { opacity: 1; transform: none; }
+
+  @media (min-width: 860px) {
+    .hero { grid-template-columns: 1.15fr 1fr; padding: 90px 0 60px; }
+    .funcion { grid-template-columns: 1fr 1fr; gap: 60px; }
+    .funcion:nth-child(even) .texto { order: 2; }
+    .tarjetas { grid-template-columns: repeat(3, 1fr); }
+  }
+  @media (max-width: 859px) {
+    .hero, .funcion { text-align: center; }
+    .hero p, .funcion p { margin-left: auto; margin-right: auto; }
+    .acciones, .confianza { justify-content: center; }
+    .chip-kit { margin-left: auto; margin-right: auto; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .luz, .hero .movil { animation: none; }
+    .sube { opacity: 1; transform: none; transition: none; }
+  }
 </style>
 </head>
 <body>
+<div class="fondo" aria-hidden="true"><span class="luz l1"></span><span class="luz l2"></span><span class="luz l3"></span></div>
 
-<canvas id="particles"></canvas>
-
-<!-- NAV -->
-<nav>
-  <span class="nav-logo">MIFINANZAS</span>
-  <a class="nav-cta" href="index.html">Entrar</a>
-</nav>
-
-<!-- HERO -->
-<section id="hero">
-  <div class="hero-ambient-top"></div>
-  <p class="hero-eyebrow">Control financiero personal</p>
-  <h1 class="hero-title" id="heroTitle"></h1>
-  <p class="hero-sub" id="herotyper"></p>
-  <a class="hero-cta" href="index.html">Empieza gratis</a>
-  <div class="hero-scroll">
-    <div class="scroll-line"></div>
-    <span>Scroll</span>
+<header class="nav">
+  <div class="ancho">
+    <a class="marca" href="#"><img src="/icon.svg" alt="">MiFinanza</a>
+    <a class="nav-entrar" href="index.html">Entrar</a>
   </div>
-  <div class="hero-ambient"></div>
-</section>
+</header>
 
-<!-- PROBLEMA -->
-<section id="problema">
-  <div class="problema-inner">
-    <span class="section-label reveal">El problema</span>
-    <h2 class="problema-title reveal reveal-delay-1">
-      El dinero desaparece.<br>
-      Y tú no sabes <em>exactamente</em> por qué.
-    </h2>
-    <div class="frases">
-      <div class="frase reveal reveal-delay-1">
-        <span class="frase-num">01</span>
-        <p class="frase-text">Llegas a fin de mes preguntándote dónde fueron los <span class="glitch-num">€800</span> que sobraban al cobrar.</p>
+<main class="ancho">
+  <section class="hero">
+    <div>
+      <div class="chip-kit">👶 Vienes del kit ALFREGA · ¡Gracias!</div>
+      <h1>Tu dinero, <span>bajo control.</span></h1>
+      <p>Apunta tus gastos en segundos, importa el extracto de tu banco y mira a dónde va cada euro. Para llegar mejor a fin de mes, sin complicarte.</p>
+      <div class="acciones">
+        <a class="btn btn-main" href="index.html">Empieza gratis</a>
+        <a class="btn btn-sec" href="#como">Ver cómo funciona ↓</a>
       </div>
-      <div class="frase reveal reveal-delay-2">
-        <span class="frase-num">02</span>
-        <p class="frase-text"><strong>Las apps complicadas no ayudan.</strong> Las usas tres días y las abandonas.</p>
+      <div class="confianza"><span>Gratis</span><span>Sin tarjeta</span><span>Android y iPhone</span></div>
+    </div>
+    <div class="movil"><img src="img/landing/inicio.webp" alt="Pantalla de inicio de MiFinanza: saldo del mes y salud financiera" fetchpriority="high"></div>
+  </section>
+
+  <section class="seccion" id="como">
+    <h2 class="titulo sube">Todo tu mes, claro de un vistazo</h2>
+    <p class="titulo-sub sube">Capturas reales de la app.</p>
+
+    <div class="funcion sube">
+      <div class="texto">
+        <span class="etiqueta">Apuntar</span>
+        <h3>Un gasto en 3 toques</h3>
+        <p>Importe, categoría y listo. Tus gastos de siempre se repiten con un toque, y si te equivocas, «Deshacer».</p>
       </div>
-      <div class="frase reveal reveal-delay-3">
-        <span class="frase-num">03</span>
-        <p class="frase-text">Quieres ahorrar, pero sin saber qué gastas, <strong>nunca sabes qué puedes recortar.</strong></p>
+      <div class="movil"><img src="img/landing/apuntar.webp" alt="Apuntar un gasto: 31,40 € en Bebé" loading="lazy"></div>
+    </div>
+
+    <div class="funcion sube">
+      <div class="texto">
+        <span class="etiqueta">Importar</span>
+        <h3>Sube el extracto de tu banco</h3>
+        <p>La app lee el archivo y clasifica cada movimiento. Tú solo revisas y guardas. Y si algo ya está en tus gastos fijos, no lo cuenta dos veces.</p>
       </div>
+      <div class="movil"><img src="img/landing/importar.webp" alt="Revisión de los movimientos importados del banco" loading="lazy"></div>
     </div>
-  </div>
-</section>
 
-<!-- SOLUCIÓN -->
-<section id="solucion">
-  <span class="section-label reveal">La solución</span>
-  <h2 class="solucion-title reveal reveal-delay-1">La app que sí vas a usar</h2>
-  <p class="solucion-sub reveal reveal-delay-2">Diseñada para gente normal. Sin categorías infinitas ni configuraciones eternas.</p>
-
-  <div class="phone-reveal reveal">
-    <div class="phone-beam"></div>
-    <div class="phone-frame">
-      <div class="phone-screen">
-        <div class="ps-header">
-          <div>
-            <div class="ps-greeting">Buenos días</div>
-            <div class="ps-name">Carlos 👋</div>
-          </div>
-          <div style="width:22px;height:22px;background:var(--green);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.55rem;color:#000;font-weight:700">C</div>
-        </div>
-        <div class="ps-balance-card">
-          <div class="ps-balance-label">Balance disponible</div>
-          <div class="ps-balance-num">€1.240</div>
-          <div class="ps-balance-sub">↑ €340 más que el mes pasado</div>
-        </div>
-        <div class="ps-stats">
-          <div class="ps-stat">
-            <div class="ps-stat-label">Gastos oct.</div>
-            <div class="ps-stat-val red">€1.180</div>
-          </div>
-          <div class="ps-stat">
-            <div class="ps-stat-label">Ahorrado</div>
-            <div class="ps-stat-val green">€340</div>
-          </div>
-        </div>
-        <div class="ps-recent">Últimos movimientos</div>
-        <div class="ps-item">
-          <span class="ps-item-name">🛒 Mercadona</span>
-          <span class="ps-item-amount neg">−€68</span>
-        </div>
-        <div class="ps-item">
-          <span class="ps-item-name">☕ Café trabajo</span>
-          <span class="ps-item-amount neg">−€3,50</span>
-        </div>
-        <div class="ps-item">
-          <span class="ps-item-name">💰 Nómina</span>
-          <span class="ps-item-amount pos">+€1.800</span>
-        </div>
+    <div class="funcion sube">
+      <div class="texto">
+        <span class="etiqueta">Entender</span>
+        <h3>Mira a dónde va tu dinero</h3>
+        <p>Por mes, por período o el año entero. Cuánto se va en el súper, en el bebé o en salir, y cómo cambia cada mes.</p>
       </div>
+      <div class="movil"><img src="img/landing/estadisticas.webp" alt="Gráfico de gastos por categoría" loading="lazy"></div>
     </div>
-  </div>
 
-  <div class="vistas-grid">
-    <div class="vista-card reveal reveal-delay-1">
-      <span class="vista-icon">📊</span>
-      <div class="vista-name">Dashboard</div>
-      <div class="vista-desc">Balance, gastos e ingresos del mes de un vistazo.</div>
+    <div class="funcion sube">
+      <div class="texto">
+        <span class="etiqueta">Ahorrar</span>
+        <h3>Una meta que sí puedes cumplir</h3>
+        <p>Haz tu plan en 4 pasos con tus números reales. Te dice cuánto ahorrar al mes y si vas bien para llegar.</p>
+      </div>
+      <div class="movil"><img src="img/landing/meta.webp" alt="Meta de ahorro: entrada del piso al 49 %" loading="lazy"></div>
     </div>
-    <div class="vista-card reveal reveal-delay-2">
-      <span class="vista-icon">💳</span>
-      <div class="vista-name">Movimientos</div>
-      <div class="vista-desc">Añade lo que gastas o cobras en segundos.</div>
-    </div>
-    <div class="vista-card reveal reveal-delay-3">
-      <span class="vista-icon">🎯</span>
-      <div class="vista-name">Metas</div>
-      <div class="vista-desc">Pon un objetivo de ahorro y mira cómo avanza.</div>
-    </div>
-    <div class="vista-card reveal reveal-delay-4">
-      <span class="vista-icon">📈</span>
-      <div class="vista-name">Estadísticas</div>
-      <div class="vista-desc">Gráficos claros por mes y por categoría.</div>
-    </div>
-  </div>
-</section>
 
-<!-- FEATURES -->
-<section id="features">
-  <h2 class="features-title reveal">Todo lo que necesitas.<br>Nada más.</h2>
-  <div class="features-grid">
-    <div class="feat-card reveal reveal-delay-1">
-      <span class="feat-icon">⚡</span>
-      <div class="feat-title">Añade un gasto en 5 segundos</div>
-      <div class="feat-desc">Importe, categoría, listo. Sin formularios eternos.</div>
+    <div class="funcion sube">
+      <div class="texto">
+        <span class="etiqueta">Fijos</span>
+        <h3>Los gastos fijos, sin apuntarlos</h3>
+        <p>Alquiler, luz, guardería… cuentan solos cada mes. Te avisa de los próximos cobros y te sugiere los que se repiten.</p>
+      </div>
+      <div class="movil"><img src="img/landing/fijos.webp" alt="Gastos fijos del mes y próximos cobros" loading="lazy"></div>
     </div>
-    <div class="feat-card reveal reveal-delay-2">
-      <span class="feat-icon">📅</span>
-      <div class="feat-title">Historial por meses</div>
-      <div class="feat-desc">Navega mes a mes y compara cómo vas evolucionando.</div>
-    </div>
-    <div class="feat-card reveal reveal-delay-3">
-      <span class="feat-icon">🏷️</span>
-      <div class="feat-title">Categorías que tienen sentido</div>
-      <div class="feat-desc">Comida, transporte, ocio, hogar. Las de siempre.</div>
-    </div>
-    <div class="feat-card reveal reveal-delay-4">
-      <span class="feat-icon">🔒</span>
-      <div class="feat-title">Tus datos, solo tuyos</div>
-      <div class="feat-desc">Sin acceso a tu banco. Sin permisos raros. Solo tú.</div>
-    </div>
-    <div class="feat-card reveal reveal-delay-1">
-      <span class="feat-icon">🌙</span>
-      <div class="feat-title">Modo oscuro nativo</div>
-      <div class="feat-desc">Diseñada para verse bien de noche y de día.</div>
-    </div>
-    <div class="feat-card reveal reveal-delay-2">
-      <span class="feat-icon">📱</span>
-      <div class="feat-title">Android — gratis</div>
-      <div class="feat-desc">Funciona en Android y iPhone, desde el navegador. Sin suscripciones ocultas.</div>
-    </div>
-  </div>
-</section>
+  </section>
 
-<!-- CTA FINAL -->
-<section id="ctafinal">
-  <div class="cta-explosion"></div>
-  <h2 class="cta-title reveal">
-    Empieza hoy.<br>
-    <span class="line2">Entiéndete mañana.</span>
-  </h2>
-  <p class="cta-sub reveal reveal-delay-1">Dos minutos de configuración. Cero excusas. El control que siempre quisiste tener.</p>
-  <div class="cta-badges reveal reveal-delay-2">
-    <div class="badge"><span class="badge-icon">✅</span> Gratis</div>
-    <div class="badge"><span class="badge-icon">🔐</span> Sin banco conectado</div>
-    <div class="badge"><span class="badge-icon">📱</span> Android</div>
-  </div>
-  <div class="cta-btn-wrap reveal reveal-delay-3">
-    <a class="cta-btn" href="index.html">Empieza gratis</a>
-  </div>
-  <p class="cta-note reveal reveal-delay-4">Gratis · Sin tarjeta · Android y iPhone</p>
-</section>
+  <section class="seccion">
+    <h2 class="titulo sube">Hecha para confiar</h2>
+    <div class="tarjetas">
+      <div class="tarjeta sube"><div class="ico">🔒</div><h4>Tus datos, privados y seguros</h4><p>Cifrados y solo para ti. Nunca los vendemos.</p></div>
+      <div class="tarjeta sube"><div class="ico">🏦</div><h4>Sin conectar tu banco</h4><p>No pedimos tus claves del banco. Tú decides qué apuntas o qué extracto subes.</p></div>
+      <div class="tarjeta sube"><div class="ico">🌍</div><h4>En español y en inglés</h4><p>Con euros, dólares y otras monedas.</p></div>
+    </div>
+  </section>
 
-<!-- FOOTER -->
-<footer>
-  <span class="footer-logo">MIFINANZAS</span>
-  <span class="footer-copy">© 2026 MiFinanzas · Sevilla, España</span>
-</footer>
+  <section class="seccion">
+    <h2 class="titulo sube">Tenla en tu móvil</h2>
+    <p class="titulo-sub sube">Sin descargar nada de la tienda: se instala desde el navegador en unos segundos.</p>
+    <div class="tarjetas">
+      <div class="tarjeta sube"><div class="ico">🤖</div><h4>Android</h4><ol><li>Abre MiFinanza en Chrome.</li><li>Toca ⋮ y luego «Instalar app» o «Añadir a pantalla de inicio».</li></ol></div>
+      <div class="tarjeta sube"><div class="ico">🍎</div><h4>iPhone</h4><ol><li>Abre MiFinanza en Safari.</li><li>Toca Compartir y luego «Añadir a pantalla de inicio».</li></ol></div>
+      <div class="tarjeta sube"><div class="ico">✨</div><h4>Y listo</h4><p>Se abre como cualquier app, con su icono, a pantalla completa.</p></div>
+    </div>
+
+    <div class="final sube">
+      <h2 class="titulo">Empieza hoy. Es gratis.</h2>
+      <p class="titulo-sub">Dos minutos para crear tu cuenta y ya sabrás a dónde va tu dinero este mes.</p>
+      <div class="acciones" style="margin-top:24px"><a class="btn btn-main" href="index.html">Crear mi cuenta gratis</a></div>
+    </div>
+  </section>
+</main>
+
+<footer>© 2026 MiFinanza · Hecha en Sevilla · <a href="privacidad.html">Privacidad</a></footer>
 
 <script>
-/* ── PARTÍCULAS ── */
-const canvas = document.getElementById('particles');
-const ctx = canvas.getContext('2d');
-let W, H, particles = [];
-
-function resize() {
-  W = canvas.width = window.innerWidth;
-  H = canvas.height = window.innerHeight;
-}
-resize();
-window.addEventListener('resize', resize);
-
-class Particle {
-  constructor() { this.reset(true); }
-  reset(init) {
-    this.x = Math.random() * W;
-    this.y = init ? Math.random() * H : H + 10;
-    this.size = Math.random() * 1.5 + 0.3;
-    this.speed = Math.random() * 0.4 + 0.1;
-    this.opacity = Math.random() * 0.5 + 0.1;
-    this.drift = (Math.random() - 0.5) * 0.3;
-    this.pulse = Math.random() * Math.PI * 2;
-  }
-  update() {
-    this.y -= this.speed;
-    this.x += this.drift;
-    this.pulse += 0.02;
-    this.opacity = (0.1 + Math.abs(Math.sin(this.pulse)) * 0.4);
-    if (this.y < -10) this.reset(false);
-  }
-  draw() {
-    ctx.beginPath();
-    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-    ctx.fillStyle = `rgba(63,185,80,${this.opacity})`;
-    ctx.fill();
-  }
-}
-
-for (let i = 0; i < 80; i++) particles.push(new Particle());
-
-function animate() {
-  ctx.clearRect(0, 0, W, H);
-  particles.forEach(p => { p.update(); p.draw(); });
-  requestAnimationFrame(animate);
-}
-animate();
-
-/* ── HERO TÍTULO POR PALABRAS ── */
-const heroWords = ["Por fin", "entiendes", "a dónde", "va tu", "dinero"];
-const heroEl = document.getElementById('heroTitle');
-heroWords.forEach((w, i) => {
-  const span = document.createElement('span');
-  span.className = 'word';
-  span.textContent = w + ' ';
-  if (w === 'dinero') span.classList.add('highlight');
-  heroEl.appendChild(span);
-  setTimeout(() => span.classList.add('visible'), 600 + i * 150);
-});
-
-/* ── TYPEWRITER SUBTÍTULO ── */
-const typer = document.getElementById('herotyper');
-const phrases = [
-  'La app que hace simple lo complicado.',
-  'Sin bancos conectados. Sin misterios.',
-  'Tu dinero, bajo tu control.'
-];
-let pi = 0, ci = 0, typing = true;
-
-function type() {
-  if (typing) {
-    typer.textContent = phrases[pi].slice(0, ci + 1);
-    ci++;
-    if (ci === phrases[pi].length) {
-      typing = false;
-      setTimeout(type, 2200);
-    } else {
-      setTimeout(type, 55);
-    }
-  } else {
-    typer.textContent = phrases[pi].slice(0, ci - 1);
-    ci--;
-    if (ci === 0) {
-      typing = true;
-      pi = (pi + 1) % phrases.length;
-      setTimeout(type, 300);
-    } else {
-      setTimeout(type, 30);
-    }
-  }
-}
-setTimeout(type, 1500);
-
-/* ── SCROLL REVEAL ── */
-const io = new IntersectionObserver((entries) => {
-  entries.forEach(e => {
-    if (e.isIntersecting) {
-      e.target.classList.add('visible');
-      io.unobserve(e.target);
-    }
-  });
-}, { threshold: 0.15 });
-
-document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+  // Si vienen del QR del kit, se les da las gracias
+  if (/[?&]desde=kit/.test(location.search)) document.body.classList.add('desde-kit')
+  const io = 'IntersectionObserver' in window && new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('ver'); io.unobserve(e.target) } }), { threshold: .12 })
+  document.querySelectorAll('.sube').forEach(el => io ? io.observe(el) : el.classList.add('ver'))
 </script>
 </body>
 </html>

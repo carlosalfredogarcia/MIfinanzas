@@ -28,7 +28,8 @@ public/                     lo que ve el usuario (Netlify publica esta carpeta)
   js/datepicker.js          selector de fechas
   js/idioma.js (+ idioma-en.js)  app en inglés: traduce en el navegador lo que se ve con el diccionario de idioma-en.js;
                             el idioma se elige en Perfil (o en la pantalla de acceso) y se guarda en el móvil
-  landing*.html, privacidad.html, sw.js, manifest.json, .well-known/ (app Android)
+  landing-cine.html         la landing (estilo de la app, capturas reales de img/landing/; ?desde=kit da las gracias)
+  landing.html, privacidad.html, sw.js, manifest.json, .well-known/ (app Android)
 kit/                        página del QR del Kit de Seguridad Infantil (ALFREGA, otro sitio de Netlify:
                             alfrega-kit.netlify.app, subido a mano, sin GitHub); lleva a landing-cine.html?desde=kit.
                             Publicar: la clave de Netlify está en «Secretos de red» del entorno (el proxy añade
@@ -74,6 +75,7 @@ Abren cada pantalla con datos fijos (`tests/datos.js`) y fecha fija (21/10/2026)
 `tests/fotos/*.txt`. Si un cambio es intencionado: revisar la diferencia y `npm run actualizar`.
 `npm test -- metas` ejecuta solo las pruebas cuyo nombre contiene «metas».
 `npm run video` graba un vídeo demo de toda la app (tests/video-demo.js, sin IA: la importación es simulada).
+`npm run capturas` rehace las capturas de la landing. Ambos usan tests/datos-demo.js (una familia con bebé, inventada).
 
 ## Publicar
 
