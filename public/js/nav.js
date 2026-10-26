@@ -252,14 +252,17 @@
   // Con &guardar=1 se guarda solo (MacroDroid al llegar la notificación del banco), con «Deshacer».
   function accionPendiente() {
     const q = new URLSearchParams(location.search)
-    const texto = [q.get('texto'), q.get('titulo')].filter(Boolean).join(' ')
+    const titulo = q.get('titulo') || ''
+    const texto = q.get('texto') || titulo
     const accion = q.get('accion') || (texto ? 'gasto' : '')
     if (!accion || !ACCIONES[accion]) return
     if (accion === 'fijo' && pagina !== 'mifinanza-fijos') return ir('fijo', FIJOS)
     history.replaceState(null, '', location.pathname)
-    const relleno = { monto: parseFloat(String(q.get('importe') || '').replace(',', '.')) || undefined, descripcion: q.get('comercio') || undefined, fecha: q.get('fecha') || undefined, texto: texto || undefined, guardar: q.get('guardar') === '1' }
+    const relleno = { monto: parseFloat(String(q.get('importe') || '').replace(',', '.')) || undefined, descripcion: q.get('comercio') || undefined, fecha: q.get('fecha') || undefined, texto: texto || undefined, titulo: titulo || undefined, guardar: q.get('guardar') === '1' }
     const fn = { fijo: 'abrirModal', csv: 'abrirImportarCSV' }[accion]
-    const lista = () => accion === 'gasto' || accion === 'ingreso' ? window.mfApunte && (() => window.mfApunte.abrir(accion, relleno)) : window[fn]
+    // Un aviso del banco decide si es gasto o ingreso («Bizum recibido» → ingreso)
+    const tipo = () => !q.get('accion') && texto ? window.mfApunte.leerMensajeBanco(texto, titulo).tipo : accion
+    const lista = () => accion === 'gasto' || accion === 'ingreso' ? window.mfApunte && (() => window.mfApunte.abrir(tipo(), relleno)) : window[fn]
     let n = 0
     const iv = setInterval(() => {
       if (window.currentUserId && typeof lista() === 'function') { clearInterval(iv); lista()() }

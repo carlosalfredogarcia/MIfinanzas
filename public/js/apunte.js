@@ -175,7 +175,7 @@
       pintarCats(); pintarRecientes()
       if (relleno.descripcion || relleno.texto) { if (!estado.categoria) adivinarCat(inpDesc.value); sugerir() }
       // Desde una notificación del banco (?guardar=1): se guarda solo; si no se sabe la categoría, va a «Otros»
-      if (relleno.guardar && parseImporte(inpImporte.value) > 0) {
+      if (relleno.guardar && relleno.fiable !== false && parseImporte(inpImporte.value) > 0) {
         if (!estado.categoria) elegirCat(modo === 'ingreso' ? '📦 Otro' : '📦 Otros', false)
         guardar()
       }
@@ -185,7 +185,7 @@
   // Abre ya relleno (Repetir en Movimientos, mensaje del banco, accesos directos)
   function rellenar(r) {
     // Lo que venga explícito manda; lo que falte se saca del mensaje del banco
-    if (r.texto) { const leido = leerMensajeBanco(r.texto); for (const k in leido) if (r[k] == null) r[k] = leido[k] }
+    if (r.texto) { const leido = leerMensajeBanco(r.texto, r.titulo); for (const k in leido) if (r[k] == null) r[k] = leido[k] }
     if (r.monto > 0) inpImporte.value = importeTxt(+r.monto)
     if (r.descripcion) inpDesc.value = r.descripcion
     if (r.fecha && /^\d{4}-\d{2}-\d{2}$/.test(r.fecha) && r.fecha <= fechaLocal()) ponerFecha(r.fecha)
@@ -407,21 +407,51 @@
     tAviso = setTimeout(() => toastEl.classList.remove('mfa-ver'), deshacer ? 5000 : 2500)
   }
 
-  // "Compra con tarjeta en MERCADONA por 23,45 EUR el 12/10" → importe, comercio y fecha (sin IA)
-  function leerMensajeBanco(txt) {
+  // Aviso o SMS de cualquier banco → importe, comercio, fecha y si es gasto o ingreso (sin IA). Ejemplos:
+  //   «Compra con tarjeta en MERCADONA por 23,45 EUR el 12/10» · «Pago con tarjeta: MERCADONA 23,45 €»
+  //   «€23.45 at Mercadona» · «Bizum recibido de Ana: 20,00 €» · Google Wallet: título «Mercadona», texto «23,45 € con Visa»
+  // fiable = se puede guardar sin preguntar (hay importe, parece una operación hecha y no es un código ni un rechazo).
+  // Bancos y apps de pago: su nombre va en el título del aviso y no es el comercio
+  const BANCOS = /^(?:banco\s+)?(?:santander|bbva|caixabank|caixa|la caixa|imagin|ing|sabadell|bankinter|abanca|unicaja|kutxabank|laboral kutxa|ibercaja|openbank|cajamar|caja rural|cajasur|evo|bnext|revolut|n26|wise|paypal|vivid|myinvestor|pibank|targobank|wizink|deutsche bank|google(?: wallet| pay)?|wallet|samsung(?: pay| wallet)?|apple pay|bizum|mi banco|banca m[oó]vil)\b/i
+  const NUM = String.raw`\d{1,3}(?:\.\d{3})+,\d{1,2}|\d{1,3}(?:,\d{3})+\.\d{1,2}|\d+[.,]\d{1,2}|\d+`
+  const leerNum = v => /^\d{1,3}(?:,\d{3})+\.\d{1,2}$/.test(v) ? parseFloat(v.replace(/,/g, '')) : parseImporte(v)
+  const bonito = v => v.replace(/[*_]+/g, ' ').replace(/\s+\d{4,}\b/g, '').replace(/\s+/g, ' ').trim().toLowerCase().replace(/(^|[\s'&.-])\S/g, c => c.toUpperCase())
+  const LETRAS = 'A-Za-zÁÉÍÓÚÜÑáéíóúüñ'
+  function leerMensajeBanco(txt, titulo = '') {
     const r = {}
-    const imp = txt.match(/(\d{1,3}(?:\.\d{3})*,\d{1,2}|\d+[.,]\d{1,2}|\d+)\s*(?:€|eur(?:os)?\b)/i)
-      || txt.match(/(?:€|eur)\s*(\d{1,3}(?:\.\d{3})*,\d{1,2}|\d+[.,]\d{1,2}|\d+)/i)
-    if (imp) r.monto = parseImporte(imp[1])
-    const com = txt.match(/\b(?:en|at)\s+([A-Za-zÁÉÍÓÚÑáéíóúñ0-9&'.\- ]{2,40}?)(?=\s+(?:el|por|con|a las|de|tarjeta)\b|\s*[,.;:]|\s*\d|\s*$)/i)
-    const bizum = !com && txt.match(/bizum[^.]*?\ba\s+([A-Za-zÁÉÍÓÚÑáéíóúñ]+)/i)
-    if (bizum) r.descripcion = 'Bizum ' + bizum[1]
-    if (com) r.descripcion = com[1].trim().replace(/\s+/g, ' ').toLowerCase().replace(/(^|\s)\S/g, s => s.toUpperCase())
-    const f = txt.match(/\b(\d{1,2})[\/\-.](\d{1,2})(?:[\/\-.](\d{2,4}))?\b/)
-    if (f && +f[2] >= 1 && +f[2] <= 12) {
+    const t = String(txt || '').replace(/\s+/g, ' ')
+    const conImporte = v => v.match(new RegExp(`(${NUM})\\s*(?:€|eur(?:os)?\\b)`, 'i')) || v.match(new RegExp(`(?:€|eur)\\s*(${NUM})`, 'i'))
+    const imp = conImporte(t) || conImporte(String(titulo || ''))
+    if (imp) r.monto = leerNum(imp[1])
+
+    // Comercio o persona, de lo más claro a lo menos
+    const fin = String.raw`(?=\s+(?:el|por|con|a las|de|del|tarjeta|card|on|for|ref)\b|\s*[,.;:(]|\s+[−-]?\d|\s*$)`
+    let d
+    if ((d = t.match(new RegExp(`bizum[^.]*?\\b(?:de|from)\\s+([${LETRAS}]+(?:\\s+[${LETRAS}]+)?)`, 'i'))) && /recib|de\s/i.test(d[0])) r.descripcion = 'Bizum de ' + bonito(d[1])
+    else if ((d = t.match(new RegExp(`bizum[^.]*?\\b(?:a|to)\\s+([${LETRAS}]+(?:\\s+[${LETRAS}]+)?)`, 'i')))) r.descripcion = 'Bizum a ' + bonito(d[1])
+    else if ((d = t.match(new RegExp(`\\b(?:en|at|in)\\s+(?!(?:tu|su|tus|sus|la|el|cuenta|el cajero)\\b)([${LETRAS}0-9&'*.\\- ]{2,40}?)${fin}`, 'i')))) r.descripcion = bonito(d[1])
+    else if ((d = t.match(new RegExp(`(?:compra|pago|cargo|purchase|payment)[^:]{0,30}:\\s*([${LETRAS}0-9&'*.\\- ]{2,40}?)\\s+[−-]?(?:€\\s*)?\\d`, 'i')))) r.descripcion = bonito(d[1])
+    else if ((d = t.match(new RegExp(`transferencia[^.]*?\\b(?:de|a)\\s+([${LETRAS}]+(?:\\s+[${LETRAS}]+){0,2})`, 'i')))) r.descripcion = 'Transferencia ' + bonito(d[1])
+    else if (/cajero|reintegro|retirada/i.test(t)) r.descripcion = 'Cajero'
+    // Sin comercio en el texto: el título del aviso, si no es el nombre del banco (Google Wallet pone ahí el comercio)
+    const tit = String(titulo || '').trim()
+    if (!r.descripcion && tit && tit.length <= 40 && !BANCOS.test(tit) && new RegExp(`[${LETRAS}]{2}`).test(tit) && !/\d+[.,]\d{2}/.test(tit)) r.descripcion = bonito(tit)
+
+    // Fecha (que no sea parte de un importe: «1.10 €»)
+    const f = t.match(/\b(\d{1,2})[\/\-.](\d{1,2})(?:[\/\-.](\d{2,4}))?\b(?!\s*(?:€|eur))/i)
+    if (f && +f[2] >= 1 && +f[2] <= 12 && +f[1] >= 1 && +f[1] <= 31) {
       const y = f[3] ? (f[3].length === 2 ? '20' + f[3] : f[3]) : new Date().getFullYear()
       r.fecha = `${y}-${f[2].padStart(2, '0')}-${f[1].padStart(2, '0')}`
     }
+
+    // ¿Entra o sale dinero?
+    r.tipo = /recibid|has recibido|te ha[n]? (?:enviado|pagado|devuelto|ingresado)|ingreso|abono|n[oó]mina|devoluci[oó]n|reembolso|received|refund/i.test(t)
+      && !/has enviado|enviado a|has pagado|compra con|pago con/i.test(t) ? 'ingreso' : 'gasto'
+
+    // ¿Se puede guardar solo?
+    const operacion = /compra|pago|pagad|pagaste|cargo|adeudo|retirada|reintegro|cajero|bizum|transferencia|recibo|domiciliaci|cobro|ingreso|recibid|abono|devoluci|reembolso|gastado|spent|paid|payment|purchase|tarjeta|visa|mastercard|card/i.test(t)
+    const noEs = /c[oó]digo|clave|contrase[ñn]a|\botp\b|verifica|rechazad|denegad|cancelad|anulad|fallid|no se ha podido|no autorizad|autoriza (?:la|el|esta)|pendiente de autoriz|declined|saldo (?:disponible|actual) es|tu saldo es|oferta|promoci/i.test(t)
+    r.fiable = r.monto > 0 && !noEs && (operacion || !!(r.descripcion && tit))
     return r
   }
 
