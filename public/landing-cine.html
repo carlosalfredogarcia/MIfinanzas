@@ -118,22 +118,28 @@
   /* ── La solución: móvil fijo que cambia de pantalla al bajar ── */
   .solucion { padding: 80px 0 40px; }
   .solucion .cab { text-align: center; margin-bottom: 30px; }
-  .historia { position: relative; height: calc(4 * 85svh + 100svh); }
-  .fijo { position: sticky; top: 64px; height: calc(100svh - 64px); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 22px; padding: 10px 0 18px; }
-  .pantalla { flex: 1 1 auto; min-height: 0; max-height: 600px; display: flex; justify-content: center; perspective: 1300px; width: 100%; }
-  .pantalla .movil { position: relative; height: 100%; width: auto; transition: transform 1s cubic-bezier(.16,1,.3,1), box-shadow .8s;
+  /* Carrusel horizontal: se desliza de lado; el móvil gira en 3D según se mueve */
+  .solucion { overflow-x: clip; }
+  .carrusel-wrap { position: relative; }
+  .carrusel { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; -webkit-overflow-scrolling: touch; margin: 0 -20px; padding: 10px 0 24px; overscroll-behavior-x: contain; }
+  .carrusel::-webkit-scrollbar { display: none; }
+  .diapo { flex: 0 0 100%; scroll-snap-align: center; scroll-snap-stop: always; display: flex; flex-direction: column; align-items: center; gap: 22px; padding: 0 20px; }
+  .pantalla { height: min(560px, 60svh); display: flex; justify-content: center; perspective: 1300px; }
+  .pantalla .movil { position: relative; height: 100%; width: auto; will-change: transform;
     box-shadow: inset 0 0 0 1.5px rgba(255,255,255,.22), inset 0 2px 2px rgba(255,255,255,.25), inset 0 -2px 3px rgba(0,0,0,.6), var(--grosor, 3px 4px 0 #2b3244, 6px 8px 0 #171c2a, 9px 12px 0 #0d111b), 0 60px 100px -30px rgba(0,0,0,.9), 0 0 150px -30px var(--brillo, rgba(16,185,129,.6)); }
-  .pantalla .movil img { position: absolute; inset: 11px; width: calc(100% - 22px); height: calc(100% - 22px); opacity: 0; transform: scale(1.05); transition: opacity .7s, transform 1s cubic-bezier(.16,1,.3,1); }
-  .pantalla .movil img.on { opacity: 1; transform: none; }
-  .textos { position: relative; flex: none; width: 100%; max-width: 460px; height: 150px; text-align: center; }
-  .texto { position: absolute; inset: 0; opacity: 0; transform: translateY(18px); filter: blur(6px); transition: opacity .6s, transform .8s cubic-bezier(.16,1,.3,1), filter .6s; pointer-events: none; }
-  .texto.on { opacity: 1; transform: none; filter: none; }
+  .texto { max-width: 460px; text-align: center; transition: opacity .4s; }
   .texto .etq { font-size: 12px; font-weight: 800; letter-spacing: .2em; text-transform: uppercase; color: var(--green-txt); }
   .texto h3 { margin-top: 4px; font-size: clamp(23px, 6.2vw, 34px); font-weight: 800; line-height: 1.12; color: var(--white); letter-spacing: -.02em; }
   .texto p { margin-top: 6px; font-size: 16px; color: #cbd5e1; }
-  .progreso { display: flex; gap: 7px; justify-content: center; }
-  .progreso i { width: 7px; height: 7px; border-radius: 4px; background: rgba(255,255,255,.18); transition: width .3s, background .3s; }
-  .progreso i.on { width: 22px; background: var(--green-txt); }
+  .controles { display: flex; align-items: center; justify-content: center; gap: 16px; }
+  .progreso { display: flex; gap: 7px; }
+  .progreso button { width: 8px; height: 8px; padding: 0; border: 0; border-radius: 4px; background: rgba(255,255,255,.2); cursor: pointer; transition: width .3s, background .3s; }
+  .progreso button.on { width: 24px; background: var(--green-txt); }
+  .flecha { width: 44px; height: 44px; border-radius: 50%; border: 1px solid rgba(255,255,255,.14); background: rgba(255,255,255,.05); color: var(--white); font-size: 20px; cursor: pointer; backdrop-filter: blur(10px); transition: opacity .3s, background .2s; }
+  .flecha:hover { background: rgba(255,255,255,.1); }
+  .flecha:disabled { opacity: .25; cursor: default; }
+  .pista { text-align: center; margin-top: 10px; color: #64748b; font-size: 12px; font-weight: 800; letter-spacing: .2em; text-transform: uppercase; animation: pista 1.8s ease-in-out infinite; }
+  @keyframes pista { 50% { transform: translateX(8px); opacity: .6; } }
 
   /* ── Confianza, instalar y final ── */
   .seccion { padding: 90px 0 30px; }
@@ -151,12 +157,12 @@
   .sube.ver { opacity: 1; transform: none; filter: none; }
 
   @media (min-width: 900px) {
-    .fijo { flex-direction: row-reverse; gap: 60px; top: 70px; height: calc(100vh - 70px); }
-    .pantalla { flex: none; width: auto; height: min(660px, 82vh); }
-    .textos { height: 220px; text-align: left; }
+    .diapo { flex-direction: row-reverse; justify-content: center; gap: 70px; }
+    .pantalla { height: min(640px, 76vh); }
+    .texto { text-align: left; }
     .texto h3 { font-size: 44px; }
     .texto p { font-size: 18px; margin-top: 10px; }
-    .fijo .progreso { position: absolute; bottom: 26px; left: 0; right: 0; }
+    .pista { display: none; }
   }
   @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after { animation-duration: .01s !important; animation-iteration-count: 1 !important; transition-duration: .01s !important; }
@@ -202,24 +208,31 @@
       <span class="kicker sube">Cómo funciona</span>
       <h2 class="gran sube">Tu dinero,<br><em>en 4 pasos.</em></h2>
     </div>
-    <div class="historia" id="historia">
-      <div class="fijo">
-        <div class="pantalla">
-          <div class="movil reflejo" id="movil-fijo">
-            <img class="on" src="img/landing/apuntar.webp" alt="Apuntar un gasto" data-brillo="rgba(239,68,68,.5)">
-            <img src="img/landing/estadisticas.webp" alt="Estadísticas" loading="lazy" data-brillo="rgba(99,102,241,.65)">
-            <img src="img/landing/recortar.webp" alt="Recortar gastos variables" loading="lazy" data-brillo="rgba(245,158,11,.5)">
-            <img src="img/landing/plan.webp" alt="Plan equilibrado" loading="lazy" data-brillo="rgba(16,185,129,.6)">
-          </div>
+    <div class="carrusel-wrap">
+      <div class="carrusel" id="carrusel">
+        <div class="diapo">
+          <div class="pantalla"><div class="movil reflejo"><img src="img/landing/apuntar.webp" alt="Apuntar un gasto" data-brillo="rgba(239,68,68,.5)"></div></div>
+          <div class="texto"><span class="etq">1 · Apunta</span><h3>Apunta o importa tus gastos</h3><p>En 3 toques, o sube el extracto de tu banco y la app lo clasifica sola.</p></div>
         </div>
-        <div class="textos">
-          <div class="texto on"><span class="etq">1 · Apunta</span><h3>Apunta o importa tus gastos</h3><p>En 3 toques, o sube el extracto de tu banco y la app lo clasifica sola.</p></div>
+        <div class="diapo">
+          <div class="pantalla"><div class="movil reflejo"><img src="img/landing/estadisticas.webp" alt="Estadísticas" loading="lazy" data-brillo="rgba(99,102,241,.65)"></div></div>
           <div class="texto"><span class="etq">2 · Descubre</span><h3>Mira a dónde se va tu dinero</h3><p>Exactamente en qué se te va cada mes. Sin sorpresas.</p></div>
+        </div>
+        <div class="diapo">
+          <div class="pantalla"><div class="movil reflejo"><img src="img/landing/recortar.webp" alt="Recortar gastos variables" loading="lazy" data-brillo="rgba(245,158,11,.5)"></div></div>
           <div class="texto"><span class="etq">3 · Recorta</span><h3>Baja tus gastos variables</h3><p>Salidas, compras, caprichos… tócalos con − / + y mira al momento cuánto ahorras.</p></div>
+        </div>
+        <div class="diapo">
+          <div class="pantalla"><div class="movil reflejo"><img src="img/landing/plan.webp" alt="Plan equilibrado" loading="lazy" data-brillo="rgba(16,185,129,.6)"></div></div>
           <div class="texto"><span class="etq">4 · Avanza</span><h3>Disfruta y avanza</h3><p>Elige tu ritmo: ahorrar sin dejar de vivir. Y ve cómo llegas a lo que quieres.</p></div>
         </div>
-        <div class="progreso" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
       </div>
+      <div class="controles">
+        <button class="flecha" id="ant" aria-label="Anterior">‹</button>
+        <div class="progreso" id="puntos"><button aria-label="Paso 1"></button><button aria-label="Paso 2"></button><button aria-label="Paso 3"></button><button aria-label="Paso 4"></button></div>
+        <button class="flecha" id="sig" aria-label="Siguiente">›</button>
+      </div>
+      <div class="pista" aria-hidden="true">Desliza →</div>
     </div>
   </section>
 
@@ -290,26 +303,34 @@
   const io = 'IntersectionObserver' in window && new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('ver'); io.unobserve(e.target) } }), { threshold: .15 })
   document.querySelectorAll('.sube').forEach(el => io ? io.observe(el) : el.classList.add('ver'))
 
-  // El móvil fijo cambia de pantalla y de texto según lo que se ha bajado dentro de la historia
+  // Carrusel horizontal: cada móvil gira en 3D según lo lejos que está del centro
   ;(() => {
-    const hist = document.getElementById('historia'), movil = document.getElementById('movil-fijo')
-    const fotos = movil.querySelectorAll('img'), textos = document.querySelectorAll('.texto'), puntos = document.querySelectorAll('.progreso i')
-    let actual = -1
-    const activar = i => {
-      if (i === actual) return; actual = i
-      fotos.forEach((f, k) => f.classList.toggle('on', k === i))
-      textos.forEach((t, k) => t.classList.toggle('on', k === i))
-      puntos.forEach((p, k) => p.classList.toggle('on', k === i))
-      movil.style.setProperty('--brillo', fotos[i].dataset.brillo)
-      movil.style.transform = `rotateY(${i % 2 ? -14 : 14}deg) rotateX(6deg) rotateZ(${i % 2 ? 1.5 : -1.5}deg)`
-      movil.style.setProperty('--grosor', i % 2 ? '3px 4px 0 #2b3244, 6px 8px 0 #171c2a, 9px 12px 0 #0d111b' : '-3px 4px 0 #2b3244, -6px 8px 0 #171c2a, -9px 12px 0 #0d111b')
+    const car = document.getElementById('carrusel'), diapos = [...car.children], puntos = [...document.querySelectorAll('#puntos button')]
+    const ant = document.getElementById('ant'), sig = document.getElementById('sig'), pista = document.querySelector('.pista')
+    let actual = 0
+    const pintar = () => {
+      const centro = car.scrollLeft + car.clientWidth / 2
+      diapos.forEach((d, k) => {
+        const off = (d.offsetLeft + d.offsetWidth / 2 - centro) / car.clientWidth
+        const m = d.querySelector('.movil'), img = m.querySelector('img')
+        m.style.transform = `rotateY(${-off * 42 + (k % 2 ? -10 : 10)}deg) rotateX(5deg) scale(${1 - Math.min(1, Math.abs(off)) * .14})`
+        m.style.setProperty('--brillo', img.dataset.brillo)
+        m.style.setProperty('--grosor', off * 42 - (k % 2 ? -10 : 10) > 0 ? '-3px 4px 0 #2b3244, -6px 8px 0 #171c2a, -9px 12px 0 #0d111b' : '3px 4px 0 #2b3244, 6px 8px 0 #171c2a, 9px 12px 0 #0d111b')
+        d.querySelector('.texto').style.opacity = 1 - Math.min(1, Math.abs(off) * 1.6)
+      })
+      actual = Math.round(car.scrollLeft / car.clientWidth)
+      puntos.forEach((p, k) => p.classList.toggle('on', k === actual))
+      ant.disabled = actual === 0; sig.disabled = actual === diapos.length - 1
+      if (actual > 0 && pista) pista.style.display = 'none'
     }
-    const alBajar = () => {
-      const r = hist.getBoundingClientRect(), recorrido = r.height - innerHeight
-      const k = Math.min(.999, Math.max(0, -r.top / recorrido))
-      activar(Math.floor(k * fotos.length))
-    }
-    addEventListener('scroll', alBajar, { passive: true }); addEventListener('resize', alBajar); alBajar()
+    const ir = i => car.scrollTo({ left: Math.max(0, Math.min(diapos.length - 1, i)) * car.clientWidth, behavior: 'smooth' })
+    car.addEventListener('scroll', () => requestAnimationFrame(pintar), { passive: true })
+    addEventListener('resize', pintar)
+    ant.onclick = () => ir(actual - 1); sig.onclick = () => ir(actual + 1)
+    puntos.forEach((p, k) => p.onclick = () => ir(k))
+    car.addEventListener('keydown', e => { if (e.key === 'ArrowRight') ir(actual + 1); if (e.key === 'ArrowLeft') ir(actual - 1) })
+    car.tabIndex = 0
+    pintar()
   })()
 
   // Botones laterales y reflejo del cristal que se mueve con el dedo o la inclinación
