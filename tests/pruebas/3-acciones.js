@@ -29,7 +29,7 @@ module.exports = [
       t.igual(await pg.evaluate(() => [document.getElementById('mfa-importe').value, document.getElementById('mfa-desc').value]), ['211', 'Vzla'])
       // Un mensaje del banco se lee sin IA
       t.igual(await pg.evaluate(() => mfApunte.leerMensajeBanco('Compra con tarjeta en MERCADONA ALAMEDA por 27,80 EUR el 18/10')),
-        { monto: 27.8, descripcion: 'Mercadona Alameda', fecha: '2026-10-18' })
+        { monto: 27.8, descripcion: 'Mercadona Alameda', fecha: '2026-10-18', tipo: 'gasto', fiable: true })
       t.sinErrores(pg)
       await pg.context().close()
     },
