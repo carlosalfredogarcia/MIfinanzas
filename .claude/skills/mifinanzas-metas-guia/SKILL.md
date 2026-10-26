@@ -88,4 +88,4 @@ El recorrido que hace el usuario hoy, y que el diseño debe convertir en pasos c
 1. Leer `CLAUDE.md` (mapa) y buscar en `js/metas.js` solo las funciones que hagan falta.
 2. Rediseñar por pasos y pasar `cd tests && npm test` (incluye los 4 pasos); probar a mano cambiar
    tipo de ahorro, ajustar categorías, crear y editar meta y repartir.
-3. Enseñar capturas y publicar en `main` cuando el usuario lo apruebe.
+3. Pasar las pruebas, publicar en `main` sin preguntar y enseñar capturas.

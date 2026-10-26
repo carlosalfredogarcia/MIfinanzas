@@ -79,4 +79,4 @@ en la página para centrar chips).
 2. Implementar en una rama, sin tocar consultas ni nombres del contrato.
 3. `cd tests && npm test` (pantallas a 360 y 412 px, los tres modos y fotos de texto) y probar a mano
    abrir categoría, editar un movimiento, buscador y chips de evolución.
-4. Enseñar capturas; publicar en `main` cuando el usuario lo diga.
+4. Pasar las pruebas, publicar en `main` sin preguntar y enseñar capturas.

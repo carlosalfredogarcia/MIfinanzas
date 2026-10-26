@@ -64,5 +64,5 @@ Abren cada pantalla con datos fijos (`tests/datos.js`) y fecha fija (21/10/2026)
 
 ## Publicar
 
-Trabajar en una rama `claude/...`; pasar las pruebas; subir la rama y, si el usuario lo aprueba, a `main`
-(Netlify publica `main`). Commits con `git -c user.name="Claude" -c user.email="noreply@anthropic.com"`.
+Trabajar en una rama `claude/...`; pasar las pruebas; subir la rama y después a `main` directamente,
+sin preguntar (Netlify publica `main`). Enseñar capturas al terminar. Commits con `git -c user.name="Claude" -c user.email="noreply@anthropic.com"`.
