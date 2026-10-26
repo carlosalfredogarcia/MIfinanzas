@@ -2,7 +2,7 @@
 // El importe va primero con el teclado numérico abierto; debajo, los recientes para repetirlos
 // con un toque y las categorías más usadas. La descripción es opcional y, si coincide con uno
 // anterior, elige su categoría. Al guardar no hay alerta: un aviso con "Deshacer".
-// También se abre ya relleno: mfApunte.abrir('gasto', { monto, descripcion, categoria, fecha, texto })
+// También se abre ya relleno: mfApunte.abrir('gasto', { monto, descripcion, categoria, fecha, texto, guardar })
 // (texto = mensaje del banco, que se lee aquí mismo sin IA).
 ;(function () {
   const CATS_DEFAULT = MF.CATS_GASTO
@@ -174,6 +174,11 @@
       if (modo !== m0) return
       pintarCats(); pintarRecientes()
       if (relleno.descripcion || relleno.texto) { if (!estado.categoria) adivinarCat(inpDesc.value); sugerir() }
+      // Desde una notificación del banco (?guardar=1): se guarda solo; si no se sabe la categoría, va a «Otros»
+      if (relleno.guardar && parseImporte(inpImporte.value) > 0) {
+        if (!estado.categoria) elegirCat(modo === 'ingreso' ? '📦 Otro' : '📦 Otros', false)
+        guardar()
+      }
     })
   }
 

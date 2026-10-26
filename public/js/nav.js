@@ -249,6 +249,7 @@
   // Llegada con ?accion=gasto|ingreso|fijo|csv: se abre en cuanto hay sesión.
   // Gasto e ingreso aceptan datos para abrirse ya rellenos (accesos directos del móvil, compartir):
   //   ?accion=gasto&importe=12,50&comercio=Mercadona&fecha=2026-10-21   o   ?texto=<mensaje del banco>
+  // Con &guardar=1 se guarda solo (MacroDroid al llegar la notificación del banco), con «Deshacer».
   function accionPendiente() {
     const q = new URLSearchParams(location.search)
     const texto = [q.get('texto'), q.get('titulo')].filter(Boolean).join(' ')
@@ -256,7 +257,7 @@
     if (!accion || !ACCIONES[accion]) return
     if (accion === 'fijo' && pagina !== 'mifinanza-fijos') return ir('fijo', FIJOS)
     history.replaceState(null, '', location.pathname)
-    const relleno = { monto: parseFloat(String(q.get('importe') || '').replace(',', '.')) || undefined, descripcion: q.get('comercio') || undefined, fecha: q.get('fecha') || undefined, texto: texto || undefined }
+    const relleno = { monto: parseFloat(String(q.get('importe') || '').replace(',', '.')) || undefined, descripcion: q.get('comercio') || undefined, fecha: q.get('fecha') || undefined, texto: texto || undefined, guardar: q.get('guardar') === '1' }
     const fn = { fijo: 'abrirModal', csv: 'abrirImportarCSV' }[accion]
     const lista = () => accion === 'gasto' || accion === 'ingreso' ? window.mfApunte && (() => window.mfApunte.abrir(accion, relleno)) : window[fn]
     let n = 0

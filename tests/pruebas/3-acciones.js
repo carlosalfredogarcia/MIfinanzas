@@ -169,6 +169,23 @@ module.exports = [
     },
   },
   {
+    nombre: 'notificación del banco con guardar=1: se guarda sola, con Deshacer',
+    async prueba(t) {
+      const texto = encodeURIComponent('Compra con tarjeta en MERCADONA ALAMEDA por 27,80 EUR el 18/10')
+      const pg = await t.abrir('inicio.html?guardar=1&titulo=CaixaBank&texto=' + texto, { datos: completo(), espera: 3000 })
+      const ins = await ultimo(pg, '__INS__')
+      t.ok(ins, 'No se guardó')
+      t.igual([ins.table, ins.v[0].categoria, ins.v[0].monto, ins.v[0].fecha], ['gastos', '🛒 Supermercado', 27.8, '2026-10-18'])
+      t.ok(!(await pg.$('.mfa-abierto')), 'La hoja sigue abierta')
+      t.contiene(await pg.$eval('.mfa-toast', e => e.textContent), 'Deshacer')
+      // Un comercio que nunca se ha visto se guarda en «Otros»
+      const pg2 = await t.abrir('inicio.html?guardar=1&texto=' + encodeURIComponent('Pago de 9,99 EUR en TIENDA NUEVA'), { datos: completo(), espera: 3000 })
+      t.igual((await ultimo(pg2, '__INS__')).v[0].categoria, '📦 Otros')
+      t.sinErrores(pg); t.sinErrores(pg2)
+      await pg.context().close(); await pg2.context().close()
+    },
+  },
+  {
     nombre: 'préstamos: abono, saldar y estado de cuenta en PDF',
     async prueba(t) {
       const pg = await t.abrir('mifinanza-prestamos.html', { datos: completo() })
