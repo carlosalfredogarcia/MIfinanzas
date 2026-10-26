@@ -65,7 +65,24 @@ const IMPORTADOS = [
   await pg.evaluate(() => irPaso(3)); await pg.waitForTimeout(900)
   await foto(pg, 'meta')
 
-  // 6. Gastos fijos
+  // 6. Plan mensual: elegir cómo ahorrar y recortar los gastos variables
+  pg = await abrir('mifinanza-metas.html')
+  await pg.evaluate(() => irPaso(2)); await pg.waitForTimeout(900)
+  await pg.evaluate(() => { const t = [...document.querySelectorAll('*')].find(e => e.children.length === 0 && /Disfrutar y avanzar/.test(e.textContent)); if (t) { t.scrollIntoView({ block: 'center' }); scrollBy(0, 120) } }); await pg.waitForTimeout(900)
+  await foto(pg, 'plan')
+
+  // 7. Recortar los gastos variables con − / +
+  pg = await abrir('mifinanza-metas.html')
+  await pg.evaluate(() => irPaso(2)); await pg.waitForTimeout(900)
+  await pg.evaluate(() => { document.getElementById('detalle-gastos').previousElementSibling.scrollIntoView({ block: 'start' }); scrollBy(0, -16) }); await pg.waitForTimeout(1000)
+  // Se baja «Salidas» con − para que se vea el recorte y el ahorro que sube
+  const caja = pg.locator('.var-row', { hasText: 'Salidas' }).locator('input').first()
+  await caja.fill('80'); await caja.dispatchEvent('input'); await caja.dispatchEvent('change'); await caja.blur()
+  await pg.waitForTimeout(5000)
+  await pg.evaluate(() => { document.getElementById('detalle-gastos').previousElementSibling.scrollIntoView({ block: 'start' }); scrollBy(0, -16) }); await pg.waitForTimeout(800)
+  await foto(pg, 'recortar')
+
+  // 8. Gastos fijos
   await foto(await abrir('mifinanza-fijos.html'), 'fijos')
 
   await b.close()
