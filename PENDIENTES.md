@@ -41,6 +41,10 @@ Lista viva: al empezar una conversación nueva, leer esto y `CLAUDE.md`. Al term
 
 ## De Claude (cuando el usuario lo pida)
 
+- Ayuda en cada pantalla (`js/ayuda.js`, botón «Ayuda»): hecha la de Inicio (27/10/2026). Si le gusta, seguir con
+  Movimientos, Estadísticas, Metas, Gastos fijos, Préstamos y Perfil (añadir sus pasos en PANTALLAS y el botón
+  `data-ayuda` en su cabecera), y decidir si la guía de bienvenida de 8 pasos se queda, se acorta o se quita.
+
 - App de Android 1.1.0 (versionCode 10; el 2 ya estaba usado) enviada a revisión en la prueba cerrada el
   27/10/2026 (repo privado mifinanza-android). minSdk 24: deja fuera Android 5–6 (aviso de 1.057 modelos, aceptado).
   Cuando Google la apruebe: el usuario la prueba en su Samsung (Perfil → Gastos automáticos → activar, pagar,

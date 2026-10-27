@@ -28,6 +28,8 @@ public/                     lo que ve el usuario (Netlify publica esta carpeta)
   js/datepicker.js          selector de fechas
   js/guia.js                guía de bienvenida (8 pasos con capturas de img/landing/); la carga nav.js, sale sola la
                             primera vez en Inicio (localStorage guiaVista) y desde Perfil → Guía. En pruebas: abrir(…, { guia: true })
+  js/ayuda.js               ayuda de cada pantalla: el botón «Ayuda» (data-ayuda; nav.js descarga este archivo al tocarlo)
+                            ilumina cada parte y una burbuja explica qué es. Pasos en PANTALLAS (de momento solo Inicio)
   js/android.js             lo que manda la app de Android de Play (?app=android&permiso&avisos): lo guarda en el
                             móvil; nav.js apunta los avisos del banco (mfApunte.guardarAvisos) y Perfil enseña
                             «Gastos automáticos». El proyecto Android está en el repo privado mifinanza-android

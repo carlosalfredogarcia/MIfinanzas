@@ -19,6 +19,7 @@
     background: radial-gradient(circle at 15% 0%, rgba(16,185,129,.22), transparent 50%), radial-gradient(circle at 100% 85%, rgba(99,102,241,.28), transparent 55%), #0a0e1a;
     padding: env(safe-area-inset-top) 0 env(safe-area-inset-bottom); opacity: 0; transition: opacity .3s; }
   .mfg.mfg-ver { opacity: 1; }
+  .mfg[hidden] { display: none; }
   .mfg-cab { display: flex; justify-content: flex-end; padding: 12px 16px 0; }
   .mfg-saltar { border: 0; background: rgba(255,255,255,.06); color: #94a3b8; font: 700 14px Manrope, system-ui, sans-serif; padding: 9px 14px; border-radius: 12px; cursor: pointer; }
   .mfg-pasos { flex: 1; min-height: 0; display: flex; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; overscroll-behavior-x: contain; }

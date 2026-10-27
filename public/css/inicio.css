@@ -54,6 +54,8 @@ button:focus-visible, a:focus-visible { outline: 2px solid #a5b4fc; outline-offs
 
 /* ── HEADER ── */
 .header { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+.header > div:first-child { min-width: 0; }
+.header-btns { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
 .header-day { font-size: 13px; color: var(--sub); font-weight: 600; margin-bottom: 2px; }
 .greeting .nombre { font-size: 26px; font-weight: 800; color: var(--text); letter-spacing: -0.02em; }
 .avatar {

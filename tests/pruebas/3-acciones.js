@@ -305,6 +305,8 @@ module.exports = [
       t.igual(await pg.$eval('.mfg-sig', b => b.textContent), 'Apuntar mi primer gasto')
       await pg.click('.mfg-sig'); await pg.waitForTimeout(900)
       t.ok(await pg.$('.mfa-abierto'), 'No se abrió el apunte')
+      // Cerrada la guía, no queda nada invisible encima: el apunte se puede usar
+      await pg.click('.mfa-cat >> nth=0', { timeout: 3000 })
       t.igual(await pg.evaluate(() => localStorage.getItem('guiaVista')), '1')
       // Vista una vez, no vuelve a salir sola; desde Perfil sí se abre
       await pg.goto('http://app.local/inicio.html'); await pg.waitForTimeout(2000)
@@ -312,6 +314,52 @@ module.exports = [
       await pg.goto('http://app.local/mifinanza-perfil.html'); await pg.waitForTimeout(1500)
       await pg.click('#btn-guia'); await pg.waitForTimeout(500)
       t.ok(await pg.$('.mfg.mfg-ver'), 'No se abre desde Perfil')
+      t.sinErrores(pg)
+      await pg.context().close()
+    },
+  },
+  {
+    nombre: 'ayuda de Inicio: ilumina cada parte, la explica y no abre nada de debajo',
+    async prueba(t) {
+      const pg = await t.abrir('inicio.html', { datos: completo() })
+      t.ok(!(await pg.$('script[src="js/ayuda.js"]')), 'La ayuda se descarga sin tocar «Ayuda»')
+      await pg.click('[data-ayuda]'); await pg.waitForTimeout(900)
+      t.ok(await pg.$('.mfh.mfh-ver'), 'No se abrió la ayuda')
+      // Cada paso: el foco rodea su parte y la burbuja se ve entera sin taparla
+      const PARTES = ['.period-bar', '#saldo-amount', '.spark-wrap', '.pills-row > .pill:first-child', '.pills-row > .pill:last-child', '.salud-card', '.fijos-card', '.mf-plus']
+      const titulos = []
+      for (const [k, sel] of PARTES.entries()) {
+        const p = await pg.evaluate(sel => {
+          const caja = s => document.querySelector(s).getBoundingClientRect()
+          const f = caja('.mfh-foco'), e = caja(sel), b = caja('.mfh-burbuja')
+          return {
+            tit: document.querySelector('.mfh-tit').textContent, cuenta: document.querySelector('.mfh-cuenta').textContent,
+            boton: document.querySelector('.mfh-sig').textContent,
+            rodea: f.top <= e.top + 1 && f.bottom >= e.bottom - 1 && f.left <= e.left + 1 && f.right >= e.right - 1,
+            burbuja: b.top >= 0 && b.bottom <= innerHeight && (b.bottom <= f.top || b.top >= f.bottom),
+          }
+        }, sel)
+        titulos.push(p.tit)
+        t.igual(p.cuenta, `${k + 1} de ${PARTES.length}`)
+        t.ok(p.rodea, p.tit + ': el foco no rodea su parte')
+        t.ok(p.burbuja, p.tit + ': la burbuja tapa lo iluminado o se sale de la pantalla')
+        t.igual(p.boton, k === PARTES.length - 1 ? 'Entendido' : 'Siguiente')
+        await pg.click('.mfh-sig'); await pg.waitForTimeout(1100)
+      }
+      t.igual(titulos, ['El mes que estás viendo', 'Saldo actual', 'Cómo acabó cada mes', 'Ingresos', 'Gastos', 'Salud financiera', 'Gastos fijos', 'Apunta en un momento'])
+      t.ok(!(await pg.$('.mfh.mfh-ver')), '«Entendido» no cierra la ayuda')
+      t.ok(!(await pg.$('.mfh-activa')), 'El botón + sigue apartado')
+      // Otra vez: flechas del teclado, «Atrás», un toque fuera de la burbuja no abre la tarjeta de debajo, Esc cierra
+      await pg.click('[data-ayuda]'); await pg.waitForTimeout(700)
+      await pg.keyboard.press('ArrowRight'); await pg.waitForTimeout(700)
+      t.igual(await pg.$eval('.mfh-tit', e => e.textContent), 'Saldo actual')
+      await pg.click('.mfh-atras'); await pg.waitForTimeout(700)
+      t.igual(await pg.$eval('.mfh-tit', e => e.textContent), 'El mes que estás viendo')
+      await pg.mouse.click(200, 520); await pg.waitForTimeout(400)
+      t.igual(new URL(pg.url()).pathname, '/inicio.html')
+      t.ok(await pg.$('.mfh.mfh-ver'), 'Un toque fuera de la burbuja cerró la ayuda')
+      await pg.keyboard.press('Escape'); await pg.waitForTimeout(400)
+      t.ok(!(await pg.$('.mfh.mfh-ver')), 'Esc no cierra la ayuda')
       t.sinErrores(pg)
       await pg.context().close()
     },

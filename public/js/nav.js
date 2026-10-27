@@ -33,6 +33,10 @@
     document.head.appendChild(g)
   }
 
+  // Ayuda de la pantalla (ayuda.js, se descarga al tocar «Ayuda»): ilumina cada parte y explica qué es
+  document.querySelectorAll('[data-ayuda]').forEach(b => b.addEventListener('click', () =>
+    MF.cargarScript('js/ayuda.js', () => window.MFAyuda).then(a => a.abrir(pagina, b), () => {})))
+
   // Si la función existe en esta página se usa; si no, se abre Movimientos con esa acción.
   const local = (fn, accion) => () => (typeof window[fn] === 'function' ? window[fn]() : ir(accion))
   const ir = (accion, pagina = MOV) => { location.href = pagina + '?accion=' + accion }
@@ -171,6 +175,14 @@
   .mf-menu-abierto .mf-velo { opacity: 1; pointer-events: auto; }
   .mf-menu-abierto .mf-menu { opacity: 1; transform: none; pointer-events: auto; }
   .mf-menu-abierto .mf-tab[data-menu] { background: rgba(99,102,241,.2); color: #c7d2fe; }
+  .mf-ayuda {
+    height: 40px; padding: 0 14px 0 10px; border-radius: 999px; display: inline-flex; align-items: center; gap: 6px; flex-shrink: 0;
+    border: 1px solid rgba(99,102,241,.45); background: rgba(99,102,241,.14); color: #c7d2fe;
+    font: 800 14px Manrope, system-ui, sans-serif; cursor: pointer; -webkit-tap-highlight-color: transparent; transition: background .2s;
+  }
+  .mf-ayuda:active { background: rgba(99,102,241,.28); }
+  .mf-ayuda:focus-visible { outline: 2px solid #a5b4fc; outline-offset: 2px; }
+  .mf-ayuda svg { width: 18px; height: 18px; }
   @media (prefers-reduced-motion: reduce) {
     .mf-acc, .mf-plus, .mf-plus svg, .mf-velo, .mf-tab, .mf-menu { transition: none; }
   }`
