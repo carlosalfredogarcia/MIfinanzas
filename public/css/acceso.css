@@ -29,17 +29,19 @@ body {
 /* ── Fondo: luces suaves en movimiento ── */
 .fondo { position: fixed; inset: 0; overflow: hidden; pointer-events: none; z-index: 0; }
 .aurora {
-  position: absolute; left: 50%; top: 18%; width: 160vmax; height: 160vmax; margin: -80vmax 0 0 -80vmax;
-  background: conic-gradient(from 0deg, transparent 0deg, rgba(16,185,129,.55) 40deg, transparent 100deg, rgba(99,102,241,.6) 170deg, transparent 230deg, rgba(20,184,166,.45) 280deg, rgba(245,158,11,.18) 320deg, transparent 360deg);
-  filter: blur(70px); opacity: .75; animation: gira 40s linear infinite;
+  position: absolute; left: 50%; top: 18%; width: 120vmax; height: 120vmax; margin: -60vmax 0 0 -60vmax;
+  /* Degradados suaves en vez de desenfoque: el móvil no tiene que recalcular nada en cada fotograma */
+  background: radial-gradient(closest-side at 32% 36%, rgba(16,185,129,.4), transparent), radial-gradient(closest-side at 70% 42%, rgba(99,102,241,.42), transparent),
+    radial-gradient(closest-side at 48% 72%, rgba(20,184,166,.28), transparent), radial-gradient(closest-side at 62% 24%, rgba(245,158,11,.1), transparent);
+  opacity: .8;
 }
-.luz { position: absolute; border-radius: 50%; filter: blur(60px); opacity: .85; will-change: transform; mix-blend-mode: screen; }
+.luz { position: absolute; border-radius: 50%; opacity: .85; will-change: transform; }
 .l1 { width: 440px; height: 440px; top: -150px; left: -140px; background: radial-gradient(circle, rgba(16,185,129,.75), transparent 62%); animation: flota1 14s ease-in-out infinite alternate; }
 .l2 { width: 480px; height: 480px; bottom: -190px; right: -170px; background: radial-gradient(circle, rgba(99,102,241,.8), transparent 62%); animation: flota2 17s ease-in-out infinite alternate; }
 .l3 { width: 280px; height: 280px; top: 40%; left: 50%; background: radial-gradient(circle, rgba(245,158,11,.32), transparent 62%); animation: flota3 20s ease-in-out infinite alternate; }
 .l4 { width: 320px; height: 320px; top: 8%; right: -120px; background: radial-gradient(circle, rgba(129,140,248,.55), transparent 62%); animation: flota4 16s ease-in-out infinite alternate; }
 .estrellas { position: absolute; top: 0; left: 0; width: 2px; height: 2px; border-radius: 50%; background: transparent;
-  box-shadow: 41vw 19vh rgba(167,243,208,.5), 6vw 9vh rgba(199,210,254,.9), 46vw 74vh rgba(255,255,255,.5), 27vw 4vh rgba(255,255,255,.7), 53vw 8vh rgba(255,255,255,.9), 70vw 54vh rgba(255,255,255,.5), 15vw 28vh rgba(199,210,254,.5), 74vw 7vh rgba(199,210,254,.5), 50vw 6vh rgba(255,255,255,.9), 71vw 17vh rgba(167,243,208,.7), 18vw 69vh rgba(255,255,255,.5), 39vw 71vh rgba(199,210,254,.9), 13vw 74vh rgba(199,210,254,.5), 24vw 47vh rgba(255,255,255,.5), 91vw 8vh rgba(199,210,254,.9), 79vw 26vh rgba(167,243,208,.5), 68vw 54vh rgba(167,243,208,.7), 74vw 58vh rgba(167,243,208,.7), 31vw 23vh rgba(199,210,254,.9), 10vw 73vh rgba(167,243,208,.5), 63vw 43vh rgba(199,210,254,.7), 36vw 77vh rgba(255,255,255,.9), 65vw 53vh rgba(255,255,255,.7), 19vw 62vh rgba(167,243,208,.9), 85vw 9vh rgba(199,210,254,.5), 40vw 43vh rgba(199,210,254,.7), 76vw 63vh rgba(199,210,254,.7), 8vw 11vh rgba(167,243,208,.7), 89vw 85vh rgba(255,255,255,.9), 93vw 89vh rgba(167,243,208,.5), 73vw 87vh rgba(167,243,208,.7), 91vw 49vh rgba(199,210,254,.7), 2vw 59vh rgba(167,243,208,.9), 78vw 14vh rgba(167,243,208,.9), 27vw 98vh rgba(167,243,208,.9), 94vw 31vh rgba(167,243,208,.7), 63vw 10vh rgba(255,255,255,.7), 51vw 70vh rgba(167,243,208,.9), 55vw 70vh rgba(167,243,208,.5), 53vw 45vh rgba(199,210,254,.7), 29vw 19vh rgba(255,255,255,.9), 19vw 29vh rgba(199,210,254,.9), 1vw 62vh rgba(199,210,254,.9), 33vw 36vh rgba(255,255,255,.9), 53vw 68vh rgba(167,243,208,.5); animation: titila 4s ease-in-out infinite alternate; }
+  box-shadow: 41vw 19vh rgba(167,243,208,.5), 6vw 9vh rgba(199,210,254,.9), 46vw 74vh rgba(255,255,255,.5), 27vw 4vh rgba(255,255,255,.7), 53vw 8vh rgba(255,255,255,.9), 70vw 54vh rgba(255,255,255,.5), 15vw 28vh rgba(199,210,254,.5), 74vw 7vh rgba(199,210,254,.5), 50vw 6vh rgba(255,255,255,.9), 71vw 17vh rgba(167,243,208,.7), 18vw 69vh rgba(255,255,255,.5), 39vw 71vh rgba(199,210,254,.9), 13vw 74vh rgba(199,210,254,.5), 24vw 47vh rgba(255,255,255,.5), 91vw 8vh rgba(199,210,254,.9), 79vw 26vh rgba(167,243,208,.5), 68vw 54vh rgba(167,243,208,.7), 74vw 58vh rgba(167,243,208,.7), 31vw 23vh rgba(199,210,254,.9), 10vw 73vh rgba(167,243,208,.5), 63vw 43vh rgba(199,210,254,.7), 36vw 77vh rgba(255,255,255,.9), 65vw 53vh rgba(255,255,255,.7), 19vw 62vh rgba(167,243,208,.9), 85vw 9vh rgba(199,210,254,.5), 40vw 43vh rgba(199,210,254,.7), 76vw 63vh rgba(199,210,254,.7), 8vw 11vh rgba(167,243,208,.7), 89vw 85vh rgba(255,255,255,.9), 93vw 89vh rgba(167,243,208,.5), 73vw 87vh rgba(167,243,208,.7), 91vw 49vh rgba(199,210,254,.7), 2vw 59vh rgba(167,243,208,.9), 78vw 14vh rgba(167,243,208,.9), 27vw 98vh rgba(167,243,208,.9), 94vw 31vh rgba(167,243,208,.7), 63vw 10vh rgba(255,255,255,.7), 51vw 70vh rgba(167,243,208,.9), 55vw 70vh rgba(167,243,208,.5), 53vw 45vh rgba(199,210,254,.7), 29vw 19vh rgba(255,255,255,.9), 19vw 29vh rgba(199,210,254,.9), 1vw 62vh rgba(199,210,254,.9), 33vw 36vh rgba(255,255,255,.9), 53vw 68vh rgba(167,243,208,.5); animation: titila 4s ease-in-out infinite alternate; will-change: opacity; }
 .estrellas.e2 { width: 1px; height: 1px; box-shadow: 72vw 40vh rgba(255,255,255,.5), 65vw 79vh rgba(199,210,254,.5), 94vw 6vh rgba(167,243,208,.5), 71vw 50vh rgba(167,243,208,.7), 50vw 13vh rgba(167,243,208,.5), 51vw 7vh rgba(255,255,255,.9), 26vw 56vh rgba(255,255,255,.9), 43vw 76vh rgba(255,255,255,.9), 0vw 72vh rgba(255,255,255,.5), 12vw 46vh rgba(199,210,254,.9), 9vw 26vh rgba(199,210,254,.7), 19vw 81vh rgba(167,243,208,.7), 77vw 46vh rgba(167,243,208,.9), 14vw 62vh rgba(167,243,208,.7), 61vw 39vh rgba(255,255,255,.9), 13vw 95vh rgba(167,243,208,.5), 33vw 61vh rgba(199,210,254,.9), 66vw 2vh rgba(255,255,255,.5), 46vw 18vh rgba(199,210,254,.5), 3vw 97vh rgba(199,210,254,.7), 82vw 11vh rgba(199,210,254,.7), 66vw 46vh rgba(255,255,255,.7), 98vw 28vh rgba(199,210,254,.5), 99vw 64vh rgba(167,243,208,.5), 28vw 78vh rgba(255,255,255,.9), 51vw 94vh rgba(255,255,255,.9), 66vw 63vh rgba(167,243,208,.5), 3vw 3vh rgba(167,243,208,.7), 33vw 24vh rgba(199,210,254,.5), 44vw 57vh rgba(199,210,254,.7), 46vw 10vh rgba(255,255,255,.9), 29vw 60vh rgba(255,255,255,.7), 26vw 61vh rgba(199,210,254,.5), 0vw 61vh rgba(199,210,254,.7), 82vw 10vh rgba(199,210,254,.9), 49vw 100vh rgba(199,210,254,.9), 61vw 22vh rgba(167,243,208,.5), 42vw 11vh rgba(199,210,254,.7), 59vw 51vh rgba(199,210,254,.9), 92vw 20vh rgba(255,255,255,.9), 3vw 19vh rgba(199,210,254,.7), 83vw 18vh rgba(199,210,254,.5), 60vw 84vh rgba(167,243,208,.9), 70vw 70vh rgba(255,255,255,.9), 1vw 92vh rgba(199,210,254,.9), 67vw 95vh rgba(255,255,255,.7), 24vw 27vh rgba(255,255,255,.7), 27vw 37vh rgba(199,210,254,.9), 97vw 75vh rgba(167,243,208,.7), 69vw 53vh rgba(255,255,255,.9), 94vw 45vh rgba(167,243,208,.5), 74vw 66vh rgba(167,243,208,.5), 16vw 68vh rgba(255,255,255,.5), 65vw 2vh rgba(167,243,208,.9), 77vw 0vh rgba(255,255,255,.9), 18vw 60vh rgba(199,210,254,.5), 15vw 71vh rgba(255,255,255,.7), 87vw 66vh rgba(199,210,254,.5), 61vw 100vh rgba(255,255,255,.5), 7vw 31vh rgba(255,255,255,.7); animation-duration: 6s; animation-delay: -2s; }
 .rejilla {
   position: absolute; inset: 0;
@@ -68,7 +70,7 @@ body {
 .cristal.anim { animation-delay: .12s; }
 .confianza.anim { animation-delay: .26s; }
 .loading-overlay.visible ~ .phone .anim { animation-play-state: paused; }
-@keyframes entra { from { opacity: 0; transform: translateY(22px) scale(.98); filter: blur(6px); } to { opacity: 1; transform: none; filter: none; } }
+@keyframes entra { from { opacity: 0; transform: translateY(22px) scale(.98); } to { opacity: 1; transform: none; } }
 
 /* ── Logo ── */
 .logo { position: relative; text-align: center; margin-bottom: 28px; }
@@ -77,26 +79,22 @@ body {
 .logo-icon::before {
   content: ''; position: absolute; inset: -26px; border-radius: 50%;
   background: radial-gradient(circle, rgba(52,211,153,.45), rgba(99,102,241,.3) 45%, transparent 70%);
-  filter: blur(8px); animation: late-halo 3.2s ease-in-out infinite;
+  animation: late-halo 3.2s ease-in-out infinite;
 }
 @keyframes levita { 50% { transform: translateY(-6px) rotate(-2deg); } }
 @keyframes late-halo { 50% { transform: scale(1.18); opacity: .65; } }
 .logo-icon svg, .loading-logo svg { width: 100%; height: 100%; display: block; }
 .logo-icon::after {
   content: ''; position: absolute; inset: -9px; border-radius: 27px; padding: 1.5px;
-  background: conic-gradient(from var(--giro), #34d399, transparent 30%, #a5b4fc 55%, transparent 80%, #34d399);
+  background: linear-gradient(135deg, #34d399, transparent 40%, transparent 60%, #a5b4fc);
   -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask-composite: exclude;
-  animation: giro 4s linear infinite;
 }
-@property --giro { syntax: '<angle>'; initial-value: 0deg; inherits: false; }
-@keyframes giro { to { --giro: 360deg; } }
 
 .logo-title {
   font-size: 36px; font-weight: 800; letter-spacing: -.03em; line-height: 1.1;
   background: linear-gradient(100deg, #fff 0%, #fff 30%, #6ee7b7 45%, #a5b4fc 60%, #fff 75%, #fff 100%) 0 0 / 250% 100%;
   -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
-  animation: destello 5s ease-in-out infinite;
-  filter: drop-shadow(0 4px 24px rgba(99,102,241,.35));
+  animation: destello 5s ease-in-out 3;
 }
 @keyframes destello { 0%, 20% { background-position: 100% 0; } 70%, 100% { background-position: 0 0; } }
 .logo-sub { font-size: 15px; font-weight: 500; color: var(--sub); margin-top: 6px; }
@@ -104,19 +102,17 @@ body {
 /* ── Tarjeta de cristal ── */
 .cristal {
   position: relative; padding: 18px 18px 14px; border-radius: 28px;
-  background: var(--glass);
-  border: 1px solid var(--glass-border);
-  -webkit-backdrop-filter: blur(22px) saturate(140%); backdrop-filter: blur(22px) saturate(140%);
+  overflow: hidden; isolation: isolate;
   box-shadow: 0 30px 60px -20px rgba(0,0,0,.7), 0 0 60px -20px rgba(16,185,129,.35), 0 0 80px -30px rgba(99,102,241,.5), inset 0 1px 0 rgba(255,255,255,.07);
 }
+.cristal > * { position: relative; z-index: 1; }
+/* Borde de luz que gira: un cuadrado con el degradado que rota detrás y el fondo de la tarjeta encima */
 .cristal::before {
-  content: ''; position: absolute; inset: 0; border-radius: inherit; padding: 1px; pointer-events: none;
-  padding: 1.5px;
-  background: conic-gradient(from var(--giro), rgba(52,211,153,.95), rgba(52,211,153,0) 25%, rgba(129,140,248,.95) 50%, rgba(129,140,248,0) 75%, rgba(52,211,153,.95));
-  animation: giro 7s linear infinite;
-  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-  -webkit-mask-composite: xor; mask-composite: exclude;
+  content: ''; position: absolute; z-index: -2; left: 50%; top: 50%; width: 170%; aspect-ratio: 1; margin: -85% 0 0 -85%; pointer-events: none;
+  background: conic-gradient(rgba(52,211,153,.95), rgba(52,211,153,0) 25%, rgba(129,140,248,.95) 50%, rgba(129,140,248,0) 75%, rgba(52,211,153,.95));
+  animation: gira 7s linear infinite; will-change: transform;
 }
+.cristal::after { content: ''; position: absolute; z-index: -1; inset: 1.5px; border-radius: 26.5px; background: #0d1322; pointer-events: none; }
 
 /* Pestañas con indicador que se desliza */
 .tabs { position: relative; display: flex; background: rgba(10,14,26,.6); border: 1px solid var(--border); border-radius: 16px; padding: 4px; margin-bottom: 20px; }
@@ -171,23 +167,27 @@ body {
   position: relative; overflow: hidden; width: 100%; margin-top: 8px;
   border: none; border-radius: 16px; padding: 17px; cursor: pointer;
   font-family: inherit; font-size: 16px; font-weight: 800; letter-spacing: .01em; color: var(--white);
-  background: linear-gradient(110deg, #10b981, #14b8a6, #6366f1, #14b8a6, #10b981) 0 0 / 300% 100%;
+  background: #10b981; isolation: isolate;
   box-shadow: 0 14px 34px -10px rgba(16,185,129,.8), 0 10px 40px -14px rgba(99,102,241,.8), inset 0 1px 0 rgba(255,255,255,.3);
   transition: transform .15s, box-shadow .2s, filter .2s;
-  animation: corre 6s linear infinite;
+}
+.btn-main::before {
+  content: ''; position: absolute; z-index: -1; top: 0; bottom: 0; left: 0; width: 300%;
+  background: linear-gradient(110deg, #10b981, #14b8a6, #6366f1, #14b8a6, #10b981, #14b8a6, #6366f1, #14b8a6, #10b981);
+  animation: corre 6s linear infinite; will-change: transform;
 }
 .btn-main span { position: relative; z-index: 1; }
 .btn-main::after {
-  content: ''; position: absolute; top: 0; bottom: 0; left: -60%; width: 45%;
+  content: ''; position: absolute; top: 0; bottom: 0; left: 0; width: 45%;
   background: linear-gradient(100deg, transparent, rgba(255,255,255,.45), transparent);
-  transform: skewX(-20deg); animation: brillo 3.6s ease-in-out 1.2s infinite;
+  transform: translateX(-130%) skewX(-20deg); animation: brillo 3.6s ease-in-out 1.2s infinite; will-change: transform;
 }
 .btn-main:hover { filter: brightness(1.08); box-shadow: 0 16px 34px -10px rgba(16,185,129,.85), inset 0 1px 0 rgba(255,255,255,.25); }
 .btn-main:active { transform: scale(.98); }
 .btn-main:focus-visible { outline: 2px solid var(--indigo-txt); outline-offset: 3px; }
 .btn-main:disabled { opacity: .5; cursor: not-allowed; }
-@keyframes corre { to { background-position: 300% 0; } }
-@keyframes brillo { 0% { left: -60%; } 45%, 100% { left: 130%; } }
+@keyframes corre { to { transform: translateX(-50%); } }
+@keyframes brillo { 0% { transform: translateX(-130%) skewX(-20deg); } 45%, 100% { transform: translateX(330%) skewX(-20deg); } }
 
 .btn-link {
   width: 100%; background: none; border: none; padding: 14px 0 6px; cursor: pointer;
@@ -255,7 +255,7 @@ html:not([lang="en"]) .idioma [data-idioma="es"], html[lang="en"] .idioma [data-
 .loading-text { font-size: 17px; font-weight: 800; color: var(--white); }
 .loading-sub { font-size: 14px; color: var(--sub); min-height: 1em; }
 @keyframes spin { to { transform: rotate(360deg); } }
-@keyframes late { 50% { transform: scale(1.06); filter: drop-shadow(0 0 18px rgba(16,185,129,.5)); } }
+@keyframes late { 50% { transform: scale(1.06); } }
 
 /* Pantallas bajas: más compacto */
 @media (max-height: 700px) {
@@ -265,6 +265,6 @@ html:not([lang="en"]) .idioma [data-idioma="es"], html[lang="en"] .idioma [data-
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .luz, .aurora, .estrellas, .logo-icon, .logo-icon::before, .logo-icon::after, .logo-title, .cristal::before, .btn-main, .btn-main::after, .loading-logo { animation: none; }
+  .luz, .aurora, .estrellas, .logo-icon, .logo-icon::before, .logo-icon::after, .logo-title, .cristal::before, .btn-main::before, .btn-main::after, .loading-logo { animation: none; }
   .anim, .form-section, .error-msg.visible { animation-duration: .01s; }
 }
