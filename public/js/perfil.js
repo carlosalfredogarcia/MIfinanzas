@@ -238,6 +238,21 @@ $('btn-clave').addEventListener('click', async () => {
   const { error } = await dbClient.auth.resetPasswordForEmail(correo, { redirectTo: location.origin + '/index.html' })
   aviso(error ? 'No se pudo enviar: ' + error.message : 'Te enviamos un enlace a ' + correo)
 })
+// Gastos automáticos (app de Android): explicar qué se lee antes de pedir el permiso
+if (window.MFAndroid && MFAndroid.enApp()) {
+  $('sec-avisos').hidden = false
+  if (MFAndroid.permiso()) $('avisos-estado').textContent = 'Activado ✓ · Cada pago se apunta solo'
+  $('btn-avisos').addEventListener('click', () => {
+    const activo = MFAndroid.permiso()
+    abrirHoja('Gastos automáticos', `
+      <p class="h-txt"><b>Con esto, cada vez que pagues se apunta solo.</b> MiFinanza leerá únicamente los avisos de las apps de tu banco y de pago (Google Wallet, Bizum…) que lleven un importe, para apuntar tus gastos e ingresos.</p>
+      <p class="h-txt">No lee otros avisos, ni mensajes, ni nada más de tu móvil. Los avisos se quedan en tu móvil hasta que abres MiFinanza; entonces se apuntan en tu cuenta y te lo decimos, con «Deshacer».</p>
+      <p class="h-txt">Se activa o desactiva en una pantalla de Android: busca <b>MiFinanza</b> y toca el interruptor.</p>
+      <button type="button" class="btn-grande" id="avisos-ok">${activo ? 'Desactivar en Android' : 'Aceptar y activar'}</button>`)
+    $('avisos-ok').addEventListener('click', () => { cerrarHoja(); MFAndroid.abrirPermiso() })
+  })
+}
+
 $('btn-salir').addEventListener('click', async () => { await dbClient.auth.signOut(); location.replace('index.html') })
 $('btn-borrar').addEventListener('click', () => {
   const texto = `Hola, quiero borrar mi cuenta de MiFinanzas y todos mis datos.\n\nCuenta: ${correo}`

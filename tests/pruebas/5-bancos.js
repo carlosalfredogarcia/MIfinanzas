@@ -37,4 +37,31 @@ module.exports = [{
     t.sinErrores(pg); t.sinErrores(pg2); t.sinErrores(pg3)
     await pg.context().close(); await pg2.context().close(); await pg3.context().close()
   },
+},
+{
+  nombre: 'bancos: la app de Android trae avisos pendientes y se apuntan todos de golpe',
+  async prueba(t) {
+    const avisos = [
+      { t: 'Santander', x: 'Compra con tarjeta en MERCADONA por 31,20 EUR', f: Date.parse('2026-10-20T10:00:00') },
+      { t: 'Santander', x: 'Compra con tarjeta en MERCADONA por 31,20 EUR', f: Date.parse('2026-10-20T10:00:00') },  // repetido
+      { t: 'Santander', x: 'Bizum recibido de Ana por 20,00 €', f: Date.parse('2026-10-21T09:00:00') },
+      { t: 'Santander', x: 'Tu código para la compra de 59,90 EUR es 482913', f: Date.parse('2026-10-21T09:30:00') },  // no se guarda
+    ]
+    const url = 'inicio.html?app=android&permiso=1&avisos=' + encodeURIComponent(JSON.stringify(avisos))
+    const pg = await t.abrir(url, { datos: completo(), espera: 3500 })
+    const ins = await pg.evaluate(() => window.__INS__ || [])
+    const g = ins.find(i => i.table === 'gastos'), i = ins.find(i => i.table === 'ingresos')
+    t.igual(g.v.map(v => [v.descripcion, v.categoria, v.monto, v.fecha]), [['Mercadona', '🛒 Supermercado', 31.2, '2026-10-20']])
+    t.igual(i.v.map(v => [v.concepto, v.monto]), [['Bizum de Ana', 20]])
+    t.contiene(await pg.$eval('.mfa-toast', e => e.textContent), '2 movimientos de tus avisos apuntados')
+    t.ok(!pg.url().includes('avisos='), 'La dirección no se limpió')
+    // Perfil enseña el interruptor solo dentro de la app (lo recuerda el móvil) y como activado
+    await pg.goto('http://app.local/mifinanza-perfil.html'); await pg.waitForTimeout(1500)
+    t.igual(await pg.$eval('#sec-avisos', e => e.hidden), false)
+    t.contiene(await pg.$eval('#avisos-estado', e => e.textContent), 'Activado')
+    const fuera = await t.abrir('mifinanza-perfil.html', { datos: completo() })
+    t.igual(await fuera.$eval('#sec-avisos', e => e.hidden), true, 'Se ve fuera de la app')
+    t.sinErrores(pg); t.sinErrores(fuera)
+    await pg.context().close(); await fuera.context().close()
+  },
 }]

@@ -427,8 +427,8 @@
     // Comercio o persona, de lo más claro a lo menos
     const fin = String.raw`(?=\s+(?:el|por|con|a las|de|del|tarjeta|card|on|for|ref)\b|\s*[,.;:(]|\s+[−-]?\d|\s*$)`
     let d
-    if ((d = t.match(new RegExp(`bizum[^.]*?\\b(?:de|from)\\s+([${LETRAS}]+(?:\\s+[${LETRAS}]+)?)`, 'i'))) && /recib|de\s/i.test(d[0])) r.descripcion = 'Bizum de ' + bonito(d[1])
-    else if ((d = t.match(new RegExp(`bizum[^.]*?\\b(?:a|to)\\s+([${LETRAS}]+(?:\\s+[${LETRAS}]+)?)`, 'i')))) r.descripcion = 'Bizum a ' + bonito(d[1])
+    if ((d = t.match(new RegExp(`bizum[^.]*?\\b(?:de|from)\\s+([${LETRAS}]+(?:\\s+(?!(?:por|de|del|el|la|con|en|a|of|for|on)\\b)[${LETRAS}]+)?)`, 'i'))) && /recib|de\s/i.test(d[0])) r.descripcion = 'Bizum de ' + bonito(d[1])
+    else if ((d = t.match(new RegExp(`bizum[^.]*?\\b(?:a|to)\\s+([${LETRAS}]+(?:\\s+(?!(?:por|de|del|el|la|con|en|a|of|for|on)\\b)[${LETRAS}]+)?)`, 'i')))) r.descripcion = 'Bizum a ' + bonito(d[1])
     else if ((d = t.match(new RegExp(`\\b(?:en|at|in)\\s+(?!(?:tu|su|tus|sus|la|el|cuenta|el cajero)\\b)([${LETRAS}0-9&'*.\\- ]{2,40}?)${fin}`, 'i')))) r.descripcion = bonito(d[1])
     else if ((d = t.match(new RegExp(`(?:compra|pago|cargo|purchase|payment)[^:]{0,30}:\\s*([${LETRAS}0-9&'*.\\- ]{2,40}?)\\s+[−-]?(?:€\\s*)?\\d`, 'i')))) r.descripcion = bonito(d[1])
     else if ((d = t.match(new RegExp(`transferencia[^.]*?\\b(?:de|a)\\s+([${LETRAS}]+(?:\\s+[${LETRAS}]+){0,2})`, 'i')))) r.descripcion = 'Transferencia ' + bonito(d[1])
@@ -478,5 +478,50 @@
     actualizarBoton()
   }
 
-  window.mfApunte = { abrir, leerMensajeBanco }
+  // Avisos del banco que trae la app de Android ([{ t: título, x: texto, f: milisegundos }]): se apuntan todos de golpe.
+  // Solo los fiables (importe claro, ni códigos ni rechazos); la categoría, la de la última vez con ese comercio;
+  // no repite uno que ya esté apuntado ese día con el mismo importe y comercio. Un aviso con «Deshacer».
+  async function guardarAvisos(avisos) {
+    const uid = window.currentUserId
+    if (!uid || !avisos.length) return 0
+    const db = window.dbClient
+    const previos = {}
+    for (const tipo of ['gasto', 'ingreso']) {
+      const m = MODOS[tipo]
+      const { data } = await db.from(m.tabla).select(`fecha, monto, ${m.desc}, ${m.cat}`).eq('usuario_id', uid).order('fecha', { ascending: false }).limit(400)
+      previos[tipo] = (data || []).map(r => ({ fecha: r.fecha, monto: +r.monto, desc: String(r[m.desc] || ''), cat: r[m.cat] }))
+    }
+    const nuevas = { gasto: [], ingreso: [] }
+    for (const a of avisos) {
+      const r = leerMensajeBanco(String(a.x || ''), String(a.t || ''))
+      if (!r.fiable) continue
+      const tipo = r.tipo === 'ingreso' ? 'ingreso' : 'gasto', m = MODOS[tipo]
+      const fecha = r.fecha && r.fecha <= fechaLocal() ? r.fecha : fechaLocal(a.f ? new Date(a.f) : new Date())
+      const desc = r.descripcion || (tipo === 'ingreso' ? 'Ingreso' : 'Gasto')
+      const lista = previos[tipo].concat(nuevas[tipo].map(f => ({ fecha: f.fecha, monto: f.monto, desc: f[m.desc] })))
+      if (lista.some(p => p.fecha === fecha && Math.abs(p.monto - r.monto) < .005 && p.desc.toLowerCase() === desc.toLowerCase())) continue
+      const palabra = desc.toLowerCase().split(' ')[0]
+      const parecido = palabra.length > 2 && previos[tipo].find(p => p.cat && p.desc.toLowerCase().includes(palabra))
+      nuevas[tipo].push({ fecha, [m.desc]: desc, [m.cat]: parecido ? parecido.cat : (tipo === 'ingreso' ? '📦 Otro' : '📦 Otros'), monto: Math.round(r.monto * 100) / 100, usuario_id: uid, origen: 'manual' })
+    }
+    const guardados = []
+    for (const tipo of ['gasto', 'ingreso']) {
+      if (!nuevas[tipo].length) continue
+      const { data, error } = await db.from(MODOS[tipo].tabla).insert(nuevas[tipo]).select('id')
+      if (error) { aviso('No se pudieron apuntar los avisos del banco: ' + error.message); continue }
+      guardados.push({ tabla: MODOS[tipo].tabla, ids: (data || []).map(d => d.id), n: nuevas[tipo].length })
+    }
+    const total = guardados.reduce((s, g) => s + g.n, 0)
+    if (!total) return 0
+    delete cache.gasto; delete cache.ingreso; datos = null
+    recargarPantalla()
+    aviso(total === 1 ? '🔔 1 movimiento de tus avisos apuntado' : `🔔 ${total} movimientos de tus avisos apuntados`, async () => {
+      for (const g of guardados) if (g.ids.length) await db.from(g.tabla).delete().in('id', g.ids)
+      recargarPantalla()
+      aviso(total === 1 ? 'Movimiento eliminado' : 'Movimientos eliminados')
+    })
+    return total
+  }
+
+  window.mfApunte = { abrir, leerMensajeBanco, guardarAvisos }
 })()

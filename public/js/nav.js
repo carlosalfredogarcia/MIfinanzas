@@ -270,6 +270,20 @@
     }, 50)
   }
 
+  // Avisos del banco que trajo la app de Android (js/android.js): se apuntan en cuanto hay sesión
+  function avisosPendientes() {
+    if (!window.MFAndroid) return
+    let n = 0
+    const iv = setInterval(() => {
+      if (window.currentUserId && window.mfApunte) {
+        clearInterval(iv)
+        const avisos = window.MFAndroid.sacarAvisos()
+        if (avisos.length) window.mfApunte.guardarAvisos(avisos)
+      } else if (++n > 100) clearInterval(iv)
+    }, 50)
+  }
+
   montar()
   accionPendiente()
+  avisosPendientes()
 })()

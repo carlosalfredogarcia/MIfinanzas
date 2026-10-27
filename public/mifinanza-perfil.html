@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>MiFinanza – Perfil</title>
 <script src="js/idioma.js"></script>
+<script src="js/android.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/perfil.css">
 <link rel="manifest" href="manifest.json">
@@ -89,6 +90,14 @@
   </section>
 
   <!-- Datos y cuenta -->
+  <!-- Solo dentro de la app de Android: apuntar los gastos con los avisos del banco -->
+  <section class="seccion" id="sec-avisos" aria-labelledby="t-avisos" hidden>
+    <h2 class="sec-tit" id="t-avisos">Gastos automáticos</h2>
+    <div class="tarjeta">
+      <button type="button" class="fila" id="btn-avisos"><span class="fila-ico">🔔</span><span class="fila-txt"><b>Apuntar mis gastos con los avisos del banco</b><small id="avisos-estado">Desactivado · Toca para activarlo</small></span><span class="flecha"></span></button>
+    </div>
+  </section>
+
   <section class="seccion" aria-labelledby="t-cuenta">
     <h2 class="sec-tit" id="t-cuenta">Tus datos y tu cuenta</h2>
     <div class="tarjeta">
