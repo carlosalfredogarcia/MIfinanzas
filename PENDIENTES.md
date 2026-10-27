@@ -41,10 +41,10 @@ Lista viva: al empezar una conversación nueva, leer esto y `CLAUDE.md`. Al term
 
 ## De Claude (cuando el usuario lo pida)
 
-- App de Android 1.1.0 (versionCode 2) hecha en el repo privado mifinanza-android: icono nuevo y «Gastos
-  automáticos» (lee avisos de bancos con permiso de notificaciones). Falta: el usuario la sube a la prueba
-  cerrada (Play Console), revisa «Seguridad de los datos» y la prueba en su móvil. Si Play dice que el
-  versionCode ya existe, subirlo en app-twa/app/build.gradle y recompilar (./compilar.sh).
+- App de Android 1.1.0 (versionCode 10; el 2 ya estaba usado) enviada a revisión en la prueba cerrada el
+  27/10/2026 (repo privado mifinanza-android). minSdk 24: deja fuera Android 5–6 (aviso de 1.057 modelos, aceptado).
+  Cuando Google la apruebe: el usuario la prueba en su Samsung (Perfil → Gastos automáticos → activar, pagar,
+  reabrir desde el icono) y cuenta qué sale. Próxima versión: versionCode 11.
 - Atajo de iPhone para Apple Pay (Atajos → Automatización → Transacción) que abra
   inicio.html?guardar=1&texto=Compra de [Importe] en [Comercio]: necesita que alguien con iPhone lo cree una vez.
 - Gasto desde la notificación del banco (Android, el usuario tiene Samsung): se le explicó MacroDroid
