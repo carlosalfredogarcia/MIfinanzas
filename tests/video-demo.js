@@ -35,7 +35,7 @@ fs.writeFileSync(path.join(OUT, 'extracto-banco.csv'), CSV)
   await ctx.addInitScript(([d, idioma]) => {
     window.__DATA__ = d
     window.__SIN_SESION__ = location.pathname.endsWith('index.html')
-    localStorage.setItem('moneda', '€'); if (!sessionStorage.getItem('demo')) { localStorage.setItem('idioma', idioma); sessionStorage.setItem('demo', '1') }
+    localStorage.setItem('moneda', '€'); localStorage.setItem('guiaVista', '1'); if (!sessionStorage.getItem('demo')) { localStorage.setItem('idioma', idioma); sessionStorage.setItem('demo', '1') }
     const f = new Date('2026-10-21T12:00:00').getTime(), R = Date
     window.Date = class extends R { constructor(...a) { super(...(a.length ? a : [f])) } static now() { return f } }
     addEventListener('DOMContentLoaded', () => {

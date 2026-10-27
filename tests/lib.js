@@ -20,11 +20,13 @@ async function cerrarNavegador() {
   if (RECOGER) fs.writeFileSync(path.join(__dirname, 'sin-traducir.txt'), [...sinTraducir].sort().join('\n') + '\n')
 }
 
-async function abrir(pagina, { datos = {}, ancho = 390, alto = 844, espera = 1800, sinSesion = false, idioma = 'es' } = {}) {
+async function abrir(pagina, { datos = {}, ancho = 390, alto = 844, espera = 1800, sinSesion = false, idioma = 'es', guia = false } = {}) {
   const ctx = await (await lanzar()).newContext({ viewport: { width: ancho, height: alto }, deviceScaleFactor: 1, locale: 'es-ES', timezoneId: 'Europe/Madrid' })
-  await ctx.addInitScript(([d, hoy, sinSesion, recoger, idioma]) => {
+  await ctx.addInitScript(([d, hoy, sinSesion, recoger, idioma, guia]) => {
     window.__SIN_SESION__ = sinSesion
     localStorage.setItem('idioma', idioma)
+    // La guía de bienvenida sale la primera vez; en las pruebas solo cuando se pide
+    if (!guia) localStorage.setItem('guiaVista', '1')
     window.__RECOGER__ = recoger
     // Fecha fija para que los resultados no cambien según el día en que se ejecuten
     const fija = new Date(hoy).getTime(), Real = Date
@@ -33,7 +35,7 @@ async function abrir(pagina, { datos = {}, ancho = 390, alto = 844, espera = 180
     window.__DATA__ = d
     localStorage.setItem('moneda', '€')
     if (!navigator.clipboard) Object.defineProperty(navigator, 'clipboard', { value: { readText: async () => window.__CLIP || '', writeText: async t => { window.__CLIP = t } } })
-  }, [datos, HOY, sinSesion, !!RECOGER, idioma])
+  }, [datos, HOY, sinSesion, !!RECOGER, idioma, guia])
   await ctx.route('**/*', r => {
     const u = new URL(r.request().url())
     if (u.hostname === 'cdn.jsdelivr.net' && u.pathname.includes('supabase')) return r.fulfill({ contentType: 'text/javascript', body: STUB })

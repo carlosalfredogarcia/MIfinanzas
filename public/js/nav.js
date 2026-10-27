@@ -21,6 +21,18 @@
     document.head.appendChild(s)
   }
 
+  // Guía de bienvenida (guia.js): sale sola la primera vez en Inicio y se puede abrir desde Perfil
+  if ((pagina === 'inicio' || pagina === 'mifinanza-perfil') && !window.MFGuia) {
+    const g = document.createElement('script')
+    g.src = 'js/guia.js'
+    g.onload = () => {
+      if (pagina !== 'inicio' || window.MFGuia.vista()) return
+      let n = 0
+      const iv = setInterval(() => { if (window.currentUserId) { clearInterval(iv); window.MFGuia.abrir() } else if (++n > 100) clearInterval(iv) }, 50)
+    }
+    document.head.appendChild(g)
+  }
+
   // Si la función existe en esta página se usa; si no, se abre Movimientos con esa acción.
   const local = (fn, accion) => () => (typeof window[fn] === 'function' ? window[fn]() : ir(accion))
   const ir = (accion, pagina = MOV) => { location.href = pagina + '?accion=' + accion }

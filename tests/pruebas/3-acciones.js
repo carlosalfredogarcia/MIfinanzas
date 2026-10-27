@@ -295,4 +295,25 @@ module.exports = [
       await pg.context().close()
     },
   },
+  {
+    nombre: 'guía de bienvenida: sale la primera vez, se desliza y al final abre el apunte',
+    async prueba(t) {
+      const pg = await t.abrir('inicio.html', { datos: completo(), guia: true, espera: 2500 })
+      t.ok(await pg.$('.mfg.mfg-ver'), 'No salió la guía')
+      t.igual(await pg.$eval('.mfg-sig', b => b.textContent), 'Siguiente')
+      for (let i = 0; i < 7; i++) { await pg.click('.mfg-sig'); await pg.waitForTimeout(450) }
+      t.igual(await pg.$eval('.mfg-sig', b => b.textContent), 'Apuntar mi primer gasto')
+      await pg.click('.mfg-sig'); await pg.waitForTimeout(900)
+      t.ok(await pg.$('.mfa-abierto'), 'No se abrió el apunte')
+      t.igual(await pg.evaluate(() => localStorage.getItem('guiaVista')), '1')
+      // Vista una vez, no vuelve a salir sola; desde Perfil sí se abre
+      await pg.goto('http://app.local/inicio.html'); await pg.waitForTimeout(2000)
+      t.ok(!(await pg.$('.mfg.mfg-ver')), 'Volvió a salir sola')
+      await pg.goto('http://app.local/mifinanza-perfil.html'); await pg.waitForTimeout(1500)
+      await pg.click('#btn-guia'); await pg.waitForTimeout(500)
+      t.ok(await pg.$('.mfg.mfg-ver'), 'No se abre desde Perfil')
+      t.sinErrores(pg)
+      await pg.context().close()
+    },
+  },
 ]

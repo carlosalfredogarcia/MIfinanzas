@@ -253,6 +253,8 @@ if (window.MFAndroid && MFAndroid.enApp()) {
   })
 }
 
+$('btn-guia').addEventListener('click', () => window.MFGuia && MFGuia.abrir())
+
 $('btn-salir').addEventListener('click', async () => { await dbClient.auth.signOut(); location.replace('index.html') })
 $('btn-borrar').addEventListener('click', () => {
   const texto = `Hola, quiero borrar mi cuenta de MiFinanzas y todos mis datos.\n\nCuenta: ${correo}`

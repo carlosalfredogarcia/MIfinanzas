@@ -26,6 +26,8 @@ public/                     lo que ve el usuario (Netlify publica esta carpeta)
   js/nav.js                 barra inferior, botón + y menú (todas las pantallas)
   js/apunte.js              hoja rápida de gasto o ingreso (la abre nav.js); se abre rellena con ?texto= o ?accion=gasto&importe=&comercio=
   js/datepicker.js          selector de fechas
+  js/guia.js                guía de bienvenida (8 pasos con capturas de img/landing/); la carga nav.js, sale sola la
+                            primera vez en Inicio (localStorage guiaVista) y desde Perfil → Guía. En pruebas: abrir(…, { guia: true })
   js/android.js             lo que manda la app de Android de Play (?app=android&permiso&avisos): lo guarda en el
                             móvil; nav.js apunta los avisos del banco (mfApunte.guardarAvisos) y Perfil enseña
                             «Gastos automáticos». El proyecto Android está en el repo privado mifinanza-android

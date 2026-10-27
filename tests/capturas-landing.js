@@ -22,7 +22,7 @@ const IMPORTADOS = [
   async function abrir(pagina) {
     const ctx = await b.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, locale: 'es-ES', timezoneId: 'Europe/Madrid' })
     await ctx.addInitScript(d => {
-      window.__DATA__ = d; localStorage.setItem('moneda', '€'); localStorage.setItem('idioma', 'es')
+      window.__DATA__ = d; localStorage.setItem('moneda', '€'); localStorage.setItem('idioma', 'es'); localStorage.setItem('guiaVista', '1')
       const f = new Date('2026-10-21T12:00:00').getTime(), R = Date
       window.Date = class extends R { constructor(...a) { super(...(a.length ? a : [f])) } static now() { return f } }
       addEventListener('DOMContentLoaded', () => { const s = document.createElement('style'); s.textContent = '::-webkit-scrollbar{display:none}'; document.head.appendChild(s) })
