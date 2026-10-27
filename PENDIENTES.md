@@ -20,8 +20,10 @@ Lista viva: al empezar una conversación nueva, leer esto y `CLAUDE.md`. Al term
    - Ponerse `premium = true` en su fila de `perfil` para la demo de 411 movimientos.
    - Después, Claude adapta la rama a la estructura nueva (public/js/movimientos.js, netlify/lib),
      añade pruebas y se ejecuta `migration_limite_servidor.sql`.
-3. **Google Play**: enviar los enlaces de la prueba cerrada a los testers (faltan 11). Deben seguir
-   apuntados 14 días seguidos; luego pedir acceso a producción.
+3. **Google Play** (27/10/2026): 4 testers han aceptado de 12 (5 en la lista; 2 dispositivos con la app
+   instalada). Faltan 8: sus 2 dispositivos propios (tablet y otro móvil) + 6 personas reales (grupos de
+   testers mutuos, familia, campaña del kit). Los 14 días empiezan con 12 inscritos a la vez; luego pedir
+   acceso a producción. No usar cuentas falsas.
 
 ## Publicado en `main` (25/10/2026)
 
