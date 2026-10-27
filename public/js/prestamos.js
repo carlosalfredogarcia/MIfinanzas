@@ -507,14 +507,7 @@ function compartirTexto(p) {
   window.open('https://wa.me/?text=' + encodeURIComponent(textoResumen(p)), '_blank', 'noopener')
 }
 
-function cargarJsPDF() {
-  if (window.jspdf) return Promise.resolve(window.jspdf)
-  return new Promise((ok, mal) => {
-    const s = document.createElement('script')
-    s.src = JSPDF; s.onload = () => ok(window.jspdf); s.onerror = () => mal(new Error('sin conexión'))
-    document.head.appendChild(s)
-  })
-}
+const cargarJsPDF = () => MF.cargarScript(JSPDF, () => window.jspdf)
 
 async function crearPDF(p, conComprobantes) {
   const { jsPDF } = await cargarJsPDF()

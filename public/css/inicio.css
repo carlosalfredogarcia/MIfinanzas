@@ -46,9 +46,10 @@ button { font-family: inherit; }
 button:focus-visible, a:focus-visible { outline: 2px solid #a5b4fc; outline-offset: 3px; }
 
 /* Halos de luz detrás del saldo */
-.blob { position: absolute; border-radius: 50%; filter: blur(70px); pointer-events: none; }
-.blob-g { top: 70px; left: -60px; width: 260px; height: 260px; background: var(--green); opacity: .28; }
-.blob-i { top: 180px; right: -70px; width: 240px; height: 240px; background: var(--accent); opacity: .30; }
+/* Manchas de luz: degradado en vez de desenfoque (se pinta mucho más rápido) */
+.blob { position: absolute; border-radius: 50%; box-sizing: content-box; padding: 70px; margin: -70px; background: radial-gradient(circle closest-side, var(--c) 40%, transparent); pointer-events: none; }
+.blob-g { top: 70px; left: -60px; width: 260px; height: 260px; --c: var(--green); opacity: .28; }
+.blob-i { top: 180px; right: -70px; width: 240px; height: 240px; --c: var(--accent); opacity: .30; }
 .phone > :not(.blob) { position: relative; flex-shrink: 0; }
 
 /* ── HEADER ── */

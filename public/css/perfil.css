@@ -24,9 +24,10 @@ body { background: var(--bg); color: var(--text); font-family: 'Manrope', system
 button, input { font-family: inherit; }
 .num { font-variant-numeric: tabular-nums; }
 .phone { width: 100%; max-width: 430px; min-height: 100vh; position: relative; overflow-x: clip; padding-bottom: 130px; }
-.blob { position: absolute; border-radius: 50%; filter: blur(70px); pointer-events: none; z-index: 0; }
-.blob-i { top: 40px; left: -70px; width: 240px; height: 240px; background: var(--indigo); opacity: .26; }
-.blob-g { top: 160px; right: -90px; width: 220px; height: 220px; background: var(--green); opacity: .16; }
+/* Manchas de luz: degradado en vez de desenfoque (se pinta mucho más rápido) */
+.blob { position: absolute; border-radius: 50%; box-sizing: content-box; padding: 70px; margin: -70px; background: radial-gradient(circle closest-side, var(--c) 40%, transparent); pointer-events: none; z-index: 0; }
+.blob-i { top: 40px; left: -70px; width: 240px; height: 240px; --c: var(--indigo); opacity: .26; }
+.blob-g { top: 160px; right: -90px; width: 220px; height: 220px; --c: var(--green); opacity: .16; }
 .phone > :not(.blob) { position: relative; z-index: 1; }
 @keyframes subir { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
 

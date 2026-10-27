@@ -31,5 +31,19 @@
   const sinEmoji = c => String(c || '').replace(/^[^\p{L}\p{N}]+/u, '').trim()
   const emoji = (c, porDefecto = '📦') => (String(c || '').match(/^[^\p{L}\p{N}\s]+/u) || [porDefecto])[0].trim()
 
-  window.MF = { CATS_DEFAULT, CATS_GASTO, dinero, esc, pad, fechaLocal, sinEmoji, emoji }
+  // Librerías grandes que solo hacen falta a veces (Excel al importar, PDF de Préstamos): se descargan al usarlas.
+  // cargarScript(url, () => window.X) → promesa con la librería; si falla, se puede volver a intentar
+  const scripts = {}
+  function cargarScript(url, lista) {
+    if (lista()) return Promise.resolve(lista())
+    return scripts[url] ||= new Promise((ok, mal) => {
+      const s = document.createElement('script')
+      s.src = url
+      s.onload = () => ok(lista())
+      s.onerror = () => { delete scripts[url]; s.remove(); mal(new Error('sin conexión')) }
+      document.head.appendChild(s)
+    })
+  }
+
+  window.MF = { CATS_DEFAULT, CATS_GASTO, dinero, esc, pad, fechaLocal, sinEmoji, emoji, cargarScript }
 })()

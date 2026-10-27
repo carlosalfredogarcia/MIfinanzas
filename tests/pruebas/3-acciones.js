@@ -282,4 +282,17 @@ module.exports = [
       await pg.context().close()
     },
   },
+  {
+    nombre: 'movimientos: el lector de Excel (300 KB) solo se descarga al importar',
+    async prueba(t) {
+      const pedidas = []
+      const pg = await t.abrir('mifinanza-movimientos.html', { datos: completo() })
+      pg.on('request', r => pedidas.push(r.url()))
+      await pg.waitForTimeout(500)
+      t.ok(!(await pg.evaluate(() => [...document.scripts].some(s => /xlsx/.test(s.src)))), 'Movimientos carga Excel al abrirse')
+      t.ok(!pedidas.some(u => /xlsx/.test(u)), 'Se pidió Excel sin importar nada')
+      t.sinErrores(pg)
+      await pg.context().close()
+    },
+  },
 ]

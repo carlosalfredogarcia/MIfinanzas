@@ -1027,9 +1027,15 @@ function fixarMojibake(str) {
   } catch { return null; }
 }
 
+// Lector de Excel (unos 300 KB): solo se descarga al importar un .xls o .xlsx
+const XLSX_URL = 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
+
 async function fileToCSV(file) {
   const ext = file.name.split('.').pop().toLowerCase();
   if (ext === 'xls' || ext === 'xlsx') {
+    let XLSX;
+    try { XLSX = await MF.cargarScript(XLSX_URL, () => window.XLSX); }
+    catch { throw new Error('No se pudo abrir el lector de Excel. Comprueba tu conexión e inténtalo de nuevo.'); }
     const buffer = await file.arrayBuffer();
     const wb = XLSX.read(buffer, { type: 'array' });
     const ws = wb.Sheets[wb.SheetNames[0]];

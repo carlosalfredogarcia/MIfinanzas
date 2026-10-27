@@ -130,9 +130,10 @@ body { font-family: 'Manrope', sans-serif; align-items: flex-start; }
 .num { font-variant-numeric: tabular-nums; }
 .phone button { font-family: inherit; }
 .phone :focus-visible { outline: 2px solid #a5b4fc; outline-offset: 2px; }
-.blob { position: absolute; border-radius: 50%; filter: blur(70px); pointer-events: none; z-index: 0; }
-.blob-g { top: 160px; left: -70px; width: 240px; height: 240px; background: #10b981; opacity: .22; }
-.blob-i { top: 260px; right: -80px; width: 240px; height: 240px; background: #6366f1; opacity: .26; }
+/* Manchas de luz: degradado en vez de desenfoque (se pinta mucho más rápido) */
+.blob { position: absolute; border-radius: 50%; box-sizing: content-box; padding: 70px; margin: -70px; background: radial-gradient(circle closest-side, var(--c) 40%, transparent); pointer-events: none; z-index: 0; }
+.blob-g { top: 160px; left: -70px; width: 240px; height: 240px; --c: #10b981; opacity: .22; }
+.blob-i { top: 260px; right: -80px; width: 240px; height: 240px; --c: #6366f1; opacity: .26; }
 .phone > :not(.blob) { position: relative; z-index: 1; }
 
 .header { padding: 52px 20px 14px; }

@@ -329,6 +329,7 @@ window.MF_EN = {
     'Guardados: {0} gastos + {1} ingresos ({2} total)': 'Saved: {0} expenses + {1} income ({2} total)',
     'Analizando tus movimientos...': 'Analyzing your transactions...',
     'Revisa que el archivo sea un CSV, XLS o XLSX válido.': 'Make sure the file is a valid CSV, XLS or XLSX.',
+    'No se pudo abrir el lector de Excel. Comprueba tu conexión e inténtalo de nuevo.': 'Couldn’t open the Excel reader. Check your connection and try again.',
     'No se encontraron movimientos en el archivo': 'No transactions found in the file',
     'No hay movimientos para guardar': 'No transactions to save',
     'Completa al menos un movimiento válido (descripción y monto)': 'Complete at least one valid transaction (description and amount)',
