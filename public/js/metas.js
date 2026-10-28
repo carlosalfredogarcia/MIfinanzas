@@ -95,6 +95,39 @@ function renderFondo(meta) {
   btnEditar.style.display = 'block'
 }
 
+// Lo que exige la meta al mes frente a lo que deja el plan (se repinta al cambiar el plan)
+function renderPlanVs() {
+  const w = document.querySelector('#promedio-texto .pv-wrap')
+  if (!w || !metaProgreso) return
+  const meses = mesesRestantes(metaProgreso.fechaLimite) || 1
+  const mensual = Math.max(0, metaProgreso.objetivo - metaProgreso.actual) / meses
+  const plan = Math.max(0, totalIngresos() - totalGastos()), tope = Math.max(mensual, plan, 1)
+  w.innerHTML = `<span class="pv"><span>Necesitas</span><i class="pv-nec" style="--w:${(mensual / tope).toFixed(3)}"></i><b class="num">${fmt(Math.ceil(mensual))}</b></span>
+    <span class="pv"><span>Tu plan deja</span><i class="pv-plan${plan < mensual ? ' corto' : ''}" style="--w:${(plan / tope).toFixed(3)}"></i><b class="num">${fmt(Math.round(plan))}</b></span>`
+}
+const ajustarAnchoFaltan = () => { const i = document.getElementById('p-faltan'); i.style.width = (String(i.value).length + 0.6) + 'ch' }
+document.getElementById('p-faltan').addEventListener('input', ajustarAnchoFaltan)
+
+// Anillo con el % de la meta y el camino de meses (inicio → hoy → fin)
+function renderAnilloYCamino(pct) {
+  const anillo = document.getElementById('meta-anillo'), camino = document.getElementById('meta-camino')
+  if (!anillo || !metaFondoData) return
+  const r = 70, c = 2 * Math.PI * r
+  anillo.innerHTML = `<svg viewBox="0 0 170 170" width="170" height="170"><defs><linearGradient id="ma-g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#10b981"/><stop offset="1" stop-color="#6366f1"/></linearGradient></defs>
+    <circle cx="85" cy="85" r="${r}" fill="none" stroke="#1f2937" stroke-width="14"/>
+    <circle cx="85" cy="85" r="${r}" fill="none" stroke="url(#ma-g)" stroke-width="14" stroke-linecap="round" stroke-dasharray="${c.toFixed(1)}" stroke-dashoffset="${(c * (1 - pct / 100)).toFixed(1)}" transform="rotate(-90 85 85)" class="ma-arco"/></svg>
+    <div class="ma-centro"><b class="num">${Math.round(pct)} %</b><span>conseguido</span></div>`
+  const ini = new Date(metaFondoData.fecha_inicio + 'T00:00:00'), fin = new Date(metaFondoData.fecha_limite + 'T00:00:00'), hoy = new Date()
+  const total = (fin.getFullYear() - ini.getFullYear()) * 12 + fin.getMonth() - ini.getMonth() + 1
+  const actualIdx = (hoy.getFullYear() - ini.getFullYear()) * 12 + hoy.getMonth() - ini.getMonth()
+  if (!(total > 0 && total <= 60)) { camino.innerHTML = ''; return }
+  const M = ['E', 'F', 'M', 'A', 'M', 'J', 'J', 'A', 'S', 'O', 'N', 'D']
+  camino.innerHTML = `<div class="mc-puntos">${Array.from({ length: total }, (_, k) => {
+    const m = (ini.getMonth() + k) % 12, est = k < actualIdx ? 'hecho' : k === actualIdx ? 'hoy' : ''
+    return `<span class="mc-p ${est}"><i></i>${total <= 14 ? `<small>${M[m]}</small>` : ''}</span>`
+  }).join('')}</div><div class="mc-txt">${actualIdx >= total ? 'Plazo terminado' : actualIdx < 0 ? 'Empieza pronto' : `Mes ${actualIdx + 1} de ${total} · quedan ${total - actualIdx}`}</div>`
+}
+
 function actualizarBarraPrincipal(actual, objetivo, fechaLimite) {
   const pct    = objetivo > 0 ? Math.min(100, (actual / objetivo) * 100) : 0
   const faltan = Math.max(0, objetivo - actual)
@@ -103,18 +136,21 @@ function actualizarBarraPrincipal(actual, objetivo, fechaLimite) {
   document.getElementById('p-llevado').textContent = fmt(actual)
   document.getElementById('p-faltan').value = Math.round(faltan)
   document.getElementById('p-faltan-mon').textContent = window.moneda || '€'
+  ajustarAnchoFaltan()
   document.getElementById('p-objetivo').textContent = `Meta: ${fmt(Math.round(objetivo))}`
   setTimeout(() => { document.getElementById('p-barra').style.width = pct + '%' }, 100)
 
   metaProgreso = { actual, objetivo, fechaLimite }
   renderRealismo()
+  renderAnilloYCamino(pct)
   const meses = mesesRestantes(fechaLimite)
   const promedio = document.getElementById('promedio-wrap')
   const texto = document.getElementById('promedio-texto')
 
   if (meses && faltan > 0) {
     const mensual = faltan / meses
-    texto.innerHTML = `Necesitas ahorrar <strong>${fmt(Math.ceil(mensual))}/mes</strong> para cumplir en ${meses} mes${meses === 1 ? '' : 'es'}`
+    texto.innerHTML = `<span>Necesitas ahorrar <strong>${fmt(Math.ceil(mensual))}/mes</strong> para cumplir en ${meses} mes${meses === 1 ? '' : 'es'}</span><span class="pv-wrap"></span>`
+    renderPlanVs()
     promedio.style.display = 'flex'
   } else if (faltan <= 0) {
     texto.textContent = '¡Meta cumplida! 🎉'
@@ -943,6 +979,52 @@ function abrirRedistrib(idx) {
     <button class="rdist-confirmar-btn" onclick="pedirConfirmRedistrib()">Confirmar traspaso</button>
   `
   document.getElementById('rdist-modal').classList.add('rdist-open')
+}
+
+// Un toque: el exceso de las categorías pasadas se cubre con lo que sobra en las demás (proporcional al margen)
+let _antesCubrir = null
+async function cubrirExceso(idxs) {
+  if (!window.currentUserId) return
+  const origenes = idxs.map(i => _redistribTodas[i]).filter(t => t && t.cat && t.diff > 0)
+  const destinos = _redistribTodas.filter(t => t.cat && !t.esFijo && t.diff < 0)
+  const exceso = origenes.reduce((s, t) => s + t.diff, 0), libre = destinos.reduce((s, t) => s - t.diff, 0)
+  if (!origenes.length) return
+  if (libre < 1) { toast('No queda margen en otras categorías: este mes toca ajustar el plan', 'err', 3500); return }
+  const parte = Math.min(1, libre / exceso)
+  const plan = {}
+  destinos.forEach(t => { plan[t.cat] = t.estimado - (-t.diff) * Math.min(1, exceso / libre) })
+  origenes.forEach(t => { plan[t.cat] = t.estimado + t.diff * parte })
+  _antesCubrir = [...origenes, ...destinos].map(t => [t.cat, t.estimado])
+  await guardarPlanCats(plan)
+  const cubierto = Math.min(exceso, libre)
+  avisoDeshacer(parte < 1 ? `Cubiertos ${fmt(cubierto)} de ${fmt(exceso)}: no había más margen` : `Cubiertos ${fmt(cubierto)} con lo que te sobraba`)
+}
+async function deshacerCubrir() {
+  if (!_antesCubrir) return
+  await guardarPlanCats(Object.fromEntries(_antesCubrir))
+  _antesCubrir = null
+  document.getElementById('aviso-deshacer')?.classList.remove('ver')
+}
+async function guardarPlanCats(plan) {
+  const ahora = new Date().toISOString()
+  Object.entries(plan).forEach(([cat, monto]) => {
+    const row = [...document.querySelectorAll('.var-row')].find(r => r._planCat === cat)
+    const inp = row?.querySelector('.variable-input'); if (inp) inp.value = Math.round(monto)
+  })
+  await dbClient.from('user_gasto_plan').upsert(Object.entries(plan).map(([categoria, monto]) => ({ user_id: window.currentUserId, categoria, monto: Math.round(monto), updated_at: ahora })), { onConflict: 'user_id,categoria' })
+  actualizarPlanificador()
+}
+// Aviso abajo con «Deshacer» (en vez de una alerta)
+function avisoDeshacer(msg) {
+  let a = document.getElementById('aviso-deshacer')
+  if (!a) {
+    a = document.createElement('div'); a.id = 'aviso-deshacer'; a.className = 'aviso-deshacer'; a.setAttribute('role', 'status')
+    a.innerHTML = '<span></span><button type="button" onclick="deshacerCubrir()">Deshacer</button>'
+    document.body.appendChild(a)
+  }
+  a.querySelector('span').textContent = msg
+  a.classList.add('ver')
+  clearTimeout(a._t); a._t = setTimeout(() => a.classList.remove('ver'), 6000)
 }
 
 function cerrarRedistrib() {
@@ -2069,20 +2151,27 @@ function renderTablaComparativa() {
 
     // Chevron goes right after the name (left side); pin goes far right
     const labelHtml = `<span class="sc-lista-label">${t.label}${chev}</span>`
+    const pctFila = t.estimado > 0 ? t.real / t.estimado : (t.real > 0 ? 1.01 : 0)
+    const barra = t.esFijo ? '' : `<div class="sc-fila-barra${t.diff > 0 ? ' over' : pctFila > 0.85 ? ' cerca' : ''}"><i style="--w:${Math.min(1, pctFila).toFixed(3)}"></i></div>
+      <div class="sc-fila-nums num">${fmt(t.real, 0)} de ${fmt(t.estimado, 0)}</div>`
 
     let rightHtml
     if (t.esFijo) {
       rightHtml = `<div class="sc-lista-row-right">${pin}</div>`
     } else if (t.diff > 0) {
-      rightHtml = `<div class="sc-lista-row-right"><div style="display:flex;flex-direction:column;align-items:flex-end;gap:5px"><button class="sc-lista-repartir" onclick="event.stopPropagation();abrirRedistrib(${idx})">↻ Repartir</button><span class="sc-lista-pill sc-lista-pill-over">${fmt(Math.abs(t.diff))} pasado</span></div>${pin}</div>`
+      rightHtml = `<div class="sc-lista-row-right"><span class="sc-lista-pill sc-lista-pill-over">${fmt(Math.abs(t.diff))} pasado</span>${pin}</div>`
     } else {
       rightHtml = `<div class="sc-lista-row-right"><span class="sc-lista-pill sc-lista-pill-free">${fmt(Math.abs(t.diff))} libre</span>${pin}</div>`
     }
 
-    return `<div class="sc-lista-row-wrap"><div class="sc-lista-row sc-lista-row-clickable" onclick="scToggleDetalle('${t.catEsc}',${t.estimado},${t.real})">${labelHtml}${rightHtml}</div><div class="sc-det-panel" id="sc-det-panel-${safeId}" style="max-height:${panelMaxH}" data-open="${isOpen?'1':'0'}">${panelContent}</div></div>`
+    const cubrir = !t.esFijo && t.diff > 0 ? `<div class="sc-cubrir"><button type="button" class="sc-cubrir-btn" onclick="cubrirExceso([${idx}])">Cubrir con lo que sobra</button><button type="button" class="sc-elegir-btn" onclick="abrirRedistrib(${idx})">Elegir yo</button></div>` : ''
+    return `<div class="sc-lista-row-wrap${t.diff > 0 && !t.esFijo ? ' sc-pasada' : ''}"><div class="sc-lista-row sc-lista-row-clickable" onclick="scToggleDetalle('${t.catEsc}',${t.estimado},${t.real})">${labelHtml}${rightHtml}</div>${barra}${cubrir}<div class="sc-det-panel" id="sc-det-panel-${safeId}" style="max-height:${panelMaxH}" data-open="${isOpen?'1':'0'}">${panelContent}</div></div>`
   }
 
   const gruposHtml = []
+  const exceso = pasadas.reduce((s, t) => s + t.diff, 0), libre = margen.reduce((s, t) => s - t.diff, 0)
+  if (pasadas.length > 1) gruposHtml.push(`<div class="sc-aviso-pasadas"><div><b>${pasadas.length} categorías se han pasado</b><span class="num">${fmt(exceso)} de más · tienes ${fmt(libre)} libres en otras</span></div>
+    <button type="button" class="sc-cubrir-btn" onclick="cubrirExceso([${pasadas.map(t => _redistribTodas.indexOf(t)).join(',')}])">Cubrir todo</button></div>`)
   if (pasadas.length > 0) gruposHtml.push(`<div class="sc-lista-grupo"><div class="sc-lista-grupo-title">⚠️ Pasadas</div>${pasadas.map(_filaLista).join('')}</div>`)
   if (margen.length > 0) {
     if (gruposHtml.length) gruposHtml.push('<div class="sc-lista-sep"></div>')
@@ -2338,6 +2427,7 @@ function renderRealismo() {
       ? `Necesitas ${fmt(Math.ceil(necesario))}/mes, pero tu plan todavía no deja ahorro. Vuelve a Tu plan y ajusta tus gastos antes de fijar la meta.`
       : `Necesitas ${fmt(Math.ceil(necesario))}/mes y tu plan deja ${fmt(Math.round(planAhorro))}. Para no frustrarte, ajusta la meta a unos ${fmt(Math.round(alcanzable / 10) * 10)} o dale más tiempo.`],
   }[nivel]
+  renderPlanVs()
   el.hidden = false
   el.className = 'realismo ' + nivel
   const ajuste = nivel === 'dificil' && planAhorro > 0 ? Math.floor(alcanzable / 10) * 10 : 0

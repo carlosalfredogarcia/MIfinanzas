@@ -133,11 +133,12 @@
         <div id="p-objetivo" style="font-size:12px;color:var(--subtext);margin-top:2px;"></div>
       </div>
       <div class="principal-btns">
-        <button class="btn-editar-principal" id="btn-editar-p" onclick="editarFondo()" style="display:none">✏️</button>
-        <button class="btn-eliminar-principal" id="btn-eliminar-p" onclick="eliminarFondo()" style="display:none">🗑 Eliminar</button>
+        <button class="btn-editar-principal" id="btn-editar-p" onclick="editarFondo()" style="display:none" aria-label="Editar meta">✏️</button>
+        <button class="btn-eliminar-principal" id="btn-eliminar-p" onclick="eliminarFondo()" style="display:none" aria-label="Eliminar meta">🗑</button>
       </div>
     </div>
     <div class="principal-fecha" id="p-fecha"></div>
+    <div class="meta-anillo" id="meta-anillo" aria-hidden="true"></div>
 
     <div class="llevas-faltan-grid">
       <div class="lf-card lf-llevas">
@@ -150,6 +151,7 @@
       </div>
     </div>
 
+    <div class="meta-camino" id="meta-camino"></div>
     <div class="principal-progress-row">
       <div class="progress-track">
         <div class="progress-fill" id="p-barra" style="width:0%"></div>

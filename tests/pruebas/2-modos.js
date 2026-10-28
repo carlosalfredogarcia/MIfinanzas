@@ -29,6 +29,23 @@ module.exports = [
     },
   },
   {
+    nombre: 'metas: seguimiento, cubrir lo pasado de un toque y deshacer',
+    async prueba(t) {
+      const pg = await t.abrir('mifinanza-metas.html', { datos: completo(), espera: 2500 })
+      await pg.evaluate(() => irPaso(4)); await pg.waitForTimeout(600)
+      const pasadas = () => pg.$$eval('.sc-pasada', e => e.length)
+      const antes = await pasadas()
+      t.ok(antes > 0, 'No hay categorías pasadas en los datos de prueba')
+      await pg.click(antes > 1 ? '.sc-aviso-pasadas .sc-cubrir-btn' : '.sc-cubrir-btn'); await pg.waitForTimeout(700)
+      t.ok(await pasadas() < antes, 'Cubrir no reparte el exceso')
+      t.ok(await pg.$('#aviso-deshacer.ver'), 'No sale «Deshacer»')
+      await pg.click('#aviso-deshacer button'); await pg.waitForTimeout(700)
+      t.igual(await pasadas(), antes)
+      t.sinErrores(pg)
+      await pg.context().close()
+    },
+  },
+  {
     nombre: 'metas: la propuesta de recortes se aplica y se deshace',
     async prueba(t) {
       const pg = await t.abrir('mifinanza-metas.html', { datos: completo(), espera: 2500 })
