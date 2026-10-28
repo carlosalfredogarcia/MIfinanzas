@@ -522,15 +522,16 @@ function resumenMeses(slice) {
       ;(grupos[k] = grupos[k] || { nombre: m.label, fechas: [], total: 0, cat: m.categoria }).fechas.push(m.fecha)
       grupos[k].total += m.monto
     }))
-    const lista = Object.values(grupos).sort((a, b) => b.fechas.sort().at(-1).localeCompare(a.fechas.sort().at(-1))).slice(0, 4)
+    const ultimo = l => l[l.length - 1]
+    const lista = Object.values(grupos).sort((a, b) => ultimo(b.fechas.sort()).localeCompare(ultimo(a.fechas.sort()))).slice(0, 4)
     if (!lista.length) { res.innerHTML = '<p class="br-vacio">No encuentro ningún gasto con ese nombre.</p>'; return }
     const hoy = new Date(); hoy.setHours(0, 0, 0, 0)
     const fechaTxt = d => `${d.getDate()} ${MESES_LABELS[d.getMonth()].toLowerCase()} ${d.getFullYear()}`
     lista.forEach(g => {
       const f = [...new Set(g.fechas)].sort()
-      const ult = new Date(f.at(-1) + 'T00:00:00')
+      const ult = new Date(ultimo(f) + 'T00:00:00')
       const hace = Math.round((hoy - ult) / 86400000)
-      const cada = f.length > 1 ? Math.round((new Date(f.at(-1)) - new Date(f[0])) / 86400000 / (f.length - 1)) : null
+      const cada = f.length > 1 ? Math.round((new Date(ultimo(f)) - new Date(f[0])) / 86400000 / (f.length - 1)) : null
       const frecTxt = !cada ? 'Solo una vez'
         : cada <= 10 ? `Cada ${cada} días · casi semanal`
         : cada <= 45 ? `Cada ${cada} días · ~${(30 / cada).toFixed(1).replace('.0', '').replace('.', ',')} ${30 / cada >= 1.5 ? 'veces' : 'vez'} al mes`

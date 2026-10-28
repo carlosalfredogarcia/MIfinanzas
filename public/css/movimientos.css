@@ -66,7 +66,7 @@ select.inp { padding:9px 32px 9px 10px;font-size:14px;appearance:none;-webkit-ap
 .toast { position: fixed; top: 24px; left: 50%; transform: translateX(-50%) translateY(-80px); background: var(--card); border: 1px solid var(--border2); border-radius: 14px; padding: 12px 20px; font-size: 13px; color: var(--text); z-index: 300; transition: transform 0.3s ease; white-space: nowrap; }
 .toast.show { transform: translateX(-50%) translateY(0); }
 .toast.ok { border-color: rgba(99,102,241,0.4); color: #6366f1; }
-.modal-base { position:fixed;inset:0;background:rgba(0,0,0,0.75);backdrop-filter:blur(8px);z-index:200;display:none;align-items:flex-end;justify-content:center; }
+.modal-base { position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:200;display:none;align-items:flex-end;justify-content:center; }
 .modal-box { width:390px;background:var(--card);border-radius:28px 28px 0 0;padding:24px 24px 40px;border-top:1px solid var(--border); }
 .modal-handle { width:40px;height:4px;background:rgba(255,255,255,0.08);border-radius:100px;margin:0 auto 20px; }
 .modal-title { font-family:'Manrope',sans-serif;font-size:18px;font-weight:700;color:var(--text);margin-bottom:18px; }
@@ -106,7 +106,7 @@ body { font-family: 'Manrope', sans-serif; align-items: flex-start; }
   margin: 0 20px 14px; padding: 20px; border-radius: 24px; display: flex; flex-direction: column; gap: 12px;
   border: 1px solid rgba(16,185,129,.38);
   background: linear-gradient(140deg, rgba(16,185,129,.20) 0%, rgba(17,24,39,.55) 55%, rgba(99,102,241,.16) 100%);
-  backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  
   box-shadow: 0 20px 50px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.08);
   animation: fadeUp .5s .1s ease both;
 }
@@ -172,7 +172,7 @@ body { font-family: 'Manrope', sans-serif; align-items: flex-start; }
 .dia-grupo { margin-bottom: 18px; }
 .dia-label {
   position: sticky; top: 0; z-index: 3; display: flex; justify-content: space-between; align-items: center;
-  margin: 0 -20px 8px; padding: 10px 22px; background: rgba(10,14,26,.88); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  margin: 0 -20px 8px; padding: 10px 22px; background: rgba(10,14,26,.97); 
   font-size: 12px; font-weight: 800; color: var(--text); letter-spacing: .1em;
 }
 .dia-total { letter-spacing: 0; font-size: 13px; color: var(--subtext); font-variant-numeric: tabular-nums; }

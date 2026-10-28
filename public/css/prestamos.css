@@ -41,7 +41,7 @@ button, input { font-family: inherit; }
 /* Resumen: lo que te deben frente a lo que debes */
 .resumen { margin: 0 20px 14px; padding: 18px; border-radius: 24px; border: 1px solid rgba(255,255,255,.08);
   background: linear-gradient(140deg, rgba(16,185,129,.2), rgba(239,68,68,.1) 75%), rgba(17,24,39,.75);
-  backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); animation: subir .45s .05s ease both; }
+  animation: subir .45s .05s ease both; }
 .res-dos { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
 .res-lbl { font-size: 11px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; color: var(--subtext); }
 .res-valor { font-size: 28px; font-weight: 800; letter-spacing: -.02em; margin-top: 4px; }
@@ -92,7 +92,7 @@ button, input { font-family: inherit; }
 .btn-wa { background: #25d366; color: #052e16; box-shadow: 0 10px 26px rgba(37,211,102,.25); display: flex; align-items: center; justify-content: center; gap: 8px; }
 
 /* Hoja */
-.h-fondo { position: fixed; inset: 0; z-index: 300; background: rgba(5,8,16,.62); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); opacity: 0; pointer-events: none; transition: opacity .2s; }
+.h-fondo { position: fixed; inset: 0; z-index: 300; background: rgba(5,8,16,.74); opacity: 0; pointer-events: none; transition: opacity .2s; }
 .hoja { position: fixed; left: 0; right: 0; bottom: 0; z-index: 301; max-width: 480px; margin: 0 auto; max-height: 92vh; overflow-y: auto; overscroll-behavior: contain;
   background: var(--card); border: 1px solid rgba(255,255,255,.08); border-bottom: 0; border-radius: 24px 24px 0 0; padding: 10px 18px calc(18px + env(safe-area-inset-bottom));
   transform: translateY(100%); visibility: hidden; transition: transform .26s cubic-bezier(.2,.8,.2,1), visibility 0s .26s; box-shadow: 0 -20px 50px rgba(0,0,0,.5); }

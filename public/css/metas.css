@@ -644,7 +644,7 @@ body {
 
 .modal-overlay, .modal-abonar-overlay {
   position: fixed; inset: 0;
-  background: rgba(0,0,0,0.7); backdrop-filter: blur(6px);
+  background: rgba(0,0,0,0.7); 
   z-index: 200; display: none;
   align-items: flex-end; justify-content: center;
 }
@@ -930,7 +930,7 @@ body { font-family: 'Manrope', sans-serif; }
 @media (prefers-reduced-motion: reduce) { .veredicto, .v-fila i, .real-barra, .paso:not([hidden]) > * { animation: none !important; } }
 
 /* Paso 2: medidor fijo arriba mientras ajustas */
-.medidor { position: sticky; top: 8px; z-index: 20; margin: 0 20px 12px; padding: 14px 16px; border-radius: 20px; background: rgba(17,24,39,.92); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border: 1px solid var(--border); box-shadow: 0 12px 30px rgba(0,0,0,.35); }
+.medidor { position: sticky; top: 8px; z-index: 20; margin: 0 20px 12px; padding: 14px 16px; border-radius: 20px; background: rgba(17,24,39,.98); border: 1px solid var(--border); box-shadow: 0 12px 30px rgba(0,0,0,.35); }
 .medidor.ok { border-color: rgba(16,185,129,.5); } .medidor.cerca { border-color: rgba(245,158,11,.5); } .medidor.mal { border-color: rgba(239,68,68,.5); }
 .med-top { display: flex; align-items: baseline; gap: 8px; font-size: 13px; font-weight: 700; color: var(--subtext); }
 .med-top b { font-size: 24px; font-weight: 800; color: var(--text); }
@@ -960,7 +960,7 @@ body { font-family: 'Manrope', sans-serif; }
 .aviso-sincero { margin-top: 8px; padding: 8px 10px; border-radius: 10px; background: rgba(245,158,11,.10); border: 1px solid rgba(245,158,11,.3); color: #fde68a; font-size: 12px; line-height: 1.45; }
 
 /* Paso 3: meta en cristal y semáforo de realismo */
-.meta-principal { margin: 0 20px 12px; border-radius: 24px; border: 1px solid rgba(16,185,129,.38); background: linear-gradient(140deg, rgba(16,185,129,.20) 0%, rgba(17,24,39,.6) 55%, rgba(99,102,241,.16) 100%); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); box-shadow: 0 20px 50px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.08); opacity: 1; animation: none; }
+.meta-principal { margin: 0 20px 12px; border-radius: 24px; border: 1px solid rgba(16,185,129,.38); background: linear-gradient(140deg, rgba(16,185,129,.20) 0%, rgba(17,24,39,.6) 55%, rgba(99,102,241,.16) 100%); box-shadow: 0 20px 50px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.08); opacity: 1; animation: none; }
 .meta-principal[hidden] { display: none; }
 .principal-nombre { font-size: 20px; font-weight: 800; }
 .lf-valor { font-weight: 800; font-variant-numeric: tabular-nums; }

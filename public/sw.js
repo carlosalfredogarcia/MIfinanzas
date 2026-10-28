@@ -1,13 +1,16 @@
-const CACHE = 'mifinanza-v13';
+// sw.js — copia local de la app para que abra rápido con mala conexión (y sin ella).
+// - Páginas, JS y CSS propios: red primero, pero si tarda más de 3 s se usa la copia guardada.
+//   Cada respuesta buena se guarda, así la siguiente vez abre aunque la red sea lenta.
+// - Librerías del CDN con versión fija y fuentes: copia guardada primero (no cambian).
+// - Supabase (datos y sesión): nunca pasa por aquí.
+const CACHE = 'mifinanza-v14';
 const ASSETS = ['/icon-192.png', '/icon-512.png', '/apple-touch-icon.png', '/favicon.png', '/icon.svg'];
+const ESPERA_RED = 3000;
 
 self.addEventListener('install', e => {
   // skipWaiting incondicional: el nuevo SW toma control inmediatamente
-  // sin esperar a que cierren las pestañas abiertas
   self.skipWaiting();
-  e.waitUntil(
-    caches.open(CACHE).then(c => c.addAll(ASSETS).catch(() => {}))
-  );
+  e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS).catch(() => {})));
 });
 
 self.addEventListener('activate', e => {
@@ -18,6 +21,26 @@ self.addEventListener('activate', e => {
   );
 });
 
+const guardar = (req, res) => {
+  if (res && (res.ok || res.type === 'opaque')) { const copia = res.clone(); caches.open(CACHE).then(c => c.put(req, copia)); }
+  return res;
+};
+
+// Copia guardada primero; si no hay, red (y se guarda)
+const copiaPrimero = req => caches.match(req).then(c => c || fetch(req).then(r => guardar(req, r)));
+
+// Red primero con tiempo máximo; si falla o tarda, la copia guardada
+function redPrimero(req, ignorarBusqueda) {
+  return new Promise(resolve => {
+    let hecho = false;
+    const copia = () => caches.match(req, { ignoreSearch: ignorarBusqueda });
+    const t = setTimeout(() => copia().then(c => { if (c && !hecho) { hecho = true; resolve(c); } }), ESPERA_RED);
+    fetch(req, { cache: 'no-cache' })
+      .then(r => { clearTimeout(t); guardar(req, r); if (!hecho) { hecho = true; resolve(r); } })
+      .catch(() => { clearTimeout(t); copia().then(c => { if (!hecho) { hecho = true; resolve(c || Response.error()); } }); });
+  });
+}
+
 self.addEventListener('fetch', e => {
   if (e.request.method !== 'GET') return;
   const url = new URL(e.request.url);
@@ -26,37 +49,19 @@ self.addEventListener('fetch', e => {
   // la respuesta antes de que Supabase JS lea ?code= o ?error= de window.location
   if (url.search.includes('code=') || url.search.includes('error=')) return;
 
-  // Peticiones externas: sin interferencia
-  if (
-    url.hostname.includes('supabase') ||
-    url.hostname.includes('jsdelivr') ||
-    url.hostname.includes('googleapis')
-  ) return;
+  // Datos y sesión: siempre directos
+  if (url.hostname.includes('supabase.co') || url.pathname.startsWith('/.netlify/')) return;
 
-  const isImage = /\.(png|jpg|jpeg|svg|webp|ico)$/i.test(url.pathname);
-
-  if (isImage) {
-    // Cache-first para imágenes e iconos
-    e.respondWith(
-      caches.match(e.request).then(cached => {
-        if (cached) return cached;
-        return fetch(e.request).then(res => {
-          if (res.ok) {
-            const resClone = res.clone();
-            caches.open(CACHE).then(c => c.put(e.request, resClone));
-          }
-          return res;
-        });
-      })
-    );
+  // Librerías con versión fija (supabase-js@2.118.0, xlsx, jspdf) y fuentes: no cambian
+  if (url.hostname === 'cdn.jsdelivr.net' || url.hostname === 'cdnjs.cloudflare.com' || url.hostname === 'fonts.gstatic.com') {
+    e.respondWith(copiaPrimero(e.request));
     return;
   }
+  if (url.hostname === 'fonts.googleapis.com') { e.respondWith(redPrimero(e.request, false)); return; }
+  if (url.origin !== self.location.origin) return;
 
-  // Network-first para HTML, JS y resto
-  // cache: 'no-cache' fuerza validación con el servidor en cada recarga normal,
-  // ignorando la HTTP cache del navegador (que es lo que falla sin Ctrl+Shift+R)
-  e.respondWith(
-    fetch(e.request, { cache: 'no-cache' })
-      .catch(() => caches.match(e.request))
-  );
+  if (/\.(png|jpg|jpeg|svg|webp|ico)$/i.test(url.pathname)) { e.respondWith(copiaPrimero(e.request)); return; }
+
+  // Páginas (con o sin ?accion=…), JS y CSS
+  e.respondWith(redPrimero(e.request, e.request.mode === 'navigate'));
 });

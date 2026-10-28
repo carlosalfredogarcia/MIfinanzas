@@ -186,7 +186,8 @@
     cuenta.textContent = (i + 1) + ' de ' + lista.length
     tit.textContent = p.tit
     txt.textContent = p.txt
-    chips.replaceChildren(...(p.chips || []).map(([color, texto]) => {
+    chips.textContent = ''
+    chips.append(...(p.chips || []).map(([color, texto]) => {
       const s = document.createElement('span'), punto = document.createElement('i')
       s.className = 'mfh-chip'; punto.style.background = color
       s.append(punto, texto)

@@ -94,7 +94,7 @@
   .mf-nav {
     flex: 1; max-width: 400px; height: 64px; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr));
     align-items: center; padding: 0 6px; border-radius: 24px;
-    background: rgba(17,24,39,.82); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+    background: rgba(17,24,39,.97); 
     border: 1px solid rgba(255,255,255,.08); box-shadow: 0 16px 36px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.06);
   }
   .mf-tab {
@@ -112,7 +112,7 @@
     bottom: calc(14px + 64px + 14px + env(safe-area-inset-bottom, 0px));
     width: 56px; height: 56px; border-radius: 50%; cursor: pointer;
     display: grid; place-items: center; color: #34d399;
-    background: rgba(17,24,39,.85); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+    background: rgba(17,24,39,.97); 
     border: 1px solid rgba(16,185,129,.45); box-shadow: 0 14px 32px rgba(0,0,0,.5), 0 0 0 5px rgba(16,185,129,.08);
     transition: transform .35s cubic-bezier(.16,1,.3,1), opacity .25s, background .25s, color .25s; -webkit-tap-highlight-color: transparent;
   }
@@ -123,7 +123,7 @@
   .mf-abierto .mf-plus svg { transform: rotate(45deg); }
   .mf-velo {
     position: fixed; inset: 0; z-index: 140; background: rgba(5,8,16,.6);
-    backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+    
     opacity: 0; pointer-events: none; transition: opacity .25s;
   }
   .mf-abierto .mf-velo { opacity: 1; pointer-events: auto; }
@@ -143,7 +143,7 @@
   .mf-acc-txt { font-size: 15px; font-weight: 800; color: #f1f5f9; text-shadow: 0 2px 8px rgba(0,0,0,.6); }
   .mf-acc-ico {
     width: 56px; height: 56px; border-radius: 18px; display: grid; place-items: center;
-    backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); box-shadow: 0 10px 24px rgba(0,0,0,.45);
+    box-shadow: 0 10px 24px rgba(0,0,0,.45);
   }
   .mf-acc-ico svg { width: 24px; height: 24px; }
   .mf-acc.mf-peligro .mf-acc-txt { color: #fca5a5; font-size: 13px; font-weight: 700; }
@@ -153,7 +153,7 @@
     bottom: calc(14px + 64px + 12px + env(safe-area-inset-bottom, 0px));
     max-width: 400px; margin: 0 auto; padding: 14px; border-radius: 24px;
     display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px;
-    background: rgba(17,24,39,.9); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+    background: rgba(17,24,39,.98); 
     border: 1px solid rgba(255,255,255,.1); box-shadow: 0 20px 44px rgba(0,0,0,.55);
     font-family: Manrope, 'DM Sans', system-ui, sans-serif;
     opacity: 0; transform: translateY(16px) scale(.97); transform-origin: 88% 100%; pointer-events: none;

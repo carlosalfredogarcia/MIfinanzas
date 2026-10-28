@@ -66,11 +66,13 @@ tests/                      pruebas en Chromium con Supabase simulado (ver abajo
 - Textos en español, cercanos y claros. Importes siempre con `MF.dinero` (1.234,56 € con `window.moneda`;
   € detrás con espacio que no se parte, otros símbolos delante). Porcentajes sin decimales.
 - Nada repetido entre pantallas: si algo sirve a dos o más, va a `js/comun.js` (o a `js/nav.js` si es de la barra).
-- Orden de carga en cada pantalla: js/idioma.js y js/android.js (en <head>, tras <title>) → supabase (CDN) → js/auth.js → js/comun.js → [js/datepicker.js] → js/<pantalla>.js → js/nav.js.
+- Orden de carga en cada pantalla: aviso de navegador antiguo (script en línea) → js/idioma.js y js/android.js (en <head>, tras <title>) → supabase (CDN) → js/auth.js → js/comun.js → [js/datepicker.js] → js/<pantalla>.js → js/nav.js.
 - Inglés: las pantallas se escriben en español. Todo texto nuevo debe tener su traducción en js/idioma-en.js
   (`cd tests && RECOGER=1 npm test` lista en tests/sin-traducir.txt lo que falta; la prueba «inglés» falla si queda algo).
 - Diseño: fondo #0a0e1a, tarjetas #111827, bordes #1f2937, esmeralda #10b981, rojo #ef4444, índigo #6366f1,
   dorado #f59e0b; letra Manrope; cifras con tabular-nums; hojas que suben desde abajo con «Deshacer» en vez de alertas.
+- Móviles viejos y conexiones lentas: nada de `backdrop-filter`/`filter: blur` ni sintaxis más nueva que Chrome 80
+  (`?.` y `??` sí; `||=`, `.at()`, `replaceChildren` no). sw.js guarda copia de todo: red primero, copia si tarda más de 3 s.
 - Ningún cálculo usa la IA salvo la importación de extractos (cuesta dinero: no añadir llamadas sin permiso).
 
 ## Pruebas (obligatorias antes de publicar)

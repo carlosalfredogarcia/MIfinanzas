@@ -25,7 +25,7 @@
   const parseImporte = v => parseFloat(String(v).replace(/\s/g, '').replace(/\.(?=\d{3}(\D|$))/g, '').replace(',', '.'))
 
   const css = `
-  .mfa-fondo { position: fixed; inset: 0; z-index: 400; background: rgba(5,8,16,.62); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); opacity: 0; pointer-events: none; transition: opacity .2s; }
+  .mfa-fondo { position: fixed; inset: 0; z-index: 400; background: rgba(5,8,16,.74); opacity: 0; pointer-events: none; transition: opacity .2s; }
   .mfa-hoja { position: fixed; left: 0; right: 0; bottom: 0; z-index: 401; max-width: 480px; margin: 0 auto; max-height: 92vh; overflow-y: auto; overscroll-behavior: contain;
     background: #111827; border: 1px solid rgba(255,255,255,.08); border-bottom: 0; border-radius: 24px 24px 0 0; padding: 10px 18px calc(18px + env(safe-area-inset-bottom));
     font-family: Manrope, system-ui, sans-serif; color: #f1f5f9; transform: translateY(100%); visibility: hidden; transition: transform .26s cubic-bezier(.2,.8,.2,1), visibility 0s .26s; box-shadow: 0 -20px 50px rgba(0,0,0,.5); }

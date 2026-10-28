@@ -36,13 +36,14 @@
   const scripts = {}
   function cargarScript(url, lista) {
     if (lista()) return Promise.resolve(lista())
-    return scripts[url] ||= new Promise((ok, mal) => {
+    if (!scripts[url]) scripts[url] = new Promise((ok, mal) => {
       const s = document.createElement('script')
       s.src = url
       s.onload = () => ok(lista())
       s.onerror = () => { delete scripts[url]; s.remove(); mal(new Error('sin conexión')) }
       document.head.appendChild(s)
     })
+    return scripts[url]
   }
 
   window.MF = { CATS_DEFAULT, CATS_GASTO, dinero, esc, pad, fechaLocal, sinEmoji, emoji, cargarScript }
