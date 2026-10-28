@@ -17,7 +17,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="MiFinanza">
-<meta name="theme-color" content="#6366f1">
+<meta name="theme-color" content="#0a0e1a">
 </head>
 <body>
 <div class="phone">
@@ -40,6 +40,7 @@
       <h2 id="paso-1-t">Tu dinero real</h2>
       <p>Antes de ponerte una meta, entiende tu dinero: lo que entra y lo que <b>de verdad</b> gastas de media, no lo que crees que gastas.</p>
     </div>
+    <div class="veredicto" id="real-veredicto" aria-live="polite"></div>
     <div class="planificador planificador-p1">
     <div class="bloque-acordeon">
       <div class="bloque-card clicable" onclick="toggleBloque('ingresos')">
@@ -61,7 +62,6 @@
       <div id="real-lista" class="real-lista"></div>
       <div class="real-total"><span>Total al mes</span><b class="num" id="real-total">—</b></div>
     </section>
-    <div class="veredicto" id="real-veredicto"></div>
     <button type="button" class="btn-siguiente" onclick="irPaso(2)">Siguiente: hacer mi plan <span aria-hidden="true">→</span></button>
   </section>
 
@@ -73,6 +73,7 @@
     </div>
     <div class="medidor" id="medidor" aria-live="polite"></div>
     <div class="tipos-ahorro" id="tipos-ahorro" role="radiogroup" aria-label="Tipo de ahorro"></div>
+    <div class="propuesta" id="propuesta" aria-live="polite"></div>
     <div class="planificador planificador-p2">
     <div class="analisis-panel">
       <div class="analisis-header" onclick="toggleAnalisis()">

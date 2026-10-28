@@ -28,4 +28,21 @@ module.exports = [
       await pg.context().close()
     },
   },
+  {
+    nombre: 'metas: la propuesta de recortes se aplica y se deshace',
+    async prueba(t) {
+      const pg = await t.abrir('mifinanza-metas.html', { datos: completo(), espera: 2500 })
+      await pg.evaluate(() => { seleccionarPerfil('ahorrador'); irPaso(2) }); await pg.waitForTimeout(800)
+      const pct = () => pg.$eval('.med-top b', b => parseInt(b.textContent))
+      const antes = await pct()
+      t.ok(await pg.$('#propuesta .prop-btn'), 'No hay propuesta de recortes')
+      await pg.click('#propuesta .prop-btn'); await pg.waitForTimeout(400)
+      t.ok(await pct() < antes, 'La propuesta no baja el gasto')
+      t.contiene(await pg.$eval('#propuesta', e => e.textContent), 'Propuesta aplicada')
+      await pg.click('#propuesta .prop-btn.sec'); await pg.waitForTimeout(400)
+      t.igual(await pct(), antes)
+      t.sinErrores(pg)
+      await pg.context().close()
+    },
+  },
 ]

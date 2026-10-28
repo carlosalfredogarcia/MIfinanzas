@@ -1507,6 +1507,7 @@ function actualizarAnalisis() {
   }
 
   renderPlanExtras()
+  renderPropuesta()
   const summaryEl = document.getElementById('analisis-summary')
   const cont      = document.getElementById('analisis-contenido')
   if (!summaryEl || !cont) return
@@ -2161,13 +2162,93 @@ function renderPaso1() {
     cont.appendChild(fila)
   })
   document.getElementById('real-total').textContent = fmt(Math.round(total))
+  // Cada categoría con su barra: qué parte del total se lleva
+  const mayor = cats.length ? cats[0][1] : 1
+  cont.querySelectorAll('.real-fila').forEach((f, k) => {
+    const b = document.createElement('i'); b.className = 'real-barra'; b.style.setProperty('--w', (cats[k][1] / mayor).toFixed(3)); f.appendChild(b)
+  })
   const ver = document.getElementById('real-veredicto')
   if (!ing || !cats.length) { ver.innerHTML = ''; return }
-  const saldo = ing - total
+  const saldo = Math.round(ing - total)
+  const tope = Math.max(ing, total)
   ver.className = 'veredicto ' + (saldo < 0 ? 'neg' : 'pos')
-  ver.innerHTML = saldo < 0
-    ? `<span class="v-lbl">Con tus gastos de hoy</span><b class="num">${fmt(Math.round(saldo))} al mes</b><p>Estás gastando más de lo que ingresas. En el siguiente paso vemos cómo darle la vuelta.</p>`
-    : `<span class="v-lbl">Con tus gastos de hoy</span><b class="num">+${fmt(Math.round(saldo))} al mes</b><p>Te sobra dinero cada mes (${Math.round(saldo / ing * 100)} % de lo que entra). Vamos a convertirlo en un plan de ahorro.</p>`
+  ver.innerHTML = `<span class="v-lbl">Con tus gastos de hoy</span>
+    <b class="v-cifra num"><span data-cuenta="${saldo}">${(saldo > 0 ? '+' : '') + fmt(saldo)}</span> <small>al mes</small></b>
+    <div class="v-balanza">
+      <div class="v-fila"><span>Entra</span><i class="v-entra" style="--w:${(ing / tope).toFixed(3)}"></i><b class="num">${fmt(Math.round(ing))}</b></div>
+      <div class="v-fila"><span>Sale</span><i class="v-sale" style="--w:${(total / tope).toFixed(3)}"></i><b class="num">${fmt(Math.round(total))}</b></div>
+    </div>
+    <p>${saldo < 0
+      ? 'Gastas más de lo que entra. No pasa nada: en el siguiente paso vemos cómo darle la vuelta.'
+      : `Te sobra dinero cada mes (${Math.round(saldo / ing * 100)} % de lo que entra). Vamos a convertirlo en un plan de ahorro.`}</p>`
+  contar(ver.querySelector('[data-cuenta]'))
+}
+
+// La cifra grande sube desde 0 la primera vez que se ve; después cambia sin animación
+let _contado = false
+function contar(el) {
+  if (!el || _contado || matchMedia('(prefers-reduced-motion: reduce)').matches) return
+  _contado = true
+  const fin = +el.dataset.cuenta, t0 = performance.now()
+  const paso = t => {
+    const k = Math.min(1, (t - t0) / 900), v = Math.round(fin * (1 - Math.pow(1 - k, 3)))
+    if (el.isConnected) el.textContent = (v > 0 ? '+' : '') + fmt(v)
+    if (k < 1) requestAnimationFrame(paso)
+  }
+  requestAnimationFrame(paso)
+}
+
+// Lo que casi nadie puede recortar: la propuesta no lo toca (salvo que el usuario lo marque como opcional)
+const CASI_NECESARIO = /alquiler|hipoteca|cr[eé]dito|pr[eé]stamo|luz|agua|\bgas\b|internet|seguro|supermercado|salud|farmacia|colegio|guarder/i
+const esRecortable = cat => categoriaTipos[cat] === 'opcional' || (!categoriaTipos[cat] && !CASI_NECESARIO.test(cat))
+
+// Paso 2: la app propone dónde recortar para llegar al objetivo, sin bajar nada de la mitad de su media
+let _antesPropuesta = null
+function renderPropuesta() {
+  const el = document.getElementById('propuesta')
+  if (!el) return
+  const ing = totalIngresos()
+  if (!ing) { el.innerHTML = ''; return }
+  const objetivo = Math.round(100 - metaAhorro)
+  const falta = totalGastos() - ing * objetivo / 100
+  if (_antesPropuesta) {
+    el.className = 'propuesta hecha'
+    el.innerHTML = `<b>Propuesta aplicada</b><p>Revisa cada categoría abajo: si algo no lo vas a cumplir, súbelo.</p><button type="button" class="prop-btn sec" onclick="deshacerPropuesta()">Deshacer</button>`
+    return
+  }
+  if (falta <= 0.5) {
+    el.className = 'propuesta ok'
+    el.innerHTML = `<b>Tu plan cumple el objetivo 🎉</b><p>Ahorras ${fmt(Math.round(ing - totalGastos()))} al mes. Si quieres, ajusta las categorías a tu gusto.</p>`
+    return
+  }
+  const filas = [...document.querySelectorAll('#gastos-lista-plan .var-row')].filter(r => r._planCat && esRecortable(r._planCat) && !categoriaFijos[r._planCat])
+    .map(r => {
+      const inp = r.querySelector('.variable-input'), v = parseFloat(inp.value) || 0, media = gastosOriginal[r._planCat] || v
+      return { cat: r._planCat, inp, v, hueco: Math.max(0, v - Math.round(media * 0.5)) }
+    }).filter(x => x.hueco >= 5)
+  const hueco = filas.reduce((t, x) => t + x.hueco, 0)
+  if (!filas.length) { el.className = 'propuesta'; el.innerHTML = `<b>Nada que recortar a la vista</b><p>Todo está marcado como necesario. Si algo es opcional (salidas, compras…), quita «Necesario» en esa categoría.</p>`; return }
+  const parte = Math.min(1, falta / hueco)
+  const cambios = filas.map(x => ({ ...x, nuevo: Math.max(0, Math.round((x.v - x.hueco * parte) / 5) * 5) })).filter(x => x.nuevo < x.v).sort((a, b) => (b.v - b.nuevo) - (a.v - a.nuevo))
+  const ahorro = cambios.reduce((t, x) => t + x.v - x.nuevo, 0)
+  el.className = 'propuesta'
+  el.innerHTML = `<span class="prop-eyebrow">La app te propone</span>
+    <b>Recorta ${fmt(Math.round(ahorro))} en lo que no es imprescindible</b>
+    <ul>${cambios.slice(0, 6).map(x => `<li><span>${MF.esc(emojiCat(x.cat))} ${MF.esc(nombreCat(x.cat))}</span><s class="num">${fmt(Math.round(x.v))}</s><span aria-hidden="true">→</span><b class="num">${fmt(x.nuevo)}</b></li>`).join('')}</ul>
+    ${parte < 1 ? `<p class="prop-aviso">Ni bajando estas categorías a la mitad de su media llegas al ${objetivo} %. Prueba un ritmo más suave o revisa lo que marcaste como necesario.</p>` : `<p>No bajamos nada de la mitad de tu media real: es un plan que puedes cumplir.</p>`}
+    <button type="button" class="prop-btn" onclick="aplicarPropuesta()">Aplicar propuesta</button>`
+  el._cambios = cambios
+}
+function aplicarPropuesta() {
+  const el = document.getElementById('propuesta'), cambios = el._cambios || []
+  _antesPropuesta = cambios.map(x => [x.inp, x.inp.value])
+  cambios.forEach(x => { x.inp.value = x.nuevo })
+  guardarGastosLocal(); actualizarPlanificador()
+}
+function deshacerPropuesta() {
+  ;(_antesPropuesta || []).forEach(([inp, v]) => { inp.value = v })
+  _antesPropuesta = null
+  guardarGastosLocal(); actualizarPlanificador()
 }
 
 // Paso 2: medidor en vivo y tarjetas de tipo de ahorro
@@ -2300,6 +2381,7 @@ _contGastos.addEventListener('focusout', e => {
 })
 _contGastos.addEventListener('input', e => {
   if (!e.target.matches('.variable-input')) return
+  _antesPropuesta = null
   guardarGastosLocal()
   actualizarPlanificador()
   mostrarAnalisisFloat(e.target)
