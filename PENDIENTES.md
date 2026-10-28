@@ -41,6 +41,11 @@ Lista viva: al empezar una conversación nueva, leer esto y `CLAUDE.md`. Al term
 
 ## De Claude (cuando el usuario lo pida)
 
+- Metas rediseñada (28/10/2026): veredicto con balanza (paso 1), propuesta de recortes que se aplica y se deshace
+  (paso 2), meta sugerida que nunca sale «difícil» y botón «Dejarla en X €» (paso 3), cifra grande de lo que queda
+  del mes (paso 4). Vídeo demo parado: el usuario no quiere el vídeo automático; cuando mande su nota de voz,
+  hacerlo con Remotion (sus datos reales nunca en el repo: es público).
+
 - Ayuda en cada pantalla (`js/ayuda.js`, botón «Ayuda»): hecha la de Inicio (27/10/2026). Si le gusta, seguir con
   Movimientos, Estadísticas, Metas, Gastos fijos, Préstamos y Perfil (añadir sus pasos en PANTALLAS y el botón
   `data-ayuda` en su cabecera), y decidir si la guía de bienvenida de 8 pasos se queda, se acorta o se quita.

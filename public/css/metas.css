@@ -860,6 +860,19 @@ body { font-family: 'Manrope', sans-serif; }
 .prop-btn { width: 100%; border: 0; border-radius: 14px; padding: 13px; font: 800 15px 'Manrope', sans-serif; color: #fff; cursor: pointer;
   background: linear-gradient(110deg, #6366f1, #14b8a6 70%, #10b981); box-shadow: 0 12px 26px -12px rgba(99,102,241,.8); }
 .prop-btn.sec { background: rgba(255,255,255,.06); box-shadow: none; color: var(--text); }
+/* Paso 3 y 4 */
+.lf-fila { display: flex; align-items: baseline; gap: 4px; }
+.lf-fila .lf-input { field-sizing: content; flex: none; min-width: 2ch; max-width: 100%; }
+.lf-mon { font-size: 18px; font-weight: 800; color: var(--subtext); }
+.r-ajustar { margin-top: 10px; border: 0; border-radius: 12px; padding: 10px 14px; font: 800 14px 'Manrope', sans-serif; color: #fff; cursor: pointer;
+  background: linear-gradient(110deg, #10b981, #14b8a6 60%, #6366f1); box-shadow: 0 10px 22px -12px rgba(16,185,129,.8); }
+.seg-hero { margin: 0 0 12px; }
+.seg-hero p { margin: -6px 0 14px; color: var(--subtext); }
+.seg-hero p b { color: var(--text); }
+.seg-hero-barra { height: 8px; border-radius: 999px; background: rgba(255,255,255,.08); overflow: hidden; }
+.seg-hero-barra i { display: block; height: 100%; border-radius: 999px; background: linear-gradient(90deg, #10b981, #6366f1); transform-origin: left; transform: scaleX(var(--w)); animation: mf-barra 1.1s cubic-bezier(.16,1,.3,1) .2s both; }
+.seg-hero.neg .seg-hero-barra i { background: linear-gradient(90deg, #f59e0b, #ef4444); }
+.seg-hero-pie { display: block; margin-top: 8px; font-size: 12px; font-weight: 700; color: var(--subtext); }
 @media (prefers-reduced-motion: reduce) { .veredicto, .v-fila i, .real-barra, .paso:not([hidden]) > * { animation: none !important; } }
 
 /* Paso 2: medidor fijo arriba mientras ajustas */

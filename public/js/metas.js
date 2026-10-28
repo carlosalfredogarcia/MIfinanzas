@@ -102,6 +102,7 @@ function actualizarBarraPrincipal(actual, objetivo, fechaLimite) {
   document.getElementById('p-percent').textContent = `${Math.round(pct)} %`
   document.getElementById('p-llevado').textContent = fmt(actual)
   document.getElementById('p-faltan').value = Math.round(faltan)
+  document.getElementById('p-faltan-mon').textContent = window.moneda || '€'
   document.getElementById('p-objetivo').textContent = `Meta: ${fmt(Math.round(objetivo))}`
   setTimeout(() => { document.getElementById('p-barra').style.width = pct + '%' }, 100)
 
@@ -429,7 +430,8 @@ async function calcularSugerenciaMeta() {
 
   const dispMensual  = Math.max(0, totalIngresos() - totalGastos())
   const dispRestante = dispMensual * mesesRest
-  const sugerido     = acumulado + dispRestante
+  // Redondeado hacia abajo: la meta sugerida nunca exige más de lo que deja el plan
+  const sugerido     = Math.floor((acumulado + dispRestante) / 10) * 10
   _metaMontoSugerido = sugerido
   calcMeta = { acumulado, mesesRest, dispMensual }
 
@@ -2102,12 +2104,20 @@ function renderTablaComparativa() {
       </div>`)
   }
 
+  // Lo que queda del mes, en grande: cuánto, para cuántos días y cuánto al día
+  const pctMes = totalEstimado > 0 ? Math.min(100, totalGastado / totalEstimado * 100) : 0
+  const hero = teQuedan >= 0
+    ? `<span class="v-lbl">Te quedan este mes</span><b class="v-cifra num">${fmt(teQuedan, 0)}</b>
+       <p>Para ${diasQuedan} día${diasQuedan === 1 ? '' : 's'} · <b class="num">${fmt(teQuedan / diasQuedan, 0)} al día</b></p>`
+    : `<span class="v-lbl">Este mes</span><b class="v-cifra num">−${fmt(Math.abs(teQuedan), 0)}</b>
+       <p>Te has pasado ${fmt(Math.abs(teQuedan))} del total estimado. Reparte el exceso entre las categorías con margen.</p>`
   cont.innerHTML = `
+    <div class="veredicto seg-hero ${teQuedan >= 0 ? 'pos' : 'neg'}">${hero}
+      <div class="seg-hero-barra" role="img" aria-label="${Math.round(pctMes)} % del plan gastado"><i style="--w:${(pctMes / 100).toFixed(3)}"></i></div>
+      <span class="seg-hero-pie num">${fmt(totalGastado, 0)} gastado de ${fmt(totalEstimado, 0)} del plan</span>
+    </div>
     <div class="sc-lista-card">
-      <div class="sc-lista-grupo" style="padding-bottom:10px;">
-        <div class="sc-resumen-quedan${quedanClass}">${quedanTxt}</div>
-      </div>
-      ${gruposHtml.length ? '<div class="sc-lista-sep"></div>' + gruposHtml.join('') : ''}
+      ${gruposHtml.join('')}
     </div>
   `
 }
@@ -2305,8 +2315,9 @@ function avisosSinceridad() {
 // Paso 3: ¿es realista la meta? Compara lo que exige con lo que deja el plan y con lo que ahorras de verdad
 function nivelRealismo(necesario, planAhorro, real) {
   if (necesario <= 0) return 'cumplida'
-  if (necesario <= planAhorro && (real === null || necesario <= Math.max(0, real) * 1.15)) return 'realista'
-  if (necesario <= planAhorro) return 'ambiciosa'
+  const plan = planAhorro + 1  // un euro de margen por los redondeos
+  if (necesario <= plan && (real === null || necesario <= Math.max(0, real) * 1.15)) return 'realista'
+  if (necesario <= plan) return 'ambiciosa'
   return 'dificil'
 }
 function renderRealismo() {
@@ -2329,13 +2340,25 @@ function renderRealismo() {
   }[nivel]
   el.hidden = false
   el.className = 'realismo ' + nivel
-  el.innerHTML = `<span class="r-sem" aria-hidden="true"><i></i><i></i><i></i></span><div><b>${txt[0]}</b><p>${txt[1]}</p></div>`
+  const ajuste = nivel === 'dificil' && planAhorro > 0 ? Math.floor(alcanzable / 10) * 10 : 0
+  el.innerHTML = `<span class="r-sem" aria-hidden="true"><i></i><i></i><i></i></span><div><b>${txt[0]}</b><p>${txt[1]}</p>${ajuste > actual
+    ? `<button type="button" class="r-ajustar" onclick="ajustarMetaAlcanzable(${ajuste})">Dejarla en ${fmt(ajuste)}, que sí llego</button>` : ''}</div>`
   const pct = objetivo > 0 ? Math.min(100, actual / objetivo * 100) : 0
   seg.innerHTML = `<button type="button" class="seg-meta ${nivel}" onclick="irPaso(3)">
     <span class="sm-top"><span class="sm-nom"></span><b class="num">${Math.round(pct)} %</b></span>
     <span class="sm-barra"><i style="width:${pct}%"></i></span>
     <span class="sm-sub">Llevas ${fmt(Math.round(actual))} de ${fmt(Math.round(objetivo))} · ${txt[0].toLowerCase()}${faltan > 0 ? ` · ${fmt(Math.ceil(necesario))}/mes` : ''}</span></button>`
   seg.querySelector('.sm-nom').textContent = `${metaFondoData.icono || '🎯'} ${metaFondoData.nombre}`
+}
+async function ajustarMetaAlcanzable(monto) {
+  if (!metaFondoData) return
+  const antes = metaFondoData.monto_objetivo
+  const { error } = await dbClient.from('metas').update({ monto_objetivo: monto }).eq('id', metaFondoData.id).eq('usuario_id', window.currentUserId)
+  if (error) { toast('Error: ' + error.message, 'err'); return }
+  toast(`Meta en ${fmt(monto)}: realista`)
+  metaFondoData.monto_objetivo = monto
+  cargarMetas()
+  return antes
 }
 // En el modal de crear meta: semáforo según el importe que escriba el usuario
 function realismoModal() {

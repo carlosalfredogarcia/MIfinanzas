@@ -13,6 +13,15 @@ Tu dinero real
 
 Antes de ponerte una meta, entiende tu dinero: lo que entra y lo que de verdad gastas de media, no lo que crees que gastas.
 
+CON TUS GASTOS DE HOY
+−438 € al mes
+Entra
+1.380 €
+Sale
+1.818 €
+
+Gastas más de lo que entra. No pasa nada: en el siguiente paso vemos cómo darle la vuelta.
+
 INGRESOS
 ›
 Restablecer
@@ -58,11 +67,6 @@ Cuidado personal
 15 €
 Total al mes
 1.818 €
-CON TUS GASTOS DE HOY
-−438 € al mes
-
-Estás gastando más de lo que ingresas. En el siguiente paso vemos cómo darle la vuelta.
-
 Siguiente: hacer mi plan
 →
 Nueva meta
