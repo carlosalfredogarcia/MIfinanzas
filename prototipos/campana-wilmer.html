@@ -99,6 +99,8 @@ h3{font-size:17px;margin:0 0 6px;letter-spacing:-.005em}
 .caso .caso-hueco{font-size:16.5px!important;color:var(--tinta)!important;margin:8px 0 12px!important}
 .caso .pendiente{white-space:normal}
 .panel-objetivo-etq{font-size:13px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--tenue);margin-bottom:6px}
+.panel-resumen{font-size:16px;line-height:1.55;color:var(--tinta);margin:0 0 14px}
+.btn-situacion{margin:0 0 12px}
 .panel-texto{font-size:14.5px;color:var(--texto);margin:10px 0 22px}
 .ayudar-intro{color:var(--texto);margin:-8px 0 22px;font-size:16px}
 .cuentas{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px}
@@ -296,7 +298,7 @@ footer{border-top:1px solid var(--linea);padding:34px 0 90px;font-size:13.5px;co
       <p class="subtitulo aparece retraso-2">Hoy podemos unirnos para darle una esperanza.</p>
       <div class="portada-acciones aparece retraso-3">
         <button class="btn btn-ayudar" data-ir="ayudar">Quiero ayudar a Wilmer</button>
-        <a class="btn btn-claro" href="#historia">Conocer su situación</a>
+        <button class="btn btn-claro" data-demo="situacion">Conocer su situación</button>
       </div>
       <div class="portada-datos aparece retraso-3">
         <span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.9M16 3.1a4 4 0 0 1 0 7.8"/></svg>Organiza su familia</span>
@@ -321,8 +323,9 @@ footer{border-top:1px solid var(--linea);padding:34px 0 90px;font-size:13.5px;co
           </figure>
 
           <div class="caso">
-            <span class="antetitulo">Qué tiene Wilmer</span>
-            <p class="caso-hueco">[Diagnóstico de Wilmer y lo que necesita]</p>
+            <span class="antetitulo">Su situación actual</span>
+            <p class="caso-hueco">Wilmer se encuentra hospitalizado en Maracaibo y atraviesa una situación de salud delicada. Permanece bajo atención médica y su familia lo acompaña cada día.</p>
+            <p class="caso-hueco">En momentos así, los gastos de atención médica, medicinas y traslados se acumulan muy rápido. Por eso su familia necesita el apoyo de familiares, amigos y personas solidarias para poder afrontarlos.</p>
           </div>
 
           <p class="entrada">Si estás leyendo esto, es porque Wilmer forma parte de tu vida o porque tienes un corazón generoso. Gracias por detenerte un momento.</p>
@@ -402,9 +405,9 @@ footer{border-top:1px solid var(--linea);padding:34px 0 90px;font-size:13.5px;co
     <!-- ============ PANEL DE RECAUDACIÓN ============ -->
     <aside class="lateral aparece" aria-label="Recaudación">
       <div class="panel">
-        <div class="panel-objetivo-etq">Objetivo de la campaña</div>
-        <div class="panel-cifra"><b>Por confirmar</b></div>
-        <p class="panel-texto">La familia indicará cuánto se necesita y cómo se puede colaborar.</p>
+        <div class="panel-objetivo-etq">Su situación</div>
+        <p class="panel-resumen">Wilmer está <b>hospitalizado en Maracaibo</b> en una situación de salud delicada. Su familia necesita nuestro apoyo.</p>
+        <button class="btn btn-borde btn-situacion" data-demo="situacion">Ver su situación</button>
 
         <button class="btn btn-ayudar" data-ir="ayudar">
           <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7-4.4-9.3-9C1 8.4 3.3 4.5 7 4.5c2 0 3.7 1.1 5 3 1.3-1.9 3-3 5-3 3.7 0 6 3.9 4.3 7.5C19 16.6 12 21 12 21z" fill="#fff"/></svg>
@@ -457,7 +460,7 @@ footer{border-top:1px solid var(--linea);padding:34px 0 90px;font-size:13.5px;co
 <div class="hoja" id="hoja" role="dialog" aria-modal="true" aria-labelledby="hojaTitulo" aria-hidden="true">
   <div class="asa"></div>
   <div class="ico-grande" id="hojaIcono"></div>
-  <span class="etiqueta">DEMOSTRACIÓN</span>
+  <span class="etiqueta" id="hojaEtiqueta">DEMOSTRACIÓN</span>
   <h3 id="hojaTitulo"></h3>
   <p id="hojaTexto"></p>
   <button class="btn btn-verde" id="hojaCerrar">Entendido</button>
@@ -470,6 +473,7 @@ footer{border-top:1px solid var(--linea);padding:34px 0 90px;font-size:13.5px;co
   var enlace = '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#1d6b52" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/></svg>';
 
   var mensajes = {
+    situacion: { i: corazon, t: 'La situación de Wilmer', x: 'Wilmer se encuentra hospitalizado en Maracaibo y atraviesa una situación de salud delicada. Permanece bajo atención médica y su familia lo acompaña cada día. En momentos así, los gastos de atención médica, medicinas y traslados se acumulan muy rápido. Por eso su familia necesita el apoyo de familiares, amigos y personas solidarias para poder afrontarlos.', b: 'Quiero ayudar a Wilmer', ir: 'ayudar', real: true },
     ayudar:   { i: corazon,   t: 'Gracias por querer ayudar', x: 'Esto es un prototipo. Este botón no procesa pagos ni recoge datos. En la versión real, aquí se indicaría la forma de colaborar que confirme la familia.' },
     whatsapp: { i: compartir, t: 'Compartir por WhatsApp',     x: 'En esta demostración no se abre WhatsApp ni se envía ningún mensaje. En la versión real se prepararía un mensaje con el enlace de la campaña.' },
     facebook: { i: compartir, t: 'Compartir en Facebook',      x: 'En esta demostración no se publica nada en Facebook. En la versión real se abriría la ventana para compartir el enlace de la campaña.' },
@@ -485,6 +489,10 @@ footer{border-top:1px solid var(--linea);padding:34px 0 90px;font-size:13.5px;co
     document.getElementById('hojaIcono').innerHTML = m.i;
     document.getElementById('hojaTitulo').textContent = m.t;
     document.getElementById('hojaTexto').textContent = m.x;
+    document.getElementById('hojaEtiqueta').style.display = m.real ? 'none' : '';
+    var bc = document.getElementById('hojaCerrar');
+    bc.textContent = m.b || 'Entendido';
+    bc.setAttribute('data-destino', m.ir || '');
     hoja.classList.add('abierta'); fondo.classList.add('abierto');
     hoja.setAttribute('aria-hidden', 'false');
     setTimeout(function () { document.getElementById('hojaCerrar').focus(); }, 50);
@@ -524,7 +532,10 @@ footer{border-top:1px solid var(--linea);padding:34px 0 90px;font-size:13.5px;co
     if (ir) { document.getElementById(ir.getAttribute('data-ir')).scrollIntoView({ behavior: 'smooth', block: 'start' }); }
   });
   fondo.addEventListener('click', cerrar);
-  document.getElementById('hojaCerrar').addEventListener('click', cerrar);
+  document.getElementById('hojaCerrar').addEventListener('click', function () {
+    var d = this.getAttribute('data-destino'); cerrar();
+    if (d) document.getElementById(d).scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
   document.addEventListener('keydown', function (e) { if (e.key === 'Escape') cerrar(); });
 
   // Sombra de la cabecera y barra móvil al desplazarse
