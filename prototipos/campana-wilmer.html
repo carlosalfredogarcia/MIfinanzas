@@ -100,6 +100,23 @@ h3{font-size:17px;margin:0 0 6px;letter-spacing:-.005em}
 .caso .pendiente{white-space:normal}
 .panel-objetivo-etq{font-size:13px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--tenue);margin-bottom:6px}
 .panel-texto{font-size:14.5px;color:var(--texto);margin:10px 0 22px}
+.ayudar-intro{color:var(--texto);margin:-8px 0 22px;font-size:16px}
+.cuentas{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px}
+.cuenta{background:#fff;border-radius:18px;box-shadow:var(--sombra);padding:22px;display:flex;flex-direction:column;gap:10px}
+.cuenta-cab{display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin-bottom:4px}
+.cuenta-cab h3{margin:0;font-family:var(--serif);font-size:20px;font-weight:600}
+.cuenta-cab span{font-size:12.5px;color:var(--tenue)}
+.dato{display:flex;align-items:center;justify-content:space-between;gap:10px;background:var(--crema);border-radius:12px;padding:10px 10px 10px 14px}
+.dato div{min-width:0}
+.dato small{display:block;font-size:12px;color:var(--tenue)}
+.dato b{display:block;font-size:15px;font-weight:600;font-variant-numeric:tabular-nums;word-break:break-word}
+.copiar{flex:none;border:1.5px solid var(--verde-menta);background:#fff;color:var(--verde);font-weight:600;font-size:13px;padding:7px 12px;border-radius:999px;transition:background .2s}
+.copiar:hover{background:var(--verde-suave)}
+.copiar.ok,.copiar-todo.ok{background:var(--verde);color:#fff;border-color:var(--verde)}
+.copiar-todo{margin-top:auto;border:0;background:var(--verde-suave);color:var(--verde-osc);font-weight:600;font-size:14px;padding:12px;border-radius:12px}
+.ayudar-pie{font-size:14px;color:var(--tenue);margin:16px 0 0}
+.aviso-copia{position:fixed;left:50%;bottom:90px;transform:translate(-50%,20px);opacity:0;z-index:95;background:#16212b;color:#fff;font-size:14px;font-weight:600;padding:11px 18px;border-radius:999px;transition:opacity .25s,transform .25s;pointer-events:none}
+.aviso-copia.visible{opacity:1;transform:translate(-50%,0)}
 .cita{border-left:3px solid var(--melocoton);padding:4px 0 4px 20px;margin:28px 0 8px;font-family:var(--serif);font-style:italic;font-size:20px;color:var(--tinta);line-height:1.45}
 .pendiente{display:inline-flex;align-items:center;gap:6px;background:#fff6e6;color:#8a5a12;border:1px dashed #e9c98d;
   font-size:12.5px;font-weight:600;padding:3px 10px;border-radius:999px;white-space:nowrap}
@@ -261,8 +278,9 @@ footer{border-top:1px solid var(--linea);padding:34px 0 90px;font-size:13.5px;co
       <span><b>Ayudemos a Wilmer</b><small>Campaña solidaria familiar</small></span>
     </a>
     <nav class="menu" aria-label="Secciones">
-      <a href="#historia">Historia</a>
-      <button class="btn btn-verde btn-chico" data-demo="ayudar">Quiero ayudar</button>
+      <a href="#historia">Su situación</a>
+      <a href="#ayudar">Cómo ayudar</a>
+      <button class="btn btn-verde btn-chico" data-ir="ayudar">Quiero ayudar</button>
     </nav>
   </div>
 </header>
@@ -277,7 +295,7 @@ footer{border-top:1px solid var(--linea);padding:34px 0 90px;font-size:13.5px;co
       <p class="situacion aparece retraso-2">Wilmer se encuentra <strong>hospitalizado en Maracaibo</strong>. Su familia lo acompaña cada día y hoy necesita el apoyo de familiares, amigos y personas solidarias para afrontar este momento.</p>
       <p class="subtitulo aparece retraso-2">Hoy podemos unirnos para darle una esperanza.</p>
       <div class="portada-acciones aparece retraso-3">
-        <button class="btn btn-ayudar" data-demo="ayudar">Quiero ayudar a Wilmer</button>
+        <button class="btn btn-ayudar" data-ir="ayudar">Quiero ayudar a Wilmer</button>
         <a class="btn btn-claro" href="#historia">Conocer su situación</a>
       </div>
       <div class="portada-datos aparece retraso-3">
@@ -294,13 +312,18 @@ footer{border-top:1px solid var(--linea);padding:34px 0 90px;font-size:13.5px;co
       <!-- ============ HISTORIA ============ -->
       <section id="historia" class="bloque aparece">
         <span class="antetitulo">Su historia</span>
-        <h2>Lo que está viviendo Wilmer</h2>
+        <h2>Su situación</h2>
         <article class="historia">
           <figure class="foto">
             <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#7d8a83" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
             <b>Espacio para una foto de Wilmer</b>
             <span>Opcional · solo si la familia quiere compartirla</span>
           </figure>
+
+          <div class="caso">
+            <span class="antetitulo">Qué tiene Wilmer</span>
+            <p class="caso-hueco">[Diagnóstico de Wilmer y lo que necesita]</p>
+          </div>
 
           <p class="entrada">Si estás leyendo esto, es porque Wilmer forma parte de tu vida o porque tienes un corazón generoso. Gracias por detenerte un momento.</p>
 
@@ -313,15 +336,41 @@ footer{border-top:1px solid var(--linea);padding:34px 0 90px;font-size:13.5px;co
             <div><b>Hospitalizado en Maracaibo</b><span>Zulia, Venezuela · Centro médico <span class="pendiente">por confirmar</span></span></div>
           </div>
 
-          <div class="caso">
-            <span class="antetitulo">Qué le pasa a Wilmer</span>
-            <p class="caso-hueco">Aquí la familia explicará, con sus palabras, qué le ocurre a Wilmer, cómo se encuentra y qué necesita (tratamiento, medicinas, estudios…).</p>
-            <span class="pendiente">Texto pendiente: lo escribe o confirma la familia</span>
-          </div>
-
           <p>Te pedimos lo que puedas: una aportación, compartir esta página o simplemente un mensaje de ánimo. Todo llega y todo se agradece.</p>
           <p class="firma">Gracias de corazón por estar.<br><span>Con cariño, la familia de Wilmer</span></p>
         </article>
+      </section>
+
+      <!-- ============ CÓMO AYUDAR ============ -->
+      <section id="ayudar" class="bloque aparece">
+        <span class="antetitulo">Cómo ayudar</span>
+        <h2>Datos para colaborar</h2>
+        <p class="ayudar-intro">Toca «Copiar» y pega el dato en la app de tu banco. Cualquier aporte, por pequeño que sea, ayuda.</p>
+        <div class="cuentas">
+          <div class="cuenta">
+            <div class="cuenta-cab"><h3>Pago Móvil</h3><span>Desde Venezuela</span></div>
+            <div class="dato"><div><small>Banco</small><b>[Banco]</b></div><button class="copiar" data-copiar="[Banco]" aria-label="Copiar banco">Copiar</button></div>
+            <div class="dato"><div><small>Teléfono</small><b>[0000-0000000]</b></div><button class="copiar" data-copiar="[0000-0000000]" aria-label="Copiar teléfono">Copiar</button></div>
+            <div class="dato"><div><small>Cédula</small><b>[V-00000000]</b></div><button class="copiar" data-copiar="[V-00000000]" aria-label="Copiar cédula">Copiar</button></div>
+            <div class="dato"><div><small>Titular</small><b>[Nombre del titular]</b></div><button class="copiar" data-copiar="[Nombre del titular]" aria-label="Copiar titular">Copiar</button></div>
+            <button class="copiar-todo" data-copiar="Banco: [Banco] · Teléfono: [0000-0000000] · Cédula: [V-00000000] · Titular: [Nombre del titular]">Copiar todos los datos</button>
+          </div>
+          <div class="cuenta">
+            <div class="cuenta-cab"><h3>Transferencia</h3><span>Desde Venezuela</span></div>
+            <div class="dato"><div><small>Banco</small><b>[Banco]</b></div><button class="copiar" data-copiar="[Banco]" aria-label="Copiar banco">Copiar</button></div>
+            <div class="dato"><div><small>Número de cuenta</small><b>[0000 0000 00 0000000000]</b></div><button class="copiar" data-copiar="[0000 0000 00 0000000000]" aria-label="Copiar número de cuenta">Copiar</button></div>
+            <div class="dato"><div><small>Titular</small><b>[Nombre del titular]</b></div><button class="copiar" data-copiar="[Nombre del titular]" aria-label="Copiar titular">Copiar</button></div>
+            <div class="dato"><div><small>Cédula</small><b>[V-00000000]</b></div><button class="copiar" data-copiar="[V-00000000]" aria-label="Copiar cédula">Copiar</button></div>
+            <button class="copiar-todo" data-copiar="Banco: [Banco] · Número de cuenta: [0000 0000 00 0000000000] · Titular: [Nombre del titular] · Cédula: [V-00000000]">Copiar todos los datos</button>
+          </div>
+          <div class="cuenta">
+            <div class="cuenta-cab"><h3>Zelle</h3><span>Desde el exterior</span></div>
+            <div class="dato"><div><small>Correo</small><b>[correo@ejemplo.com]</b></div><button class="copiar" data-copiar="[correo@ejemplo.com]" aria-label="Copiar correo">Copiar</button></div>
+            <div class="dato"><div><small>Titular</small><b>[Nombre del titular]</b></div><button class="copiar" data-copiar="[Nombre del titular]" aria-label="Copiar titular">Copiar</button></div>
+            <button class="copiar-todo" data-copiar="Correo: [correo@ejemplo.com] · Titular: [Nombre del titular]">Copiar todos los datos</button>
+          </div>
+        </div>
+        <p class="ayudar-pie">Si tienes dudas, escribe a la familia antes de enviar tu aporte.</p>
       </section>
 
       <!-- ============ COMPARTIR ============ -->
@@ -357,7 +406,7 @@ footer{border-top:1px solid var(--linea);padding:34px 0 90px;font-size:13.5px;co
         <div class="panel-cifra"><b>Por confirmar</b></div>
         <p class="panel-texto">La familia indicará cuánto se necesita y cómo se puede colaborar.</p>
 
-        <button class="btn btn-ayudar" data-demo="ayudar">
+        <button class="btn btn-ayudar" data-ir="ayudar">
           <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7-4.4-9.3-9C1 8.4 3.3 4.5 7 4.5c2 0 3.7 1.1 5 3 1.3-1.9 3-3 5-3 3.7 0 6 3.9 4.3 7.5C19 16.6 12 21 12 21z" fill="#fff"/></svg>
           Quiero ayudar a Wilmer
         </button>
@@ -399,10 +448,11 @@ footer{border-top:1px solid var(--linea);padding:34px 0 90px;font-size:13.5px;co
   <button class="btn-icono" data-ir="compartir" aria-label="Compartir">
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1b2a23" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg>
   </button>
-  <button class="btn btn-ayudar" data-demo="ayudar">Quiero ayudar a Wilmer</button>
+  <button class="btn btn-ayudar" data-ir="ayudar">Quiero ayudar a Wilmer</button>
 </div>
 
 <!-- Hoja de demostración -->
+<div class="aviso-copia" id="avisoCopia"></div>
 <div class="fondo" id="fondo"></div>
 <div class="hoja" id="hoja" role="dialog" aria-modal="true" aria-labelledby="hojaTitulo" aria-hidden="true">
   <div class="asa"></div>
@@ -444,6 +494,28 @@ footer{border-top:1px solid var(--linea);padding:34px 0 90px;font-size:13.5px;co
     hoja.setAttribute('aria-hidden', 'true');
     if (ultimoFoco) ultimoFoco.focus();
   }
+
+  var aviso = document.getElementById('avisoCopia'), tAviso;
+  function avisar(t) { aviso.textContent = t; aviso.classList.add('visible'); clearTimeout(tAviso); tAviso = setTimeout(function () { aviso.classList.remove('visible'); }, 1800); }
+  function copiar(texto, boton) {
+    if (texto.indexOf('[') !== -1) { avisar('Falta poner este dato'); return; }
+    function hecho() {
+      var antes = boton.textContent; boton.textContent = '¡Copiado!'; boton.classList.add('ok');
+      setTimeout(function () { boton.textContent = antes; boton.classList.remove('ok'); }, 1600);
+      avisar('Copiado: ya puedes pegarlo');
+    }
+    function viejo() {
+      var ta = document.createElement('textarea'); ta.value = texto; ta.setAttribute('readonly', '');
+      ta.style.position = 'fixed'; ta.style.opacity = '0'; document.body.appendChild(ta); ta.select();
+      try { document.execCommand('copy'); hecho(); } catch (e) { avisar('No se pudo copiar'); }
+      document.body.removeChild(ta);
+    }
+    if (navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(texto).then(hecho, viejo); else viejo();
+  }
+  document.addEventListener('click', function (e) {
+    var c = e.target.closest('[data-copiar]');
+    if (c) copiar(c.getAttribute('data-copiar'), c);
+  });
 
   document.addEventListener('click', function (e) {
     var b = e.target.closest('[data-demo]');
