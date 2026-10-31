@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex, nofollow">
-<title>Ayudemos a Wilmer · Prototipo (no acepta donaciones)</title>
+<title>Ayudemos a Wilmer Ramírez</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -119,6 +119,10 @@ h3{font-size:17px;margin:0 0 6px;letter-spacing:-.005em}
 .ayudar-pie{font-size:14px;color:var(--tenue);margin:16px 0 0}
 .aviso-copia{position:fixed;left:50%;bottom:90px;transform:translate(-50%,20px);opacity:0;z-index:95;background:#16212b;color:#fff;font-size:14px;font-weight:600;padding:11px 18px;border-radius:999px;transition:opacity .25s,transform .25s;pointer-events:none}
 .aviso-copia.visible{opacity:1;transform:translate(-50%,0)}
+.retrato{margin:0 0 28px;display:flex;align-items:center;gap:18px}
+.retrato img{width:96px;height:96px;border-radius:50%;object-fit:cover;border:3px solid #fff;box-shadow:0 0 0 2px var(--verde-menta),0 10px 24px -12px rgba(22,33,43,.4)}
+.retrato b{display:block;font-family:var(--serif);font-size:22px;font-weight:600}
+.retrato span{font-size:14px;color:var(--tenue)}
 .cita{border-left:3px solid var(--melocoton);padding:4px 0 4px 20px;margin:28px 0 8px;font-family:var(--serif);font-style:italic;font-size:20px;color:var(--tinta);line-height:1.45}
 .pendiente{display:inline-flex;align-items:center;gap:6px;background:#fff6e6;color:#8a5a12;border:1px dashed #e9c98d;
   font-size:12.5px;font-weight:600;padding:3px 10px;border-radius:999px;white-space:nowrap}
@@ -266,7 +270,6 @@ footer{border-top:1px solid var(--linea);padding:34px 0 90px;font-size:13.5px;co
 </head>
 <body>
 
-<div class="prototipo" role="note" aria-label="Prototipo, no acepta donaciones"><i></i>PROTOTIPO · NO ACEPTA DONACIONES</div>
 
 <!-- ============ CABECERA ============ -->
 <header id="cabecera">
@@ -294,15 +297,15 @@ footer{border-top:1px solid var(--linea);padding:34px 0 90px;font-size:13.5px;co
     <div class="envoltura portada-int">
       <span class="sello aparece"><span class="punto"></span>Campaña solidaria · Maracaibo, Venezuela</span>
       <h1 class="aparece retraso-1">Ayudemos a Wilmer</h1>
-      <p class="situacion aparece retraso-2">Wilmer se encuentra <strong>hospitalizado en Maracaibo</strong>. Su familia lo acompaña cada día y hoy necesita el apoyo de familiares, amigos y personas solidarias para afrontar este momento.</p>
-      <p class="subtitulo aparece retraso-2">Hoy podemos unirnos para darle una esperanza.</p>
+      <p class="situacion aparece retraso-2">Nuestro papá, <strong>Wilmer Ramírez</strong>, está hospitalizado en Maracaibo. Tras una intervención quirúrgica enfrenta un cuadro médico complejo de <strong>sepsis</strong> y necesita cuidados constantes.</p>
+      <p class="subtitulo aparece retraso-2">Ayúdanos a salvar la vida de nuestro papá.</p>
       <div class="portada-acciones aparece retraso-3">
         <button class="btn btn-ayudar" data-ir="ayudar">Quiero ayudar a Wilmer</button>
         <button class="btn btn-claro" data-demo="situacion">Conocer su situación</button>
       </div>
       <div class="portada-datos aparece retraso-3">
         <span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.9M16 3.1a4 4 0 0 1 0 7.8"/></svg>Organiza su familia</span>
-        <span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Datos pendientes de confirmación familiar</span>
+        <span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Un mes luchando por su salud</span>
       </div>
     </div>
   </section>
@@ -316,31 +319,19 @@ footer{border-top:1px solid var(--linea);padding:34px 0 90px;font-size:13.5px;co
         <span class="antetitulo">Su historia</span>
         <h2>Su situación</h2>
         <article class="historia">
-          <figure class="foto">
-            <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#7d8a83" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
-            <b>Espacio para una foto de Wilmer</b>
-            <span>Opcional · solo si la familia quiere compartirla</span>
-          </figure>
+          <figure class="retrato"><img src="data:image/jpeg;base64,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" alt="Ilustración de Wilmer Ramírez" width="120" height="120"><figcaption><b>Wilmer Ramírez</b><span>Hospitalizado en Maracaibo, Venezuela</span></figcaption></figure>
 
           <div class="caso">
-            <span class="antetitulo">Su situación actual</span>
-            <p class="caso-hueco">Wilmer se encuentra hospitalizado en Maracaibo y atraviesa una situación de salud delicada. Permanece bajo atención médica y su familia lo acompaña cada día.</p>
-            <p class="caso-hueco">En momentos así, los gastos de atención médica, medicinas y traslados se acumulan muy rápido. Por eso su familia necesita el apoyo de familiares, amigos y personas solidarias para poder afrontarlos.</p>
+            <span class="antetitulo">Lo que le está pasando</span>
+            <p class="caso-hueco">Nuestro amado papá, Wilmer Ramírez, se encuentra hospitalizado en Maracaibo, Venezuela. Tras una intervención quirúrgica, enfrenta un cuadro médico complejo de <b>sepsis</b>, agravado por infección, inflamación aguda, anemia y, recientemente, COVID-19.</p>
+            <p class="caso-hueco">Su condición requiere cuidados constantes y atención especializada. Llevamos un mes luchando por su salud y hemos agotado todos nuestros recursos económicos cubriendo los gastos médicos.</p>
           </div>
 
-          <p class="entrada">Si estás leyendo esto, es porque Wilmer forma parte de tu vida o porque tienes un corazón generoso. Gracias por detenerte un momento.</p>
+          <p class="entrada">Acudimos a su solidaridad para que nuestro papá pueda continuar su tratamiento y tenga una oportunidad de superar esta crisis.</p>
 
-          <p>Estos días están siendo muy duros para él y para los suyos. Mientras sigue en el hospital, su familia hace todo lo posible por estar a su lado, y no queremos que carguen solos con todo.</p>
-
-          <div class="lugar">
-            <div class="ico">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#1d6b52" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z"/><path d="M12 7v6M9 10h6"/></svg>
-            </div>
-            <div><b>Hospitalizado en Maracaibo</b><span>Zulia, Venezuela · Centro médico <span class="pendiente">por confirmar</span></span></div>
-          </div>
-
-          <p>Te pedimos lo que puedas: una aportación, compartir esta página o simplemente un mensaje de ánimo. Todo llega y todo se agradece.</p>
-          <p class="firma">Gracias de corazón por estar.<br><span>Con cariño, la familia de Wilmer</span></p>
+          <blockquote class="cita">«La caridad es el amor puro de Cristo, y permanece para siempre».</blockquote>
+          <p>Su donación, oración y apoyo representan luz de esperanza.</p>
+          <p class="firma">Gracias de corazón.<br><span>La familia de Wilmer Ramírez</span></p>
         </article>
       </section>
 
@@ -348,32 +339,21 @@ footer{border-top:1px solid var(--linea);padding:34px 0 90px;font-size:13.5px;co
       <section id="ayudar" class="bloque aparece">
         <span class="antetitulo">Cómo ayudar</span>
         <h2>Datos para colaborar</h2>
-        <p class="ayudar-intro">Toca «Copiar» y pega el dato en la app de tu banco. Cualquier aporte, por pequeño que sea, ayuda.</p>
+        <p class="ayudar-intro">Toca «Copiar» y pega el dato en Zelle o en la app de tu banco. Cualquier aporte, por pequeño que sea, ayuda.</p>
         <div class="cuentas">
           <div class="cuenta">
-            <div class="cuenta-cab"><h3>Pago Móvil</h3><span>Desde Venezuela</span></div>
-            <div class="dato"><div><small>Banco</small><b>[Banco]</b></div><button class="copiar" data-copiar="[Banco]" aria-label="Copiar banco">Copiar</button></div>
-            <div class="dato"><div><small>Teléfono</small><b>[0000-0000000]</b></div><button class="copiar" data-copiar="[0000-0000000]" aria-label="Copiar teléfono">Copiar</button></div>
-            <div class="dato"><div><small>Cédula</small><b>[V-00000000]</b></div><button class="copiar" data-copiar="[V-00000000]" aria-label="Copiar cédula">Copiar</button></div>
-            <div class="dato"><div><small>Titular</small><b>[Nombre del titular]</b></div><button class="copiar" data-copiar="[Nombre del titular]" aria-label="Copiar titular">Copiar</button></div>
-            <button class="copiar-todo" data-copiar="Banco: [Banco] · Teléfono: [0000-0000000] · Cédula: [V-00000000] · Titular: [Nombre del titular]">Copiar todos los datos</button>
+            <div class="cuenta-cab"><h3>Zelle</h3><span>Desde Estados Unidos</span></div>
+            <div class="dato"><div><small>Nombre</small><b>Zully Alvarez</b></div><button class="copiar" data-copiar="Zully Alvarez" aria-label="Copiar nombre">Copiar</button></div>
+            <div class="dato"><div><small>Correo</small><b>zullyurdaneta0706@gmail.com</b></div><button class="copiar" data-copiar="zullyurdaneta0706@gmail.com" aria-label="Copiar correo">Copiar</button></div>
+            <button class="copiar-todo" data-copiar="Zelle · Nombre: Zully Alvarez · Correo: zullyurdaneta0706@gmail.com">Copiar todos los datos</button>
           </div>
           <div class="cuenta">
-            <div class="cuenta-cab"><h3>Transferencia</h3><span>Desde Venezuela</span></div>
-            <div class="dato"><div><small>Banco</small><b>[Banco]</b></div><button class="copiar" data-copiar="[Banco]" aria-label="Copiar banco">Copiar</button></div>
-            <div class="dato"><div><small>Número de cuenta</small><b>[0000 0000 00 0000000000]</b></div><button class="copiar" data-copiar="[0000 0000 00 0000000000]" aria-label="Copiar número de cuenta">Copiar</button></div>
-            <div class="dato"><div><small>Titular</small><b>[Nombre del titular]</b></div><button class="copiar" data-copiar="[Nombre del titular]" aria-label="Copiar titular">Copiar</button></div>
-            <div class="dato"><div><small>Cédula</small><b>[V-00000000]</b></div><button class="copiar" data-copiar="[V-00000000]" aria-label="Copiar cédula">Copiar</button></div>
-            <button class="copiar-todo" data-copiar="Banco: [Banco] · Número de cuenta: [0000 0000 00 0000000000] · Titular: [Nombre del titular] · Cédula: [V-00000000]">Copiar todos los datos</button>
-          </div>
-          <div class="cuenta">
-            <div class="cuenta-cab"><h3>Zelle</h3><span>Desde el exterior</span></div>
-            <div class="dato"><div><small>Correo</small><b>[correo@ejemplo.com]</b></div><button class="copiar" data-copiar="[correo@ejemplo.com]" aria-label="Copiar correo">Copiar</button></div>
-            <div class="dato"><div><small>Titular</small><b>[Nombre del titular]</b></div><button class="copiar" data-copiar="[Nombre del titular]" aria-label="Copiar titular">Copiar</button></div>
-            <button class="copiar-todo" data-copiar="Correo: [correo@ejemplo.com] · Titular: [Nombre del titular]">Copiar todos los datos</button>
+            <div class="cuenta-cab"><h3>Transferencia en euros</h3><span>Desde Europa</span></div>
+            <div class="dato"><div><small>Titular</small><b>Scherezade Amor Ramírez Montero</b></div><button class="copiar" data-copiar="Scherezade Amor Ramírez Montero" aria-label="Copiar titular">Copiar</button></div>
+            <div class="dato"><div><small>IBAN</small><b>ES13 0049 7348 1428 1002 8481</b></div><button class="copiar" data-copiar="ES1300497348142810028481" aria-label="Copiar iban">Copiar</button></div>
+            <button class="copiar-todo" data-copiar="Titular: Scherezade Amor Ramírez Montero · IBAN: ES13 0049 7348 1428 1002 8481">Copiar todos los datos</button>
           </div>
         </div>
-        <p class="ayudar-pie">Si tienes dudas, escribe a la familia antes de enviar tu aporte.</p>
       </section>
 
       <!-- ============ COMPARTIR ============ -->
@@ -382,21 +362,21 @@ footer{border-top:1px solid var(--linea);padding:34px 0 90px;font-size:13.5px;co
         <h2>Tu mensaje también ayuda</h2>
         <p>Si no puedes aportar, compartir esta página con alguien cercano puede marcar la diferencia.</p>
         <div class="redes">
-          <button class="red" data-demo="whatsapp">
+          <button class="red" data-red="whatsapp">
             <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path fill="#25D366" d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2z"/><path fill="#fff" d="M17.1 14.6c-.3-.1-1.7-.8-1.9-.9-.3-.1-.5-.1-.7.1l-.9 1.1c-.2.2-.3.2-.6.1-1.6-.8-2.7-1.5-3.8-3.3-.3-.5.3-.5.8-1.6.1-.2 0-.4 0-.5l-.9-2.1c-.2-.6-.5-.5-.7-.5h-.6c-.2 0-.5.1-.8.4-.3.3-1 1-1 2.4s1 2.8 1.2 3c.1.2 2 3.1 4.9 4.3 1.8.8 2.5.8 3.4.7.6-.1 1.7-.7 1.9-1.4.2-.7.2-1.2.2-1.4-.1-.2-.3-.3-.5-.4z"/></svg>
             WhatsApp
           </button>
-          <button class="red" data-demo="facebook">
+          <button class="red" data-red="facebook">
             <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="11" fill="#1877F2"/><path fill="#fff" d="M15.1 12.6l.4-2.6H13V8.3c0-.7.4-1.4 1.5-1.4h1.1V4.7s-1-.2-2-.2c-2.1 0-3.4 1.3-3.4 3.5V10H8v2.6h2.2V19h2.8v-6.4z"/></svg>
             Facebook
           </button>
-          <button class="red transp" data-demo="copiar">
+          <button class="red transp" data-copiar="https://ayudemos-a-wilmer.netlify.app/">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/></svg>
             Copiar enlace
           </button>
         </div>
         <div class="enlace-demo">
-          <span>Enlace de la campaña:</span><code>pendiente · aún no existe</code>
+          <span>Enlace de la campaña:</span><code>ayudemos-a-wilmer.netlify.app</code>
         </div>
       </section>
 
@@ -406,7 +386,7 @@ footer{border-top:1px solid var(--linea);padding:34px 0 90px;font-size:13.5px;co
     <aside class="lateral aparece" aria-label="Recaudación">
       <div class="panel">
         <div class="panel-objetivo-etq">Su situación</div>
-        <p class="panel-resumen">Wilmer está <b>hospitalizado en Maracaibo</b> en una situación de salud delicada. Su familia necesita nuestro apoyo.</p>
+        <p class="panel-resumen">Wilmer lleva <b>un mes hospitalizado en Maracaibo</b> luchando contra una sepsis. Su familia ha agotado sus recursos cubriendo los gastos médicos.</p>
         <button class="btn btn-borde btn-situacion" data-demo="situacion">Ver su situación</button>
 
         <button class="btn btn-ayudar" data-ir="ayudar">
@@ -414,11 +394,6 @@ footer{border-top:1px solid var(--linea);padding:34px 0 90px;font-size:13.5px;co
           Quiero ayudar a Wilmer
         </button>
         <button class="btn btn-borde" data-ir="compartir">Compartir la campaña</button>
-
-        <div class="panel-pie">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7d8a83" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-          <span>Página de demostración. Los botones no procesan pagos ni recogen datos.</span>
-        </div>
       </div>
 
       <div class="garantias">
@@ -428,7 +403,7 @@ footer{border-top:1px solid var(--linea);padding:34px 0 90px;font-size:13.5px;co
         </div>
         <div class="garantia">
           <span class="ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1d6b52" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12h16M4 6h16M4 18h10"/></svg></span>
-          Cuentas claras con quienes colaboren
+          Donaciones directas a la familia
         </div>
       </div>
     </aside>
@@ -442,7 +417,7 @@ footer{border-top:1px solid var(--linea);padding:34px 0 90px;font-size:13.5px;co
       <svg width="28" height="28" viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="20" fill="#1d6b52"/><path d="M20 29.5c-.4 0-.8-.1-1.1-.4C14.6 25.6 11 22.6 11 18.6 11 15.9 13 14 15.5 14c1.8 0 3.3.9 4.5 2.5 1.2-1.6 2.7-2.5 4.5-2.5 2.5 0 4.5 1.9 4.5 4.6 0 4-3.6 7-7.9 10.5-.3.3-.7.4-1.1.4z" fill="#fff"/></svg>
       <b>Ayudemos a Wilmer</b>
     </span>
-    <span>Diseño conceptual para presentar a la familia · No es una campaña activa · Datos pendientes de confirmación</span>
+    <span>Campaña de la familia de Wilmer Ramírez · Maracaibo, Venezuela</span>
   </div>
 </footer>
 
@@ -473,11 +448,7 @@ footer{border-top:1px solid var(--linea);padding:34px 0 90px;font-size:13.5px;co
   var enlace = '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#1d6b52" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/></svg>';
 
   var mensajes = {
-    situacion: { i: corazon, t: 'La situación de Wilmer', x: 'Wilmer se encuentra hospitalizado en Maracaibo y atraviesa una situación de salud delicada. Permanece bajo atención médica y su familia lo acompaña cada día. En momentos así, los gastos de atención médica, medicinas y traslados se acumulan muy rápido. Por eso su familia necesita el apoyo de familiares, amigos y personas solidarias para poder afrontarlos.', b: 'Quiero ayudar a Wilmer', ir: 'ayudar', real: true },
-    ayudar:   { i: corazon,   t: 'Gracias por querer ayudar', x: 'Esto es un prototipo. Este botón no procesa pagos ni recoge datos. En la versión real, aquí se indicaría la forma de colaborar que confirme la familia.' },
-    whatsapp: { i: compartir, t: 'Compartir por WhatsApp',     x: 'En esta demostración no se abre WhatsApp ni se envía ningún mensaje. En la versión real se prepararía un mensaje con el enlace de la campaña.' },
-    facebook: { i: compartir, t: 'Compartir en Facebook',      x: 'En esta demostración no se publica nada en Facebook. En la versión real se abriría la ventana para compartir el enlace de la campaña.' },
-    copiar:   { i: enlace,    t: 'Copiar enlace',              x: 'La campaña todavía no tiene enlace, así que no se ha copiado nada. En la versión real, el enlace se copiaría para pegarlo donde quieras.' }
+    situacion: { i: corazon, t: 'La situación de Wilmer', x: 'Nuestro amado papá, Wilmer Ramírez, se encuentra hospitalizado en Maracaibo, Venezuela. Tras una intervención quirúrgica, enfrenta un cuadro médico complejo de sepsis, agravado por infección, inflamación aguda, anemia y, recientemente, COVID-19. Su condición requiere cuidados constantes y atención especializada. Llevamos un mes luchando por su salud y hemos agotado todos nuestros recursos económicos cubriendo los gastos médicos.', b: 'Quiero ayudar a Wilmer', ir: 'ayudar', real: true },
   };
 
   var hoja = document.getElementById('hoja'), fondo = document.getElementById('fondo');
@@ -502,6 +473,15 @@ footer{border-top:1px solid var(--linea);padding:34px 0 90px;font-size:13.5px;co
     hoja.setAttribute('aria-hidden', 'true');
     if (ultimoFoco) ultimoFoco.focus();
   }
+
+  var URL_CAMPANA = 'https://ayudemos-a-wilmer.netlify.app/';
+  var TEXTO = 'Ayudemos a Wilmer Ramírez. Está hospitalizado en Maracaibo y su familia necesita nuestro apoyo: ';
+  document.addEventListener('click', function (e) {
+    var r = e.target.closest('[data-red]'); if (!r) return;
+    var red = r.getAttribute('data-red');
+    if (red === 'whatsapp') location.href = 'https://wa.me/?text=' + encodeURIComponent(TEXTO + URL_CAMPANA);
+    else if (red === 'facebook') window.open('https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(URL_CAMPANA), '_blank');
+  });
 
   var aviso = document.getElementById('avisoCopia'), tAviso;
   function avisar(t) { aviso.textContent = t; aviso.classList.add('visible'); clearTimeout(tAviso); tAviso = setTimeout(function () { aviso.classList.remove('visible'); }, 1800); }
