@@ -95,6 +95,11 @@ h3{font-size:17px;margin:0 0 6px;letter-spacing:-.005em}
 .foto span{font-size:13.5px;color:var(--tenue)}
 .firma{font-family:var(--serif);font-size:19px!important;color:var(--tinta)!important;margin-top:26px!important}
 .firma span{font-family:var(--sans);font-size:14px;color:var(--tenue)}
+.caso{background:#f7f8f6;border-left:4px solid var(--verde);border-radius:0 14px 14px 0;padding:20px 22px;margin:26px 0}
+.caso .caso-hueco{font-size:16.5px!important;color:var(--tinta)!important;margin:8px 0 12px!important}
+.caso .pendiente{white-space:normal}
+.panel-objetivo-etq{font-size:13px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--tenue);margin-bottom:6px}
+.panel-texto{font-size:14.5px;color:var(--texto);margin:10px 0 22px}
 .cita{border-left:3px solid var(--melocoton);padding:4px 0 4px 20px;margin:28px 0 8px;font-family:var(--serif);font-style:italic;font-size:20px;color:var(--tinta);line-height:1.45}
 .pendiente{display:inline-flex;align-items:center;gap:6px;background:#fff6e6;color:#8a5a12;border:1px dashed #e9c98d;
   font-size:12.5px;font-weight:600;padding:3px 10px;border-radius:999px;white-space:nowrap}
@@ -257,7 +262,6 @@ footer{border-top:1px solid var(--linea);padding:34px 0 90px;font-size:13.5px;co
     </a>
     <nav class="menu" aria-label="Secciones">
       <a href="#historia">Historia</a>
-      <a href="#transparencia">Transparencia</a>
       <button class="btn btn-verde btn-chico" data-demo="ayudar">Quiero ayudar</button>
     </nav>
   </div>
@@ -309,51 +313,15 @@ footer{border-top:1px solid var(--linea);padding:34px 0 90px;font-size:13.5px;co
             <div><b>Hospitalizado en Maracaibo</b><span>Zulia, Venezuela · Centro médico <span class="pendiente">por confirmar</span></span></div>
           </div>
 
+          <div class="caso">
+            <span class="antetitulo">Qué le pasa a Wilmer</span>
+            <p class="caso-hueco">Aquí la familia explicará, con sus palabras, qué le ocurre a Wilmer, cómo se encuentra y qué necesita (tratamiento, medicinas, estudios…).</p>
+            <span class="pendiente">Texto pendiente: lo escribe o confirma la familia</span>
+          </div>
+
           <p>Te pedimos lo que puedas: una aportación, compartir esta página o simplemente un mensaje de ánimo. Todo llega y todo se agradece.</p>
           <p class="firma">Gracias de corazón por estar.<br><span>Con cariño, la familia de Wilmer</span></p>
-
-          <div class="aviso">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#7d8a83" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
-            <span>Por respeto a Wilmer, esta página no incluye información médica. Cualquier detalle sobre su salud lo compartirá la familia cuando lo considere oportuno.</span>
-          </div>
         </article>
-      </section>
-
-      <!-- ============ TRANSPARENCIA ============ -->
-      <section id="transparencia" class="bloque aparece">
-        <span class="antetitulo">Transparencia</span>
-        <h2>Claridad en cada paso</h2>
-        <div class="trans-grid">
-          <div class="trans">
-            <div class="ico" style="background:#e6f4ec">
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1d6b52" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a6 6 0 0 1 6-6h4a6 6 0 0 1 6 6v1"/></svg>
-            </div>
-            <h3>Quién organiza</h3>
-            <p>Un familiar directo de Wilmer será la persona responsable de la campaña y de responder a las dudas.</p>
-            <span class="pendiente">Nombre y parentesco por confirmar</span>
-          </div>
-          <div class="trans">
-            <div class="ico" style="background:#f1ece6">
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#9a6b4f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="6" width="20" height="13" rx="2"/><path d="M2 10h20M6 15h4"/></svg>
-            </div>
-            <h3>Quién recibe las aportaciones</h3>
-            <p>Las ayudas llegarán a una única persona o cuenta designada por la familia, indicada aquí con claridad.</p>
-            <span class="pendiente">Titular y medio por confirmar</span>
-          </div>
-          <div class="trans ancha">
-            <div class="ico" style="background:#f3efe4">
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#c8902b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
-            </div>
-            <h3>Cómo se utilizarán las ayudas</h3>
-            <p>Todo lo que se reúna se destinará a cubrir las necesidades de Wilmer y de su familia durante este tiempo. La familia se compromete a:</p>
-            <ul class="compromisos">
-              <li>Explicar en qué se usará cada ayuda antes de abrir la campaña.</li>
-              <li>Contar con claridad en qué se ha usado lo recibido.</li>
-              <li>Responder con honestidad a cualquier persona que pregunte.</li>
-            </ul>
-            <span class="pendiente">Destino concreto pendiente de confirmación familiar</span>
-          </div>
-        </div>
       </section>
 
       <!-- ============ COMPARTIR ============ -->
@@ -385,15 +353,9 @@ footer{border-top:1px solid var(--linea);padding:34px 0 90px;font-size:13.5px;co
     <!-- ============ PANEL DE RECAUDACIÓN ============ -->
     <aside class="lateral aparece" aria-label="Recaudación">
       <div class="panel">
-        <div class="panel-cifra"><b>— —</b><span>recaudado</span></div>
-        <div class="panel-objetivo">de un objetivo de <span class="pendiente">por confirmar</span></div>
-
-        <div class="progreso" role="progressbar" aria-label="Progreso de la recaudación, sin datos todavía" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><span id="relleno"></span></div>
-
-        <div class="panel-datos">
-          <div><small>Colaboradores</small><b>Por confirmar</b></div>
-          <div><small>Progreso</small><b>Sin datos</b></div>
-        </div>
+        <div class="panel-objetivo-etq">Objetivo de la campaña</div>
+        <div class="panel-cifra"><b>Por confirmar</b></div>
+        <p class="panel-texto">La familia indicará cuánto se necesita y cómo se puede colaborar.</p>
 
         <button class="btn btn-ayudar" data-demo="ayudar">
           <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7-4.4-9.3-9C1 8.4 3.3 4.5 7 4.5c2 0 3.7 1.1 5 3 1.3-1.9 3-3 5-3 3.7 0 6 3.9 4.3 7.5C19 16.6 12 21 12 21z" fill="#fff"/></svg>
