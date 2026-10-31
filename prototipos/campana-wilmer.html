@@ -89,6 +89,12 @@ h3{font-size:17px;margin:0 0 6px;letter-spacing:-.005em}
 .lugar .ico{flex:none;width:46px;height:46px;border-radius:14px;background:#fff;display:grid;place-items:center;box-shadow:0 4px 12px -6px rgba(29,107,82,.4)}
 .lugar b{display:block;font-size:16px}
 .lugar span{font-size:14px;color:var(--texto)}
+.foto{margin:0 0 30px;aspect-ratio:16/9;border-radius:16px;border:1.5px dashed #c9d1cc;background:repeating-linear-gradient(135deg,#f7f8f6 0 14px,#f2f4f1 14px 28px);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;text-align:center;padding:20px}
+.foto b{font-size:15.5px;color:var(--tinta);margin-top:6px}
+.foto span{font-size:13.5px;color:var(--tenue)}
+.firma{font-family:var(--serif);font-size:19px!important;color:var(--tinta)!important;margin-top:26px!important}
+.firma span{font-family:var(--sans);font-size:14px;color:var(--tenue)}
 .cita{border-left:3px solid var(--melocoton);padding:4px 0 4px 20px;margin:28px 0 8px;font-family:var(--serif);font-style:italic;font-size:20px;color:var(--tinta);line-height:1.45}
 .pendiente{display:inline-flex;align-items:center;gap:6px;background:#fff6e6;color:#8a5a12;border:1px dashed #e9c98d;
   font-size:12.5px;font-weight:600;padding:3px 10px;border-radius:999px;white-space:nowrap}
@@ -251,7 +257,6 @@ footer{border-top:1px solid var(--linea);padding:34px 0 90px;font-size:13.5px;co
     </a>
     <nav class="menu" aria-label="Secciones">
       <a href="#historia">Historia</a>
-      <a href="#actualizaciones">Novedades</a>
       <a href="#transparencia">Transparencia</a>
       <button class="btn btn-verde btn-chico" data-demo="ayudar">Quiero ayudar</button>
     </nav>
@@ -287,7 +292,15 @@ footer{border-top:1px solid var(--linea);padding:34px 0 90px;font-size:13.5px;co
         <span class="antetitulo">Su historia</span>
         <h2>Lo que está viviendo Wilmer</h2>
         <article class="historia">
-          <p class="entrada">Wilmer está pasando por un momento difícil. Hoy se encuentra hospitalizado y su familia está a su lado, acompañándolo cada día.</p>
+          <figure class="foto">
+            <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#7d8a83" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+            <b>Espacio para una foto de Wilmer</b>
+            <span>Opcional · solo si la familia quiere compartirla</span>
+          </figure>
+
+          <p class="entrada">Si estás leyendo esto, es porque Wilmer forma parte de tu vida o porque tienes un corazón generoso. Gracias por detenerte un momento.</p>
+
+          <p>Estos días están siendo muy duros para él y para los suyos. Mientras sigue en el hospital, su familia hace todo lo posible por estar a su lado, y no queremos que carguen solos con todo.</p>
 
           <div class="lugar">
             <div class="ico">
@@ -296,50 +309,14 @@ footer{border-top:1px solid var(--linea);padding:34px 0 90px;font-size:13.5px;co
             <div><b>Hospitalizado en Maracaibo</b><span>Zulia, Venezuela · Centro médico <span class="pendiente">por confirmar</span></span></div>
           </div>
 
-          <p>En situaciones así, nadie debería sentirse solo. Por eso queremos reunir a familiares, amigos y a todas las personas solidarias que quieran estar a su lado, ya sea con una aportación, compartiendo esta página o enviándole su cariño.</p>
-          <p>Cada gesto, por pequeño que parezca, suma. Juntos podemos aliviar la carga de su familia para que puedan concentrarse en lo más importante: acompañar a Wilmer.</p>
+          <p>Te pedimos lo que puedas: una aportación, compartir esta página o simplemente un mensaje de ánimo. Todo llega y todo se agradece.</p>
+          <p class="firma">Gracias de corazón por estar.<br><span>Con cariño, la familia de Wilmer</span></p>
 
           <div class="aviso">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#7d8a83" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
             <span>Por respeto a Wilmer, esta página no incluye información médica. Cualquier detalle sobre su salud lo compartirá la familia cuando lo considere oportuno.</span>
           </div>
         </article>
-      </section>
-
-      <!-- ============ ACTUALIZACIONES ============ -->
-      <section id="actualizaciones" class="bloque aparece">
-        <span class="antetitulo">Actualizaciones</span>
-        <h2>Novedades sobre Wilmer</h2>
-        <div class="nota-familia">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1d6b52" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
-          Todas las novedades serán publicadas únicamente por la familia de Wilmer.
-        </div>
-
-        <div class="linea-tiempo">
-          <article class="actualizacion aparece">
-            <div class="act-cab">
-              <div class="act-autor"><span class="avatar">F</span>La familia de Wilmer · <span class="pendiente">fecha por confirmar</span></div>
-            </div>
-            <h3>Comenzamos esta campaña</h3>
-            <p>Aquí la familia contará por qué decidió abrir esta campaña y dará las gracias a quienes se sumen desde el primer día.</p>
-          </article>
-
-          <article class="actualizacion vacia aparece">
-            <div class="act-cab">
-              <div class="act-autor"><span class="avatar">F</span>La familia de Wilmer · <span class="pendiente">próximamente</span></div>
-            </div>
-            <h3>Evolución de Wilmer</h3>
-            <p>Espacio para compartir cómo se encuentra, siempre con la información que la familia quiera hacer pública.</p>
-          </article>
-
-          <article class="actualizacion vacia aparece">
-            <div class="act-cab">
-              <div class="act-autor"><span class="avatar">F</span>La familia de Wilmer · <span class="pendiente">próximamente</span></div>
-            </div>
-            <h3>En qué se han usado las ayudas</h3>
-            <p>Espacio para rendir cuentas: qué se ha cubierto con lo recibido y qué queda pendiente.</p>
-          </article>
-        </div>
       </section>
 
       <!-- ============ TRANSPARENCIA ============ -->
@@ -371,7 +348,7 @@ footer{border-top:1px solid var(--linea);padding:34px 0 90px;font-size:13.5px;co
             <p>Todo lo que se reúna se destinará a cubrir las necesidades de Wilmer y de su familia durante este tiempo. La familia se compromete a:</p>
             <ul class="compromisos">
               <li>Explicar en qué se usará cada ayuda antes de abrir la campaña.</li>
-              <li>Publicar novedades periódicas sobre el destino de lo recibido.</li>
+              <li>Contar con claridad en qué se ha usado lo recibido.</li>
               <li>Responder con honestidad a cualquier persona que pregunte.</li>
             </ul>
             <span class="pendiente">Destino concreto pendiente de confirmación familiar</span>
@@ -437,7 +414,7 @@ footer{border-top:1px solid var(--linea);padding:34px 0 90px;font-size:13.5px;co
         </div>
         <div class="garantia">
           <span class="ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1d6b52" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12h16M4 6h16M4 18h10"/></svg></span>
-          Cuentas claras y novedades periódicas
+          Cuentas claras con quienes colaboren
         </div>
       </div>
     </aside>
