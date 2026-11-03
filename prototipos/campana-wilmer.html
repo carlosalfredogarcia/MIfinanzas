@@ -228,7 +228,7 @@ footer{border-top:1px solid var(--linea);padding:34px 0 90px;font-size:13.5px;co
 .hoja .asa{width:44px;height:5px;border-radius:9px;background:#dde3df;margin:0 auto 22px}
 .hoja .ico-grande{width:68px;height:68px;border-radius:50%;background:var(--verde-suave);display:grid;place-items:center;margin:0 auto 16px}
 .hoja h3{font-family:var(--serif);font-size:24px;font-weight:600;margin:0 0 8px}
-.hoja p{white-space:pre-line;color:var(--texto);margin:0 0 22px;font-size:15.5px}
+.hoja p{white-space:pre-line;text-align:left;color:var(--texto);margin:0 0 22px;font-size:15.5px}
 .hoja .etiqueta{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.12em;color:#8a5a12;background:#fff6e6;padding:5px 10px;border-radius:999px;margin-bottom:14px}
 .hoja .btn{width:100%;padding:15px}
 
@@ -383,6 +383,10 @@ footer{border-top:1px solid var(--linea);padding:34px 0 90px;font-size:13.5px;co
             <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path fill="#25D366" d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2z"/><path fill="#fff" d="M17.1 14.6c-.3-.1-1.7-.8-1.9-.9-.3-.1-.5-.1-.7.1l-.9 1.1c-.2.2-.3.2-.6.1-1.6-.8-2.7-1.5-3.8-3.3-.3-.5.3-.5.8-1.6.1-.2 0-.4 0-.5l-.9-2.1c-.2-.6-.5-.5-.7-.5h-.6c-.2 0-.5.1-.8.4-.3.3-1 1-1 2.4s1 2.8 1.2 3c.1.2 2 3.1 4.9 4.3 1.8.8 2.5.8 3.4.7.6-.1 1.7-.7 1.9-1.4.2-.7.2-1.2.2-1.4-.1-.2-.3-.3-.5-.4z"/></svg>
             WhatsApp
           </button>
+          <button class="red" data-red="instagram">
+            <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><defs><linearGradient id="igg" x1="0" y1="1" x2="1" y2="0"><stop offset="0" stop-color="#feda75"/><stop offset=".35" stop-color="#fa7e1e"/><stop offset=".6" stop-color="#d62976"/><stop offset="1" stop-color="#4f5bd5"/></linearGradient></defs><rect x="2" y="2" width="20" height="20" rx="6" fill="url(#igg)"/><circle cx="12" cy="12" r="4.3" fill="none" stroke="#fff" stroke-width="2"/><circle cx="17.3" cy="6.7" r="1.3" fill="#fff"/></svg>
+            Instagram
+          </button>
           <button class="red" data-red="facebook">
             <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="11" fill="#1877F2"/><path fill="#fff" d="M15.1 12.6l.4-2.6H13V8.3c0-.7.4-1.4 1.5-1.4h1.1V4.7s-1-.2-2-.2c-2.1 0-3.4 1.3-3.4 3.5V10H8v2.6h2.2V19h2.8v-6.4z"/></svg>
             Facebook
@@ -461,6 +465,7 @@ footer{border-top:1px solid var(--linea);padding:34px 0 90px;font-size:13.5px;co
   var enlace = '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#1d6b52" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/></svg>';
 
   var mensajes = {
+    instagram: { i: compartir, t: 'Compartir en Instagram', x: '✓ El enlace ya está copiado.\n\n1. Toca «Continuar» y elige Instagram → Historia: se abre con la imagen de Wilmer.\n2. Toca el icono de stickers, elige «Enlace» y pega.\n3. Coloca el enlace sobre la imagen y publica.', b: 'Continuar', accion: 'instagram', real: true },
     situacion: { i: corazon, t: 'La situación de Wilmer', x: 'Nuestro amado papá, Wilmer Ramírez, se encuentra hospitalizado en Maracaibo, Venezuela. Tras una intervención quirúrgica, enfrenta un cuadro médico complejo de sepsis, agravado por infección, inflamación aguda, anemia y, recientemente, COVID-19. Su condición requiere cuidados constantes y atención especializada. Llevamos un mes luchando por su salud y hemos agotado todos nuestros recursos económicos cubriendo los gastos médicos.', b: 'Quiero ayudar a Wilmer', ir: 'ayudar', real: true },
   };
 
@@ -477,6 +482,7 @@ footer{border-top:1px solid var(--linea);padding:34px 0 90px;font-size:13.5px;co
     var bc = document.getElementById('hojaCerrar');
     bc.textContent = m.b || 'Entendido';
     bc.setAttribute('data-destino', m.ir || '');
+    bc.setAttribute('data-accion', m.accion || '');
     hoja.classList.add('abierta'); fondo.classList.add('abierto');
     hoja.setAttribute('aria-hidden', 'false');
     setTimeout(function () { document.getElementById('hojaCerrar').focus(); }, 50);
@@ -493,8 +499,28 @@ footer{border-top:1px solid var(--linea);padding:34px 0 90px;font-size:13.5px;co
     var r = e.target.closest('[data-red]'); if (!r) return;
     var red = r.getAttribute('data-red');
     if (red === 'whatsapp') location.href = 'https://wa.me/?text=' + encodeURIComponent(TEXTO + URL_CAMPANA);
+    else if (red === 'instagram') { copiarEnSilencio(URL_CAMPANA); abrir('instagram'); }
     else if (red === 'facebook') window.open('https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(URL_CAMPANA), '_blank');
   });
+
+  // Imagen para la historia, descargada de antemano para poder compartirla al momento
+  var imagenIG = null;
+  if (window.fetch) fetch('historia.jpg').then(function (r) { return r.blob(); }).then(function (b) {
+    try { imagenIG = new File([b], 'Ayudemos-al-Sr-Wilmer.jpg', { type: 'image/jpeg' }); } catch (e) {}
+  }).catch(function () {});
+  function copiarEnSilencio(t) {
+    try { navigator.clipboard.writeText(t).catch(function () {}); } catch (e) {}
+  }
+  function imagenAInstagram() {
+    if (imagenIG && navigator.canShare && navigator.canShare({ files: [imagenIG] })) {
+      navigator.share({ files: [imagenIG] }).catch(function () {});
+    } else {
+      // Sin menú de compartir: se descarga la imagen para subirla a mano
+      var a = document.createElement('a'); a.href = 'historia.jpg'; a.download = 'Ayudemos-al-Sr-Wilmer.jpg';
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      avisar('Imagen descargada. Súbela a tu historia y pega el enlace');
+    }
+  }
 
   var aviso = document.getElementById('avisoCopia'), tAviso;
   function avisar(t) { aviso.textContent = t; aviso.classList.add('visible'); clearTimeout(tAviso); tAviso = setTimeout(function () { aviso.classList.remove('visible'); }, 1800); }
@@ -526,7 +552,8 @@ footer{border-top:1px solid var(--linea);padding:34px 0 90px;font-size:13.5px;co
   });
   fondo.addEventListener('click', cerrar);
   document.getElementById('hojaCerrar').addEventListener('click', function () {
-    var d = this.getAttribute('data-destino'); cerrar();
+    var d = this.getAttribute('data-destino'), a = this.getAttribute('data-accion'); cerrar();
+    if (a === 'instagram') imagenAInstagram();
     if (d) document.getElementById(d).scrollIntoView({ behavior: 'smooth', block: 'start' });
   });
   document.addEventListener('keydown', function (e) { if (e.key === 'Escape') cerrar(); });
