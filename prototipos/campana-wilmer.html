@@ -126,7 +126,7 @@ h3{font-size:17px;margin:0 0 6px;letter-spacing:-.005em}
 .copiar.ok,.copiar-todo.ok{background:var(--verde);color:#fff;border-color:var(--verde)}
 .copiar-todo{margin-top:auto;border:0;background:var(--verde-suave);color:var(--verde-osc);font-weight:600;font-size:14px;padding:12px;border-radius:12px}
 .ayudar-pie{font-size:14px;color:var(--tenue);margin:16px 0 0}
-.aviso-copia{position:fixed;left:50%;bottom:90px;transform:translate(-50%,20px);opacity:0;z-index:95;background:#16212b;color:#fff;font-size:14px;font-weight:600;padding:11px 18px;border-radius:999px;transition:opacity .25s,transform .25s;pointer-events:none}
+.aviso-copia{position:fixed;left:50%;bottom:96px;width:max-content;max-width:calc(100% - 32px);text-align:center;line-height:1.4;transform:translate(-50%,20px);opacity:0;z-index:95;background:#16212b;color:#fff;font-size:14px;font-weight:600;padding:12px 20px;border-radius:16px;transition:opacity .25s,transform .25s;pointer-events:none}
 .aviso-copia.visible{opacity:1;transform:translate(-50%,0)}
 .retrato{margin:0 0 28px;display:flex;align-items:center;gap:18px}
 .retrato img{width:96px;height:96px;border-radius:50%;object-fit:cover;border:3px solid #fff;box-shadow:0 0 0 2px var(--verde-menta),0 10px 24px -12px rgba(22,33,43,.4)}
@@ -203,6 +203,7 @@ h3{font-size:17px;margin:0 0 6px;letter-spacing:-.005em}
 .redes{display:flex;flex-wrap:wrap;gap:12px;position:relative;z-index:1}
 .red{display:inline-flex;align-items:center;gap:10px;padding:13px 20px;border-radius:999px;border:0;background:#fff;color:var(--tinta);font-weight:600;font-size:15px;transition:transform .2s,box-shadow .2s}
 .red:hover{transform:translateY(-2px);box-shadow:0 10px 22px -10px rgba(0,0,0,.4)}
+.red-principal{flex:1 1 100%;justify-content:center;padding:16px 22px;font-size:16px}
 .red.transp{background:rgba(255,255,255,.14);color:#fff;border:1.5px solid rgba(255,255,255,.35)}
 .imagenes-ig{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-top:18px;font-size:13.5px;color:rgba(255,255,255,.75);position:relative;z-index:1}
 .imagenes-ig a{color:#fff;font-weight:600;text-decoration:none;border:1.5px solid rgba(255,255,255,.35);padding:7px 14px;border-radius:999px}
@@ -372,29 +373,20 @@ footer{border-top:1px solid var(--linea);padding:34px 0 90px;font-size:13.5px;co
       <section id="compartir" class="compartir aparece">
         <span class="antetitulo">Compartir</span>
         <h2>Tu mensaje también ayuda</h2>
-        <p>Si no puedes aportar, compartir esta página con alguien cercano puede marcar la diferencia.</p>
+        <p>Si no puedes aportar, compartir esta página con alguien cercano puede marcar la diferencia. Copia el enlace y pégalo en WhatsApp, Instagram, Facebook o donde quieras: saldrá con la imagen de Wilmer.</p>
         <div class="redes">
+          <button class="red red-principal" data-aviso="Enlace copiado. Pégalo en WhatsApp, Instagram o donde quieras" data-copiar="https://ayudemos-al-sr-wilmer.netlify.app/">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/></svg>
+            Copiar enlace para compartir
+          </button>
           <button class="red" data-red="whatsapp">
             <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path fill="#25D366" d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2z"/><path fill="#fff" d="M17.1 14.6c-.3-.1-1.7-.8-1.9-.9-.3-.1-.5-.1-.7.1l-.9 1.1c-.2.2-.3.2-.6.1-1.6-.8-2.7-1.5-3.8-3.3-.3-.5.3-.5.8-1.6.1-.2 0-.4 0-.5l-.9-2.1c-.2-.6-.5-.5-.7-.5h-.6c-.2 0-.5.1-.8.4-.3.3-1 1-1 2.4s1 2.8 1.2 3c.1.2 2 3.1 4.9 4.3 1.8.8 2.5.8 3.4.7.6-.1 1.7-.7 1.9-1.4.2-.7.2-1.2.2-1.4-.1-.2-.3-.3-.5-.4z"/></svg>
             WhatsApp
-          </button>
-          <button class="red" data-red="instagram">
-            <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><defs><linearGradient id="igg" x1="0" y1="1" x2="1" y2="0"><stop offset="0" stop-color="#feda75"/><stop offset=".35" stop-color="#fa7e1e"/><stop offset=".6" stop-color="#d62976"/><stop offset="1" stop-color="#4f5bd5"/></linearGradient></defs><rect x="2" y="2" width="20" height="20" rx="6" fill="url(#igg)"/><circle cx="12" cy="12" r="4.3" fill="none" stroke="#fff" stroke-width="2"/><circle cx="17.3" cy="6.7" r="1.3" fill="#fff"/></svg>
-            Instagram
           </button>
           <button class="red" data-red="facebook">
             <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="11" fill="#1877F2"/><path fill="#fff" d="M15.1 12.6l.4-2.6H13V8.3c0-.7.4-1.4 1.5-1.4h1.1V4.7s-1-.2-2-.2c-2.1 0-3.4 1.3-3.4 3.5V10H8v2.6h2.2V19h2.8v-6.4z"/></svg>
             Facebook
           </button>
-          <button class="red transp" data-copiar="https://ayudemos-al-sr-wilmer.netlify.app/">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/></svg>
-            Copiar enlace
-          </button>
-        </div>
-        <div class="imagenes-ig">
-          <span>Imágenes para Instagram:</span>
-          <a href="historia.jpg" download="Ayudemos-al-Sr-Wilmer-historia.jpg">Historia</a>
-          <a href="publicacion.jpg" download="Ayudemos-al-Sr-Wilmer-publicacion.jpg">Publicación</a>
         </div>
         <div class="enlace-demo">
           <span>Enlace de la campaña:</span><code>ayudemos-al-sr-wilmer.netlify.app</code>
@@ -469,7 +461,6 @@ footer{border-top:1px solid var(--linea);padding:34px 0 90px;font-size:13.5px;co
   var enlace = '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#1d6b52" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/></svg>';
 
   var mensajes = {
-    instagram: { i: compartir, t: 'Compartir en Instagram', x: '1. Guarda la imagen «Historia» (debajo de los botones).\n2. Súbela a tu historia de Instagram.\n3. Toca el icono de stickers, elige «Enlace» y pega el enlace: ya está copiado.\n\nEn las publicaciones el enlace no se puede tocar: ponlo en tu perfil y escribe «enlace en mi perfil».', b: 'Entendido', real: true, copia: true },
     situacion: { i: corazon, t: 'La situación de Wilmer', x: 'Nuestro amado papá, Wilmer Ramírez, se encuentra hospitalizado en Maracaibo, Venezuela. Tras una intervención quirúrgica, enfrenta un cuadro médico complejo de sepsis, agravado por infección, inflamación aguda, anemia y, recientemente, COVID-19. Su condición requiere cuidados constantes y atención especializada. Llevamos un mes luchando por su salud y hemos agotado todos nuestros recursos económicos cubriendo los gastos médicos.', b: 'Quiero ayudar a Wilmer', ir: 'ayudar', real: true },
   };
 
@@ -478,7 +469,6 @@ footer{border-top:1px solid var(--linea);padding:34px 0 90px;font-size:13.5px;co
 
   function abrir(clave) {
     var m = mensajes[clave]; if (!m) return;
-    if (m.copia) copiarEnSilencio(URL_CAMPANA);
     ultimoFoco = document.activeElement;
     document.getElementById('hojaIcono').innerHTML = m.i;
     document.getElementById('hojaTitulo').textContent = m.t;
@@ -503,26 +493,8 @@ footer{border-top:1px solid var(--linea);padding:34px 0 90px;font-size:13.5px;co
     var r = e.target.closest('[data-red]'); if (!r) return;
     var red = r.getAttribute('data-red');
     if (red === 'whatsapp') location.href = 'https://wa.me/?text=' + encodeURIComponent(TEXTO + URL_CAMPANA);
-    else if (red === 'instagram') compartirInstagram();
     else if (red === 'facebook') window.open('https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(URL_CAMPANA), '_blank');
   });
-
-  function pasosInstagram() {
-    abrir('instagram');
-  }
-  function compartirInstagram() {
-    // En el móvil: abre el menú de compartir con la imagen de historia (de ahí, Instagram)
-    if (window.fetch && navigator.share && navigator.canShare) {
-      fetch('historia.jpg').then(function (r) { return r.blob(); }).then(function (b) {
-        var f = new File([b], 'Ayudemos-al-Sr-Wilmer.jpg', { type: 'image/jpeg' });
-        if (!navigator.canShare({ files: [f] })) throw new Error('sin archivos');
-        copiarEnSilencio(URL_CAMPANA);
-        return navigator.share({ files: [f] });
-      }).then(function () { avisar('Añade el sticker «Enlace» y pega el enlace'); })
-        .catch(function (e) { if (!e || e.name !== 'AbortError') pasosInstagram(); });
-    } else pasosInstagram();
-  }
-  function copiarEnSilencio(t) { try { navigator.clipboard.writeText(t); } catch (e) {} }
 
   var aviso = document.getElementById('avisoCopia'), tAviso;
   function avisar(t) { aviso.textContent = t; aviso.classList.add('visible'); clearTimeout(tAviso); tAviso = setTimeout(function () { aviso.classList.remove('visible'); }, 1800); }
@@ -531,7 +503,7 @@ footer{border-top:1px solid var(--linea);padding:34px 0 90px;font-size:13.5px;co
     function hecho() {
       var antes = boton.textContent; boton.textContent = '¡Copiado!'; boton.classList.add('ok');
       setTimeout(function () { boton.textContent = antes; boton.classList.remove('ok'); }, 1600);
-      avisar('Copiado: ya puedes pegarlo');
+      avisar(boton.getAttribute('data-aviso') || 'Copiado: ya puedes pegarlo');
     }
     function viejo() {
       var ta = document.createElement('textarea'); ta.value = texto; ta.setAttribute('readonly', '');
