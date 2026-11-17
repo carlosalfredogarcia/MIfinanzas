@@ -81,6 +81,20 @@
   }
   .app-nota { text-align: center; margin-top: 10px; font-size: 13.5px !important; color: #94a3b8 !important; }
 
+
+  /* Webs para negocios (lo principal después del kit) */
+  .negocio { margin-top: 28px; background: var(--dark); color: #fff; border-radius: 24px; padding: 26px 22px; box-shadow: 0 18px 40px -18px rgba(26,46,34,.7); }
+  .negocio .eti { display: inline-block; padding: 5px 12px; border-radius: 30px; background: rgba(143,219,168,.16); color: var(--green-lt); font-size: 13px; font-weight: 800; }
+  .negocio h2 { font-size: 22px; font-weight: 900; line-height: 1.2; margin: 14px 0 10px; }
+  .negocio p { font-size: 16.5px; font-weight: 600; color: rgba(255,255,255,.85); }
+  .negocio ul { list-style: none; margin: 16px 0 4px; }
+  .negocio li { font-size: 15.5px; font-weight: 700; padding: 4px 0; }
+  .negocio li::before { content: '✓ '; color: var(--green-lt); font-weight: 900; }
+  .neg-btn { display: block; margin-top: 18px; padding: 16px; border-radius: 16px; text-align: center; text-decoration: none; font-weight: 900; font-size: 17px; color: #fff; background: #25D366; box-shadow: 0 12px 26px -10px rgba(37,211,102,.8); }
+  .neg-link { display: block; margin-top: 12px; text-align: center; color: var(--green-lt); font-weight: 800; font-size: 15px; text-decoration: none; }
+  .recomienda { margin-top: 18px; padding-top: 16px; border-top: 1px solid rgba(255,255,255,.15); font-size: 15px !important; }
+  .recomienda b { color: #fcd34d; }
+
   footer { text-align: center; padding: 34px 20px calc(30px + env(safe-area-inset-bottom)); color: var(--muted); font-size: 13px; font-weight: 700; }
 
   /* Aparecen al bajar */
@@ -126,6 +140,21 @@
       <video src="img/carlos.mp4" poster="img/carlos.jpg" controls playsinline preload="none"></video> -->
       <p>Cuando un bebé empieza a gatear, lo descubre todo: cajones, puertas, enchufes… Este kit es para que pueda explorar seguro y tú estés un poco más tranquilo.</p>
       <div class="firma"><span>C</span>Con cariño, Carlos</div>
+    </section>
+
+
+    <section class="negocio sube" aria-labelledby="neg-t">
+      <span class="eti">Para negocios 💼</span>
+      <h2 id="neg-t">¿Tienes un negocio, o conoces a alguien que tenga uno?</h2>
+      <p>Hago webs con reservas y recordatorios por WhatsApp para negocios de la zona: estéticas, peluquerías, fisios, academias, talleres… <b style="color:#fff">Te la enseño gratis.</b></p>
+      <ul>
+        <li>Primer mes gratis</li>
+        <li>Sin permanencia: si no te gusta, no sigues</li>
+        <li>Sin comisiones por reserva</li>
+      </ul>
+      <a class="neg-btn" href="https://wa.me/34640309239?text=Hola%20Carlos%2C%20he%20recibido%20el%20kit%20y%20me%20interesa%20la%20web%20para%20un%20negocio." target="_blank" rel="noopener">Escríbeme por WhatsApp</a>
+      <a class="neg-link" href="https://estetica-web-six.vercel.app/negocios">Ver ejemplos y precios →</a>
+      <p class="recomienda">🎁 <b>¿Me recomiendas un negocio?</b> Si contrata, te regalo 30 €.</p>
     </section>
 
     <section class="app sube" aria-labelledby="app-t">

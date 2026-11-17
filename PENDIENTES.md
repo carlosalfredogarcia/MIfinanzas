@@ -37,7 +37,8 @@ Lista viva: al empezar una conversación nueva, leer esto y `CLAUDE.md`. Al term
   La clave está en «Secretos de red» (api.netlify.com, tipo Bearer) y caduca: si da 401, pedirle otra.
 - El QR impreso abre `alfrega-kit.netlify.app` (confirmado): al conectar ese sitio, las 300 cajas ya llevan a la página nueva.
 - Vídeo de Carlos (20–30 s, vertical): subirlo como `kit/img/carlos.mp4` y activar el <video> de «Un mensaje para ti».
-- Siguientes pasos de la estrategia: enlace distinto por guardería (`?desde=kit-<guarderia>`) para medir.
+- 17/11/2026: la página del kit lleva una parte «Para negocios» (webs con reservas de ALFREGA, WhatsApp, enlace a estetica-web-six.vercel.app/negocios y 30 € por recomendar), encima de MiFinanza. Ya publicada.
+- Carlos decidió **un solo QR** para todas las guarderías (sin enlace distinto por guardería).
 
 ## De Claude (cuando el usuario lo pida)
 
