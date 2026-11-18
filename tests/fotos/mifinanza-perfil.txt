@@ -85,7 +85,7 @@ Deshacer
 Gasto
 Ingreso
 Gasto fijo
-Importar CSV
+Importar
 MENÚ
 Metas
 Gastos fijos

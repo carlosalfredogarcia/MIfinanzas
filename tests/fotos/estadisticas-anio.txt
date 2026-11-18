@@ -125,7 +125,7 @@ Tu mejor mes fue enero: ahorraste 306 €. En 4 meses gastaste más de lo que e
 Gasto
 Ingreso
 Gasto fijo
-Importar CSV
+Importar
 MENÚ
 Metas
 Gastos fijos

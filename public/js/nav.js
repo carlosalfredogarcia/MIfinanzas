@@ -1,7 +1,7 @@
 // nav.js — barra de navegación y botón + compartidos por todas las pantallas.
 // Se carga al final del <body>. Sustituye la .navbar y el .fab propios de cada página
 // y añade dos menús rápidos que no se confunden entre sí:
-//  - el botón + (flota sobre la barra, a la derecha; abre una columna de botones): Gasto, Ingreso, Gasto fijo, Importar CSV;
+//  - el botón + (flota sobre la barra, a la derecha; abre una columna de botones): Gasto, Ingreso, Gasto fijo, Importar;
 //    "Gasto" abre el apunte rápido (apunte.js) en la misma pantalla;
 //  - la pestaña Menú (panel de casillas sobre la barra): Metas, Gastos fijos, Préstamos, Perfil.
 ;(function () {
@@ -48,7 +48,7 @@
     gasto:   { label: 'Gasto',        color: '#f87171', fondo: 'rgba(239,68,68,.16)',  icono: '<path d="M12 5v14M19 12l-7 7-7-7"/>', run: apunte('gasto') },
     ingreso: { label: 'Ingreso',      color: '#34d399', fondo: 'rgba(16,185,129,.16)', icono: '<path d="M12 19V5M5 12l7-7 7 7"/>', run: apunte('ingreso') },
     fijo:    { label: 'Gasto fijo',   color: '#a5b4fc', fondo: 'rgba(99,102,241,.18)', icono: '<path d="M21 12a9 9 0 1 1-3-6.7L21 8"/><path d="M21 3v5h-5"/>', run: () => ir('fijo', FIJOS) },
-    csv:     { label: 'Importar CSV', color: '#fbbf24', fondo: 'rgba(245,158,11,.16)', icono: '<path d="M12 3v12M7 10l5 5 5-5"/><path d="M5 21h14"/>', run: local('abrirImportarCSV', 'csv') },
+    csv:     { label: 'Importar', color: '#fbbf24', fondo: 'rgba(245,158,11,.16)', icono: '<path d="M12 3v12M7 10l5 5 5-5"/><path d="M5 21h14"/>', run: local('abrirImportarCSV', 'csv') },
   }
 
   // Acción propia de cada pantalla, que antes hacía su botón +.

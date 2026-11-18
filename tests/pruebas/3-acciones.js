@@ -177,8 +177,35 @@ module.exports = [
       }
       const pg = await t.abrir('mifinanza-movimientos.html', { datos: completo() })
       await pg.click('.mf-plus'); await pg.waitForTimeout(300)
-      await pg.click('.mf-acc:has-text("Importar CSV")'); await pg.waitForTimeout(600)
-      t.ok(await pg.$eval('#modal-csv', e => getComputedStyle(e).display !== 'none'), 'Importar CSV no abre')
+      await pg.click('.mf-acc:has-text("Importar")'); await pg.waitForTimeout(600)
+      t.ok(await pg.$eval('#modal-csv', e => getComputedStyle(e).display !== 'none'), 'Importar no abre')
+      await pg.context().close()
+    },
+  },
+  {
+    nombre: 'apunte por voz: «treinta y cinco con cincuenta de gasolina» rellena importe, concepto y categoría',
+    async prueba(t) {
+      const pg = await t.abrir('inicio.html', { datos: completo() })
+      // El reconocimiento de voz del móvil, simulado: «oye» la frase de window.__FRASE
+      await pg.context().addInitScript(() => {
+        window.SpeechRecognition = class {
+          start() { setTimeout(() => { this.onresult({ results: [[{ transcript: window.__FRASE }]] }); this.onend() }, 50) }
+          stop() {}
+        }
+      })
+      await pg.reload(); await pg.waitForTimeout(1500)
+      await pg.evaluate(() => { window.__FRASE = 'treinta y cinco con cincuenta de gasolina'; window.mfApunte.abrir('gasto') }); await pg.waitForTimeout(800)
+      t.ok(await pg.isVisible('.mfa-voz'), 'No se ve el botón de dictar')
+      await pg.click('.mfa-voz'); await pg.waitForTimeout(400)
+      t.igual(await pg.inputValue('#mfa-importe'), '35,50')
+      t.igual(await pg.inputValue('#mfa-desc'), 'Gasolina')
+      t.contiene(await pg.$eval('.mfa-cat[aria-pressed="true"]', b => b.textContent), 'Gasolina')
+      // Si lo dicho es un ingreso, la hoja pasa a ingreso
+      await pg.evaluate(() => { window.__FRASE = 'me pagaron la nómina 1300 euros' })
+      await pg.click('.mfa-voz'); await pg.waitForTimeout(600)
+      t.contiene(await pg.$eval('#mfa-tit', e => e.textContent), 'ingreso')
+      t.igual(await pg.inputValue('#mfa-importe'), '1300')
+      t.sinErrores(pg)
       await pg.context().close()
     },
   },

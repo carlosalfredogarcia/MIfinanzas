@@ -68,6 +68,10 @@
   .mfa-sug { display: flex; gap: 6px; flex-wrap: wrap; min-height: 0; margin: 8px 0 0; }
   .mfa-guardar { width: 100%; margin-top: 14px; border: 0; border-radius: 16px; padding: 16px; font: 800 16px Manrope, system-ui, sans-serif; background: var(--mfa-acento); color: var(--mfa-texto-boton); cursor: pointer; box-shadow: 0 10px 26px color-mix(in srgb, var(--mfa-acento) 32%, transparent); transition: opacity .15s; }
   .mfa-guardar:disabled { opacity: .35; box-shadow: none; cursor: default; }
+  .mfa-voz { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; margin: 4px 0 12px; border: 1px dashed #334155; border-radius: 14px; padding: 11px 12px; background: none; color: #cbd5e1; font: 700 14px Manrope, system-ui, sans-serif; cursor: pointer; }
+  .mfa-voz small { color: #64748b; font-weight: 600; }
+  .mfa-voz.mfa-oyendo { border-style: solid; border-color: #ef4444; color: #fca5a5; animation: mfa-latido 1s ease-in-out infinite alternate; }
+  @keyframes mfa-latido { to { background: rgba(239,68,68,.10); } }
   .mfa-pie { display: flex; justify-content: center; margin-top: 10px; }
   .mfa-pegar { border: 0; background: none; color: #94a3b8; font: 700 13px Manrope, system-ui, sans-serif; cursor: pointer; padding: 6px 10px; }
   .mfa-toast { position: fixed; left: 50%; bottom: calc(110px + env(safe-area-inset-bottom)); z-index: 402; transform: translate(-50%, 20px); opacity: 0; pointer-events: none; transition: all .22s;
@@ -93,6 +97,7 @@
         <div class="mfa-asa"></div>
         <div class="mfa-cab"><span class="mfa-tit" id="mfa-tit">Nuevo gasto</span><button type="button" class="mfa-x" data-cerrar aria-label="Cerrar">×</button></div>
         <label class="mfa-importe"><span class="mfa-mon" data-mon-pre></span><input id="mfa-importe" inputmode="decimal" autocomplete="off" placeholder="0" aria-label="Importe"><span class="mfa-mon" data-mon-post></span></label>
+        <button type="button" class="mfa-voz" hidden>🎤 Dictar <small>«25 euros Mercadona»</small></button>
         <div class="mfa-fechas" role="group" aria-label="Fecha">
           <button type="button" class="mfa-chip" data-dia="0">Hoy</button>
           <button type="button" class="mfa-chip" data-dia="1">Ayer</button>
@@ -142,6 +147,9 @@
     raiz.querySelector('[data-nueva-ok]').addEventListener('click', guardarNuevaCat)
     raiz.querySelector('[data-nueva-nombre]').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); guardarNuevaCat() } })
     raiz.querySelector('.mfa-pegar').addEventListener('click', pegarDelBanco)
+    const voz = raiz.querySelector('.mfa-voz')
+    voz.hidden = !Reconocedor
+    voz.addEventListener('click', dictar)
   }
 
   function abrir(m = 'gasto', relleno = {}) {
@@ -462,6 +470,87 @@
     if (previo) elegirCat(previo.categoria, false)
   }
 
+  // ── Dictar un gasto: el móvil pasa la voz a texto (gratis, sin IA) y aquí se saca el importe y el concepto ──
+  const Reconocedor = window.SpeechRecognition || window.webkitSpeechRecognition
+  const UNIDADES = { un: 1, uno: 1, una: 1, dos: 2, tres: 3, cuatro: 4, cinco: 5, seis: 6, siete: 7, ocho: 8, nueve: 9, diez: 10, once: 11, doce: 12, trece: 13, catorce: 14, quince: 15,
+    dieciseis: 16, diecisiete: 17, dieciocho: 18, diecinueve: 19, veinte: 20, veintiuno: 21, veintiun: 21, veintidos: 22, veintitres: 23, veinticuatro: 24, veinticinco: 25,
+    veintiseis: 26, veintisiete: 27, veintiocho: 28, veintinueve: 29, treinta: 30, cuarenta: 40, cincuenta: 50, sesenta: 60, setenta: 70, ochenta: 80, noventa: 90,
+    cien: 100, ciento: 100, doscientos: 200, trescientos: 300, cuatrocientos: 400, quinientos: 500, seiscientos: 600, setecientos: 700, ochocientos: 800, novecientos: 900, mil: 1000 }
+  const sinTilde = s => s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase()
+  // «treinta y cinco» → «35»; «doce con cincuenta» y «12 con 50» → «12,50»
+  function cifras(txt) {
+    let t = sinTilde(txt).replace(/(\d)\s*(?:euros?|€)?\s*(?:con|coma)\s*(\d{1,2})\b/g, '$1,$2')
+    t = t.replace(new RegExp(`\\b(?:${Object.keys(UNIDADES).join('|')})(?:\\s+(?:y\\s+)?(?:${Object.keys(UNIDADES).join('|')}))*\\b`, 'g'), m => {
+      let total = 0, parcial = 0
+      for (const w of m.split(/\s+/)) {
+        if (w === 'y') continue
+        const v = UNIDADES[w]
+        if (v === 1000) { total += (parcial || 1) * 1000; parcial = 0 } else parcial += v
+      }
+      return String(total + parcial)
+    })
+    return t.replace(/(\d)\s*(?:euros?|€)?\s*(?:con|coma)\s*(\d{1,2})\b/g, '$1,$2')
+  }
+  const PALABRAS_VACIAS = /\b(?:he|gaste|gastado|gastao|pague|pagado|compre|comprado|en|el|la|los|las|de|del|un|una|por|para|euros?|eur|€|hoy|ayer|me|ha|costado|salio|son|fueron|y|con|al|pagaron|han|ingresaron|cobre|cobrado|recibi)\b/g
+  const PISTAS = [[/mercadona|carrefour|lidl|aldi|\bdia\b|supermercado|super\b|compra/, 'supermercado'], [/gasolin|repsol|cepsa|galp|diesel|combustible/, 'gasolina'],
+    [/farmacia|medic|dentista|medico/, 'salud'], [/bar\b|restaurante|cena|comida fuera|cerveza|cafe|copas|kebab|pizza/, 'salidas'], [/ropa|zapatos|zara|primark|shein/, 'ropa'],
+    [/luz\b|endesa|iberdrola/, 'luz'], [/agua\b/, 'agua'], [/alquiler/, 'alquiler'], [/taxi|uber|cabify|parking|aparcamiento|taller|itv/, 'vehiculo']]
+  function leerVoz(txt) {
+    const t = cifras(String(txt || ''))
+    const r = {}
+    const imp = t.match(/(\d+(?:[.,]\d{1,2})?)/)
+    if (imp) r.monto = leerNum(imp[1])
+    // El concepto, con sus tildes: lo dicho sin cifras ni palabras de relleno
+    const resto = String(txt || '').split(/\s+/).filter(w => {
+      const b = sinTilde(w).replace(/[.,;:!?¿¡]/g, '')
+      return b && !/^\d/.test(b) && !UNIDADES[b] && !/^(?:y|con|coma)$/.test(b) && b.replace(PALABRAS_VACIAS, '').trim() !== ''
+    }).join(' ').replace(/[.,;:!?¿¡]+$/, '').trim()
+    if (resto) r.descripcion = bonito(resto)
+    r.tipo = /\b(?:cobre|cobrado|me pagaron|me han pagado|recibi|ingreso|nomina|me ingresaron)\b/.test(t) ? 'ingreso' : 'gasto'
+    const pista = PISTAS.find(([re]) => re.test(t))
+    if (pista) r.pista = pista[1]
+    return r
+  }
+
+  let oyendo = null
+  function dictar() {
+    const boton = raiz.querySelector('.mfa-voz')
+    if (oyendo) { oyendo.stop(); return }
+    const rec = new Reconocedor()
+    rec.lang = window.MF_IDIOMA === 'en' ? 'en-GB' : 'es-ES'
+    rec.interimResults = true
+    rec.maxAlternatives = 1
+    let final = ''
+    rec.onresult = e => {
+      final = [...e.results].map(x => x[0].transcript).join(' ')
+      boton.innerHTML = `🔴 <small>${MF.esc(final)}</small>`
+    }
+    rec.onerror = e => aviso(e.error === 'not-allowed' || e.error === 'service-not-allowed' ? 'Permite el micrófono para dictar' : e.error === 'no-speech' ? 'No te he oído. Toca y dilo otra vez' : 'No se pudo dictar. Inténtalo de nuevo')
+    rec.onend = () => {
+      oyendo = null
+      boton.classList.remove('mfa-oyendo')
+      boton.innerHTML = '🎤 Dictar <small>«25 euros Mercadona»</small>'
+      if (!final) return
+      const r = leerVoz(final)
+      if (!r.monto && !r.descripcion) { aviso('No entendí el importe. Prueba: «25 euros Mercadona»'); return }
+      // «Me pagaron la nómina, 1300»: se abre como ingreso
+      if (r.tipo !== modo && MODOS[r.tipo]) { abrir(r.tipo, { monto: r.monto, descripcion: r.descripcion }); return }
+      if (r.monto) inpImporte.value = importeTxt(r.monto)
+      if (r.descripcion) inpDesc.value = r.descripcion
+      // Categoría: la que tuvo ese concepto otras veces; si no, la que encaja con lo dicho
+      adivinarCat(r.descripcion)
+      if (!estado.categoria && r.pista && datos) {
+        const c = datos.cats.find(x => sinTilde(sinEmoji(x)).includes(r.pista))
+        if (c) elegirCat(c, false)
+      }
+      sugerir(); actualizarBoton()
+    }
+    oyendo = rec
+    boton.classList.add('mfa-oyendo')
+    boton.innerHTML = '🔴 Te escucho… <small>toca para terminar</small>'
+    try { rec.start() } catch { oyendo = null; boton.classList.remove('mfa-oyendo') }
+  }
+
   async function pegarDelBanco() {
     let txt = ''
     try { txt = await navigator.clipboard.readText() } catch { /* sin permiso */ }
@@ -523,5 +612,5 @@
     return total
   }
 
-  window.mfApunte = { abrir, leerMensajeBanco, guardarAvisos }
+  window.mfApunte = { abrir, leerMensajeBanco, guardarAvisos, leerVoz }
 })()

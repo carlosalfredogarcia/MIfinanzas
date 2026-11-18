@@ -104,8 +104,8 @@ fs.writeFileSync(path.join(OUT, 'extracto-banco.csv'), CSV)
 
   // 4. Importar el extracto del banco
   marca('importar'); await ir('mifinanza-movimientos.html')
-  await cap('Importa el extracto de tu banco', 'CSV, XLS o XLSX'); await espera(1500)
-  await toca('.mf-plus', 600); await toca('.mf-acc:has-text("CSV")', 900)
+  await cap('Importa el extracto de tu banco', 'PDF, Excel, CSV o capturas'); await espera(1500)
+  await toca('.mf-plus', 600); await toca('.mf-acc:has-text("Importar")', 900)
   await pg.setInputFiles('#csv-file', path.join(OUT, 'extracto-banco.csv'))
   await cap('La app lee y clasifica cada movimiento', 'Tú solo revisas'); await espera(3200)
   await baja(380, 1500); await baja(-380, 900)

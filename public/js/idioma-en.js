@@ -305,6 +305,7 @@ window.MF_EN = {
     'Fijos': 'Fixed',
     'Fijo': 'Fixed',
     'Importar CSV': 'Import CSV',
+    'Importar': 'Import',
     'Importar extracto bancario': 'Import bank statement',
     'Selecciona el extracto de tu banco (CSV, XLS o XLSX). La app detectará los movimientos automáticamente — revisa las categorías antes de guardar.': 'Select your bank statement (CSV, XLS or XLSX). The app will detect the transactions automatically — check the categories before saving.',
     'Seleccionar archivo': 'Choose file',
@@ -817,6 +818,15 @@ window.MF_EN = {
     'No se pudo leer el archivo.': 'Couldn’t read the file.',
     '⚠️ {0} parte no se pudo leer: revisa que no falte nada': '⚠️ {0} part couldn’t be read: check nothing is missing',
     '⚠️ {0} partes no se pudo leer: revisa que no falte nada': '⚠️ {0} parts couldn’t be read: check nothing is missing',
+    // Dictar un gasto
+    'Dictar': 'Dictate',
+    '«25 euros Mercadona»': '“25 euros Tesco”',
+    'Te escucho…': 'Listening…',
+    'toca para terminar': 'tap to finish',
+    'Permite el micrófono para dictar': 'Allow the microphone to dictate',
+    'No te he oído. Toca y dilo otra vez': 'I didn’t hear you. Tap and say it again',
+    'No se pudo dictar. Inténtalo de nuevo': 'Couldn’t dictate. Try again',
+    'No entendí el importe. Prueba: «25 euros Mercadona»': 'I didn’t get the amount. Try: “25 euros Tesco”',
     // Ayuda de cada pantalla (js/ayuda.js)
     'Ayuda de esta pantalla': 'Help for this screen',
     'Cerrar la ayuda': 'Close help',

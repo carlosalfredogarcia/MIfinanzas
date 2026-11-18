@@ -123,7 +123,7 @@ Tu mejor mes fue octubre: ahorraste 55 €. En 2 meses gastaste más de lo que 
 Gasto
 Ingreso
 Gasto fijo
-Importar CSV
+Importar
 MENÚ
 Metas
 Gastos fijos
