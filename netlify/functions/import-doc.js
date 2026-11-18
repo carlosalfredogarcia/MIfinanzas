@@ -2,11 +2,10 @@
 // El móvil manda una pieza cada vez (el texto de unas líneas de un PDF, o una imagen ya reducida)
 // y varias en paralelo, para no pasar del tiempo máximo de una función de Netlify.
 // Claude devuelve cada movimiento con fecha, concepto corto, categoría, importe y si es gasto o ingreso.
-// Modelo: IMPORT_MODEL en las variables de Netlify (por defecto el mismo que import-csv.js).
+// Modelo: el de netlify/lib/comun.js (variable IMPORT_MODEL de Netlify).
 
-const { CATS_DEFAULT, NO_CACHE, obtenerUsuario } = require('../lib/comun')
+const { CATS_DEFAULT, NO_CACHE, obtenerUsuario, MODELO_IMPORTAR: MODELO } = require('../lib/comun')
 
-const MODELO = process.env.IMPORT_MODEL || 'claude-haiku-4-5'
 const MAX_TEXTO = 20000                 // caracteres por pieza de texto
 const MAX_IMAGEN = 4.5 * 1024 * 1024    // base64 de una imagen
 const TIPOS_IMAGEN = ['image/jpeg', 'image/png', 'image/webp']

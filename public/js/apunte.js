@@ -68,10 +68,18 @@
   .mfa-sug { display: flex; gap: 6px; flex-wrap: wrap; min-height: 0; margin: 8px 0 0; }
   .mfa-guardar { width: 100%; margin-top: 14px; border: 0; border-radius: 16px; padding: 16px; font: 800 16px Manrope, system-ui, sans-serif; background: var(--mfa-acento); color: var(--mfa-texto-boton); cursor: pointer; box-shadow: 0 10px 26px color-mix(in srgb, var(--mfa-acento) 32%, transparent); transition: opacity .15s; }
   .mfa-guardar:disabled { opacity: .35; box-shadow: none; cursor: default; }
-  .mfa-voz { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; margin: 4px 0 12px; border: 1px dashed #334155; border-radius: 14px; padding: 11px 12px; background: none; color: #cbd5e1; font: 700 14px Manrope, system-ui, sans-serif; cursor: pointer; }
-  .mfa-voz small { color: #64748b; font-weight: 600; }
-  .mfa-voz.mfa-oyendo { border-style: solid; border-color: #ef4444; color: #fca5a5; animation: mfa-latido 1s ease-in-out infinite alternate; }
-  @keyframes mfa-latido { to { background: rgba(239,68,68,.10); } }
+  .mfa-arriba { position: relative; }
+  .mfa-voz { position: absolute; right: 2px; top: 50%; transform: translateY(-50%); width: 48px; height: 48px; border-radius: 50%; border: 1px solid rgba(16,185,129,.45);
+    background: rgba(16,185,129,.12); color: #34d399; display: grid; place-items: center; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+  .mfa-voz[hidden] { display: none; }
+  .mfa-voz svg { width: 22px; height: 22px; }
+  .mfa-voz::after { content: ''; position: absolute; inset: -1px; border-radius: 50%; border: 2px solid currentColor; opacity: 0; animation: mfa-onda 2.4s ease-out infinite; }
+  .mfa-voz.mfa-oyendo { background: #ef4444; border-color: #ef4444; color: #fff; }
+  .mfa-voz.mfa-oyendo::after { animation-duration: 1.1s; }
+  @keyframes mfa-onda { 0% { transform: scale(1); opacity: .7; } 100% { transform: scale(1.6); opacity: 0; } }
+  .mfa-oido { min-height: 18px; margin: -2px 0 8px; text-align: center; font: 600 13px Manrope, system-ui, sans-serif; color: #fca5a5; }
+  .mfa-oido:empty { display: none; }
+  @media (prefers-reduced-motion: reduce) { .mfa-voz::after { animation: none; } }
   .mfa-pie { display: flex; justify-content: center; margin-top: 10px; }
   .mfa-pegar { border: 0; background: none; color: #94a3b8; font: 700 13px Manrope, system-ui, sans-serif; cursor: pointer; padding: 6px 10px; }
   .mfa-toast { position: fixed; left: 50%; bottom: calc(110px + env(safe-area-inset-bottom)); z-index: 402; transform: translate(-50%, 20px); opacity: 0; pointer-events: none; transition: all .22s;
@@ -96,8 +104,11 @@
       <section class="mfa-hoja" role="dialog" aria-modal="true" aria-labelledby="mfa-tit">
         <div class="mfa-asa"></div>
         <div class="mfa-cab"><span class="mfa-tit" id="mfa-tit">Nuevo gasto</span><button type="button" class="mfa-x" data-cerrar aria-label="Cerrar">×</button></div>
+        <div class="mfa-arriba">
         <label class="mfa-importe"><span class="mfa-mon" data-mon-pre></span><input id="mfa-importe" inputmode="decimal" autocomplete="off" placeholder="0" aria-label="Importe"><span class="mfa-mon" data-mon-post></span></label>
-        <button type="button" class="mfa-voz" hidden>🎤 Dictar <small>«25 euros Mercadona»</small></button>
+          <button type="button" class="mfa-voz" hidden aria-label="Dictar el gasto"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></button>
+        </div>
+        <div class="mfa-oido" aria-live="polite"></div>
         <div class="mfa-fechas" role="group" aria-label="Fecha">
           <button type="button" class="mfa-chip" data-dia="0">Hoy</button>
           <button type="button" class="mfa-chip" data-dia="1">Ayer</button>
@@ -495,15 +506,40 @@
   const PISTAS = [[/mercadona|carrefour|lidl|aldi|\bdia\b|supermercado|super\b|compra/, 'supermercado'], [/gasolin|repsol|cepsa|galp|diesel|combustible/, 'gasolina'],
     [/farmacia|medic|dentista|medico/, 'salud'], [/bar\b|restaurante|cena|comida fuera|cerveza|cafe|copas|kebab|pizza/, 'salidas'], [/ropa|zapatos|zara|primark|shein/, 'ropa'],
     [/luz\b|endesa|iberdrola/, 'luz'], [/agua\b/, 'agua'], [/alquiler/, 'alquiler'], [/taxi|uber|cabify|parking|aparcamiento|taller|itv/, 'vehiculo']]
+  const DIAS_SEMANA = ['domingo', 'lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado']
+  const MESES_VOZ = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre']
+  // «ayer», «el lunes», «el 3», «el día 3», «3 de noviembre» → AAAA-MM-DD (nunca en el futuro). Devuelve [fecha, texto sin ella]
+  function fechaDicha(t) {
+    const hoy = new Date(); hoy.setHours(12, 0, 0, 0)
+    const dia = n => { const d = new Date(hoy); d.setDate(d.getDate() - n); return fechaLocal(d) }
+    let m
+    if ((m = t.match(/\b(?:antes de ayer|anteayer)\b/))) return [dia(2), t.replace(m[0], ' ')]
+    if ((m = t.match(/\bayer\b/))) return [dia(1), t.replace(m[0], ' ')]
+    if ((m = t.match(/\bhoy\b/))) return [dia(0), t.replace(m[0], ' ')]
+    if ((m = t.match(new RegExp(`\\b(?:el\\s+)?(?:pasado\\s+)?(${DIAS_SEMANA.join('|')})(?:\\s+pasado)?\\b`)))) {
+      const atras = (hoy.getDay() - DIAS_SEMANA.indexOf(m[1]) + 7) % 7
+      return [dia(atras), t.replace(m[0], ' ')]
+    }
+    if ((m = t.match(new RegExp(`\\b(?:el\\s+)?(?:dia\\s+)?(\\d{1,2})\\s+de\\s+(${MESES_VOZ.join('|')})\\b`))) || (m = t.match(/\b(?:el\s+dia|el|dia)\s+(\d{1,2})\b(?!\s*(?:euros?|€|con|coma|[.,]\d))/))) {
+      const d = +m[1], mes = m[2] ? MESES_VOZ.indexOf(m[2]) : hoy.getMonth()
+      if (d < 1 || d > 31) return [null, t]
+      let f = new Date(hoy.getFullYear(), mes, d, 12)
+      if (f > hoy) f = m[2] ? new Date(hoy.getFullYear() - 1, mes, d, 12) : new Date(hoy.getFullYear(), mes - 1, d, 12)
+      return [fechaLocal(f), t.replace(m[0], ' ')]
+    }
+    return [null, t]
+  }
   function leerVoz(txt) {
-    const t = cifras(String(txt || ''))
+    const [fecha, sinFecha] = fechaDicha(cifras(String(txt || '')))
+    const t = sinFecha
     const r = {}
+    if (fecha) r.fecha = fecha
     const imp = t.match(/(\d+(?:[.,]\d{1,2})?)/)
     if (imp) r.monto = leerNum(imp[1])
     // El concepto, con sus tildes: lo dicho sin cifras ni palabras de relleno
     const resto = String(txt || '').split(/\s+/).filter(w => {
       const b = sinTilde(w).replace(/[.,;:!?¿¡]/g, '')
-      return b && !/^\d/.test(b) && !UNIDADES[b] && !/^(?:y|con|coma)$/.test(b) && b.replace(PALABRAS_VACIAS, '').trim() !== ''
+      return b && !/^\d/.test(b) && !UNIDADES[b] && !/^(?:y|con|coma|dia|pasado|anteayer|antes)$/.test(b) && !DIAS_SEMANA.includes(b) && !MESES_VOZ.includes(b) && b.replace(PALABRAS_VACIAS, '').trim() !== ''
     }).join(' ').replace(/[.,;:!?¿¡]+$/, '').trim()
     if (resto) r.descripcion = bonito(resto)
     r.tipo = /\b(?:cobre|cobrado|me pagaron|me han pagado|recibi|ingreso|nomina|me ingresaron)\b/.test(t) ? 'ingreso' : 'gasto'
@@ -512,31 +548,47 @@
     return r
   }
 
+  // Escucha hasta que se vuelve a tocar el micrófono (si el móvil corta por un silencio, sigue)
   let oyendo = null
   function dictar() {
-    const boton = raiz.querySelector('.mfa-voz')
-    if (oyendo) { oyendo.stop(); return }
-    const rec = new Reconocedor()
-    rec.lang = window.MF_IDIOMA === 'en' ? 'en-GB' : 'es-ES'
-    rec.interimResults = true
-    rec.maxAlternatives = 1
-    let final = ''
-    rec.onresult = e => {
-      final = [...e.results].map(x => x[0].transcript).join(' ')
-      boton.innerHTML = `🔴 <small>${MF.esc(final)}</small>`
+    const boton = raiz.querySelector('.mfa-voz'), oido = raiz.querySelector('.mfa-oido')
+    if (oyendo) { oyendo.seguir = false; oyendo.rec.stop(); return }
+    const estadoVoz = oyendo = { seguir: true, dicho: '', rec: null }
+    const empezar = () => {
+      const rec = estadoVoz.rec = new Reconocedor()
+      rec.lang = window.MF_IDIOMA === 'en' ? 'en-GB' : 'es-ES'
+      rec.continuous = true
+      rec.interimResults = true
+      let parte = ''
+      rec.onresult = e => {
+        parte = [...e.results].map(x => x[0].transcript).join(' ')
+        oido.textContent = (estadoVoz.dicho + ' ' + parte).trim()
+      }
+      rec.onerror = e => {
+        if (e.error === 'no-speech' || e.error === 'aborted') return
+        estadoVoz.seguir = false
+        aviso(e.error === 'not-allowed' || e.error === 'service-not-allowed' ? 'Permite el micrófono para dictar' : 'No se pudo dictar. Inténtalo de nuevo')
+      }
+      rec.onend = () => {
+        estadoVoz.dicho = (estadoVoz.dicho + ' ' + parte).trim()
+        if (estadoVoz.seguir && raiz.classList.contains('mfa-abierto')) { try { empezar(); return } catch { /* sigue abajo */ } }
+        terminar()
+      }
+      rec.start()
     }
-    rec.onerror = e => aviso(e.error === 'not-allowed' || e.error === 'service-not-allowed' ? 'Permite el micrófono para dictar' : e.error === 'no-speech' ? 'No te he oído. Toca y dilo otra vez' : 'No se pudo dictar. Inténtalo de nuevo')
-    rec.onend = () => {
+    const terminar = () => {
       oyendo = null
-      boton.classList.remove('mfa-oyendo')
-      boton.innerHTML = '🎤 Dictar <small>«25 euros Mercadona»</small>'
-      if (!final) return
-      const r = leerVoz(final)
+      boton.classList.remove('mfa-oyendo'); boton.setAttribute('aria-label', 'Dictar el gasto')
+      oido.textContent = ''
+      const dicho = estadoVoz.dicho
+      if (!dicho) return
+      const r = leerVoz(dicho)
       if (!r.monto && !r.descripcion) { aviso('No entendí el importe. Prueba: «25 euros Mercadona»'); return }
       // «Me pagaron la nómina, 1300»: se abre como ingreso
-      if (r.tipo !== modo && MODOS[r.tipo]) { abrir(r.tipo, { monto: r.monto, descripcion: r.descripcion }); return }
+      if (r.tipo !== modo && MODOS[r.tipo]) { abrir(r.tipo, { monto: r.monto, descripcion: r.descripcion, fecha: r.fecha }); return }
       if (r.monto) inpImporte.value = importeTxt(r.monto)
       if (r.descripcion) inpDesc.value = r.descripcion
+      if (r.fecha && r.fecha <= fechaLocal()) ponerFecha(r.fecha)
       // Categoría: la que tuvo ese concepto otras veces; si no, la que encaja con lo dicho
       adivinarCat(r.descripcion)
       if (!estado.categoria && r.pista && datos) {
@@ -545,10 +597,9 @@
       }
       sugerir(); actualizarBoton()
     }
-    oyendo = rec
-    boton.classList.add('mfa-oyendo')
-    boton.innerHTML = '🔴 Te escucho… <small>toca para terminar</small>'
-    try { rec.start() } catch { oyendo = null; boton.classList.remove('mfa-oyendo') }
+    boton.classList.add('mfa-oyendo'); boton.setAttribute('aria-label', 'Terminar de dictar')
+    oido.textContent = 'Te escucho… toca el micrófono para terminar'
+    try { empezar() } catch { estadoVoz.seguir = false; terminar() }
   }
 
   async function pegarDelBanco() {

@@ -11,6 +11,10 @@ const CATS_DEFAULT = [
   '💼 Nómina'
 ]
 
+// Modelo de la importación (CSV, Excel, PDF y capturas). Se cambia sin tocar código con la variable
+// IMPORT_MODEL de Netlify, p. ej. claude-haiku-5-5 (mucho más barato que Haiku 4.5)
+const MODELO_IMPORTAR = process.env.IMPORT_MODEL || 'claude-haiku-4-5'
+
 const NO_CACHE = { 'content-type': 'application/json', 'cache-control': 'no-store, no-cache' }
 
 // Usuario de la sesión de Supabase (null si el token no vale)
@@ -28,4 +32,4 @@ async function obtenerUsuario(token) {
   }
 }
 
-module.exports = { SUPABASE_URL, SUPABASE_KEY, CATS_DEFAULT, NO_CACHE, obtenerUsuario }
+module.exports = { SUPABASE_URL, SUPABASE_KEY, CATS_DEFAULT, MODELO_IMPORTAR, NO_CACHE, obtenerUsuario }

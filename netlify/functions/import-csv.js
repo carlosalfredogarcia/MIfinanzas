@@ -6,7 +6,7 @@
 //   2) Lista de conceptos (extraída con el índice correcto) → nombre simplificado + categoría.
 //   Fechas e importes los parsea JS puro; sin heurístico propio de detección de columnas.
 
-const { CATS_DEFAULT, NO_CACHE, obtenerUsuario } = require('../lib/comun')
+const { CATS_DEFAULT, NO_CACHE, obtenerUsuario, MODELO_IMPORTAR: MODELO } = require('../lib/comun')
 
 // Detecta si una línea es la cabecera MiFinanza y devuelve los índices de columna,
 // o null si no lo es. Tolera BOM, distintas codificaciones de "Categoría",
@@ -244,8 +244,8 @@ exports.handler = async (event) => {
       method: 'POST',
       headers: { 'content-type': 'application/json', 'x-api-key': apiKey, 'anthropic-version': '2023-06-01' },
       body: JSON.stringify({
-        model: 'claude-haiku-4-5-20251001',
-        max_tokens: 400,
+        model: MODELO,
+        max_tokens: 1024,
         tools: [schemaTool],
         tool_choice: { type: 'tool', name: 'detectar_esquema' },
         messages: [{
@@ -347,8 +347,8 @@ ${muestraNum}`
         method: 'POST',
         headers: { 'content-type': 'application/json', 'x-api-key': apiKey, 'anthropic-version': '2023-06-01' },
         body: JSON.stringify({
-          model: 'claude-haiku-4-5-20251001',
-          max_tokens: 2048,
+          model: MODELO,
+          max_tokens: 4096,
           tools: [conceptsTool],
           tool_choice: { type: 'tool', name: 'simplificar_conceptos' },
           messages: [{

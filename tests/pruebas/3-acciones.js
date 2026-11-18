@@ -183,26 +183,37 @@ module.exports = [
     },
   },
   {
-    nombre: 'apunte por voz: «treinta y cinco con cincuenta de gasolina» rellena importe, concepto y categoría',
+    nombre: 'apunte por voz: escucha hasta tocar otra vez y saca importe, concepto, categoría y fecha',
     async prueba(t) {
       const pg = await t.abrir('inicio.html', { datos: completo() })
-      // El reconocimiento de voz del móvil, simulado: «oye» la frase de window.__FRASE
+      // El reconocimiento de voz del móvil, simulado: «oye» window.__FRASE y solo termina al pararlo
       await pg.context().addInitScript(() => {
         window.SpeechRecognition = class {
-          start() { setTimeout(() => { this.onresult({ results: [[{ transcript: window.__FRASE }]] }); this.onend() }, 50) }
-          stop() {}
+          start() { window.__INICIOS = (window.__INICIOS || 0) + 1; setTimeout(() => this.onresult({ results: [[{ transcript: window.__FRASE }]] }), 50) }
+          stop() { setTimeout(() => this.onend(), 10) }
         }
       })
       await pg.reload(); await pg.waitForTimeout(1500)
-      await pg.evaluate(() => { window.__FRASE = 'treinta y cinco con cincuenta de gasolina'; window.mfApunte.abrir('gasto') }); await pg.waitForTimeout(800)
-      t.ok(await pg.isVisible('.mfa-voz'), 'No se ve el botón de dictar')
+      await pg.evaluate(() => { window.__FRASE = 'ayer treinta y cinco con cincuenta de gasolina'; window.mfApunte.abrir('gasto') }); await pg.waitForTimeout(800)
+      t.ok(await pg.isVisible('.mfa-voz'), 'No se ve el micrófono')
+      await pg.click('.mfa-voz'); await pg.waitForTimeout(1200)
+      // Sigue escuchando: no ha rellenado nada todavía
+      t.igual(await pg.inputValue('#mfa-importe'), '')
+      t.contiene(await pg.$eval('.mfa-oido', e => e.textContent), 'gasolina')
       await pg.click('.mfa-voz'); await pg.waitForTimeout(400)
       t.igual(await pg.inputValue('#mfa-importe'), '35,50')
       t.igual(await pg.inputValue('#mfa-desc'), 'Gasolina')
       t.contiene(await pg.$eval('.mfa-cat[aria-pressed="true"]', b => b.textContent), 'Gasolina')
+      t.contiene(await pg.$eval('.mfa-chip[aria-pressed="true"]', b => b.textContent), 'Ayer')
+      // Fechas dichas (hoy es miércoles 21/10/2026)
+      const voz = f => pg.evaluate(f => window.mfApunte.leerVoz(f), f)
+      t.igual((await voz('el lunes 12 euros pan')).fecha, '2026-10-19')
+      t.igual(await voz('el 3 gasté 25 euros en Mercadona'), { fecha: '2026-10-03', monto: 25, descripcion: 'Mercadona', tipo: 'gasto', pista: 'supermercado' })
+      t.igual((await voz('el tres de octubre veinte euros farmacia')).fecha, '2026-10-03')
+      t.igual((await voz('el día 25 diez euros')).fecha, '2026-09-25')
       // Si lo dicho es un ingreso, la hoja pasa a ingreso
       await pg.evaluate(() => { window.__FRASE = 'me pagaron la nómina 1300 euros' })
-      await pg.click('.mfa-voz'); await pg.waitForTimeout(600)
+      await pg.click('.mfa-voz'); await pg.waitForTimeout(300); await pg.click('.mfa-voz'); await pg.waitForTimeout(600)
       t.contiene(await pg.$eval('#mfa-tit', e => e.textContent), 'ingreso')
       t.igual(await pg.inputValue('#mfa-importe'), '1300')
       t.sinErrores(pg)
