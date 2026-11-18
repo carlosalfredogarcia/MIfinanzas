@@ -133,7 +133,6 @@ Gasto
 Ingreso
 Gasto fijo
 Importar CSV
-Eliminar todo
 MENÚ
 Metas
 Gastos fijos

@@ -78,7 +78,6 @@
     prestamos: '<path d="M7 10h13l-4-4M17 14H4l4 4"/>',
     perfil: '<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>',
     estrella: '<path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1 6.2-5.5-2.9-5.5 2.9 1-6.2L3 9.6l6.2-.9Z"/>',
-    papelera: '<path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/>',
   }
   const svg = (d, w = 2) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${d}</svg>`
 
@@ -146,8 +145,6 @@
     box-shadow: 0 10px 24px rgba(0,0,0,.45);
   }
   .mf-acc-ico svg { width: 24px; height: 24px; }
-  .mf-acc.mf-peligro .mf-acc-txt { color: #fca5a5; font-size: 13px; font-weight: 700; }
-  .mf-acc.mf-peligro .mf-acc-ico { width: 44px; height: 44px; border-radius: 14px; margin-right: 6px; }
   .mf-menu {
     position: fixed; z-index: 151; left: max(12px, env(safe-area-inset-left, 0px)); right: max(12px, env(safe-area-inset-right, 0px));
     bottom: calc(14px + 64px + 12px + env(safe-area-inset-bottom, 0px));
@@ -199,9 +196,6 @@
     const items = []
     if (propia) items.push({ label: propia.label, color: '#e5e7eb', fondo: 'rgba(255,255,255,.10)', icono: ICONOS.estrella, run: () => window[propia.fn]() })
     items.push(ACCIONES.gasto, ACCIONES.ingreso, ACCIONES.fijo, ACCIONES.csv)
-    if (pagina === 'mifinanza-movimientos' && typeof window.abrirBorrarTodo === 'function') {
-      items.push({ label: 'Eliminar todo', color: '#f87171', fondo: 'rgba(239,68,68,.10)', icono: ICONOS.papelera, run: () => window.abrirBorrarTodo(), peligro: true })
-    }
 
     const raiz = document.createElement('div')
     raiz.className = 'mf-raiz'
@@ -209,7 +203,7 @@
       <div class="mf-velo" data-cerrar></div>
       <div class="mf-acciones" id="mf-acciones" role="menu" aria-label="Añadir">
         ${items.map((a, i) => `
-          <button type="button" role="menuitem" tabindex="-1" class="mf-acc${a.peligro ? ' mf-peligro' : ''}" data-i="${i}"
+          <button type="button" role="menuitem" tabindex="-1" class="mf-acc" data-i="${i}"
             style="transition-delay:${(items.length - 1 - i) * 35}ms">
             <span class="mf-acc-txt">${a.label}</span>
             <span class="mf-acc-ico" style="background:${a.fondo};border:1px solid ${a.color}55;color:${a.color}">${svg(a.icono, 2.2)}</span>
