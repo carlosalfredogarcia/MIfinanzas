@@ -970,7 +970,7 @@ function toast(msg, tipo = 'ok') {
 
 async function abrirImportarCSV() {
 
-  document.getElementById('csv-estado').textContent = 'Selecciona el extracto de tu banco (CSV, XLS o XLSX). La app detectará los movimientos automáticamente — revisa las categorías antes de guardar.';
+  document.getElementById('csv-estado').textContent = 'Elige el extracto de tu banco (PDF, Excel o CSV) o capturas y fotos de tus gastos. La app saca los movimientos sola; revisa las categorías antes de guardar.';
   document.getElementById('csv-btn-seleccionar').style.display = 'block';
   document.getElementById('csv-file').value = '';
   document.getElementById('modal-csv').style.display = 'flex';
@@ -987,7 +987,17 @@ async function abrirImportarCSV() {
       dbClient.from('ingresos').select('*', { count: 'exact', head: true }).eq('usuario_id', uid).eq('origen', 'importado')
     ]);
     const total = (resG.count ?? 0) + (resI.count ?? 0);
-    const limite = 200;
+    const { data: perfilUso } = await dbClient.from('perfil').select('premium, codigos_usados, limite_importacion').eq('usuario_id', uid).limit(1);
+    const pu = perfilUso?.[0] || {};
+    if (pu.premium === true) {
+      texto.textContent = `${total} · sin límite`;
+      texto.style.color = '#4ade80';
+      barra.style.width = '100%';
+      barra.style.background = '#4ade80';
+      wrap.style.display = 'block';
+      return;
+    }
+    const limite = (pu.limite_importacion ?? 200) + parseCodigosUsados(pu.codigos_usados).length * 200;
     const pct = Math.min((total / limite) * 100, 100);
     const color = pct >= 90 ? '#ef4444' : pct >= 75 ? '#f0a030' : '#4ade80';
     texto.textContent = `${total} / ${limite}`;
@@ -1030,6 +1040,137 @@ function fixarMojibake(str) {
 // Lector de Excel (unos 300 KB): solo se descarga al importar un .xls o .xlsx
 const XLSX_URL = 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
 
+// ── Extractos en PDF y capturas o fotos (import-doc.js) ─────────────────────────────
+// Se leen en el móvil: el PDF con texto se manda como texto (lo más barato); el escaneado y las fotos,
+// como imágenes reducidas. Cada trozo va en su propia petición, varias a la vez.
+const PDFJS_URL = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
+const PDFJS_WORKER = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+const DOC_LIMITES = { mbPdf: 10, paginas: 20, imagenes: 10, lineasTrozo: 45, ladoImagen: 1600 };
+const esDocumento = f => f.type === 'application/pdf' || /\.pdf$/i.test(f.name) || f.type.startsWith('image/') || /\.(jpe?g|png|webp|heic)$/i.test(f.name);
+
+// Imagen → JPEG de como mucho 1600 px de lado (menos peso y menos coste en la IA)
+async function imagenReducida(fuente) {
+  const img = fuente instanceof HTMLCanvasElement ? fuente : await new Promise((ok, mal) => {
+    const i = new Image(); i.onload = () => ok(i); i.onerror = () => mal(new Error('No se pudo abrir la imagen'));
+    i.src = URL.createObjectURL(fuente);
+  });
+  const w = img.naturalWidth || img.width, h = img.naturalHeight || img.height;
+  const k = Math.min(1, DOC_LIMITES.ladoImagen / Math.max(w, h));
+  const c = document.createElement('canvas'); c.width = Math.round(w * k); c.height = Math.round(h * k);
+  const ctx = c.getContext('2d'); ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, c.width, c.height); ctx.drawImage(img, 0, 0, c.width, c.height);
+  return { imagen: { media_type: 'image/jpeg', data: c.toDataURL('image/jpeg', 0.82).split(',')[1] } };
+}
+
+// PDF → trozos de texto; si es escaneado (sin texto), una imagen por página
+async function piezasDePdf(file) {
+  if (file.size > DOC_LIMITES.mbPdf * 1024 * 1024) throw new Error(`El PDF pesa más de ${DOC_LIMITES.mbPdf} MB. Descarga un periodo más corto.`);
+  let pdfjs;
+  try { pdfjs = await MF.cargarScript(PDFJS_URL, () => window.pdfjsLib); }
+  catch { throw new Error('No se pudo abrir el lector de PDF. Comprueba tu conexión e inténtalo de nuevo.'); }
+  pdfjs.GlobalWorkerOptions.workerSrc = PDFJS_WORKER;
+  const pdf = await pdfjs.getDocument({ data: await file.arrayBuffer() }).promise;
+  if (pdf.numPages > DOC_LIMITES.paginas) throw new Error(`El PDF tiene ${pdf.numPages} páginas; como mucho ${DOC_LIMITES.paginas}. Descarga un periodo más corto.`);
+  const lineas = [], paginas = [];
+  for (let n = 1; n <= pdf.numPages; n++) {
+    const pag = await pdf.getPage(n); paginas.push(pag);
+    // Las piezas de texto con la misma altura forman una línea
+    const filas = new Map();
+    (await pag.getTextContent()).items.forEach(it => {
+      const y = Math.round(it.transform[5]); if (!filas.has(y)) filas.set(y, []);
+      filas.get(y).push([it.transform[4], it.str]);
+    });
+    [...filas.entries()].sort((a, b) => b[0] - a[0]).forEach(([, f]) => {
+      const t = f.sort((a, b) => a[0] - b[0]).map(x => x[1]).join(' ').replace(/\s+/g, ' ').trim();
+      if (t) lineas.push(t);
+    });
+  }
+  if (lineas.join('').length > 40 * pdf.numPages) {
+    const trozos = [];
+    for (let i = 0; i < lineas.length; i += DOC_LIMITES.lineasTrozo) trozos.push({ texto: lineas.slice(i, i + DOC_LIMITES.lineasTrozo).join('\n') });
+    return trozos;
+  }
+  // Escaneado: cada página como imagen
+  return Promise.all(paginas.map(async pag => {
+    const vista = pag.getViewport({ scale: 1 });
+    const v = pag.getViewport({ scale: DOC_LIMITES.ladoImagen / Math.max(vista.width, vista.height) });
+    const c = document.createElement('canvas'); c.width = v.width; c.height = v.height;
+    await pag.render({ canvasContext: c.getContext('2d'), viewport: v }).promise;
+    return imagenReducida(c);
+  }));
+}
+
+async function procesarDocumentos(archivos) {
+  const estado = document.getElementById('csv-estado');
+  const poner = t => { estado.textContent = t; };
+  document.getElementById('csv-btn-seleccionar').style.display = 'none';
+  const otraVez = msg => { poner('❌ ' + msg); document.getElementById('csv-btn-seleccionar').style.display = 'block'; document.getElementById('csv-file').value = ''; };
+  try {
+    const imagenes = archivos.filter(f => !(f.type === 'application/pdf' || /\.pdf$/i.test(f.name)));
+    const pdfs = archivos.filter(f => !imagenes.includes(f));
+    if (imagenes.length > DOC_LIMITES.imagenes) return otraVez(`Como mucho ${DOC_LIMITES.imagenes} capturas o fotos a la vez.`);
+    if (pdfs.length > 1) return otraVez('Elige un solo PDF cada vez.');
+
+    // Límite de importación (salvo premium): si ya se llegó, ni se llama a la IA
+    const uid = window.currentUserId;
+    const { data: pf } = await dbClient.from('perfil').select('premium, codigos_usados, limite_importacion').eq('usuario_id', uid).limit(1);
+    const p = pf?.[0] || {};
+    if (p.premium !== true) {
+      const [g, i] = await Promise.all([
+        dbClient.from('gastos').select('*', { count: 'exact', head: true }).eq('usuario_id', uid).eq('origen', 'importado'),
+        dbClient.from('ingresos').select('*', { count: 'exact', head: true }).eq('usuario_id', uid).eq('origen', 'importado')
+      ]);
+      if ((g.count ?? 0) + (i.count ?? 0) >= (p.limite_importacion ?? 200) + parseCodigosUsados(p.codigos_usados).length * 200) {
+        cerrarCSV();
+        document.getElementById('modal-limite-premium').style.display = 'flex';
+        actualizarModalLimite();
+        return;
+      }
+    }
+
+    poner(`📄 ${archivos.length === 1 ? archivos[0].name : archivos.length + ' archivos'}\n\nPreparando…`);
+    const piezas = [];
+    for (const f of pdfs) piezas.push(...await piezasDePdf(f));
+    for (const f of imagenes) piezas.push(await imagenReducida(f));
+
+    const { data: { session } } = await dbClient.auth.getSession();
+    if (!session?.access_token) return otraVez('Sesión expirada, vuelve a iniciar sesión.');
+    await cargarCategoriasPerfil();
+    let hechas = 0, fallos = 0;
+    poner(`Leyendo tus movimientos… 0 de ${piezas.length}`);
+    const leer = async pieza => {
+      try {
+        const r = await fetch('/.netlify/functions/import-doc', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json', authorization: 'Bearer ' + session.access_token },
+          body: JSON.stringify({ ...pieza, categorias: categoriasPerfil })
+        });
+        const d = await r.json().catch(() => ({}));
+        if (!r.ok) { fallos++; return []; }
+        return d.movimientos || [];
+      } catch { fallos++; return []; }
+      finally { poner(`Leyendo tus movimientos… ${++hechas} de ${piezas.length}`); }
+    };
+    // Como mucho 4 a la vez
+    const resultados = new Array(piezas.length);
+    let siguiente = 0;
+    await Promise.all(Array.from({ length: Math.min(4, piezas.length) }, async () => {
+      while (siguiente < piezas.length) { const k = siguiente++; resultados[k] = await leer(piezas[k]); }
+    }));
+    // La misma operación en dos capturas que se solapan cuenta una vez
+    const vistos = new Set();
+    const movimientos = resultados.flat().filter(m => {
+      const k = [m.fecha, m.monto, m.tipo, m.descripcion.toLowerCase()].join('|');
+      if (vistos.has(k)) return false; vistos.add(k); return true;
+    });
+    if (!movimientos.length) return otraVez(fallos ? 'No se pudo leer. Comprueba tu conexión e inténtalo de nuevo.' : 'No se encontraron movimientos. Prueba con una imagen más nítida o con el extracto en PDF.');
+    cerrarCSV();
+    abrirRevisionVoz(movimientos);
+    if (fallos) toast(`⚠️ ${fallos} parte${fallos === 1 ? '' : 's'} no se pudo leer: revisa que no falte nada`, 'err');
+  } catch (err) {
+    otraVez(err.message || 'No se pudo leer el archivo.');
+  }
+}
+
 async function fileToCSV(file) {
   const ext = file.name.split('.').pop().toLowerCase();
   if (ext === 'xls' || ext === 'xlsx') {
@@ -1052,7 +1193,9 @@ async function fileToCSV(file) {
 }
 
 async function procesarArchivoCSV(input) {
-  const file = input.files[0];
+  const archivos = [...input.files];
+  if (archivos.some(esDocumento)) return procesarDocumentos(archivos);
+  const file = archivos[0];
   if (!file) return;
   document.getElementById('csv-btn-seleccionar').style.display = 'none';
   document.getElementById('csv-estado').textContent = `📄 ${file.name}\n\nAnalizando tus movimientos...`;

@@ -88,6 +88,53 @@ module.exports = [
     },
   },
   {
+    nombre: 'importar capturas y un extracto en PDF: se leen por trozos y sin repetir movimientos',
+    async prueba(t) {
+      const pg = await t.abrir('mifinanza-movimientos.html', { datos: completo() })
+      const pedidas = []
+      // El servidor simulado devuelve lo mismo para cada trozo: Mercadona sale una vez aunque aparezca en dos capturas
+      await pg.route('**/.netlify/functions/import-doc', r => {
+        pedidas.push(JSON.parse(r.request().postData()))
+        r.fulfill({ contentType: 'application/json', body: JSON.stringify({ movimientos: [
+          { fecha: '2026-10-03', descripcion: 'Mercadona', categoria: '🛒 Supermercado', monto: 32.4, tipo: 'gasto' },
+          { fecha: '2026-10-0' + pedidas.length, descripcion: 'Bizum', categoria: '📦 Otros', monto: 10, tipo: 'ingreso' }] }) })
+      })
+      const png = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg=='
+      await pg.evaluate(() => abrirImportarCSV()); await pg.waitForTimeout(500)
+      t.contiene(await pg.$eval('#csv-uso-texto', e => e.textContent), '/ 200')
+      await pg.setInputFiles('#csv-file', [1, 2].map(n => ({ name: `captura${n}.png`, mimeType: 'image/png', buffer: Buffer.from(png, 'base64') })))
+      await pg.waitForTimeout(1500)
+      t.igual(pedidas.length, 2)
+      t.igual(pedidas[0].imagen.media_type, 'image/jpeg')
+      t.igual(await pg.$eval('#revision-voz-titulo', e => e.textContent), '3 movimientos detectados')
+      await pg.evaluate(() => cerrarRevisionVoz && cerrarRevisionVoz()).catch(() => {})
+
+      // Un PDF con texto se manda como texto, no como imagen
+      const { jsPDF } = require('jspdf')
+      const doc = new jsPDF(); doc.text('Fecha  Concepto  Importe', 10, 10)
+      ;['03/10/2026 COMPRA TARJ MERCADONA FUENGIROLA -32,40', '05/10/2026 BIZUM RECIBIDO DE ANA 10,00'].forEach((l, i) => doc.text(l, 10, 20 + i * 8))
+      pedidas.length = 0
+      await pg.evaluate(() => abrirImportarCSV()); await pg.waitForTimeout(400)
+      await pg.setInputFiles('#csv-file', { name: 'extracto.pdf', mimeType: 'application/pdf', buffer: Buffer.from(doc.output('arraybuffer')) })
+      await pg.waitForTimeout(2500)
+      t.igual(pedidas.length, 1)
+      t.contiene(pedidas[0].texto || '', 'MERCADONA')
+      t.ok(!pedidas[0].imagen, 'El PDF con texto se mandó como imagen')
+      t.sinErrores(pg)
+      await pg.context().close()
+    },
+  },
+  {
+    nombre: 'importar: con premium no hay límite',
+    async prueba(t) {
+      const datos = completo(); datos.perfil[0].premium = true
+      const pg = await t.abrir('mifinanza-movimientos.html', { datos })
+      await pg.evaluate(() => abrirImportarCSV()); await pg.waitForTimeout(600)
+      t.contiene(await pg.$eval('#csv-uso-texto', e => e.textContent), 'sin límite')
+      await pg.context().close()
+    },
+  },
+  {
     nombre: 'movimientos: buscar, filtrar y borrar con deshacer',
     async prueba(t) {
       const pg = await t.abrir('mifinanza-movimientos.html', { datos: completo() })

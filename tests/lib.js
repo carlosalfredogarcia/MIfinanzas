@@ -45,6 +45,8 @@ async function abrir(pagina, { datos = {}, ancho = 390, alto = 844, espera = 180
     }
     // jsPDF (PDF de Préstamos) desde el propio proyecto, sin depender de internet
     if (u.hostname === 'cdnjs.cloudflare.com' && u.pathname.includes('jspdf')) return r.fulfill({ path: require.resolve('jspdf/dist/jspdf.umd.min.js') })
+    // Lector de PDF (importar extractos en PDF), también desde el proyecto
+    if (u.hostname === 'cdnjs.cloudflare.com' && u.pathname.includes('pdf.js')) return r.fulfill({ path: require.resolve('pdfjs-dist/build/' + u.pathname.split('/').pop()), contentType: 'text/javascript' })
     // Fuentes y librerías externas: no hacen falta para probar
     return r.fulfill({ status: 204, body: '' })
   })

@@ -45,7 +45,9 @@ kit/                        página del QR del Kit de Seguridad Infantil (ALFREG
                             --data-binary @/tmp/kit.zip https://api.netlify.com/api/v1/sites/alfrega-kit.netlify.app/deploys
                             y comprobar con curl que alfrega-kit.netlify.app sirve la página nueva.
                             Sin clave (401): pasar al usuario el .zip de kit/ para «choose a file» en Netlify
-netlify/functions/          servidor: import-csv.js (IA para extractos, usa ANTHROPIC_API_KEY)
+netlify/functions/          servidor: import-csv.js (CSV y Excel; IA para extractos de bancos, usa ANTHROPIC_API_KEY)
+                            e import-doc.js (PDF, capturas y fotos: el móvil los parte en trozos y los manda a la vez;
+                            modelo en IMPORT_MODEL). Lo compartido, en netlify/lib/comun.js
 supabase/migrations/        SQL que se ejecuta a mano en el SQL Editor de Supabase
 tests/                      pruebas en Chromium con Supabase simulado (ver abajo)
 .claude/skills/             guías de diseño de cada pantalla
