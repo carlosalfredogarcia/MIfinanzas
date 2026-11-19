@@ -2279,22 +2279,64 @@ function renderPaso1() {
   })
   const pista = document.getElementById('ing-pista')
   if (pista) pista.hidden = ing > 0
-  const ver = document.getElementById('real-veredicto')
-  if (!ing || !cats.length) { ver.innerHTML = ''; return }
-  const saldo = Math.round(ing - total)
-  const tope = Math.max(ing, total)
-  ver.className = 'veredicto ' + (saldo < 0 ? 'neg' : 'pos')
-  ver.innerHTML = `<span class="v-lbl">Con tus gastos de hoy</span>
-    <b class="v-cifra num"><span data-cuenta="${saldo}">${(saldo > 0 ? '+' : '') + fmt(saldo)}</span> <small>al mes</small></b>
-    <div class="v-balanza">
-      <div class="v-fila"><span>Entra</span><i class="v-entra" style="--w:${(ing / tope).toFixed(3)}"></i><b class="num">${fmt(Math.round(ing))}</b></div>
-      <div class="v-fila"><span>Sale</span><i class="v-sale" style="--w:${(total / tope).toFixed(3)}"></i><b class="num">${fmt(Math.round(total))}</b></div>
-    </div>
-    <p>${saldo < 0
-      ? 'Gastas más de lo que entra. No pasa nada: aquí abajo le damos la vuelta.'
-      : `Te sobra dinero cada mes (${Math.round(saldo / ing * 100)} % de lo que entra). Vamos a convertirlo en un plan de ahorro.`}</p>`
-  contar(ver.querySelector('[data-cuenta]'))
+  pintarVeredicto(ing, total)
 }
+
+// Banner de «Tu plan»: lo que entra (se cambia con el lápiz), lo que sale de media y lo que queda con el plan.
+// Se monta una vez y luego solo cambian las cifras, para no perder el campo mientras se escribe.
+function pintarVeredicto(ing, total) {
+  const ver = document.getElementById('real-veredicto')
+  if (!ver) return
+  if (!ver.querySelector('.v-cifra')) {
+    ver.innerHTML = `<span class="v-lbl">Con tus gastos de hoy</span>
+      <b class="v-cifra num"><span class="v-saldo"></span> <small>al mes</small></b>
+      <div class="v-balanza">
+        <div class="v-fila v-fila-ing"><span>Entra</span><i class="v-entra"></i>
+          <button type="button" class="v-editar" aria-label="Cambiar lo que entra al mes"><b class="num v-ing"></b><span class="v-lapiz" aria-hidden="true">✏️</span></button>
+          <label class="v-ing-campo" hidden><input type="number" inputmode="decimal" class="v-ing-inp num" aria-label="Lo que entra al mes" placeholder="0"><span class="v-ing-mon"></span></label>
+        </div>
+        <div class="v-fila"><span>Sale</span><i class="v-sale"></i><b class="num v-gas"></b></div>
+      </div>
+      <div class="v-disp"><span>Disponible con tu plan</span><b class="num"></b></div>
+      <p class="v-msg"></p>`
+    const btn = ver.querySelector('.v-editar'), campo = ver.querySelector('.v-ing-campo'), inp = ver.querySelector('.v-ing-inp')
+    const abrir = () => {
+      btn.hidden = true; campo.hidden = false
+      inp.value = totalIngresos() || ''
+      ver.querySelector('.v-ing-mon').textContent = window.moneda || '€'
+      inp.focus(); inp.select()
+    }
+    const cerrar = () => { campo.hidden = true; btn.hidden = false; pintarVeredicto(totalIngresos(), _totalReal) }
+    btn.onclick = abrir
+    inp.addEventListener('input', () => {
+      const real = document.getElementById('p-ingresos-total')
+      real.value = inp.value
+      real.dispatchEvent(new Event('input'))
+    })
+    inp.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); inp.blur() } })
+    inp.addEventListener('blur', cerrar)
+  }
+  _totalReal = total
+  const saldo = Math.round(ing - total), tope = Math.max(ing, total, 1)
+  const disp = Math.round(ing - totalGastos())
+  ver.className = 'veredicto ' + (ing && saldo >= 0 ? 'pos' : 'neg')
+  const elSaldo = ver.querySelector('.v-saldo')
+  elSaldo.textContent = (saldo > 0 ? '+' : '') + fmt(saldo)
+  ver.querySelector('.v-entra').style.setProperty('--w', (ing / tope).toFixed(3))
+  ver.querySelector('.v-sale').style.setProperty('--w', (total / tope).toFixed(3))
+  ver.querySelector('.v-ing').textContent = ing ? fmt(Math.round(ing)) : 'Escríbelo'
+  ver.querySelector('.v-gas').textContent = fmt(Math.round(total))
+  const d = ver.querySelector('.v-disp b')
+  d.textContent = (disp > 0 ? '+' : '') + fmt(disp)
+  d.classList.toggle('neg', disp < 0)
+  ver.querySelector('.v-msg').textContent = !ing
+    ? 'Toca el lápiz y escribe lo que entra al mes: con eso hacemos tu plan.'
+    : saldo < 0
+      ? 'Gastas más de lo que entra. No pasa nada: planifica cada categoría y le damos la vuelta.'
+      : `Te sobra dinero cada mes (${Math.round(saldo / ing * 100)} % de lo que entra). Vamos a convertirlo en un plan de ahorro.`
+  if (ing && total) { elSaldo.dataset.cuenta = saldo; contar(elSaldo) }
+}
+let _totalReal = 0
 
 let _verTodasReal = false
 // Paso 1: tus últimos meses cerrados, uno por fila: lo que entró, lo que salió y lo que te quedó
@@ -2515,7 +2557,16 @@ function montarPlanGuiado() {
   _pg.setAttribute('role', 'dialog'); _pg.setAttribute('aria-modal', 'true'); _pg.setAttribute('aria-label', 'Planificar categoría por categoría')
   _pg.innerHTML = `
     <div class="pg-cab"><span class="pg-cuenta num"></span><button type="button" class="pg-x" aria-label="Cerrar">×</button></div>
-    <div class="pg-med"><div class="pg-med-top"><span>Gastos</span><b class="num"></b><span class="pg-obj"></span></div><div class="pg-med-barra"><i></i><em></em></div></div>
+    <div class="pg-med">
+      <div class="pg-med-top"><span>Gastos</span><b class="num"></b><button type="button" class="pg-obj" aria-expanded="false"></button></div>
+      <div class="pg-med-barra"><i></i><em></em></div>
+      <div class="pg-med-pie"><span class="pg-gastos num"></span><button type="button" class="pg-reset">↺ Restablecer</button></div>
+      <div class="pg-meta" hidden>
+        <p>¿Cuánto quieres ahorrar de lo que entra?</p>
+        <div class="pg-meta-chips"></div>
+        <label class="pg-meta-otro">Otro <input type="number" inputmode="numeric" min="5" max="50" class="num" aria-label="Porcentaje que quieres ahorrar"> %</label>
+      </div>
+    </div>
     <div class="pg-saltos" role="group" aria-label="Ir a una categoría"></div>
     <div class="pg-cuerpo">
       <div class="pg-emoji" aria-hidden="true"></div>
@@ -2546,11 +2597,52 @@ function montarPlanGuiado() {
   q('.pg-mas').onclick = () => ponerValorPG((parseFloat(q('.pg-inp').value) || 0) + 10)
   q('.pg-inp').addEventListener('input', e => ponerValorPG(Math.max(0, parseFloat(e.target.value) || 0), true))
   q('.pg-inp').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); q('.pg-sig').click() } })
+  q('.pg-obj').onclick = () => {
+    const m = q('.pg-meta'); m.hidden = !m.hidden
+    q('.pg-obj').setAttribute('aria-expanded', String(!m.hidden))
+    pintarPlanGuiado()
+  }
+  q('.pg-meta-chips').addEventListener('click', e => {
+    const b = e.target.closest('[data-pct]'); if (!b) return
+    ponerMetaAhorro(+b.dataset.pct); q('.pg-meta').hidden = true; q('.pg-obj').setAttribute('aria-expanded', 'false'); pintarPlanGuiado()
+  })
+  q('.pg-meta-otro input').addEventListener('change', e => {
+    const n = parseFloat(e.target.value); if (isNaN(n)) return
+    ponerMetaAhorro(Math.max(5, Math.min(50, Math.round(n)))); pintarPlanGuiado()
+  })
+  // Restablecer: todas las categorías vuelven a tu media real; durante unos segundos se puede deshacer
+  q('.pg-reset').onclick = () => {
+    const b = q('.pg-reset')
+    if (b._antes) {
+      filasPlan().forEach(f => { const v = b._antes[f._planCat]; if (v !== undefined) f.querySelector('.variable-input').value = v })
+      b._antes = null; clearTimeout(b._t); b.textContent = '↺ Restablecer'
+      guardarGastosLocal(); actualizarPlanificador(); pintarPlanGuiado()
+      return
+    }
+    const antes = {}
+    filasPlan().forEach(f => { antes[f._planCat] = f.querySelector('.variable-input').value })
+    restablecerGastos(); pintarPlanGuiado()
+    b._antes = antes; b.textContent = 'Deshacer'
+    clearTimeout(b._t); b._t = setTimeout(() => { b._antes = null; b.textContent = '↺ Restablecer' }, 6000)
+    toast('Todo como antes: tu media real en cada categoría', 'ok')
+  }
   q('.pg-tipo').addEventListener('click', e => {
     const b = e.target.closest('[data-tipo]'); if (!b) return
     setTipo(filasPlan()[_pgIdx]._planCat, b.dataset.tipo); pintarPlanGuiado()
   })
   document.addEventListener('keydown', e => { if (e.key === 'Escape' && !_pg.hidden) cerrarPlanGuiado() })
+}
+// Cuánto quiere ahorrar (el objetivo de gastos es el resto). Se guarda igual que en el antiguo selector de perfil.
+function ponerMetaAhorro(pct) {
+  const perfil = Object.keys(PERFILES_AHORRO).find(k => PERFILES_AHORRO[k] && PERFILES_AHORRO[k].ahorro === pct)
+  if (perfil) return seleccionarPerfil(perfil)
+  perfilAhorro = 'personalizado'
+  metaAhorro = pct
+  if (window.currentUserId) {
+    try { localStorage.setItem('mf_meta_ahorro_' + window.currentUserId, metaAhorro) } catch(e) {}
+    dbClient.from('perfil').update({ perfil_presupuesto: 'personalizado' }).eq('usuario_id', window.currentUserId)
+  }
+  actualizarAnalisis()
 }
 function abrirPlanGuiado(i) {
   if (!filasPlan().length) return
@@ -2611,7 +2703,14 @@ function pintarPlanGuiado(escribiendo) {
   const med = q('.pg-med')
   med.className = 'pg-med ' + (pG <= obj + 0.5 ? 'ok' : pG > 100 ? 'mal' : 'cerca')
   q('.pg-med-top b').textContent = `${Math.round(pG)} %`
-  q('.pg-obj').textContent = `objetivo ${obj} %`
+  q('.pg-obj').innerHTML = `objetivo ${obj} % <span aria-hidden="true">✏️</span>`
+  q('.pg-gastos').innerHTML = ing
+    ? `<b>${fmt(Math.round(totalGastos()))}</b> en gastos · máximo ${fmt(Math.round(ing * obj / 100))}`
+    : `<b>${fmt(Math.round(totalGastos()))}</b> en gastos`
+  const ahorroAhora = Math.round(metaAhorro)
+  q('.pg-meta-chips').innerHTML = [10, 15, 20, 25, 30].map(p => `<button type="button" class="pg-chip${p === ahorroAhora ? ' on' : ''}" data-pct="${p}">${p} %<small class="num">${ing ? fmt(Math.round(ing * p / 100)) : ''}</small></button>`).join('')
+  const otro = q('.pg-meta-otro input')
+  if (document.activeElement !== otro) otro.value = [10, 15, 20, 25, 30].includes(ahorroAhora) ? '' : ahorroAhora
   q('.pg-med-barra i').style.width = Math.min(100, pG / tope * 100) + '%'
   q('.pg-med-barra em').style.left = (obj / tope * 100) + '%'
   q('.pg-ant').disabled = _pgIdx === 0

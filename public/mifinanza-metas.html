@@ -41,7 +41,7 @@
       <p>Lo que entra, lo que gastas <b>de verdad</b> de media y cuánto quieres ahorrar. Sé sincero: un plan que puedas cumplir vale más que uno perfecto.</p>
     </div>
     <div class="veredicto" id="real-veredicto" aria-live="polite"></div>
-    <div class="planificador planificador-p1">
+    <div class="planificador planificador-p1 plan-oculto">
     <div class="bloque-acordeon">
       <div class="bloque-card clicable" onclick="toggleBloque('ingresos')">
         <div class="bloque-card-top">
@@ -58,10 +58,12 @@
     </div>
 
     </div>
+    <div class="plan-oculto">
     <div class="medidor" id="medidor" aria-live="polite"></div>
     <div class="tipos-ahorro" id="tipos-ahorro" role="radiogroup" aria-label="Tipo de ahorro"></div>
     <div class="propuesta" id="propuesta" aria-live="polite"></div>
-    <button type="button" class="btn-plan-guiado" onclick="abrirPlanGuiado(0)"><span aria-hidden="true">✍️</span><span><b>Planificar categoría por categoría</b><small id="plan-guiado-sub">Una pantalla para cada una: decides cuánto le dejas</small></span><span aria-hidden="true">→</span></button>
+    </div>
+    <button type="button" class="btn-plan-guiado" onclick="abrirPlanGuiado(0)"><span aria-hidden="true">✍️</span><span><b>Planificar categoría por categoría</b></span><span aria-hidden="true">→</span></button>
     <div class="planificador planificador-p2">
     <div class="plan-oculto" hidden>
     <div class="analisis-panel">
@@ -100,7 +102,7 @@
     </section>
     </div>
     </div>
-    <div class="bloque-card disponible-card" id="disponible-card">
+    <div class="bloque-card disponible-card plan-oculto" id="disponible-card">
       <div class="bloque-card-top">
         <span class="bloque-label">Te queda para ahorrar</span>
       </div>

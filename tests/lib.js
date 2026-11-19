@@ -6,7 +6,7 @@ const fs = require('fs'), path = require('path')
 const PUBLIC = path.join(__dirname, '..', 'public')
 const STUB = fs.readFileSync(path.join(__dirname, 'stub.js'), 'utf8')
 const HOY = '2026-10-21T12:00:00'
-const CHROME = process.env.CHROME_PATH || ['/opt/pw-browsers/chromium-1194/chrome-linux/chrome'].find(p => fs.existsSync(p))
+const CHROME = process.env.CHROME_PATH || ['/opt/pw-browsers/chromium-1194/chrome-linux/chrome', '/opt/pw-browsers/chromium'].find(p => fs.existsSync(p))
 
 let navegador
 // RECOGER=1 npm test → guarda en tests/sin-traducir.txt los textos que faltan en js/idioma-en.js
