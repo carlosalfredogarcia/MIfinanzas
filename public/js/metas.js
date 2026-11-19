@@ -2655,7 +2655,8 @@ _contGastos.addEventListener('input', e => {
   _antesPropuesta = null
   guardarGastosLocal()
   actualizarPlanificador()
-  mostrarAnalisisFloat(e.target)
+  // La ventanita «En tiempo real» solo al escribir en la lista, no al cambiar desde el plan guiado
+  if (document.activeElement === e.target) mostrarAnalisisFloat(e.target)
 })
 _contGastos.addEventListener('keydown', e => {
   if (e.key !== 'Enter') return
