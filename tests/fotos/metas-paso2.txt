@@ -1,18 +1,28 @@
 Mis metas
 Entiende tu dinero, haz tu plan y cúmplelo
 1
-Tu dinero
-2
 Tu plan
-3
+2
 Tu meta
-4
+3
 Seguimiento
-PASO 2 DE 4
-Tu plan mensual
+PASO 1 DE 3
+Tu plan
 
-Elige cómo quieres ahorrar y ajusta cada categoría hasta llegar a tu objetivo. Sé sincero: un plan que puedas cumplir vale más que uno perfecto.
+Lo que entra, lo que gastas de verdad de media y cuánto quieres ahorrar. Sé sincero: un plan que puedas cumplir vale más que uno perfecto.
 
+CON TUS GASTOS DE HOY
+−438 € al mes
+Entra
+1.380 €
+Sale
+1.818 €
+
+Gastas más de lo que entra. No pasa nada: aquí abajo le damos la vuelta.
+
+TUS INGRESOS DE ESTE MES
+›
+Restablecer
 Gastos
 132 %
 objetivo 85 %
@@ -69,99 +79,6 @@ Aplicar propuesta
 Planificar categoría por categoría
 Una pantalla para cada una: decides cuánto le dejas
 →
-% → €
-TU CASO
-Gastos ▾
-132 %
-85 %
-🔒 Necesarios
-75 %
-65 %
-✨ Opcionales
-57 %
-20 %
-Ahorro
-0 %
-%
-💡 Si bajas al 85% podrías ahorrar 207 €/mes — unos 2.484 € al año.
-AJUSTA CADA CATEGORÍA
-›
-1.818 €
-Restablecer
-Empieza con tu media real de los últimos meses cerrados. Toca − / + o escribe el importe.
-🏠
-Alquiler
-media 836 €
-Necesario
-−
-+
-🛒
-Supermercado
-media 193 €
-Necesario
-−
-+
-⛽
-Gasolina
-media 203 €
-Necesario
-−
-+
-💳
-Crédito
-media 180 €
-Necesario
-−
-+
-🎉
-Salidas
-media 120 €
-Necesario
-−
-+
-🌍
-Remesas
-media 91 €
-Necesario
-−
-+
-⚠️
-Gastos Imprevistos
-media 74 €
-Necesario
-−
-+
-💡
-Luz
-media 46 €
-Necesario
-−
-+
-🏋️
-Gym
-media 25 €
-Necesario
-−
-+
-📺
-Suscripción
-media 20 €
-Necesario
-−
-+
-🚗
-Vehículo
-media 15 €
-Necesario
-−
-+
-🧴
-Cuidado personal
-media 15 €
-Necesario
-−
-+
-✕ Cerrar gastos
 TE QUEDA PARA AHORRAR
 −438 €
 Siguiente: mi meta

@@ -29,26 +29,26 @@
   </div>
 
   <nav class="pasos" role="tablist" aria-label="Pasos">
-    <button type="button" role="tab" class="paso-tab" data-paso="1" onclick="irPaso(1)"><b>1</b><span>Tu dinero</span></button>
-    <button type="button" role="tab" class="paso-tab" data-paso="2" onclick="irPaso(2)"><b>2</b><span>Tu plan</span></button>
-    <button type="button" role="tab" class="paso-tab" data-paso="3" onclick="irPaso(3)"><b>3</b><span>Tu meta</span></button>
-    <button type="button" role="tab" class="paso-tab" data-paso="4" onclick="irPaso(4)"><b>4</b><span>Seguimiento</span></button>
+    <button type="button" role="tab" class="paso-tab" data-paso="2" onclick="irPaso(2)"><b>1</b><span>Tu plan</span></button>
+    <button type="button" role="tab" class="paso-tab" data-paso="3" onclick="irPaso(3)"><b>2</b><span>Tu meta</span></button>
+    <button type="button" role="tab" class="paso-tab" data-paso="4" onclick="irPaso(4)"><b>3</b><span>Seguimiento</span></button>
   </nav>
 
-  <section class="paso" id="paso-1" role="tabpanel" aria-labelledby="paso-1-t">
+  <section class="paso" id="paso-2" role="tabpanel" aria-labelledby="paso-2-t" hidden>
     <div class="paso-intro">
-      <span class="paso-eyebrow">Paso 1 de 4</span>
-      <h2 id="paso-1-t">Tu dinero real</h2>
-      <p>Antes de ponerte una meta, entiende tu dinero: lo que entra y lo que <b>de verdad</b> gastas de media, no lo que crees que gastas.</p>
+      <span class="paso-eyebrow">Paso 1 de 3</span>
+      <h2 id="paso-2-t">Tu plan</h2>
+      <p>Lo que entra, lo que gastas <b>de verdad</b> de media y cuánto quieres ahorrar. Sé sincero: un plan que puedas cumplir vale más que uno perfecto.</p>
     </div>
     <div class="veredicto" id="real-veredicto" aria-live="polite"></div>
     <div class="planificador planificador-p1">
     <div class="bloque-acordeon">
       <div class="bloque-card clicable" onclick="toggleBloque('ingresos')">
         <div class="bloque-card-top">
-          <span class="bloque-label">Ingresos</span>
+          <span class="bloque-label">Tus ingresos de este mes</span>
           <span class="bloque-chevron" id="chevron-ingresos">›</span>
         </div>
+        <p class="ing-pista" id="ing-pista" hidden>Aún no has apuntado lo que cobras este mes: escríbelo aquí 👇</p>
         <input type="number" inputmode="decimal" id="p-ingresos-total" class="bloque-ing-input" placeholder="0" onclick="event.stopPropagation()">
         <button class="btn-restablecer" onclick="event.stopPropagation();pedirConfirmacionReset(restablecerIngresos)">Restablecer</button>
       </div>
@@ -58,26 +58,12 @@
     </div>
 
     </div>
-    <section class="tarjeta meses-card" id="meses-card" hidden></section>
-    <section class="tarjeta" aria-labelledby="real-t">
-      <div class="t-head"><h3 class="t-titulo" id="real-t">Lo que gastas de verdad</h3><span class="t-nota-corta" id="real-sub"></span></div>
-      <div id="real-lista" class="real-lista"></div>
-      <div class="real-total"><span>Total al mes</span><b class="num" id="real-total">—</b></div>
-    </section>
-    <button type="button" class="btn-siguiente" onclick="irPaso(2)">Siguiente: hacer mi plan <span aria-hidden="true">→</span></button>
-  </section>
-
-  <section class="paso" id="paso-2" role="tabpanel" aria-labelledby="paso-2-t" hidden>
-    <div class="paso-intro">
-      <span class="paso-eyebrow">Paso 2 de 4</span>
-      <h2 id="paso-2-t">Tu plan mensual</h2>
-      <p>Elige cómo quieres ahorrar y ajusta cada categoría hasta llegar a tu objetivo. Sé sincero: un plan que puedas cumplir vale más que uno perfecto.</p>
-    </div>
     <div class="medidor" id="medidor" aria-live="polite"></div>
     <div class="tipos-ahorro" id="tipos-ahorro" role="radiogroup" aria-label="Tipo de ahorro"></div>
     <div class="propuesta" id="propuesta" aria-live="polite"></div>
-    <button type="button" class="btn-plan-guiado" onclick="abrirPlanGuiado(0)"><span aria-hidden="true">✍️</span><span><b>Planificar categoría por categoría</b><small>Una pantalla para cada una: decides cuánto le dejas</small></span><span aria-hidden="true">→</span></button>
+    <button type="button" class="btn-plan-guiado" onclick="abrirPlanGuiado(0)"><span aria-hidden="true">✍️</span><span><b>Planificar categoría por categoría</b><small id="plan-guiado-sub">Una pantalla para cada una: decides cuánto le dejas</small></span><span aria-hidden="true">→</span></button>
     <div class="planificador planificador-p2">
+    <div class="plan-oculto" hidden>
     <div class="analisis-panel">
       <div class="analisis-header" onclick="toggleAnalisis()">
         <div class="asi-summary" id="analisis-summary">
@@ -106,6 +92,14 @@
       </div>
     </div>
 
+    <div hidden>
+    <section class="tarjeta" aria-labelledby="real-t">
+      <div class="t-head"><h3 class="t-titulo" id="real-t">Lo que gastas de verdad</h3><span class="t-nota-corta" id="real-sub"></span></div>
+      <div id="real-lista" class="real-lista"></div>
+      <div class="real-total"><span>Total al mes</span><b class="num" id="real-total">—</b></div>
+    </section>
+    </div>
+    </div>
     <div class="bloque-card disponible-card" id="disponible-card">
       <div class="bloque-card-top">
         <span class="bloque-label">Te queda para ahorrar</span>
@@ -119,7 +113,7 @@
 
   <section class="paso" id="paso-3" role="tabpanel" aria-labelledby="paso-3-t" hidden>
     <div class="paso-intro">
-      <span class="paso-eyebrow">Paso 3 de 4</span>
+      <span class="paso-eyebrow">Paso 2 de 3</span>
       <h2 id="paso-3-t">Tu meta</h2>
       <p>Ahora sí, con base real. Contamos lo que has ahorrado de verdad y lo que tu plan te permite ahorrar en los meses que quedan.</p>
     </div>
@@ -190,7 +184,7 @@
 
   <section class="paso" id="paso-4" role="tabpanel" aria-labelledby="paso-4-t" hidden>
     <div class="paso-intro">
-      <span class="paso-eyebrow">Paso 4 de 4</span>
+      <span class="paso-eyebrow">Paso 3 de 3</span>
       <h2 id="paso-4-t">Seguimiento del mes</h2>
       <p>Lo que llevas gastado frente a tu plan. Si una categoría se pasa, reparte el exceso entre las que tienen margen.</p>
     </div>

@@ -17,10 +17,10 @@ module.exports = [
     },
   },
   {
-    nombre: 'metas: los 4 pasos',
+    nombre: 'metas: los 3 pasos',
     async prueba(t) {
       const pg = await t.abrir('mifinanza-metas.html', { datos: completo(), espera: 2500 })
-      for (const n of [1, 2, 3, 4]) {
+      for (const n of [2, 3, 4]) {
         await pg.evaluate(n => irPaso(n), n); await pg.waitForTimeout(500)
         t.foto('metas-paso' + n, await t.textoVisible(pg))
       }
@@ -46,12 +46,14 @@ module.exports = [
     },
   },
   {
-    nombre: 'metas: últimos meses en el paso 1 y plan categoría por categoría en el paso 2',
+    nombre: 'metas: tu plan con ingresos y plan categoría por categoría',
     async prueba(t) {
       const pg = await t.abrir('mifinanza-metas.html', { datos: completo(), espera: 2500 })
+      // El antiguo paso «Tu dinero» lleva a «Tu plan», con el veredicto y los ingresos
       await pg.evaluate(() => irPaso(1)); await pg.waitForTimeout(500)
-      t.igual(await pg.$$eval('#meses-card .mes-fila', e => e.length), 3)
-      await pg.evaluate(() => irPaso(2)); await pg.waitForTimeout(500)
+      t.ok(await pg.isVisible('#paso-2 #real-veredicto'), 'El resumen no está en Tu plan')
+      t.ok(await pg.isVisible('#p-ingresos-total'), 'No se pueden escribir los ingresos')
+      t.ok(!(await pg.isVisible('#gastos-lista-plan')), 'La lista larga de categorías sigue a la vista')
       const pct = () => pg.$eval('.pg-med-top b', b => parseInt(b.textContent))
       await pg.click('.btn-plan-guiado'); await pg.waitForTimeout(500)
       t.contiene(await pg.$eval('.pg-cuenta', e => e.textContent), '1 de ')
@@ -66,9 +68,13 @@ module.exports = [
       t.ok((await pg.$eval('.pg-nom', e => e.textContent)) !== nombre1, 'Siguiente no cambia de categoría')
       await pg.click('.pg-x'); await pg.waitForTimeout(300)
       t.ok(await pg.$eval('.pg', e => e.hidden), 'No se cierra')
-      // Tocar una categoría de la lista abre su pantalla
-      await pg.click('#gastos-lista-plan .var-row >> nth=3'); await pg.waitForTimeout(400)
+      // Desde la barra de iconos se salta a una categoría
+      await pg.click('.btn-plan-guiado'); await pg.waitForTimeout(400)
+      await pg.click('.pg-saltos button >> nth=3'); await pg.waitForTimeout(400)
       t.contiene(await pg.$eval('.pg-cuenta', e => e.textContent), '4 de ')
+      // Consejo sincero si se baja mucho
+      await pg.click('.pg-chip:has-text("Nada")'); await pg.waitForTimeout(300)
+      t.ok(await pg.$eval('.pg-aviso', e => e.classList.contains('ojo') || e.textContent === ''), 'Sin aviso al bajar a 0')
       t.sinErrores(pg)
       await pg.context().close()
     },

@@ -2221,6 +2221,7 @@ let calcMeta = null          // cálculo del modal de crear meta
 let _pasoElegido = false
 
 function irPaso(n) {
+  if (n < 2) n = 2  // «Tu dinero» ahora va dentro de «Tu plan»
   document.querySelectorAll('.paso').forEach(p => { p.hidden = p.id !== 'paso-' + n })
   document.querySelectorAll('.paso-tab').forEach(t => {
     const act = +t.dataset.paso === n
@@ -2237,7 +2238,7 @@ function elegirPasoInicial(hayMeta) {
   if (_pasoElegido) return
   let guardado = null
   try { guardado = parseInt(localStorage.getItem('mf-metas-paso')) } catch (e) {}
-  irPaso(guardado >= 1 && guardado <= 4 ? guardado : hayMeta ? 4 : 1)
+  irPaso(guardado >= 2 && guardado <= 4 ? guardado : hayMeta ? 4 : 2)
 }
 
 const nombreCat = c => (c || '').trim().replace(/^[^\p{L}\p{N}]+/u, '').trim()
@@ -2276,6 +2277,8 @@ function renderPaso1() {
   cont.querySelectorAll('.real-fila').forEach((f, k) => {
     const b = document.createElement('i'); b.className = 'real-barra'; b.style.setProperty('--w', (cats[k][1] / mayor).toFixed(3)); f.appendChild(b)
   })
+  const pista = document.getElementById('ing-pista')
+  if (pista) pista.hidden = ing > 0
   const ver = document.getElementById('real-veredicto')
   if (!ing || !cats.length) { ver.innerHTML = ''; return }
   const saldo = Math.round(ing - total)
@@ -2288,7 +2291,7 @@ function renderPaso1() {
       <div class="v-fila"><span>Sale</span><i class="v-sale" style="--w:${(total / tope).toFixed(3)}"></i><b class="num">${fmt(Math.round(total))}</b></div>
     </div>
     <p>${saldo < 0
-      ? 'Gastas más de lo que entra. No pasa nada: en el siguiente paso vemos cómo darle la vuelta.'
+      ? 'Gastas más de lo que entra. No pasa nada: aquí abajo le damos la vuelta.'
       : `Te sobra dinero cada mes (${Math.round(saldo / ing * 100)} % de lo que entra). Vamos a convertirlo en un plan de ahorro.`}</p>`
   contar(ver.querySelector('[data-cuenta]'))
 }
@@ -2513,6 +2516,7 @@ function montarPlanGuiado() {
   _pg.innerHTML = `
     <div class="pg-cab"><span class="pg-cuenta num"></span><button type="button" class="pg-x" aria-label="Cerrar">×</button></div>
     <div class="pg-med"><div class="pg-med-top"><span>Gastos</span><b class="num"></b><span class="pg-obj"></span></div><div class="pg-med-barra"><i></i><em></em></div></div>
+    <div class="pg-saltos" role="group" aria-label="Ir a una categoría"></div>
     <div class="pg-cuerpo">
       <div class="pg-emoji" aria-hidden="true"></div>
       <h2 class="pg-nom"></h2>
@@ -2532,7 +2536,12 @@ function montarPlanGuiado() {
   const q = c => _pg.querySelector(c)
   q('.pg-x').onclick = cerrarPlanGuiado
   q('.pg-ant').onclick = () => irPlanGuiado(_pgIdx - 1)
-  q('.pg-sig').onclick = () => _pgIdx >= filasPlan().length - 1 ? cerrarPlanGuiado() : irPlanGuiado(_pgIdx + 1)
+  q('.pg-sig').onclick = () => {
+    if (_pgIdx < filasPlan().length - 1) return irPlanGuiado(_pgIdx + 1)
+    cerrarPlanGuiado()
+    const queda = Math.round(totalIngresos() - totalGastos())
+    toast(queda > 0 ? `Plan listo: ahorras ${fmt(queda)} al mes. ¡A por ello!` : `Aún gastas ${fmt(-queda)} más de lo que entra. Revisa las opcionales: lo vas a conseguir.`, queda > 0 ? 'ok' : 'err', 4500)
+  }
   q('.pg-menos').onclick = () => ponerValorPG(Math.max(0, (parseFloat(q('.pg-inp').value) || 0) - 10))
   q('.pg-mas').onclick = () => ponerValorPG((parseFloat(q('.pg-inp').value) || 0) + 10)
   q('.pg-inp').addEventListener('input', e => ponerValorPG(Math.max(0, parseFloat(e.target.value) || 0), true))
@@ -2586,9 +2595,17 @@ function pintarPlanGuiado(escribiendo) {
   q('.pg-chips').querySelectorAll('[data-v]').forEach(b => { b.onclick = () => ponerValorPG(+b.dataset.v) })
   const tipo = categoriaTipos[cat] ?? 'opcional'
   q('.pg-tipo').querySelectorAll('[data-tipo]').forEach(b => b.classList.toggle('on', b.dataset.tipo === tipo))
-  q('.pg-aviso').textContent = media >= 20 && val < media * 0.5
-    ? (val === 0 ? `Tu media es ${fmt(media)}. ¿Seguro que este mes no gastarás nada aquí?` : `Es mucho menos que tu media (${fmt(media)}). Hazlo solo si de verdad puedes.`)
-    : ''
+  const aviso = q('.pg-aviso'), ahorra = media - val, suave = Math.round(media * 0.75 / 5) * 5
+  let txt = '', clase = ''
+  if (media >= 20 && val === 0) { txt = `Tu media aquí es ${fmt(media)}. Dejarlo en 0 es muy difícil de cumplir: ponle algo realista. Un plan que se cumple es el que funciona.`; clase = 'ojo' }
+  else if (media >= 20 && val < media * 0.5) { txt = `Estás bajando mucho: tu media es ${fmt(media)}. Si lo cumples, ¡genial! Si no, con −25 % (${fmt(suave)}) ya ahorras ${fmt(media - suave)} al mes.`; clase = 'ojo' }
+  else if (media > 0 && val < media * 0.97) { txt = `¡Bien! Aquí ahorras ${fmt(Math.round(ahorra))} al mes. 💪`; clase = 'bien' }
+  else if (media > 0 && val > media * 1.05) { txt = `Le dejas más que tu media: aquí tendrás margen.`; clase = '' }
+  aviso.textContent = txt
+  aviso.className = 'pg-aviso ' + clase
+  q('.pg-saltos').innerHTML = filas.map((f, k) => `<button type="button" class="${k === _pgIdx ? 'on' : ''}" data-k="${k}" aria-label="${MF.esc(nombreCat(f._planCat))}">${MF.esc(emojiCat(f._planCat))}</button>`).join('')
+  q('.pg-saltos').querySelectorAll('[data-k]').forEach(b => { b.onclick = () => irPlanGuiado(+b.dataset.k) })
+  q('.pg-saltos .on')?.scrollIntoView({ inline: 'center', block: 'nearest' })
   // Medidor: % de lo que entra que se va en gastos, frente al objetivo
   const ing = totalIngresos(), pG = ing ? totalGastos() / ing * 100 : 0, obj = Math.round(100 - metaAhorro), tope = Math.max(110, pG + 5)
   const med = q('.pg-med')

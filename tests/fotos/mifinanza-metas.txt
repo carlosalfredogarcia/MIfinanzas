@@ -1,14 +1,12 @@
 Mis metas
 Entiende tu dinero, haz tu plan y cúmplelo
 1
-Tu dinero
-2
 Tu plan
-3
+2
 Tu meta
-4
+3
 Seguimiento
-PASO 4 DE 4
+PASO 3 DE 3
 Seguimiento del mes
 
 Lo que llevas gastado frente a tu plan. Si una categoría se pasa, reparte el exceso entre las que tienen margen.
