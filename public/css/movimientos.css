@@ -210,16 +210,6 @@ body { font-family: 'Manrope', sans-serif; align-items: flex-start; }
 .vacio button { margin-top: 6px; height: 44px; padding: 0 18px; border-radius: 14px; border: 1px solid rgba(16,185,129,.5); background: rgba(16,185,129,.14); color: var(--green-txt); font: 800 14px 'Manrope', sans-serif; cursor: pointer; }
 
 /* Hoja de detalle */
-.det-importe { font-size: 40px; font-weight: 800; letter-spacing: -0.03em; font-variant-numeric: tabular-nums; margin: 4px 0 2px; }
-.det-desc { font-size: 18px; font-weight: 800; color: var(--text); }
-.det-meta { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin: 10px 0 14px; font-size: 13px; color: var(--subtext); }
-.det-contexto { padding: 12px 14px; border-radius: 14px; background: rgba(99,102,241,.10); border: 1px solid rgba(99,102,241,.25); font-size: 14px; color: #dbe2ff; line-height: 1.45; margin-bottom: 18px; }
-.det-acciones { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin-bottom: 8px; }
-.det-acciones button { height: 64px; border-radius: 16px; border: 1px solid var(--border2); background: var(--card2); color: var(--text); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; font: 700 13px 'Manrope', sans-serif; cursor: pointer; }
-.det-acciones button svg { width: 20px; height: 20px; }
-.det-acciones button[hidden] { display: none; }
-.det-acciones:has(button[hidden]) { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-.det-acciones .peligro { color: var(--red-txt); border-color: rgba(239,68,68,.3); }
 
 /* Aviso con deshacer */
 .deshacer {

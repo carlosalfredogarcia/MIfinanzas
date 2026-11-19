@@ -133,6 +133,7 @@
     <div class="fld" id="fld-fecha-fin"><label class="lbl">Fecha fin</label><span class="dp-wrap"><input type="hidden" id="e-fecha-fin" class="dp-real-input"><button type="button" class="inp dp-btn" data-dp-for="e-fecha-fin" onclick="openDatePicker('e-fecha-fin')"><span class="dp-txt" data-empty="true">Seleccionar fecha</span><svg class="dp-cal-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="16" height="15" rx="2"/><path d="M2 8h16M7 1v4M13 1v4"/></svg></button></span></div>
     <div class="fld" style="margin-bottom:18px"><label class="lbl">Monto</label><input type="number" id="e-monto" class="inp" placeholder="$0.00"></div>
     <button onclick="guardarEdicion()" class="btn-ok" id="edit-btn-ok" style="background:#6366f1;color:#fff">Guardar cambios</button>
+    <button onclick="repetirEditando()" class="btn-no" id="edit-btn-repetir">🔁 Repetir hoy</button>
     <button onclick="eliminarMovimiento()" class="btn-del">Eliminar</button>
     <button onclick="cerrarEditar()" class="btn-no">Cancelar</button>
   </div>
@@ -222,22 +223,6 @@
     <input type="text" id="borrar-confirmar-input" class="inp" placeholder="CONFIRMAR" autocomplete="off" oninput="actualizarBtnBorrar()" style="margin-bottom:12px">
     <button id="borrar-btn-ok" onclick="ejecutarBorrarTodo()" class="btn-ok" style="background:#ef4444;color:#fff;opacity:0.4;pointer-events:none">🗑 Eliminar todo</button>
     <button onclick="cerrarBorrar()" class="btn-no">Cancelar</button>
-  </div>
-</div>
-
-<div class="modal-base" id="modal-detalle">
-  <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="det-desc">
-    <div class="modal-handle"></div>
-    <div class="det-desc" id="det-desc"></div>
-    <div class="det-importe num" id="det-importe"></div>
-    <div class="det-meta" id="det-meta"></div>
-    <div class="det-contexto" id="det-contexto"></div>
-    <div class="det-acciones">
-      <button type="button" onclick="detalleEditar()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16Z"/></svg>Editar</button>
-      <button type="button" id="det-repetir" onclick="detalleRepetir()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 2l4 4-4 4"/><path d="M3 11V9a3 3 0 0 1 3-3h15M7 22l-4-4 4-4"/><path d="M21 13v2a3 3 0 0 1-3 3H3"/></svg>Repetir</button>
-      <button type="button" class="peligro" onclick="detalleEliminar()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg>Eliminar</button>
-    </div>
-    <button class="btn-no" onclick="cerrarDetalle()">Cerrar</button>
   </div>
 </div>
 

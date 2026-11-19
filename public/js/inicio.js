@@ -108,6 +108,30 @@ async function cargarSparkline(uid) {
     'Saldo a fin de mes: ' + meses6.map((m, i) => `${m.label} ${fmt(serie[i])}`).join(', '))
 }
 
+// A dónde va el dinero del mes: cada categoría (gastos y fijos), de mayor a menor, con los colores de Estadísticas
+const COLORES_CAT = ['#6366f1', '#10b981', '#f59e0b', '#ef4444', '#38bdf8', '#64748b']
+function pintarCategorias(filas) {
+  const suma = {}
+  filas.forEach(f => { const c = (f.categoria || '').trim() || '📦 Otros'; suma[c] = (suma[c] || 0) + parseFloat(f.monto) })
+  const orden = Object.entries(suma).filter(([, v]) => v > 0).sort((a, b) => b[1] - a[1])
+  const total = orden.reduce((t, [, v]) => t + v, 0)
+  const lista = document.getElementById('cats-lista'), barra = document.getElementById('cats-barra')
+  barra.hidden = !orden.length
+  if (!orden.length) { lista.innerHTML = '<div class="vacio">Sin gastos este mes</div>'; return }
+  const color = i => COLORES_CAT[Math.min(i, 5)]
+  barra.innerHTML = orden.map(([, v], i) => `<i style="flex:${v.toFixed(2)} 0 0;background:${color(i)}"></i>`).join('')
+  lista.innerHTML = ''
+  orden.forEach(([c, v], i) => {
+    const fila = document.createElement('div')
+    fila.className = 'cat-fila'
+    fila.innerHTML = `<span class="cat-ico" aria-hidden="true"></span><span class="cat-nom"><i style="background:${color(i)}"></i><span></span></span>
+      <span class="cat-imp num">${fmt(v)}</span><span class="cat-pct num">${pctTxt(v / total * 100)}</span>`
+    fila.querySelector('.cat-ico').textContent = MF.emoji(c)
+    fila.querySelector('.cat-nom span').textContent = MF.sinEmoji(c) || c
+    lista.appendChild(fila)
+  })
+}
+
 async function cargarDashboard() {
   let uid = window.currentUserId
   if (!uid) {
@@ -162,6 +186,8 @@ async function cargarDashboard() {
   // Salud financiera
   const pctGastado = totalIng > 0 ? (totalGastadoTodo / totalIng) * 100 : 0
   actualizarSalud(pctGastado, saldo, totalIng)
+
+  pintarCategorias([...(gastos || []), ...(fijos || [])])
 
   // Gastos fijos: de mayor a menor, cada uno con su % del total
   const listaFijos = document.getElementById('fijos-lista')

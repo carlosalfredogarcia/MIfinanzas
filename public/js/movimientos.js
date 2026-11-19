@@ -385,7 +385,7 @@ function prepararFila(fila, m) {
   btn.addEventListener('click', e => {
     if (horizontal) { horizontal = null; e.preventDefault(); return; }  // fue un deslizamiento, no un toque
     if (base) { cerrar(); return; }
-    abrirDetalle(m);
+    abrirEditar(m);
   });
   fila._cerrar = cerrar;
   accEditar.addEventListener('click', () => { cerrar(); abrirEditar(m); });
@@ -424,40 +424,12 @@ async function confirmarBorrado() {
 // Si se sale de la pantalla durante la cuenta atrás, el borrado se completa
 window.addEventListener('pagehide', () => { if (pendienteBorrado) confirmarBorrado(); });
 
-// ── Hoja de detalle ──
-let enDetalle = null;
-function abrirDetalle(m) {
-  enDetalle = m;
-  const esIngreso = m.tipo === 'ingreso';
-  document.getElementById('det-desc').textContent = m.descripcion || m.concepto || '';
-  const imp = document.getElementById('det-importe');
-  imp.textContent = (esIngreso ? '+' : '') + fmt(esIngreso ? importe(m) : -importe(m));
-  imp.style.color = esIngreso ? 'var(--green-txt)' : 'var(--red-txt)';
-  const f = new Date(m.fecha + 'T00:00:00');
-  const fechaTxt = f.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' });
-  const meta = document.getElementById('det-meta');
-  meta.innerHTML = '';
-  [getIcon(m.categoria) + ' ' + (sinEmoji(m.categoria) || (esIngreso ? 'Ingreso' : '—')), fechaTxt, m.tipo === 'fijo' ? 'Gasto fijo' : m.origen === 'importado' ? 'Importado' : 'Añadido a mano']
-    .forEach((t, i) => { const sp = document.createElement('span'); sp.textContent = (i ? '· ' : '') + t; meta.appendChild(sp); });
-  const mismos = todosMovimientos.filter(x => x.tipo === m.tipo && x.categoria === m.categoria);
-  const total = mismos.reduce((t, x) => t + importe(x), 0);
-  const ctx = document.getElementById('det-contexto');
-  ctx.textContent = m.categoria
-    ? `Este mes llevas ${fmt(total)} en ${sinEmoji(m.categoria)} (${mismos.length} ${mismos.length === 1 ? 'movimiento' : 'movimientos'}).`
-    : `Este mes llevas ${mismos.length} ${mismos.length === 1 ? 'movimiento' : 'movimientos'} de este tipo.`;
-  document.getElementById('det-repetir').hidden = m.tipo === 'fijo';
-  document.getElementById('modal-detalle').style.display = 'flex';
-}
-function cerrarDetalle() { document.getElementById('modal-detalle').style.display = 'none'; }
-function detalleEditar() { const m = enDetalle; cerrarDetalle(); if (m) abrirEditar(m); }
-function detalleEliminar() { const m = enDetalle; cerrarDetalle(); if (m) borrarConDeshacer(m); }
 // Repetir: abre la hoja rápida (apunte.js) con los mismos datos y la fecha de hoy
-function detalleRepetir() {
-  const m = enDetalle; cerrarDetalle();
+function repetirEditando() {
+  const m = editando; cerrarEditar();
   if (!m || !window.mfApunte) return;
   window.mfApunte.abrir(m.tipo === 'ingreso' ? 'ingreso' : 'gasto', { monto: +m.monto, descripcion: m.concepto || m.descripcion || '', categoria: m.categoria });
 }
-document.getElementById('modal-detalle').addEventListener('click', function (e) { if (e.target === this) cerrarDetalle(); });
 
 // ── Búsqueda ──
 ;(function () {
@@ -857,6 +829,7 @@ async function abrirEditar(m) {
   document.getElementById('fld-nombre').style.display      = esFijo ? '' : 'none';
   document.getElementById('fld-cat-fijo').style.display    = esFijo ? '' : 'none';
   document.getElementById('fld-fecha-fin').style.display   = esFijo ? '' : 'none';
+  document.getElementById('edit-btn-repetir').hidden = esFijo;
   if (esFijo) {
     document.getElementById('e-nombre').value    = m.nombre || '';
     document.getElementById('e-cat-fijo').value  = m.categoria;
