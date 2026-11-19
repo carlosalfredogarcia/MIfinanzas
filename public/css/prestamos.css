@@ -126,18 +126,25 @@ button, input { font-family: inherit; }
 .det-cifras .pend b { color: var(--acento-txt); }
 .acciones2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px; }
 .btn-sec { border: 1px solid var(--border2); background: var(--card2); color: var(--text); border-radius: 14px; padding: 12px; font-size: 13.5px; font-weight: 800; cursor: pointer; }
-.linea { position: relative; margin: 16px 0 6px; padding-left: 18px; }
-.linea::before { content: ''; position: absolute; left: 5px; top: 6px; bottom: 6px; width: 2px; background: var(--border); border-radius: 2px; }
-.mov { position: relative; display: flex; align-items: center; gap: 10px; padding: 8px 0; width: 100%; background: none; border: 0; color: inherit; text-align: left; cursor: pointer; }
-.mov::before { content: ''; position: absolute; left: -17px; top: 50%; width: 10px; height: 10px; margin-top: -5px; border-radius: 50%; background: var(--card); border: 2px solid var(--subtext); }
-.mov.abono::before { border-color: var(--green); background: var(--green); }
-.mov.prestado::before { border-color: var(--gold-txt); }
-.mov-info { flex: 1; min-width: 0; }
-.mov-info b { display: block; font-size: 14px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.mov-info small { font-size: 12px; color: var(--subtext); }
-.mov-monto { font-size: 14.5px; font-weight: 800; flex: none; }
-.mov.abono .mov-monto { color: var(--green-txt); }
-.mov.prestado .mov-monto { color: var(--gold-txt); }
+.h-titulo { margin: 18px 0 4px; font-size: 12px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+.historial { display: flex; flex-direction: column; margin-bottom: 14px; }
+.h-mes { margin: 12px 0 6px; font-size: 13px; font-weight: 800; color: var(--subtext); text-transform: capitalize; }
+.h-fila { display: grid; grid-template-columns: 46px minmax(0, 1fr) auto; gap: 12px; align-items: center; width: 100%; padding: 10px 12px; margin-bottom: 6px;
+  border-radius: 16px; background: var(--campo); border: 1px solid var(--border); color: inherit; text-align: left; font: inherit; cursor: pointer; }
+.h-fila.inicio { cursor: default; border-style: dashed; }
+.h-dia { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 46px; border-radius: 12px; background: var(--card); border: 1px solid var(--border); }
+.h-dia b { font-size: 17px; font-weight: 800; line-height: 1; }
+.h-dia small { font-size: 10.5px; font-weight: 800; text-transform: uppercase; color: var(--subtext); margin-top: 2px; }
+.h-info { min-width: 0; }
+.h-info b { display: block; font-size: 14.5px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.h-chip { display: inline-block; margin-top: 4px; font-style: normal; font-size: 11px; font-weight: 800; padding: 2px 8px; border-radius: 999px; background: rgba(148,163,184,.14); color: var(--subtext); }
+.h-fila.abono .h-chip { background: rgba(16,185,129,.16); color: var(--green-txt); }
+.h-fila.prestado .h-chip, .h-fila.inicio .h-chip { background: rgba(245,158,11,.16); color: var(--gold-txt); }
+.h-cifras { display: flex; flex-direction: column; align-items: flex-end; gap: 3px; }
+.h-cifras b { font-size: 15px; font-weight: 800; }
+.h-fila.abono .h-cifras b { color: var(--green-txt); }
+.h-fila.prestado .h-cifras b, .h-fila.inicio .h-cifras b { color: var(--gold-txt); }
+.h-cifras small { font-size: 11.5px; font-weight: 700; color: var(--subtext); }
 .det-pie { display: grid; gap: 8px; margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--border); }
 .btn-texto { border: 0; background: none; color: var(--subtext); font-size: 13px; font-weight: 700; cursor: pointer; padding: 8px; }
 .btn-texto.peligro { color: var(--red-txt); }

@@ -25,6 +25,23 @@ Gastas más de lo que entra. No pasa nada: en el siguiente paso vemos cómo darl
 INGRESOS
 ›
 Restablecer
+TUS ÚLTIMOS MESES
+sin contar este mes
+Julio
+Entró 1.380 €
+Salió 1.794 €
+−414 €
+Agosto
+Entró 1.500 €
+Salió 1.901 €
+−401 €
+Septiembre
+Entró 1.380 €
+Salió 1.758 €
+−378 €
+
+De media gastas 398 € más de lo que entra cada mes.
+
 LO QUE GASTAS DE VERDAD
 media de Jul, Ago, Sep
 🏠
@@ -47,24 +64,7 @@ Salidas
 🌍
 Remesas
 91 €
-⚠️
-Gastos Imprevistos
-74 €
-💡
-Luz
-46 €
-🏋️
-Gym
-25 €
-📺
-Suscripción
-20 €
-🚗
-Vehículo
-15 €
-🧴
-Cuidado personal
-15 €
+Ver las 12 categorías
 Total al mes
 1.818 €
 Siguiente: hacer mi plan

@@ -860,6 +860,7 @@ async function cargarGastos() {
   const numMeses = mesesCerrados.length || 1
   ahorroRealMedio = mesesCerrados.length ? mesesCerrados.reduce((t, d) => t + d.ingresos - d.gastos, 0) / mesesCerrados.length : null
   mesesBase = mesesCerrados.map(d => d.mes)
+  mesesResumen = mesesCerrados.slice().reverse().map(d => ({ nombre: d.mesNombre, ingresos: d.ingresos, gastos: d.gastos }))
 
   console.log('[Planificador] mesActual (excluido):', mesActual)
   console.log('[Planificador] mesesCerrados:', JSON.stringify(mesesCerrados.map(d => d.key)))
@@ -2214,6 +2215,7 @@ function renderTablaComparativa() {
 // ═════════════ Recorrido guiado en 4 pasos ═════════════
 let ahorroRealMedio = null   // ahorro real medio de los últimos meses cerrados
 let mesesBase = []           // meses usados para las medias
+let mesesResumen = []        // { nombre, ingresos, gastos } de esos meses, del más antiguo al más reciente
 let metaProgreso = null      // { actual, objetivo, fechaLimite } de la meta principal
 let calcMeta = null          // cálculo del modal de crear meta
 let _pasoElegido = false
@@ -2250,9 +2252,9 @@ function renderPaso1() {
   const ing = totalIngresos()
   document.getElementById('real-sub').textContent = mesesBase.length ? `media de ${mesesBase.slice().reverse().join(', ')}` : ''
   cont.innerHTML = cats.length ? '' : '<p class="real-vacio">Aún no hay meses cerrados con gastos. Cuando termine tu primer mes verás aquí tu media real.</p>'
-  cats.forEach(([c, v]) => {
+  cats.forEach(([c, v], k) => {
     const fila = document.createElement('div')
-    fila.className = 'real-fila'
+    fila.className = 'real-fila' + (k >= 6 && !_verTodasReal ? ' real-oculta' : '')
     const nec = (categoriaTipos[c] ?? 'opcional') === 'necesario'
     fila.innerHTML = `<span class="real-ico" aria-hidden="true"></span><span class="real-nom"></span>${nec ? '<span class="etq-nec">Necesario</span>' : ''}<b class="num"></b>`
     fila.querySelector('.real-ico').textContent = emojiCat(c)
@@ -2260,6 +2262,14 @@ function renderPaso1() {
     fila.querySelector('b').textContent = fmt(Math.round(v))
     cont.appendChild(fila)
   })
+  if (cats.length > 6) {
+    const mas = document.createElement('button')
+    mas.type = 'button'; mas.className = 'real-mas'
+    mas.textContent = _verTodasReal ? 'Ver menos' : `Ver las ${cats.length} categorías`
+    mas.onclick = () => { _verTodasReal = !_verTodasReal; renderPaso1() }
+    cont.appendChild(mas)
+  }
+  renderMeses()
   document.getElementById('real-total').textContent = fmt(Math.round(total))
   // Cada categoría con su barra: qué parte del total se lleva
   const mayor = cats.length ? cats[0][1] : 1
@@ -2281,6 +2291,30 @@ function renderPaso1() {
       ? 'Gastas más de lo que entra. No pasa nada: en el siguiente paso vemos cómo darle la vuelta.'
       : `Te sobra dinero cada mes (${Math.round(saldo / ing * 100)} % de lo que entra). Vamos a convertirlo en un plan de ahorro.`}</p>`
   contar(ver.querySelector('[data-cuenta]'))
+}
+
+let _verTodasReal = false
+// Paso 1: tus últimos meses cerrados, uno por fila: lo que entró, lo que salió y lo que te quedó
+function renderMeses() {
+  const el = document.getElementById('meses-card')
+  if (!el) return
+  if (!mesesResumen.length) { el.hidden = true; return }
+  el.hidden = false
+  const tope = Math.max(...mesesResumen.map(m => Math.max(m.ingresos, m.gastos)), 1)
+  const media = mesesResumen.reduce((t, m) => t + m.ingresos - m.gastos, 0) / mesesResumen.length
+  el.innerHTML = `<div class="t-head"><h3 class="t-titulo">Tus últimos meses</h3><span class="t-nota-corta">sin contar este mes</span></div>
+    ${mesesResumen.map(m => {
+      const queda = Math.round(m.ingresos - m.gastos)
+      return `<div class="mes-fila">
+        <span class="mes-nom">${m.nombre}</span>
+        <span class="mes-barras"><i class="b-entra" style="--w:${(m.ingresos / tope).toFixed(3)}"></i><i class="b-sale" style="--w:${(m.gastos / tope).toFixed(3)}"></i></span>
+        <span class="mes-cifras num"><small>Entró ${fmt(Math.round(m.ingresos))}</small><small>Salió ${fmt(Math.round(m.gastos))}</small></span>
+        <b class="mes-queda num ${queda < 0 ? 'neg' : 'pos'}">${queda > 0 ? '+' : ''}${fmt(queda)}</b>
+      </div>`
+    }).join('')}
+    <p class="mes-media ${media < 0 ? 'neg' : 'pos'}">${media < 0
+      ? `De media gastas <b>${fmt(Math.round(-media))}</b> más de lo que entra cada mes.`
+      : `De media te quedan <b>${fmt(Math.round(media))}</b> al mes.`}</p>`
 }
 
 // La cifra grande sube desde 0 la primera vez que se ve; después cambia sin animación
@@ -2466,6 +2500,113 @@ function realismoModal() {
     : `Exige ${fmt(Math.ceil(necesario))}/mes de los ${fmt(Math.round(calcMeta.dispMensual))} que deja tu plan.`}</p></div>`
 }
 document.getElementById('m-monto').addEventListener('input', realismoModal)
+
+// ── Paso 2 guiado: una pantalla por categoría (Siguiente / Anterior), y desde la lista a una en concreto ──
+let _pg = null, _pgIdx = 0
+const filasPlan = () => [...document.querySelectorAll('#gastos-lista-plan .var-row')].filter(r => r._planCat && r.querySelector('.variable-input'))
+function montarPlanGuiado() {
+  if (_pg) return
+  _pg = document.createElement('div')
+  _pg.className = 'pg'
+  _pg.hidden = true
+  _pg.setAttribute('role', 'dialog'); _pg.setAttribute('aria-modal', 'true'); _pg.setAttribute('aria-label', 'Planificar categoría por categoría')
+  _pg.innerHTML = `
+    <div class="pg-cab"><span class="pg-cuenta num"></span><button type="button" class="pg-x" aria-label="Cerrar">×</button></div>
+    <div class="pg-med"><div class="pg-med-top"><span>Gastos</span><b class="num"></b><span class="pg-obj"></span></div><div class="pg-med-barra"><i></i><em></em></div></div>
+    <div class="pg-cuerpo">
+      <div class="pg-emoji" aria-hidden="true"></div>
+      <h2 class="pg-nom"></h2>
+      <p class="pg-media"></p>
+      <div class="pg-importe">
+        <button type="button" class="pg-menos" aria-label="Bajar 10">−</button>
+        <label><input class="pg-inp num" type="number" inputmode="decimal" enterkeyhint="next" aria-label="Lo que le dejas al mes"><span class="pg-mon"></span></label>
+        <button type="button" class="pg-mas" aria-label="Subir 10">+</button>
+      </div>
+      <p class="pg-al-mes">al mes</p>
+      <div class="pg-chips"></div>
+      <div class="pg-tipo" role="group" aria-label="Tipo de gasto"><button type="button" data-tipo="necesario">Necesario</button><button type="button" data-tipo="opcional">Opcional</button></div>
+      <p class="pg-aviso" aria-live="polite"></p>
+    </div>
+    <div class="pg-pie"><button type="button" class="pg-ant">← Anterior</button><button type="button" class="pg-sig">Siguiente →</button></div>`
+  document.body.appendChild(_pg)
+  const q = c => _pg.querySelector(c)
+  q('.pg-x').onclick = cerrarPlanGuiado
+  q('.pg-ant').onclick = () => irPlanGuiado(_pgIdx - 1)
+  q('.pg-sig').onclick = () => _pgIdx >= filasPlan().length - 1 ? cerrarPlanGuiado() : irPlanGuiado(_pgIdx + 1)
+  q('.pg-menos').onclick = () => ponerValorPG(Math.max(0, (parseFloat(q('.pg-inp').value) || 0) - 10))
+  q('.pg-mas').onclick = () => ponerValorPG((parseFloat(q('.pg-inp').value) || 0) + 10)
+  q('.pg-inp').addEventListener('input', e => ponerValorPG(Math.max(0, parseFloat(e.target.value) || 0), true))
+  q('.pg-inp').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); q('.pg-sig').click() } })
+  q('.pg-tipo').addEventListener('click', e => {
+    const b = e.target.closest('[data-tipo]'); if (!b) return
+    setTipo(filasPlan()[_pgIdx]._planCat, b.dataset.tipo); pintarPlanGuiado()
+  })
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && !_pg.hidden) cerrarPlanGuiado() })
+}
+function abrirPlanGuiado(i) {
+  if (!filasPlan().length) return
+  montarPlanGuiado()
+  _pg.hidden = false
+  document.documentElement.style.overflow = 'hidden'
+  irPlanGuiado(i)
+}
+function cerrarPlanGuiado() {
+  _pg.hidden = true
+  document.documentElement.style.overflow = ''
+}
+function irPlanGuiado(i) {
+  const n = filasPlan().length
+  _pgIdx = Math.max(0, Math.min(n - 1, i))
+  pintarPlanGuiado()
+  _pg.querySelector('.pg-cuerpo').classList.remove('pg-entra'); void _pg.offsetWidth; _pg.querySelector('.pg-cuerpo').classList.add('pg-entra')
+}
+// Cambia el valor en la fila del plan (y se guarda y recalcula como al tocar − / + en la lista)
+function ponerValorPG(v, escribiendo) {
+  const inp = filasPlan()[_pgIdx]?.querySelector('.variable-input')
+  if (!inp) return
+  inp.value = Math.round(v)
+  inp.dispatchEvent(new Event('input', { bubbles: true }))
+  pintarPlanGuiado(escribiendo)
+}
+function pintarPlanGuiado(escribiendo) {
+  const filas = filasPlan(), fila = filas[_pgIdx]
+  if (!fila) return
+  const q = c => _pg.querySelector(c), cat = fila._planCat
+  const val = parseFloat(fila.querySelector('.variable-input').value) || 0
+  const media = Math.round(gastosOriginal[cat] || 0)
+  q('.pg-cuenta').textContent = `${_pgIdx + 1} de ${filas.length}`
+  q('.pg-emoji').textContent = emojiCat(cat)
+  q('.pg-nom').textContent = nombreCat(cat)
+  q('.pg-media').innerHTML = media ? `Tu media real: <b>${fmt(media)}</b> al mes${mesesBase.length ? ` <small>(${mesesBase.slice().reverse().join(', ')})</small>` : ''}` : 'Aún no tienes gastos aquí'
+  if (!escribiendo) q('.pg-inp').value = Math.round(val)
+  q('.pg-mon').textContent = window.moneda || '€'
+  const opciones = [['Como siempre', media], ['−10 %', Math.round(media * 0.9 / 5) * 5], ['−25 %', Math.round(media * 0.75 / 5) * 5], ['La mitad', Math.round(media / 2 / 5) * 5], ['Nada', 0]]
+    .filter(([, v], k, a) => k === 0 || (media > 0 && a.findIndex(x => x[1] === v) === k))
+  q('.pg-chips').innerHTML = opciones.map(([t, v]) => `<button type="button" class="pg-chip${Math.round(val) === v ? ' on' : ''}" data-v="${v}">${t}<small class="num">${fmt(v)}</small></button>`).join('')
+  q('.pg-chips').querySelectorAll('[data-v]').forEach(b => { b.onclick = () => ponerValorPG(+b.dataset.v) })
+  const tipo = categoriaTipos[cat] ?? 'opcional'
+  q('.pg-tipo').querySelectorAll('[data-tipo]').forEach(b => b.classList.toggle('on', b.dataset.tipo === tipo))
+  q('.pg-aviso').textContent = media >= 20 && val < media * 0.5
+    ? (val === 0 ? `Tu media es ${fmt(media)}. ¿Seguro que este mes no gastarás nada aquí?` : `Es mucho menos que tu media (${fmt(media)}). Hazlo solo si de verdad puedes.`)
+    : ''
+  // Medidor: % de lo que entra que se va en gastos, frente al objetivo
+  const ing = totalIngresos(), pG = ing ? totalGastos() / ing * 100 : 0, obj = Math.round(100 - metaAhorro), tope = Math.max(110, pG + 5)
+  const med = q('.pg-med')
+  med.className = 'pg-med ' + (pG <= obj + 0.5 ? 'ok' : pG > 100 ? 'mal' : 'cerca')
+  q('.pg-med-top b').textContent = `${Math.round(pG)} %`
+  q('.pg-obj').textContent = `objetivo ${obj} %`
+  q('.pg-med-barra i').style.width = Math.min(100, pG / tope * 100) + '%'
+  q('.pg-med-barra em').style.left = (obj / tope * 100) + '%'
+  q('.pg-ant').disabled = _pgIdx === 0
+  q('.pg-sig').textContent = _pgIdx === filas.length - 1 ? 'Terminar ✓' : 'Siguiente →'
+}
+// Tocar el nombre de una categoría en la lista abre su pantalla
+document.getElementById('gastos-lista-plan').addEventListener('click', e => {
+  if (e.target.closest('input, button, label')) return
+  const fila = e.target.closest('.var-row')
+  if (!fila || !fila._planCat) return
+  abrirPlanGuiado(filasPlan().indexOf(fila))
+})
 
 cargarMetas()
 cargarIngresos()

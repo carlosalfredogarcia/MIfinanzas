@@ -46,6 +46,34 @@ module.exports = [
     },
   },
   {
+    nombre: 'metas: últimos meses en el paso 1 y plan categoría por categoría en el paso 2',
+    async prueba(t) {
+      const pg = await t.abrir('mifinanza-metas.html', { datos: completo(), espera: 2500 })
+      await pg.evaluate(() => irPaso(1)); await pg.waitForTimeout(500)
+      t.igual(await pg.$$eval('#meses-card .mes-fila', e => e.length), 3)
+      await pg.evaluate(() => irPaso(2)); await pg.waitForTimeout(500)
+      const pct = () => pg.$eval('.pg-med-top b', b => parseInt(b.textContent))
+      await pg.click('.btn-plan-guiado'); await pg.waitForTimeout(500)
+      t.contiene(await pg.$eval('.pg-cuenta', e => e.textContent), '1 de ')
+      const nombre1 = await pg.$eval('.pg-nom', e => e.textContent), antes = await pct()
+      await pg.click('.pg-chip:has-text("La mitad")'); await pg.waitForTimeout(300)
+      t.ok(await pct() < antes, 'Bajar la categoría no baja el % de gastos')
+      // El valor llega a la lista del plan
+      const enLista = await pg.evaluate(n => [...document.querySelectorAll('#gastos-lista-plan .var-row')].find(r => r._planCat.includes(n)).querySelector('.variable-input').value, nombre1)
+      t.igual(enLista, await pg.inputValue('.pg-inp'))
+      await pg.click('.pg-sig'); await pg.waitForTimeout(500)
+      t.contiene(await pg.$eval('.pg-cuenta', e => e.textContent), '2 de ')
+      t.ok((await pg.$eval('.pg-nom', e => e.textContent)) !== nombre1, 'Siguiente no cambia de categoría')
+      await pg.click('.pg-x'); await pg.waitForTimeout(300)
+      t.ok(await pg.$eval('.pg', e => e.hidden), 'No se cierra')
+      // Tocar una categoría de la lista abre su pantalla
+      await pg.click('#gastos-lista-plan .var-row >> nth=3'); await pg.waitForTimeout(400)
+      t.contiene(await pg.$eval('.pg-cuenta', e => e.textContent), '4 de ')
+      t.sinErrores(pg)
+      await pg.context().close()
+    },
+  },
+  {
     nombre: 'metas: la propuesta de recortes se aplica y se deshace',
     async prueba(t) {
       const pg = await t.abrir('mifinanza-metas.html', { datos: completo(), espera: 2500 })

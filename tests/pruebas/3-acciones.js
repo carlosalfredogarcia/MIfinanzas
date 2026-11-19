@@ -321,7 +321,7 @@ module.exports = [
       const fs = require('fs'), path = require('path')
       const pg = await t.abrir('mifinanza-prestamos.html', { datos: completo() })
       await pg.click('[data-id="pr1"]'); await pg.waitForTimeout(400)
-      t.contiene(await pg.$eval('.linea', e => e.innerText), '📎 comprobante')
+      t.contiene(await pg.$eval('.historial', e => e.innerText), '📎')
       // Abono con una foto: se reduce a JPEG y se guarda con el id del movimiento
       await pg.click('#d-abono'); await pg.waitForTimeout(400)
       await pg.keyboard.type('20')

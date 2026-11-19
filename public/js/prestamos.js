@@ -289,8 +289,27 @@ function abrirDetalle(id) {
   const p = prestamos.find(x => String(x.id) === String(id))
   if (!p) return
   const c = cuentas(p), deben = p.tipo === 'preste'
-  // Línea de tiempo: el préstamo inicial y cada movimiento, del más reciente al más antiguo
-  const movs = [...movsDe(p)].sort((a, b) => b.fecha.localeCompare(a.fecha) || String(b.id).localeCompare(String(a.id)))
+  // Historial: del más reciente al más antiguo, por meses, con lo que quedaba pendiente después de cada movimiento
+  const { filas } = extracto(p), movs = movsDe(p)
+  const MESES_L = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre']
+  const items = filas.map((f, i) => ({ ...f, mov: i ? f.mov : null, inicio: !i })).reverse()
+  let mesAnt = ''
+  const historial = items.map(f => {
+    const [y, m, d] = f.fecha.split('-')
+    const mes = `${MESES_L[+m - 1]} ${y}`
+    const cab = mes !== mesAnt ? `<div class="h-mes">${mes}</div>` : ''
+    mesAnt = mes
+    const presto = f.prestado > 0, clase = f.inicio ? 'inicio' : presto ? 'prestado' : 'abono'
+    const titulo = f.inicio ? (deben ? 'Le prestaste' : 'Te prestó')
+      : f.mov.descripcion || (presto ? (deben ? 'Le prestaste más' : 'Te prestó más') : (deben ? 'Te devolvió' : 'Devolviste'))
+    const etiqueta = f.inicio ? 'Préstamo' : presto ? 'Préstamo más' : 'Devolución'
+    const atr = f.inicio ? '' : ` data-mov="${esc(f.mov.id)}"`
+    return `${cab}<${f.inicio ? 'div' : 'button type="button"'} class="h-fila ${clase}"${atr}>
+      <span class="h-dia"><b>${+d}</b><small>${MESES[+m - 1]}</small></span>
+      <span class="h-info"><b>${esc(titulo)}</b><small><i class="h-chip">${etiqueta}</i>${!f.inicio && tieneComp(f.mov) ? ' 📎' : ''}</small></span>
+      <span class="h-cifras"><b class="num">${presto || f.inicio ? '+' : '−'}${din(f.inicio ? f.prestado : presto ? f.prestado : f.abonado, p)}</b><small class="num">Quedan ${din(f.saldo, p)}</small></span>
+    </${f.inicio ? 'div' : 'button'}>`
+  }).join('')
   abrirHoja(p.nombre, `
     <p class="nota" style="text-align:left;margin:0 0 10px">${deben ? `${esc(p.nombre)} te debe` : `Le debes a ${esc(p.nombre)}`} · desde ${fechaTxt(p.fecha_inicio)}</p>
     <div class="det-cifras">
@@ -300,17 +319,13 @@ function abrirDetalle(id) {
     </div>
     <div class="p-barra" style="margin:0 0 14px"><i style="width:${c.pct}%"></i></div>
     ${p.activo ? `<div class="acciones2"><button type="button" class="btn-grande" id="d-abono">＋ ${deben ? 'Me devolvió' : 'Devolví'}</button><button type="button" class="btn-sec" id="d-mas">${deben ? 'Le presté más' : 'Me prestó más'}</button></div>` : ''}
+    <h3 class="h-titulo">Historial</h3>
+    <div class="historial">${historial}</div>
     <button type="button" class="btn-grande btn-wa" id="d-pdf" style="margin-top:4px">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6M12 18v-6M9 15l3 3 3-3"/></svg>
       Enviar estado de cuenta (PDF)</button>
     ${movs.some(tieneComp) ? `<label class="interruptor"><input type="checkbox" id="d-con-comp" ${localStorage.getItem('mf-pdf-comprobantes') === '1' ? 'checked' : ''}><span></span>Incluir los comprobantes en el PDF</label>` : ''}
     <button type="button" class="btn-texto" id="d-texto" style="width:100%">o enviar un resumen por WhatsApp</button>
-    <div class="linea">
-      ${movs.map(m => `<button type="button" class="mov ${m.tipo === 'prestado' ? 'prestado' : 'abono'}" data-mov="${esc(m.id)}">
-        <span class="mov-info"><b>${esc(m.descripcion || (m.tipo === 'prestado' ? (deben ? 'Le prestaste más' : 'Te prestó más') : (deben ? 'Te devolvió' : 'Devolviste')))}</b><small>${fechaTxt(m.fecha)} · ${m.tipo === 'prestado' ? 'préstamo' : 'abono'}${tieneComp(m) ? ' · 📎 comprobante' : ''}</small></span>
-        <span class="mov-monto num">${m.tipo === 'prestado' ? '+' : '−'}${din(m.monto, p)}</span></button>`).join('')}
-      <div class="mov"><span class="mov-info"><b>${deben ? 'Le prestaste' : 'Te prestó'}</b><small>${fechaTxt(p.fecha_inicio)} · inicio</small></span><span class="mov-monto num">${din(c.inicial, p)}</span></div>
-    </div>
     <div class="det-pie">
       <button type="button" class="btn-sec" id="d-saldar">${p.activo ? (c.pendiente > 0 ? 'Marcar como saldado' : '✓ Marcar como saldado') : 'Reabrir'}</button>
       <button type="button" class="btn-texto" id="d-editar">Editar nombre, fecha o importe inicial</button>
@@ -479,9 +494,9 @@ function borrarMovimiento(p, mov) {
 function extracto(p) {
   const c = cuentas(p)
   const filas = [{ fecha: String(p.fecha_inicio).slice(0, 10), concepto: 'Préstamo inicial', prestado: c.inicial, abonado: 0 }]
-  for (const m of [...movsDe(p)].sort((a, b) => a.fecha.localeCompare(b.fecha))) {
+  for (const m of [...movsDe(p)].sort((a, b) => a.fecha.localeCompare(b.fecha) || String(a.id).localeCompare(String(b.id)))) {
     const presto = m.tipo === 'prestado'
-    filas.push({ fecha: String(m.fecha).slice(0, 10), concepto: m.descripcion || (presto ? 'Préstamo adicional' : 'Abono'), prestado: presto ? num(m.monto) : 0, abonado: presto ? 0 : num(m.monto) })
+    filas.push({ fecha: String(m.fecha).slice(0, 10), concepto: m.descripcion || (presto ? 'Préstamo adicional' : 'Abono'), prestado: presto ? num(m.monto) : 0, abonado: presto ? 0 : num(m.monto), mov: m })
   }
   let saldo = 0
   for (const f of filas) { saldo += f.prestado - f.abonado; f.saldo = Math.max(0, saldo) }

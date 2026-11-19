@@ -58,6 +58,7 @@
     </div>
 
     </div>
+    <section class="tarjeta meses-card" id="meses-card" hidden></section>
     <section class="tarjeta" aria-labelledby="real-t">
       <div class="t-head"><h3 class="t-titulo" id="real-t">Lo que gastas de verdad</h3><span class="t-nota-corta" id="real-sub"></span></div>
       <div id="real-lista" class="real-lista"></div>
@@ -75,6 +76,7 @@
     <div class="medidor" id="medidor" aria-live="polite"></div>
     <div class="tipos-ahorro" id="tipos-ahorro" role="radiogroup" aria-label="Tipo de ahorro"></div>
     <div class="propuesta" id="propuesta" aria-live="polite"></div>
+    <button type="button" class="btn-plan-guiado" onclick="abrirPlanGuiado(0)"><span aria-hidden="true">✍️</span><span><b>Planificar categoría por categoría</b><small>Una pantalla para cada una: decides cuánto le dejas</small></span><span aria-hidden="true">→</span></button>
     <div class="planificador planificador-p2">
     <div class="analisis-panel">
       <div class="analisis-header" onclick="toggleAnalisis()">
