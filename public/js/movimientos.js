@@ -659,8 +659,6 @@ async function guardarRevisionVoz() {
   }
 
   const ops = [];
-  console.log('Insertando gastos:', JSON.stringify(gastos));
-  console.log('Insertando ingresos:', JSON.stringify(ingresos));
   if (gastos.length)   ops.push(dbClient.from('gastos').insert(gastos));
   if (ingresos.length) ops.push(dbClient.from('ingresos').insert(ingresos));
   const resultados = await Promise.all(ops);
@@ -1191,7 +1189,6 @@ async function procesarArchivoCSV(input) {
         dbClient.from('ingresos').select('*', { count: 'exact', head: true }).eq('usuario_id', uid).eq('origen', 'importado')
       ]);
       const totalImportados = (resGcsv.count ?? 0) + (resIcsv.count ?? 0);
-      console.log('filasCsv:', filasCsv, 'totalImportados:', totalImportados, 'limiteTotal:', limiteTotalCSV);
       if (totalImportados + filasCsv > limiteTotalCSV) {
         _pendingCsvText = csvText;
         document.getElementById('csv-btn-seleccionar').style.display = 'block';
@@ -1226,7 +1223,6 @@ async function procesarArchivoCSV(input) {
       return;
     }
     datos = await resp.json();
-    console.log('DBG importacion:', JSON.stringify(datos.dbg, null, 2));
     // Aceptar movimientos de Tipo A (mifinanza) y Tipo B (banco), más alias gastos
     let movimientos = Array.isArray(datos.movimientos) && datos.movimientos.length
       ? datos.movimientos

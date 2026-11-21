@@ -104,9 +104,9 @@ async function cargarPlan() {
 // ── Categorías ─────────────────────────────────────────────
 async function cargarUsos() {
   const res = await Promise.all([
-    dbClient.from('gastos').select('categoria').eq('usuario_id', uid),
+    MF.todas(() => dbClient.from('gastos').select('id, categoria').eq('usuario_id', uid).order('id')),
     dbClient.from('gastos_fijos').select('categoria').eq('usuario_id', uid),
-    dbClient.from('ingresos').select('tipo').eq('usuario_id', uid),
+    MF.todas(() => dbClient.from('ingresos').select('id, tipo').eq('usuario_id', uid).order('id')),
   ])
   usos = {}
   for (const r of res) for (const f of r.data || []) { const c = f.categoria || f.tipo; if (c) usos[c] = (usos[c] || 0) + 1 }

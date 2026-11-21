@@ -3,7 +3,7 @@
 (function () {
   const D = window.__DATA__ || {};
   function q(table) {
-    let rows = (D[table] || []).slice(), one = false;
+    let rows = (D[table] || []).slice(), one = false, orden = [];
     const api = {
       insert(v) { (window.__INS__ = window.__INS__ || []).push({ table, v }); rows = [{ id: 'nuevo-1' }]; return p; },
       update(v) { (window.__UPD__ = window.__UPD__ || []).push({ table, v }); return p; },
@@ -18,10 +18,17 @@
       },
       gte(c, v) { rows = rows.filter(r => r[c] >= v); return p; },
       lte(c, v) { rows = rows.filter(r => r[c] <= v); return p; },
-      order(c, o) { rows.sort((a, z) => (o && o.ascending ? 1 : -1) * (a[c] > z[c] ? 1 : -1)); return p; },
+      // Varios order() se aplican en orden, como en Supabase (fecha y luego id)
+      order(c, o) {
+        orden.push([c, o && o.ascending ? 1 : -1])
+        rows.sort((a, z) => { for (const [k, s] of orden) { if (a[k] !== z[k]) return s * (a[k] > z[k] ? 1 : -1) } return 0 })
+        return p
+      },
       limit(n) { rows = rows.slice(0, n); return p; },
+      range(a, b) { rows = rows.slice(a, b + 1); return p; },
       single() { one = true; return p; }, maybeSingle() { one = true; return p; },
-      then(res, rej) { return Promise.resolve({ data: one ? (rows[0] || null) : rows, error: null, count: rows.length }).then(res, rej); },
+      // Como Supabase: como mucho 1.000 filas por consulta (si no se pide un trozo con range)
+      then(res, rej) { return Promise.resolve({ data: one ? (rows[0] || null) : rows.slice(0, 1000), error: null, count: rows.length }).then(res, rej); },
     };
     const p = new Proxy(api, { get: (t, k) => k in t ? t[k] : () => p });
     return p;

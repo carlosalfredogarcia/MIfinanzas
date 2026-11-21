@@ -142,31 +142,26 @@ async function cargarDashboard() {
   }
   if (!uid) return
 
-  const { data: perfil } = await dbClient.from('perfil').select('nombre').eq('usuario_id', uid).single()
+  const inicio = anioVer + '-' + String(mesVer+1).padStart(2,'0') + '-01'
+  const ultimoDia = new Date(anioVer, mesVer+1, 0).getDate()
+  const fin = anioVer + '-' + String(mesVer+1).padStart(2,'0') + '-' + String(ultimoDia).padStart(2,'0')
+
+  // Todo a la vez: antes iban una consulta detrás de otra (perfil, ingresos de prueba, el mes, metas
+  // que no se usaban y el último gasto) y en móvil cada viaje a Supabase sumaba espera
+  cargarSparkline(uid)
+  const [{ data: perfil }, { data: gastos }, { data: ingresos }, { data: fijos }, { data: ultimo }] = await Promise.all([
+    dbClient.from('perfil').select('nombre').eq('usuario_id', uid).limit(1).maybeSingle(),
+    dbClient.from('gastos').select('fecha,monto,categoria').eq('usuario_id', uid).gte('fecha', inicio).lte('fecha', fin),
+    dbClient.from('ingresos').select('monto').eq('usuario_id', uid).gte('fecha', inicio).lte('fecha', fin),
+    dbClient.from('gastos_fijos').select('nombre,categoria,monto').eq('usuario_id', uid).lte('fecha_inicio', fin).or(`fecha_fin.gte.${inicio},fecha_fin.is.null`),
+    dbClient.from('gastos').select('fecha,descripcion,categoria,monto').eq('usuario_id', uid).order('fecha', { ascending: false }).limit(1)
+  ])
+
   if (perfil?.nombre) {
     document.getElementById('saludo-nombre').textContent = 'Hola, ' + perfil.nombre
     document.getElementById('avatar-header').textContent = perfil.nombre[0].toUpperCase()
   }
   document.getElementById('header-saludo').style.visibility = 'visible'
-
-  const inicio = anioVer + '-' + String(mesVer+1).padStart(2,'0') + '-01'
-  const ultimoDia = new Date(anioVer, mesVer+1, 0).getDate()
-  const fin = anioVer + '-' + String(mesVer+1).padStart(2,'0') + '-' + String(ultimoDia).padStart(2,'0')
-
-  console.log('[dashboard] uid:', uid, 'inicio:', inicio, 'fin:', fin)
-  const { data: todosIngresos } = await dbClient.from('ingresos').select('fecha,monto').eq('usuario_id', uid).order('fecha', { ascending: false }).limit(10)
-  console.log('[dashboard] TODOS los ingresos del usuario (sin filtro de fecha):', todosIngresos)
-
-  const [{ data: gastos, error: eGas }, { data: ingresos, error: eIng }, { data: fijos, error: eFij }] = await Promise.all([
-    dbClient.from('gastos').select('*').eq('usuario_id', uid).gte('fecha', inicio).lte('fecha', fin),
-    dbClient.from('ingresos').select('*').eq('usuario_id', uid).gte('fecha', inicio).lte('fecha', fin),
-    dbClient.from('gastos_fijos').select('*').eq('usuario_id', uid).lte('fecha_inicio', fin).or(`fecha_fin.gte.${inicio},fecha_fin.is.null`)
-  ])
-  const { data: metas } = await dbClient.from('metas').select('*').eq('usuario_id', uid).eq('es_principal', true).maybeSingle()
-
-  console.log('[dashboard] gastos mes:', gastos?.length, eGas?.message)
-  console.log('[dashboard] ingresos mes:', ingresos, 'error:', eIng?.message)
-  console.log('[dashboard] fijos:', fijos?.length, eFij?.message)
 
   const totalGas = (gastos   || []).reduce((s,g) => s + parseFloat(g.monto), 0)
   const totalIng = (ingresos || []).reduce((s,i) => s + parseFloat(i.monto), 0)
@@ -181,7 +176,6 @@ async function cargarDashboard() {
   const saldoEl = document.getElementById('saldo-amount')
   saldoEl.className = 'saldo-amount num' + (saldo < 0 ? ' negativo' : '')
   saldoEl.textContent = fmt(saldo)
-  cargarSparkline(uid)
 
   // Salud financiera
   const pctGastado = totalIng > 0 ? (totalGastadoTodo / totalIng) * 100 : 0
@@ -213,7 +207,6 @@ async function cargarDashboard() {
     listaFijos.appendChild(div)
   })
 
-  const { data: ultimo } = await dbClient.from('gastos').select('*').eq('usuario_id', uid).order('fecha', { ascending: false }).limit(1)
   if (ultimo && ultimo.length > 0) {
     const u = ultimo[0]
     const cat = (u.categoria || '').trim()

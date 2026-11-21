@@ -3,8 +3,8 @@
 //   Cada respuesta buena se guarda, así la siguiente vez abre aunque la red sea lenta.
 // - Librerías del CDN con versión fija y fuentes: copia guardada primero (no cambian).
 // - Supabase (datos y sesión): nunca pasa por aquí.
-const CACHE = 'mifinanza-v14';
-const ASSETS = ['/icon-192.png', '/icon-512.png', '/apple-touch-icon.png', '/favicon.png', '/icon.svg'];
+const CACHE = 'mifinanza-v15';
+const ASSETS = ['/fonts/manrope.woff2', '/css/fuente.css', '/icon-192.png', '/icon-512.png', '/apple-touch-icon.png', '/favicon.png', '/icon.svg'];
 const ESPERA_RED = 3000;
 
 self.addEventListener('install', e => {
@@ -60,7 +60,7 @@ self.addEventListener('fetch', e => {
   if (url.hostname === 'fonts.googleapis.com') { e.respondWith(redPrimero(e.request, false)); return; }
   if (url.origin !== self.location.origin) return;
 
-  if (/\.(png|jpg|jpeg|svg|webp|ico)$/i.test(url.pathname)) { e.respondWith(copiaPrimero(e.request)); return; }
+  if (/\.(png|jpg|jpeg|svg|webp|ico|woff2)$/i.test(url.pathname)) { e.respondWith(copiaPrimero(e.request)); return; }
 
   // Páginas (con o sin ?accion=…), JS y CSS
   e.respondWith(redPrimero(e.request, e.request.mode === 'navigate'));

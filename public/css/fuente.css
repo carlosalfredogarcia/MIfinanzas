@@ -1,0 +1,10 @@
+/* Manrope (letra de toda la app) servida desde la propia web: sin pasar por Google Fonts,
+   que bloqueaba el dibujo de cada pantalla mientras se conectaba a otros dos servidores.
+   Un solo archivo con todos los grosores (200–800), solo letras latinas (español incluido). */
+@font-face {
+  font-family: 'Manrope';
+  font-style: normal;
+  font-weight: 200 800;
+  font-display: swap;
+  src: url(../fonts/manrope.woff2) format('woff2');
+}

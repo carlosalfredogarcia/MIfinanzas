@@ -282,3 +282,6 @@ body { font-family: 'Manrope', sans-serif; align-items: flex-start; }
 
 @media (prefers-reduced-motion: reduce) {
   .hero, .tarjeta, .analisis-card, }
+/* Ver todas las categorías / Ver menos */
+.cats-mas { display: block; width: 100%; margin-top: 6px; padding: 12px; border: 1px solid var(--border); border-radius: 12px; background: rgba(255,255,255,.03); color: var(--accent2); font: 700 13px 'Manrope', sans-serif; cursor: pointer; }
+.cats-mas:active { opacity: .7; }

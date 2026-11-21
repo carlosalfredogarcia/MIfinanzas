@@ -792,8 +792,8 @@ async function cargarGastos() {
     { data: ingresos, error: errI },
     { data: fijos,   error: errF }
   ] = await Promise.all([
-    dbClient.from('gastos').select('id, fecha, monto, categoria, descripcion').eq('usuario_id', uid).order('fecha', { ascending: true }),
-    dbClient.from('ingresos').select('fecha, monto').eq('usuario_id', uid).order('fecha', { ascending: true }),
+    MF.todas(() => dbClient.from('gastos').select('id, fecha, monto, categoria, descripcion').eq('usuario_id', uid).order('fecha', { ascending: true }).order('id')),
+    MF.todas(() => dbClient.from('ingresos').select('id, fecha, monto').eq('usuario_id', uid).order('fecha', { ascending: true }).order('id')),
     dbClient.from('gastos_fijos').select('id, monto, categoria, nombre, fecha_inicio, fecha_fin, dia_del_mes').eq('usuario_id', uid)
   ])
 
@@ -862,8 +862,6 @@ async function cargarGastos() {
   mesesBase = mesesCerrados.map(d => d.mes)
   mesesResumen = mesesCerrados.slice().reverse().map(d => ({ nombre: d.mesNombre, ingresos: d.ingresos, gastos: d.gastos }))
 
-  console.log('[Planificador] mesActual (excluido):', mesActual)
-  console.log('[Planificador] mesesCerrados:', JSON.stringify(mesesCerrados.map(d => d.key)))
 
   const sumasPorCategoria = {}
   mesesCerrados.forEach(d => {
@@ -872,17 +870,14 @@ async function cargarGastos() {
     })
   })
 
-  console.log('[Planificador] sumasPorCategoria:', JSON.stringify(sumasPorCategoria))
 
   gastosOriginal = {}
   Object.keys(sumasPorCategoria).forEach(cat => {
     gastosOriginal[cat] = sumasPorCategoria[cat] / numMeses
   })
 
-  console.log('[Planificador] gastosOriginal:', JSON.stringify(gastosOriginal))
 
-  await cargarGastosGuardados()
-  await cargarGruposPlan()
+  await Promise.all([cargarGastosGuardados(), cargarGruposPlan()])
   renderGastos()
 }
 

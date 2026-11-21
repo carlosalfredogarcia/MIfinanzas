@@ -22,6 +22,7 @@ let mesesPeriodo    = new Set()
 let catsSliceActual   = []
 let catsSoloMesActual = false
 let categoriaAbierta  = null
+let catsTodas         = false   // «Ver todas» las categorías o solo las 5 mayores
 let editandoItem      = null
 let catElegida        = false  // la categoría de Evolución la eligió el usuario
 let ingTotalResumen   = 0   // ingresos totales de lo que se está viendo, para la tasa de ahorro
@@ -66,8 +67,8 @@ async function fetchDatos() {
     { data: ingresos, error: errI },
     { data: fijos,   error: errF }
   ] = await Promise.all([
-    dbClient.from('gastos').select('id, fecha, monto, categoria, descripcion').eq('usuario_id', uid).order('fecha', { ascending: true }),
-    dbClient.from('ingresos').select('fecha, monto').eq('usuario_id', uid).order('fecha', { ascending: true }),
+    MF.todas(() => dbClient.from('gastos').select('id, fecha, monto, categoria, descripcion').eq('usuario_id', uid).order('fecha', { ascending: true }).order('id')),
+    MF.todas(() => dbClient.from('ingresos').select('id, fecha, monto').eq('usuario_id', uid).order('fecha', { ascending: true }).order('id')),
     dbClient.from('gastos_fijos').select('id, monto, categoria, nombre, fecha_inicio, fecha_fin, dia_del_mes').eq('usuario_id', uid)
   ])
 
@@ -322,6 +323,7 @@ function dibujarCats(slice, soloMes) {
   catsSliceActual   = slice
   catsSoloMesActual = soloMes
   categoriaAbierta  = null
+  catsTodas         = false
   renderCatsUI()
   renderExtras(slice, soloMes)
 }
@@ -358,10 +360,14 @@ function renderCatsUI() {
   const wrap = document.getElementById('cats-wrap')
   wrap.innerHTML = ''
   const mayor = orden.length ? orden[0][1] : 0
+  // Se ven las 5 mayores; el resto, al tocar «Ver todas» (y la abierta siempre se ve)
+  const VISIBLES = 5
+  const plegadas = !catsTodas && orden.length > VISIBLES + 1
 
   // Cada categoría: nombre y total; debajo, una barra (la mayor llena) con el % del gasto y la media al mes
-  orden.forEach(([cat, total]) => {
+  orden.forEach(([cat, total], i) => {
     const abierta = categoriaAbierta === cat
+    if (plegadas && i >= VISIBLES && !abierta) return
     const row = document.createElement('div')
     row.className = 'cat-row' + (abierta ? ' abierta' : '') + (soloMes ? ' solo-mes' : '')
     row.setAttribute('role', 'listitem')
@@ -398,6 +404,16 @@ function renderCatsUI() {
     }
     wrap.appendChild(row)
   })
+
+  if (orden.length > VISIBLES + 1) {
+    const mas = document.createElement('button')
+    mas.type = 'button'
+    mas.className = 'cats-mas'
+    mas.setAttribute('aria-expanded', String(catsTodas))
+    mas.textContent = catsTodas ? 'Ver menos' : `Ver las ${orden.length} categorías`
+    mas.addEventListener('click', () => { catsTodas = !catsTodas; renderCatsUI() })
+    wrap.appendChild(mas)
+  }
 }
 
 function renderAnalisis() {

@@ -61,6 +61,7 @@ Todo se calcula con `datos`; ninguna consulta nueva ni llamada a la API de Claud
 2. Dentro de la misma tarjeta (`#reparto`), TODAS las categorías de mayor a menor: nombre y total; debajo una
    barra roja (la mayor llena) con el % (y en período/año la media al mes). **Sin anillo**: el usuario lo quitó
    porque los colores no decían qué era cada cosa; el nombre va siempre junto a su barra, sin leyendas de color.
+   Se ven las 5 mayores y un botón «Ver las N categorías» / «Ver menos» (plegado al cambiar de mes).
    Tocar una fila despliega sus movimientos para ubicar o editar un gasto.
 3. **Evolución por categoría**: chips, barras con promedio, mes más alto en dorado. La nota de
    abajo es el resumen del período: "Tu mejor mes fue febrero: ahorraste 495 €. En 3 meses

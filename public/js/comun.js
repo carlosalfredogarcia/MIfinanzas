@@ -46,5 +46,17 @@
     return scripts[url]
   }
 
-  window.MF = { CATS_DEFAULT, CATS_GASTO, dinero, esc, pad, fechaLocal, sinEmoji, emoji, cargarScript }
+  // Supabase da como mucho 1.000 filas por consulta: con más movimientos se perdían los últimos meses.
+  // todas(() => dbClient.from('gastos').select(…).eq(…).order(…)) las trae todas, de 1.000 en 1.000
+  async function todas(consulta) {
+    const filas = []
+    for (let desde = 0; ; desde += 1000) {
+      const { data, error } = await consulta().range(desde, desde + 999)
+      if (error) return { data: null, error }
+      filas.push(...(data || []))
+      if (!data || data.length < 1000) return { data: filas, error: null }
+    }
+  }
+
+  window.MF = { CATS_DEFAULT, CATS_GASTO, dinero, esc, pad, fechaLocal, sinEmoji, emoji, cargarScript, todas }
 })()

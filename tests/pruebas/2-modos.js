@@ -3,6 +3,24 @@ const { completo } = require('../datos')
 
 module.exports = [
   {
+    nombre: 'estadísticas: con más de 1.000 movimientos no se pierde ninguno',
+    async prueba(t) {
+      const d = completo()
+      // 1.200 cafés antiguos: los meses recientes quedaban fuera del límite de 1.000 filas de Supabase
+      for (let i = 0; i < 1200; i++) d.gastos.push({ id: 90000 + i, fecha: '2025-06-0' + (1 + i % 9), descripcion: 'Café', categoria: '☕ Café', monto: 1, usuario_id: 'u1' })
+      const pg = await t.abrir('mifinanza-estadisticas-v2.html', { datos: d })
+      t.contiene(await pg.$eval('.hero', e => e.innerText), 'Octubre 2026')
+      t.contiene(await pg.$eval('#cats-wrap', e => e.innerText), 'Alquiler')
+      await pg.click('#tab-anio'); await pg.waitForTimeout(1000)
+      await pg.click('.cats-mas'); await pg.waitForTimeout(300)
+      const texto = await pg.$eval('#cats-wrap', e => e.innerText)
+      t.ok(/Café\s+1\.200/.test(texto), 'Faltan los 1.200 cafés: ' + texto.slice(0, 200))
+      t.contiene(await pg.$eval('.cats-mas', e => e.textContent), 'Ver menos')
+      t.sinErrores(pg)
+      await pg.context().close()
+    },
+  },
+  {
     nombre: 'estadísticas: por mes, año completo y período',
     async prueba(t) {
       const pg = await t.abrir('mifinanza-estadisticas-v2.html', { datos: completo() })

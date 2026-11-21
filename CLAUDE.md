@@ -22,7 +22,8 @@ public/                     lo que ve el usuario (Netlify publica esta carpeta)
     mifinanza-perfil         → perfil        nombre, moneda, plan, categorías (renombrar/juntar), cuenta, soporte WhatsApp
     mifinanza-viajes         → viajes        oculta en el menú
   js/auth.js                crea window.dbClient y window.currentUserId; redirige si no hay sesión; registra sw.js
-  js/comun.js               window.MF: CATS_DEFAULT, CATS_GASTO, dinero(n, decimales), esc, fechaLocal, sinEmoji, emoji
+  js/comun.js               window.MF: CATS_DEFAULT, CATS_GASTO, dinero(n, decimales), esc, fechaLocal, sinEmoji, emoji,
+                            todas(() => consulta): trae TODAS las filas (Supabase corta en 1.000); úsala si no hay filtro de fechas
   js/nav.js                 barra inferior, botón + y menú (todas las pantallas)
   js/apunte.js              hoja rápida de gasto o ingreso (la abre nav.js); se abre rellena con ?texto= o ?accion=gasto&importe=&comercio=
   js/datepicker.js          selector de fechas
@@ -37,6 +38,8 @@ public/                     lo que ve el usuario (Netlify publica esta carpeta)
                             el idioma se elige en Perfil (o en la pantalla de acceso) y se guarda en el móvil
   landing-cine.html         la landing (estilo de la app, capturas reales de img/landing/; ?desde=kit da las gracias)
   landing.html, privacidad.html, sw.js, manifest.json, .well-known/ (app Android)
+  fonts/manrope.woff2 + css/fuente.css   la letra, servida desde la web (no Google Fonts): cada pantalla lleva
+                            <link rel="preload" …manrope.woff2> y css/fuente.css, y preconnect a Supabase
 kit/                        página del QR del Kit de Seguridad Infantil (ALFREGA, otro sitio de Netlify:
                             alfrega-kit.netlify.app). Se publica SOLA desde GitHub (main, base directory kit) desde el
                             21 nov: no subir zips. Los QR ya están impresos: NUNCA renombrar ni borrar el proyecto
@@ -71,6 +74,8 @@ tests/                      pruebas en Chromium con Supabase simulado (ver abajo
   (`cd tests && RECOGER=1 npm test` lista en tests/sin-traducir.txt lo que falta; la prueba «inglés» falla si queda algo).
 - Diseño: fondo #0a0e1a, tarjetas #111827, bordes #1f2937, esmeralda #10b981, rojo #ef4444, índigo #6366f1,
   dorado #f59e0b; letra Manrope; cifras con tabular-nums; hojas que suben desde abajo con «Deshacer» en vez de alertas.
+- Rápido: las consultas de una pantalla van juntas en un Promise.all (nunca una detrás de otra) y solo con las
+  columnas que se usan; nada de consultas de depuración ni console.log.
 - Móviles viejos y conexiones lentas: nada de `backdrop-filter`/`filter: blur` ni sintaxis más nueva que Chrome 80
   (`?.` y `??` sí; `||=`, `.at()`, `replaceChildren` no). sw.js guarda copia de todo: red primero, copia si tarda más de 3 s.
 - Ningún cálculo usa la IA salvo la importación de extractos (cuesta dinero: no añadir llamadas sin permiso).
