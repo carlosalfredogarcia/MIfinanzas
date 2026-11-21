@@ -25,6 +25,19 @@ Lista viva: al empezar una conversación nueva, leer esto y `CLAUDE.md`. Al term
    testers mutuos, familia, campaña del kit). Los 14 días empiezan con 12 inscritos a la vez; luego pedir
    acceso a producción. No usar cuentas falsas.
 
+## Publicado en `main` (17–21/11/2026)
+
+- Dominio nuevo `mifinanzas.alfrega.es` (el antiguo sigue funcionando). Recuperar contraseña vuelve al dominio desde el que se pide.
+- Importar: además de CSV/Excel, PDF (10 MB, 20 páginas), capturas y fotos (hasta 10) por `import-doc.js`;
+  un solo modelo para toda la importación (variable `IMPORT_MODEL`). Con premium, «sin límite».
+- Dictar un gasto por voz (gratis, sin IA): micrófono al lado del importe; entiende «hoy», «ayer», «el lunes», «3 de octubre».
+- Botón +: sin «Eliminar todo» (sigue en Perfil → Borrar todos mis movimientos).
+- Movimientos: un toque abre Editar. Inicio: a dónde va tu dinero este mes.
+- Metas en 3 pasos («Tu dinero» dentro de «Tu plan»); lo que entra se edita en el banner, un solo botón;
+  objetivo y restablecer dentro del plan guiado; sin la ventanita «En tiempo real».
+- Préstamos: historial por meses.
+- Kit: parte «Para negocios» con enlaces a alfrega.es; la web no se regala, el primer mes es gratis.
+
 ## Publicado en `main` (25/10/2026)
 
 - Pantalla de acceso nueva (Manrope, aurora y luces vivas, logo propio, cristal con borde de luz, ver contraseña, avisos amables).
