@@ -194,7 +194,7 @@ async function enviarRecuperacion() {
   ocultarError()
   mostrarCarga('Enviando enlace...', '')
   const { error } = await dbClient.auth.resetPasswordForEmail(email, {
-    redirectTo: 'https://dulcet-raindrop-bf51bd.netlify.app/index.html'
+    redirectTo: location.origin + '/index.html'
   })
   document.getElementById('loading').classList.remove('visible')
   if (error) { mostrarError(mensajeAmable(error)); return }
