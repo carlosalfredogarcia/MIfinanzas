@@ -548,6 +548,21 @@
     return r
   }
 
+  // Junta los trozos que oye el móvil. En Android cada trozo suele repetir lo anterior («Mercadona»,
+  // «Mercadona cuarenta», «Mercadona cuarenta y cinco»…): si uno empieza por lo ya oído lo sustituye,
+  // si ya estaba dentro no se añade; si no, se añade detrás (iPhone y ordenador mandan trozos nuevos)
+  const clave = s => sinTilde(s).replace(/[.,;:!?¿¡]/g, '').replace(/\s+/g, ' ').trim()
+  function unirVoz(trozos) {
+    let todo = ''
+    for (const t of trozos) {
+      const k = clave(t), kt = clave(todo)
+      if (!k) continue
+      if (!kt || k.startsWith(kt)) todo = String(t).trim()
+      else if (!kt.endsWith(k) && !kt.includes(k)) todo = todo + ' ' + String(t).trim()
+    }
+    return todo
+  }
+
   // Escucha hasta que se vuelve a tocar el micrófono (si el móvil corta por un silencio, sigue)
   let oyendo = null
   function dictar() {
@@ -561,8 +576,8 @@
       rec.interimResults = true
       let parte = ''
       rec.onresult = e => {
-        parte = [...e.results].map(x => x[0].transcript).join(' ')
-        oido.textContent = (estadoVoz.dicho + ' ' + parte).trim()
+        parte = unirVoz([...e.results].map(x => x[0].transcript))
+        oido.textContent = unirVoz([estadoVoz.dicho, parte])
       }
       rec.onerror = e => {
         if (e.error === 'no-speech' || e.error === 'aborted') return
@@ -570,7 +585,7 @@
         aviso(e.error === 'not-allowed' || e.error === 'service-not-allowed' ? 'Permite el micrófono para dictar' : 'No se pudo dictar. Inténtalo de nuevo')
       }
       rec.onend = () => {
-        estadoVoz.dicho = (estadoVoz.dicho + ' ' + parte).trim()
+        estadoVoz.dicho = unirVoz([estadoVoz.dicho, parte])
         if (estadoVoz.seguir && raiz.classList.contains('mfa-abierto')) { try { empezar(); return } catch { /* sigue abajo */ } }
         terminar()
       }
@@ -663,5 +678,5 @@
     return total
   }
 
-  window.mfApunte = { abrir, leerMensajeBanco, guardarAvisos, leerVoz }
+  window.mfApunte = { abrir, leerMensajeBanco, guardarAvisos, leerVoz, unirVoz }
 })()

@@ -224,6 +224,13 @@ module.exports = [
       t.igual(await voz('el 3 gasté 25 euros en Mercadona'), { fecha: '2026-10-03', monto: 25, descripcion: 'Mercadona', tipo: 'gasto', pista: 'supermercado' })
       t.igual((await voz('el tres de octubre veinte euros farmacia')).fecha, '2026-10-03')
       t.igual((await voz('el día 25 diez euros')).fecha, '2026-09-25')
+      // Android repite lo ya oído en cada trozo: se queda con la frase una vez y el importe entero
+      const android = ['Mercadona', 'Mercadona', 'Mercadona cuarenta', 'Mercadona cuarenta y', 'Mercadona cuarenta y cinco', 'Mercadona cuarenta y cinco', 'Mercadona cuarenta y cinco el', 'Mercadona cuarenta y cinco el 3 de octubre']
+      const unido = await pg.evaluate(a => window.mfApunte.unirVoz(a), android)
+      t.igual(unido, 'Mercadona cuarenta y cinco el 3 de octubre')
+      t.igual(await voz(unido), { fecha: '2026-10-03', monto: 45, descripcion: 'Mercadona', tipo: 'gasto', pista: 'supermercado' })
+      // iPhone y ordenador mandan trozos nuevos: se juntan
+      t.igual(await pg.evaluate(() => window.mfApunte.unirVoz(['doce euros', 'pan'])), 'doce euros pan')
       // Si lo dicho es un ingreso, la hoja pasa a ingreso
       await pg.evaluate(() => { window.__FRASE = 'me pagaron la nómina 1300 euros' })
       await pg.click('.mfa-voz'); await pg.waitForTimeout(300); await pg.click('.mfa-voz'); await pg.waitForTimeout(600)
