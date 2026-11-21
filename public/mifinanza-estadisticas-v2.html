@@ -57,33 +57,31 @@
 
   <div id="contenido" style="display:none">
 
-    <section class="hero" aria-label="Resultado">
+    <!-- Resultado y reparto en una sola tarjeta: lo que entró se parte en gastado y ahorrado,
+         y debajo cada categoría con su barra (el nombre al lado, sin leyenda de colores) -->
+    <section class="hero" aria-label="Resultado del mes y a dónde va tu dinero">
       <div class="hero-veredicto">
         <span class="hero-lbl" id="lbl-aho">Ahorro</span>
         <span class="hero-val num" id="val-aho">—</span>
         <span class="hero-sub"><span id="sub-aho"></span><span id="tasa-aho"></span></span>
       </div>
+      <div class="flujo" id="flujo" aria-hidden="true"><i class="flujo-gas" id="flujo-gas"></i><i class="flujo-aho" id="flujo-aho"></i></div>
       <div class="hero-par">
-        <div class="hero-item">
+        <div class="hero-item hi-ing">
           <span class="hero-mini" id="lbl-ing">Ingresos</span>
           <span class="hero-num num ing" id="val-ing">—</span>
           <span class="hero-mini2" id="sub-ing"></span>
         </div>
-        <div class="hero-item">
+        <div class="hero-item hi-gas">
           <span class="hero-mini" id="lbl-gas">Gastos</span>
           <span class="hero-num num gas" id="val-gas">—</span>
           <span class="hero-mini2" id="sub-gas"></span>
         </div>
       </div>
-    </section>
-
-    <section class="tarjeta" id="donut-card" aria-labelledby="donut-t">
-      <div class="t-head"><h2 class="t-titulo" id="donut-t">¿A dónde va tu dinero?</h2><span class="t-leyenda" id="cats-title"></span></div>
-      <div class="donut-solo">
-        <svg class="donut" id="donut" viewBox="0 0 160 160" role="img" aria-label="Reparto del gasto por categoría"></svg>
+      <div class="reparto" id="reparto">
+        <div class="t-head"><h2 class="t-titulo" id="reparto-t">¿A dónde va tu dinero?</h2><span class="t-leyenda" id="cats-title"></span></div>
+        <div id="cats-wrap" role="list" aria-labelledby="reparto-t"></div>
       </div>
-      <div class="cat-cab" id="cat-cab" aria-hidden="true"></div>
-      <div id="cats-wrap" role="list"></div>
     </section>
 
     <section class="analisis-card" id="analisis-card" aria-labelledby="analisis-t">

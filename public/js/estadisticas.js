@@ -308,6 +308,14 @@ function setResumen(lIng, vIng, sIng, lGas, vGas, sGas, lAho, vAho, sAho, aho) {
   hero.classList.toggle('neg', !sinDatos && aho < 0)
   const ing = ingTotalResumen
   document.getElementById('tasa-aho').textContent = !sinDatos && ing > 0 ? `${aho >= 0 ? 'Guardaste' : 'Gastaste de más'} el ${Math.round(Math.abs(aho) / ing * 100)} % de lo que entró` : ''
+  // Barra de lo que entró: la parte roja es lo gastado y la verde lo ahorrado (como la cifra grande).
+  // Si se gastó más de lo que entró, la barra es lo gastado y la parte dorada lo que salió del ahorro
+  const gas = ing - aho, base = Math.max(ing, gas)
+  document.getElementById('flujo').hidden = sinDatos || base <= 0
+  if (!sinDatos && base > 0) {
+    document.getElementById('flujo-gas').style.width = (aho >= 0 ? gas : ing) / base * 100 + '%'
+    document.getElementById('flujo-aho').style.width = Math.abs(aho) / base * 100 + '%'
+  }
 }
 
 function dibujarCats(slice, soloMes) {
@@ -347,12 +355,12 @@ function renderCatsUI() {
   const orden = Object.entries(totales).sort((a, b) => b[1] - a[1])
 
   document.getElementById('cats-title').textContent = n ? (soloMes ? slice[0].mesNombre + ' ' + slice[0].anio : `${n} ${n === 1 ? 'mes' : 'meses'}`) : ''
-  document.getElementById('cat-cab').className = 'cat-cab' + (soloMes ? ' solo-mes' : '')
-  document.getElementById('cat-cab').innerHTML = n ? `<span>Categoría</span><span>%</span>${soloMes ? '' : '<span>Media/mes</span>'}<span>Total</span>` : ''
   const wrap = document.getElementById('cats-wrap')
   wrap.innerHTML = ''
+  const mayor = orden.length ? orden[0][1] : 0
 
-  orden.forEach(([cat, total], i) => {
+  // Cada categoría: nombre y total; debajo, una barra (la mayor llena) con el % del gasto y la media al mes
+  orden.forEach(([cat, total]) => {
     const abierta = categoriaAbierta === cat
     const row = document.createElement('div')
     row.className = 'cat-row' + (abierta ? ' abierta' : '') + (soloMes ? ' solo-mes' : '')
@@ -360,10 +368,10 @@ function renderCatsUI() {
     row.dataset.cat = cat
     row.innerHTML = `
       <button type="button" class="cat-fila" aria-expanded="${abierta}">
-        <span class="cat-nom"><i style="background:${i < 5 ? COLORES[i] : COLORES[5]}"></i><span class="cat-txt"></span></span>
-        <span class="cat-pct num">${Math.round(total / suma * 100)}</span>
-        ${soloMes ? '' : `<span class="cat-prom num">${fmt(total / n)}</span>`}
+        <span class="cat-nom"><span class="cat-txt"></span></span>
         <span class="cat-tot num">${fmt(total)}</span>
+        <span class="cat-barra"><i style="width:${mayor ? Math.max(2, total / mayor * 100) : 0}%"></i></span>
+        <span class="cat-dato num"><b>${Math.round(total / suma * 100)} %</b>${soloMes ? '' : ` · ${fmt(total / n)}/mes`}</span>
       </button>`
     row.querySelector('.cat-txt').textContent = cat
     row.querySelector('.cat-fila').addEventListener('click', () => toggleCategoria(cat))
@@ -459,42 +467,9 @@ function renderAnalisis() {
 // ── Utilidades ──
 // Quita el emoji inicial (y su selector de variante) de una categoría: "⚠️ Gastos Imprevistos" → "Gastos Imprevistos"
 const sinEmoji = c => (c || '').trim().replace(/^[^\p{L}\p{N}]+/u, '').trim()
-// Colores del anillo: las 5 categorías mayores y el resto (gris)
-const COLORES = ['#6366f1', '#10b981', '#f59e0b', '#ef4444', '#38bdf8', '#64748b']
-// ── Anillo del panel "¿A dónde va tu dinero?" ──
-function renderExtras(slice, soloMes) {
-  document.getElementById('donut-card').hidden = !slice.length
-  if (slice.length) renderDonut(slice)
-}
-
-function renderDonut(slice) {
-  const tot = {}
-  slice.forEach(d => Object.entries(d.cats).forEach(([c, v]) => { tot[c] = (tot[c] || 0) + v }))
-  const orden = Object.entries(tot).sort((a, b) => b[1] - a[1])
-  const suma = orden.reduce((t, [, v]) => t + v, 0)
-  const partes = orden.slice(0, 5)
-  const resto = orden.slice(5).reduce((t, [, v]) => t + v, 0)
-  if (resto > 0) partes.push(['Resto', resto])
-  const R = 58, C = 2 * Math.PI * R
-  let acum = 0
-  const svg = document.getElementById('donut')
-  svg.innerHTML = partes.map(([c, v], i) => {
-    const largo = suma ? v / suma * C : 0
-    const seg = `<circle class="tramo" data-cat="${i < 5 ? encodeURIComponent(c) : ''}" cx="80" cy="80" r="${R}" stroke="${COLORES[i]}"
-      stroke-dasharray="${Math.max(0, largo - 2).toFixed(2)} ${C.toFixed(2)}" stroke-dashoffset="${(-acum).toFixed(2)}"
-      transform="rotate(-90 80 80)" style="animation-delay:${i * 80}ms"><title>${sinEmoji(c)}: ${fmt(v)}</title></circle>`
-    acum += largo
-    return seg
-  }).join('') + `<text class="donut-centro-v" x="80" y="82" text-anchor="middle">${fmt(suma)}</text><text class="donut-centro-l" x="80" y="99" text-anchor="middle">GASTADO</text>`
-  svg.querySelectorAll('.tramo[data-cat]').forEach(t => { if (t.dataset.cat) t.addEventListener('click', () => abrirCategoria(decodeURIComponent(t.dataset.cat))) })
-}
-
-// Abre la categoría en la tabla y la lleva a la vista
-function abrirCategoria(cat) {
-  categoriaAbierta = cat
-  renderCatsUI()
-  const fila = [...document.querySelectorAll('.cat-row')].find(r => r.dataset.cat === cat)
-  if (fila) fila.scrollIntoView({ behavior: 'smooth', block: 'center' })
+// El reparto se oculta si no hay meses elegidos
+function renderExtras(slice) {
+  document.getElementById('reparto').hidden = !slice.length
 }
 
 // Resumen del período: mejor mes y meses en que se gastó más de lo que entró

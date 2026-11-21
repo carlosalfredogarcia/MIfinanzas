@@ -379,6 +379,7 @@ window.MF_EN = {
     'Gasto por día; toca un día para ir a él en la lista': 'Spending per day; tap a day to jump to it in the list',
     'Día más alto: {0}': 'Highest day: {0}',
     '¿A dónde va tu dinero?': 'Where does your money go?',
+    'Resultado del mes y a dónde va tu dinero': 'This month’s result and where your money goes',
     'Reparto del gasto por categoría': 'Spending by category',
     'Media/mes': 'Avg/mo',
     'Evolución por categoría': 'Trend by category',

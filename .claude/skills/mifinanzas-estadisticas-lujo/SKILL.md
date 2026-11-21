@@ -54,12 +54,14 @@ Iconos SVG de trazo; emoji solo en categorías.
 
 Todo se calcula con `datos`; ninguna consulta nueva ni llamada a la API de Claude.
 
-1. **Resultado**: ingresos, gastos y el veredicto en grande: "Ahorraste X" (esmeralda) o
-   "Tiraste del ahorro X" (dorado), con el % de lo que entró.
-2. **¿A dónde va tu dinero?** (un solo panel): anillo con las 5 categorías mayores + "Resto" y,
-   debajo, una tabla compacta con TODAS las categorías: % · Media/mes · Total (en "Por mes": % · Total).
-   Sin barras. Tocar una fila (o un tramo del anillo) despliega sus movimientos para ubicar
-   o editar un gasto.
+1. **Resultado + ¿A dónde va tu dinero?** en UNA sola tarjeta (`.hero`; el usuario pidió unirlas, 21/11/2026):
+   arriba el veredicto en grande: "Ahorraste X" (esmeralda) o "Tiraste del ahorro X" (dorado), con el % de lo
+   que entró; una barra de lo que entró partida en gastado (rojo) y ahorrado (verde, o dorado si salió del
+   ahorro); debajo, ingresos y gastos en una línea.
+2. Dentro de la misma tarjeta (`#reparto`), TODAS las categorías de mayor a menor: nombre y total; debajo una
+   barra roja (la mayor llena) con el % (y en período/año la media al mes). **Sin anillo**: el usuario lo quitó
+   porque los colores no decían qué era cada cosa; el nombre va siempre junto a su barra, sin leyendas de color.
+   Tocar una fila despliega sus movimientos para ubicar o editar un gasto.
 3. **Evolución por categoría**: chips, barras con promedio, mes más alto en dorado. La nota de
    abajo es el resumen del período: "Tu mejor mes fue febrero: ahorraste 495 €. En 3 meses
    gastaste más de lo que entró (…)". No poner frases tipo "bajaste X un 40 %": no le sirven.

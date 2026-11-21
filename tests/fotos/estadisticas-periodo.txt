@@ -21,66 +21,46 @@ TIRASTE DEL AHORRO
 Gastaste de más el 17 % de lo que entró
 Prom. ingresos
 1.420 €
-por mes
 Prom. gastos
 1.662 €
-por mes
 ¿A DÓNDE VA TU DINERO?
 3 meses
-4.985 €
-GASTADO
-CATEGORÍA
-%
-MEDIA/MES
-TOTAL
 🏠 Alquiler
-42
-697 €
 2.090 €
+42 % · 697 €/mes
 🛒 Supermercado
-11
-184 €
 552 €
+11 % · 184 €/mes
 💳 Crédito
-11
-180 €
 540 €
+11 % · 180 €/mes
 ⛽ Gasolina
-8
-139 €
 418 €
+8 % · 139 €/mes
 🎉 Salidas
-8
-131 €
 393 €
+8 % · 131 €/mes
 🌍 Remesas
-8
-131 €
 393 €
+8 % · 131 €/mes
 ⚠️ Gastos Imprevistos
-5
-87 €
 261 €
+5 % · 87 €/mes
 💡 Luz
-3
-46 €
 137 €
+3 % · 46 €/mes
 🏋️ Gym
-2
-25 €
 75 €
+2 % · 25 €/mes
 🧴 Cuidado personal
-1
-15 €
 45 €
+1 % · 15 €/mes
 🚗 Vehículo
-1
-15 €
 45 €
+1 % · 15 €/mes
 📺 Suscripción
-1
-12 €
 37 €
+1 % · 12 €/mes
 EVOLUCIÓN POR CATEGORÍA
 🏠 Alquiler
 🛒 Supermercado

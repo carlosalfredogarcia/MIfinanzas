@@ -21,47 +21,40 @@ Octubre 2026
 Guardaste el 4 % de lo que entró
 Ingresos
 1.380 €
-Octubre
 Gastos
 1.326 €
-Octubre
 ¿A DÓNDE VA TU DINERO?
 Octubre 2026
-1.326 €
-GASTADO
-CATEGORÍA
-%
-TOTAL
 🏠 Alquiler
-32
 418 €
+32 %
 🌍 Remesas
-16
 211 €
+16 %
 🛒 Supermercado
-15
 195 €
+15 %
 💳 Crédito
-14
 180 €
+14 %
 🎉 Salidas
-8
 110 €
+8 %
 ⚠️ Gastos Imprevistos
-8
 100 €
+8 %
 💡 Luz
-3
 46 €
+3 %
 ⛽ Gasolina
-2
 26 €
+2 %
 🏋️ Gym
-2
 25 €
+2 %
 🧴 Cuidado personal
-1
 15 €
+1 %
 ÚLTIMA VEZ Y FRECUENCIA
 Gasto
 Ingreso

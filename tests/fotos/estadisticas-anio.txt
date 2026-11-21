@@ -9,66 +9,46 @@ en 10 meses
 Gastaste de más el 4 % de lo que entró
 Total ingresos
 13.920 €
-en el año
 Total gastos
 14.456 €
-en el año
 ¿A DÓNDE VA TU DINERO?
 10 meses
-14.456 €
-GASTADO
-CATEGORÍA
-%
-MEDIA/MES
-TOTAL
 🏠 Alquiler
-38
-543 €
 5.434 €
+38 % · 543 €/mes
 🛒 Supermercado
-13
-194 €
 1.935 €
+13 % · 194 €/mes
 💳 Crédito
-12
-180 €
 1.800 €
+12 % · 180 €/mes
 ⛽ Gasolina
-9
-134 €
 1.340 €
+9 % · 134 €/mes
 🌍 Remesas
-7
-103 €
 1.030 €
+7 % · 103 €/mes
 ⚠️ Gastos Imprevistos
-7
-96 €
 955 €
+7 % · 96 €/mes
 🎉 Salidas
-5
-71 €
 706 €
+5 % · 71 €/mes
 💡 Luz
-3
-46 €
 455 €
+3 % · 46 €/mes
 🏋️ Gym
-2
-25 €
 250 €
+2 % · 25 €/mes
 🚗 Vehículo
-2
-25 €
 248 €
+2 % · 25 €/mes
 📺 Suscripción
-1
-15 €
 153 €
+1 % · 15 €/mes
 🧴 Cuidado personal
-1
-15 €
 150 €
+1 % · 15 €/mes
 EVOLUCIÓN POR CATEGORÍA
 🏠 Alquiler
 🛒 Supermercado
