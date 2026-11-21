@@ -38,13 +38,11 @@ public/                     lo que ve el usuario (Netlify publica esta carpeta)
   landing-cine.html         la landing (estilo de la app, capturas reales de img/landing/; ?desde=kit da las gracias)
   landing.html, privacidad.html, sw.js, manifest.json, .well-known/ (app Android)
 kit/                        página del QR del Kit de Seguridad Infantil (ALFREGA, otro sitio de Netlify:
-                            alfrega-kit.netlify.app, subido a mano, sin GitHub); lleva a landing-cine.html?desde=kit.
-                            Publicar: la clave de Netlify está en «Secretos de red» del entorno (el proxy añade
-                            Authorization a api.netlify.com; no se ve). Subir un zip de kit/ por la API:
-                            cd kit && zip -r /tmp/kit.zip index.html img && curl -sS -X POST -H "Content-Type: application/zip"
-                            --data-binary @/tmp/kit.zip https://api.netlify.com/api/v1/sites/alfrega-kit.netlify.app/deploys
-                            y comprobar con curl que alfrega-kit.netlify.app sirve la página nueva.
-                            Sin clave (401): pasar al usuario el .zip de kit/ para «choose a file» en Netlify
+                            alfrega-kit.netlify.app). Se publica SOLA desde GitHub (main, base directory kit) desde el
+                            21 nov: no subir zips. Los QR ya están impresos: NUNCA renombrar ni borrar el proyecto
+                            alfrega-kit en Netlify (cambiaría la dirección). El bloque «Para negocios» va con los
+                            colores de alfrega.es (beige #f0e8e0 y dorado #b8922a); sin «te regalo 30 €».
+                            Lleva a mifinanzas.alfrega.es/descubre?desde=kit.
 netlify/functions/          servidor: import-csv.js (CSV y Excel; IA para extractos de bancos, usa ANTHROPIC_API_KEY)
                             e import-doc.js (PDF, capturas y fotos: el móvil los parte en trozos y los manda a la vez;
                             modelo en IMPORT_MODEL). Lo compartido, en netlify/lib/comun.js
