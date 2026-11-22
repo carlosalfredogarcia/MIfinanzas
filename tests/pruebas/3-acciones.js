@@ -373,6 +373,26 @@ module.exports = [
     },
   },
   {
+    nombre: 'acceso: «Continuar con Google» solo si está activado en Supabase, y abre Google',
+    async prueba(t) {
+      const pg = await t.abrir('index.html', { sinSesion: true })
+      t.ok(!(await pg.isVisible('.btn-google')), 'Sale Google sin estar activado')
+      await pg.context().route('**/auth/v1/settings', r => r.fulfill({ contentType: 'application/json', body: JSON.stringify({ external: { google: true, email: true } }) }))
+      await pg.reload(); await pg.waitForTimeout(1500)
+      t.ok(await pg.isVisible('.btn-google'), 'No sale «Continuar con Google»')
+      await pg.click('#tab-crear'); await pg.waitForTimeout(200)
+      t.ok(await pg.isVisible('.btn-google'), 'En «Crear cuenta» no sale Google')
+      await pg.click('.btn-google'); await pg.waitForTimeout(300)
+      const o = await pg.evaluate(() => window.__OAUTH__)
+      t.igual(o.provider, 'google')
+      t.contiene(o.options.redirectTo, '/index.html')
+      await pg.evaluate(() => setTab('recuperacion'))
+      t.ok(!(await pg.isVisible('.btn-google')), 'Google sale al recuperar la contraseña')
+      t.sinErrores(pg)
+      await pg.context().close()
+    },
+  },
+  {
     nombre: 'acceso: mostrar y ocultar la contraseña, aviso amable si falta algo',
     async prueba(t) {
       const pg = await t.abrir('index.html', { sinSesion: true })

@@ -39,6 +39,7 @@
     getUser: () => Promise.resolve({ data: { user: usuario } }),
     onAuthStateChange() { return { data: { subscription: { unsubscribe() {} } } }; },
     signOut: () => Promise.resolve({}),
+    signInWithOAuth: o => { window.__OAUTH__ = o; return Promise.resolve({ data: {}, error: null }); },
     resetPasswordForEmail: (e, o) => { window.__RESET__ = [e, o]; return Promise.resolve({ error: null }); },
   };
   // Archivos (comprobantes): los guardados vienen en __DATA__.__archivos; las subidas se anotan en __SUBIDOS__.

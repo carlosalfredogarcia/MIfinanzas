@@ -268,3 +268,12 @@ html:not([lang="en"]) .idioma [data-idioma="es"], html[lang="en"] .idioma [data-
   .luz, .aurora, .estrellas, .logo-icon, .logo-icon::before, .logo-icon::after, .logo-title, .cristal::before, .btn-main::before, .btn-main::after, .loading-logo { animation: none; }
   .anim, .form-section, .error-msg.visible { animation-duration: .01s; }
 }
+
+/* Continuar con Google */
+.social[hidden], .social.fuera { display: none; }
+.btn-google { width: 100%; height: 52px; display: flex; align-items: center; justify-content: center; gap: 12px; border: 0; border-radius: 16px;
+  background: #fff; color: #1f2937; font: 700 15px 'Manrope', sans-serif; cursor: pointer; box-shadow: 0 6px 18px rgba(0,0,0,.25); }
+.btn-google:active { transform: scale(.98); }
+.btn-google svg { width: 22px; height: 22px; flex: none; }
+.separador { display: flex; align-items: center; gap: 12px; margin: 18px 0 16px; color: var(--sub); font-size: 13px; font-weight: 600; }
+.separador::before, .separador::after { content: ''; flex: 1; height: 1px; background: var(--border); }

@@ -62,9 +62,27 @@ dbClient.auth.onAuthStateChange((event, session) => {
 
 inicializar()
 
+// «Continuar con Google»: un toque, sin escribir correo ni contraseña. Sirve para entrar y para crear la cuenta.
+// El botón solo aparece si Google está activado en Supabase (Authentication → Sign In / Providers)
+fetch(SUPABASE_URL + '/auth/v1/settings', { headers: { apikey: SUPABASE_KEY } })
+  .then(r => r.json())
+  .then(c => { if (c && c.external && c.external.google) document.getElementById('social').hidden = false })
+  .catch(() => {})
+
+async function entrarConGoogle() {
+  ocultarError()
+  mostrarCarga('Abriendo Google...', '')
+  const { error } = await dbClient.auth.signInWithOAuth({
+    provider: 'google',
+    options: { redirectTo: location.origin + '/index.html', queryParams: { prompt: 'select_account' } }
+  })
+  if (error) { document.getElementById('loading').classList.remove('visible'); mostrarError(mensajeAmable(error)) }
+}
+
 function setTab(tab) {
   const enTabs = tab === 'entrar' || tab === 'crear'
   document.getElementById('tabs').style.display = enTabs ? '' : 'none'
+  document.getElementById('social').classList.toggle('fuera', !enTabs)
   document.getElementById('tab-entrar').classList.toggle('active', tab === 'entrar')
   document.getElementById('tab-crear').classList.toggle('active', tab === 'crear')
   for (const s of ['entrar', 'crear', 'recuperacion', 'nueva-clave']) {
