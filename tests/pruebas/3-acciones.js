@@ -165,6 +165,17 @@ module.exports = [
       t.igual(await filas(), total - 1)
       await pg.click('#deshacer button'); await pg.waitForTimeout(300)
       t.igual(await filas(), total)
+      // Borrar uno de abajo: al confirmarse el borrado la pantalla se queda donde estaba (no sube arriba)
+      await pg.setViewportSize({ width: 390, height: 500 })
+      await pg.evaluate(() => { const f = [...document.querySelectorAll('.fila')].pop(); f.scrollIntoView({ block: 'center' }); f.querySelector('.acc-borrar').click() })
+      await pg.waitForTimeout(300)
+      const antes = await pg.evaluate(() => window.scrollY)
+      t.ok(antes > 200, 'La lista no bajó')
+      // Con internet real la recarga tarda: si la lista se vaciara (esqueletos) la página encogería y subiría arriba
+      await pg.evaluate(() => { window.__VACIA__ = false; new MutationObserver(() => { if (document.querySelector('#lista .esqueleto')) window.__VACIA__ = true }).observe(document.getElementById('lista'), { childList: true, subtree: true }) })
+      await pg.waitForTimeout(5600)
+      t.ok(!(await pg.evaluate(() => window.__VACIA__)), 'La lista se vació al confirmar el borrado')
+      t.ok(Math.abs((await pg.evaluate(() => window.scrollY)) - antes) < 80, 'La pantalla saltó al borrar')
       t.sinErrores(pg)
       await pg.context().close()
     },

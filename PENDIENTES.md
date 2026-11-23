@@ -4,13 +4,10 @@ Lista viva: al empezar una conversación nueva, leer esto y `CLAUDE.md`. Al term
 
 ## Del usuario (en el ordenador)
 
-- **Activar «Continuar con Google»** (el botón ya está en la web y aparece solo cuando Google está activado):
-  1. console.cloud.google.com → APIs y servicios → Pantalla de consentimiento OAuth (externo, nombre MiFinanza).
-  2. Credenciales → Crear ID de cliente OAuth → Aplicación web. URI de redireccionamiento autorizado:
-     `https://gapeweomesgawnodarsp.supabase.co/auth/v1/callback`.
-  3. Supabase → Authentication → Sign In / Providers → Google: activar y pegar el Client ID y el Client Secret.
-  4. Supabase → Authentication → URL Configuration → Redirect URLs: `https://mifinanzas.alfrega.es/**` y
-     `https://dulcet-raindrop-bf51bd.netlify.app/**`.
+- **«Continuar con Google»**: ya configurado en Google Cloud y Supabase (23/11). Falta **publicar la app de Google**:
+  Google Cloud → Google Auth Platform → Público → «Publicar app» (antes completar «Información de la marca»: nombre
+  «MiFinanza», correo de asistencia, logo, enlace a privacidad.html). Mientras esté en «Prueba» solo entran las
+  cuentas de la lista de usuarios de prueba.
 
 0. **Icono de la app de Google Play**: la web y la app instalada desde el navegador ya usan el logo
    nuevo (`public/icon.svg`, `icon-512.png`), pero la app de Play (TWA com.mifinanza.app) lleva el

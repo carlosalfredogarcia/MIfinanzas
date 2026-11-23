@@ -113,8 +113,10 @@ async function confirmarDescargaCSV() {
   }
 }
 
-async function cargarMovimientos() {
-  document.getElementById('lista').innerHTML = esqueletos();
+// quieto: recarga tras borrar o editar sin vaciar la lista, así la pantalla no salta arriba
+async function cargarMovimientos(quieto) {
+  const y = window.scrollY;
+  if (quieto !== true) document.getElementById('lista').innerHTML = esqueletos();
   let uid = window.currentUserId;
   if (!uid) {
     uid = await new Promise(resolve => {
@@ -153,6 +155,7 @@ async function cargarMovimientos() {
   renderPulso();
   renderComercios();
   renderLista();
+  if (quieto === true) window.scrollTo(0, y);
 }
 
 function filtrar(el, cat) {
@@ -419,7 +422,7 @@ async function confirmarBorrado() {
   const tabla = m.tipo === 'ingreso' ? 'ingresos' : m.tipo === 'fijo' ? 'gastos_fijos' : 'gastos';
   const { error } = await dbClient.from(tabla).delete().eq('id', m.id).eq('usuario_id', window.currentUserId);
   if (error) { alert('Error: ' + error.message); }
-  cargarMovimientos();
+  cargarMovimientos(true);
 }
 // Si se sale de la pantalla durante la cuenta atrás, el borrado se completa
 window.addEventListener('pagehide', () => { if (pendienteBorrado) confirmarBorrado(); });
@@ -879,7 +882,7 @@ async function guardarEdicion() {
   }
   if (error) { alert('Error: ' + error.message); return; }
   cerrarEditar();
-  cargarMovimientos();
+  cargarMovimientos(true);
 }
 
 async function eliminarMovimiento() {
@@ -890,7 +893,7 @@ async function eliminarMovimiento() {
   const { error } = await dbClient.from(tabla).delete().eq('id', editando.id).eq('usuario_id', window.currentUserId);
   if (error) { alert('Error: ' + error.message); return; }
   cerrarEditar();
-  cargarMovimientos();
+  cargarMovimientos(true);
 }
 
 function abrirEditarIdx(idx) {
