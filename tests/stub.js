@@ -7,6 +7,7 @@
     const api = {
       insert(v) { (window.__INS__ = window.__INS__ || []).push({ table, v }); rows = [{ id: 'nuevo-1' }]; return p; },
       update(v) { (window.__UPD__ = window.__UPD__ || []).push({ table, v }); return p; },
+      upsert(v) { (window.__UPS__ = window.__UPS__ || []).push({ table, v }); return p; },
       delete() { (window.__DEL__ = window.__DEL__ || []).push(table); return p; },
       // Filtros como en Supabase; si la fila no tiene esa columna en los datos de prueba, no se filtra
       eq(c, v) { rows = rows.filter(r => r[c] === undefined || String(r[c]) === String(v)); return p; },

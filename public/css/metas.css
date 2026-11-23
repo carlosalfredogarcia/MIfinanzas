@@ -1143,3 +1143,39 @@ input[type=number] { -moz-appearance: textfield; }
 .mb-plan, .mb-apuntar { width: 100%; padding: 14px; border-radius: 14px; font: 800 15px 'Manrope', sans-serif; cursor: pointer; }
 .mb-plan { border: 0; color: #fff; background: linear-gradient(110deg, #10b981, #14b8a6 60%, #6366f1); }
 .mb-apuntar { border: 1px solid var(--border); background: none; color: var(--text); }
+
+/* Ingreso: que se vea que se escribe ahí (recuadro, lápiz grande) y se puede restablecer */
+.v-fila { grid-template-columns: 58px minmax(0, 1fr) auto; }
+.v-editar { gap: 8px; padding: 7px 8px 7px 12px; border: 1.5px solid rgba(16,185,129,.6); background: rgba(16,185,129,.10); border-radius: 12px; font-size: 15px; box-shadow: 0 0 0 3px rgba(16,185,129,.08); }
+.v-editar:active { transform: scale(.97); }
+.v-lapiz { display: inline-grid; place-items: center; width: 26px; height: 26px; border-radius: 8px; background: #10b981; font-size: 13px; }
+.v-editar.vacio { border-color: rgba(245,158,11,.75); background: rgba(245,158,11,.12); animation: mf-llama 1.6s ease-in-out infinite; }
+.v-editar.vacio b { color: #fcd34d; font-size: 13px; }
+.v-editar.vacio .v-lapiz { background: #f59e0b; }
+@keyframes mf-llama { 50% { box-shadow: 0 0 0 6px rgba(245,158,11,.18); } }
+.v-ing-campo { padding: 4px 10px; border: 1.5px solid #10b981; border-radius: 12px; background: rgba(10,14,26,.7); }
+.v-ing-inp { width: 6ch; background: none; border: 0; outline: none; color: #fff; font: 800 18px 'Manrope', sans-serif; text-align: right; }
+.v-ing-pie { display: flex; align-items: center; justify-content: flex-end; gap: 10px; margin: -2px 0 6px; font-size: 11.5px; font-weight: 600; color: var(--subtext); text-align: right; }
+.v-reset { flex: none; border: 0; background: none; color: var(--green-txt); font: 800 12px 'Manrope', sans-serif; padding: 4px 0; cursor: pointer; }
+.v-reset[hidden] { display: none; }
+@media (prefers-reduced-motion: reduce) { .v-editar.vacio { animation: none; } }
+.btn-plan-guiado[hidden] { display: none; }
+
+/* Medidor del plan guiado: gasto medio de hoy, máximo para el objetivo y cómo vas */
+.pg-hoy { font-size: 20px; font-weight: 800; color: var(--text); }
+.pg-med-top .pg-hoy { color: var(--text) !important; }
+.pg-med-meta { margin: 6px 0 0; font-size: 13px; line-height: 1.4; font-weight: 600; color: #cbd5e1; }
+.pg-med-meta b { color: #fff; }
+.pg-med-barra { height: 12px; margin-top: 10px; }
+.pg-med-barra u { position: absolute; top: -3px; width: 2px; height: 18px; margin-left: -1px; background: rgba(255,255,255,.35); border-radius: 2px; }
+.pg-med-barra em { width: 4px; height: 20px; top: -4px; margin-left: -2px; box-shadow: 0 0 0 0 rgba(255,255,255,.7); animation: mf-marca 1.4s ease-out infinite; }
+@keyframes mf-marca { 0% { box-shadow: 0 0 0 0 rgba(255,255,255,.65); } 70% { box-shadow: 0 0 0 7px rgba(255,255,255,0); } 100% { box-shadow: 0 0 0 0 rgba(255,255,255,0); } }
+.pg-med-barra i.late { animation: mf-late .6s ease-out; }
+@keyframes mf-late { 0% { filter: brightness(1); transform: scaleY(1); } 35% { filter: brightness(1.5); transform: scaleY(1.45); } 100% { filter: brightness(1); transform: scaleY(1); } }
+.pg-plan { display: inline-block; margin: 0 2px 0 4px; font-size: 15px; }
+.pg-plan.late { animation: mf-cifra .6s ease-out; }
+@keyframes mf-cifra { 35% { transform: scale(1.25); color: #fff; } }
+.pg-falta { color: #fcd34d; font-weight: 800; }
+.pg-med.mal .pg-falta { color: var(--red-txt); }
+.pg-ok { color: var(--green-txt); font-weight: 800; }
+@media (prefers-reduced-motion: reduce) { .pg-med-barra em, .pg-med-barra i.late, .pg-plan.late { animation: none; } }

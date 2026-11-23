@@ -701,12 +701,19 @@ function renderIngresos(ingresosOverride) {
     const suma = ingresosOriginal.reduce((s, r) => s + parseFloat(r.monto || 0), 0)
     inp.value = suma > 0 ? +suma.toFixed(2) : ''
   }
+  _ingOverride = ingresosOverride !== null && ingresosOverride !== undefined
+  // Se guarda de verdad (supabase-js solo envía la consulta con .then/await): antes se perdía al refrescar
+  let t = null
   inp.addEventListener('input', () => {
     const val = inp.value === '' ? null : parseFloat(inp.value)
-    dbClient.from('user_budget_mode').upsert(
-      { user_id: window.currentUserId, ingresos_override: val, updated_at: new Date().toISOString() },
-      { onConflict: 'user_id' }
-    )
+    _ingOverride = val !== null
+    clearTimeout(t)
+    t = setTimeout(() => {
+      dbClient.from('user_budget_mode').upsert(
+        { user_id: window.currentUserId, ingresos_override: val, updated_at: new Date().toISOString() },
+        { onConflict: 'user_id' }
+      ).then(({ error }) => { if (error) toast('No se pudo guardar tu ingreso. Revisa la conexión.', 'err') })
+    }, 400)
     actualizarPlanificador()
   })
   inp.addEventListener('focus', function() { this.select() })
@@ -754,11 +761,15 @@ function cerrarModalReset() {
 }
 document.getElementById('modal-reset').addEventListener('click', function(e) { if (e.target === this) cerrarModalReset() })
 
+let _ingOverride = false
+// Ingreso apuntado este mes (lo que hay en Movimientos)
+const ingresoApuntado = () => ingresosOriginal.reduce((s, r) => s + parseFloat(r.monto || 0), 0)
 function restablecerIngresos() {
+  _ingOverride = false
   dbClient.from('user_budget_mode').upsert(
     { user_id: window.currentUserId, ingresos_override: null, updated_at: new Date().toISOString() },
     { onConflict: 'user_id' }
-  )
+  ).then(() => {})
   const inp = document.getElementById('p-ingresos-total')
   const suma = ingresosOriginal.reduce((s, r) => s + parseFloat(r.monto || 0), 0)
   inp.value = suma > 0 ? suma.toFixed(2) : ''
@@ -1457,7 +1468,7 @@ function restablecerGastos() {
   })
   _gastosGuardados = {}
   if (window.currentUserId) {
-    dbClient.from('user_gasto_plan').delete().eq('user_id', window.currentUserId)
+    dbClient.from('user_gasto_plan').delete().eq('user_id', window.currentUserId).then(() => {})
   }
   actualizarPlanificador()
 }
@@ -1811,7 +1822,7 @@ function onMetaAhorroBlur(inp) {
     try { localStorage.setItem('mf_meta_ahorro_' + window.currentUserId, metaAhorro) } catch(e) {}
     dbClient.from('perfil')
       .update({ perfil_presupuesto: 'personalizado' })
-      .eq('usuario_id', window.currentUserId)
+      .eq('usuario_id', window.currentUserId).then(() => {})
   }
   actualizarAnalisis()  // full re-render: input no longer focused
 }
@@ -2296,10 +2307,11 @@ function pintarVeredicto(ing, total) {
     ver.innerHTML = `<span class="v-lbl">Con tus gastos de hoy</span>
       <b class="v-cifra num"><span class="v-saldo"></span> <small>al mes</small></b>
       <div class="v-balanza">
-        <div class="v-fila v-fila-ing"><span>Entra</span><i class="v-entra"></i>
-          <button type="button" class="v-editar" aria-label="Cambiar lo que entra al mes"><b class="num v-ing"></b><span class="v-lapiz" aria-hidden="true">✏️</span></button>
-          <label class="v-ing-campo" hidden><input type="number" inputmode="decimal" class="v-ing-inp num" aria-label="Lo que entra al mes" placeholder="0"><span class="v-ing-mon"></span></label>
+        <div class="v-fila v-fila-ing"><span>Ingreso</span><i class="v-entra"></i>
+          <button type="button" class="v-editar" aria-label="Cambiar tu ingreso del mes"><b class="num v-ing"></b><span class="v-lapiz" aria-hidden="true">✏️</span></button>
+          <label class="v-ing-campo" hidden><input type="number" inputmode="decimal" class="v-ing-inp num" aria-label="Tu ingreso del mes" placeholder="0"><span class="v-ing-mon"></span></label>
         </div>
+        <div class="v-ing-pie"><span class="v-ing-ayuda"></span><button type="button" class="v-reset" hidden>↺ Restablecer</button></div>
         <div class="v-fila"><span>Sale</span><i class="v-sale"></i><b class="num v-gas"></b></div>
       </div>
       <div class="v-disp"><span>Disponible con tu plan</span><b class="num"></b></div>
@@ -2313,6 +2325,11 @@ function pintarVeredicto(ing, total) {
     }
     const cerrar = () => { campo.hidden = true; btn.hidden = false; pintarVeredicto(totalIngresos(), _totalReal) }
     btn.onclick = abrir
+    ver.querySelector('.v-reset').onclick = () => {
+      restablecerIngresos()
+      const ap = Math.round(ingresoApuntado())
+      toast(ap ? `Ingreso restablecido: ${fmt(ap)}, lo que has apuntado este mes` : 'Ingreso borrado: escribe lo que cobras al mes', 'ok')
+    }
     inp.addEventListener('input', () => {
       const real = document.getElementById('p-ingresos-total')
       real.value = inp.value
@@ -2329,13 +2346,19 @@ function pintarVeredicto(ing, total) {
   elSaldo.textContent = (saldo > 0 ? '+' : '') + fmt(saldo)
   ver.querySelector('.v-entra').style.setProperty('--w', (ing / tope).toFixed(3))
   ver.querySelector('.v-sale').style.setProperty('--w', (total / tope).toFixed(3))
-  ver.querySelector('.v-ing').textContent = ing ? fmt(Math.round(ing)) : 'Escríbelo'
+  ver.querySelector('.v-ing').textContent = ing ? fmt(Math.round(ing)) : 'Escribe tu ingreso'
+  ver.querySelector('.v-editar').classList.toggle('vacio', !ing)
+  const ap = Math.round(ingresoApuntado())
+  ver.querySelector('.v-reset').hidden = !_ingOverride
+  ver.querySelector('.v-ing-ayuda').textContent = !ing ? 'Toca el recuadro y escribe lo que cobras al mes'
+    : _ingOverride ? (ap ? `Lo has cambiado tú · apuntado este mes: ${fmt(ap)}` : 'Lo has escrito tú')
+    : 'Lo que has apuntado este mes · toca para cambiarlo'
   ver.querySelector('.v-gas').textContent = fmt(Math.round(total))
   const d = ver.querySelector('.v-disp b')
   d.textContent = (disp > 0 ? '+' : '') + fmt(disp)
   d.classList.toggle('neg', disp < 0)
   ver.querySelector('.v-msg').textContent = !ing
-    ? 'Toca el lápiz y escribe lo que entra al mes: con eso hacemos tu plan.'
+    ? 'Escribe tu ingreso del mes: con eso hacemos tu plan.'
     : saldo < 0
       ? 'Gastas más de lo que entra. No pasa nada: planifica cada categoría y le damos la vuelta.'
       : `Te sobra dinero cada mes (${Math.round(saldo / ing * 100)} % de lo que entra). Vamos a convertirlo en un plan de ahorro.`
@@ -2553,7 +2576,7 @@ function realismoModal() {
 document.getElementById('m-monto').addEventListener('input', realismoModal)
 
 // ── Paso 2 guiado: una pantalla por categoría (Siguiente / Anterior), y desde la lista a una en concreto ──
-let _pg = null, _pgIdx = 0
+let _pg = null, _pgIdx = 0, _pgUltimoGas = null
 const filasPlan = () => [...document.querySelectorAll('#gastos-lista-plan .var-row')].filter(r => r._planCat && r.querySelector('.variable-input'))
 function montarPlanGuiado() {
   if (_pg) return
@@ -2564,8 +2587,9 @@ function montarPlanGuiado() {
   _pg.innerHTML = `
     <div class="pg-cab"><span class="pg-cuenta num"></span><button type="button" class="pg-x" aria-label="Cerrar">×</button></div>
     <div class="pg-med">
-      <div class="pg-med-top"><span>Gastos</span><b class="num"></b><button type="button" class="pg-obj" aria-expanded="false"></button></div>
-      <div class="pg-med-barra"><i></i><em></em></div>
+      <div class="pg-med-top"><span class="pg-hoy-l">Tu gasto medio hoy</span><b class="num pg-hoy"></b><button type="button" class="pg-obj" aria-expanded="false"></button></div>
+      <p class="pg-med-meta" aria-live="polite"></p>
+      <div class="pg-med-barra" aria-hidden="true"><i></i><u></u><em></em></div>
       <div class="pg-med-pie"><span class="pg-gastos num"></span><button type="button" class="pg-reset">↺ Restablecer</button></div>
       <div class="pg-meta" hidden>
         <p>¿Cuánto quieres ahorrar de lo que entra?</p>
@@ -2679,7 +2703,7 @@ function ponerMetaAhorro(pct) {
   metaAhorro = pct
   if (window.currentUserId) {
     try { localStorage.setItem('mf_meta_ahorro_' + window.currentUserId, metaAhorro) } catch(e) {}
-    dbClient.from('perfil').update({ perfil_presupuesto: 'personalizado' }).eq('usuario_id', window.currentUserId)
+    dbClient.from('perfil').update({ perfil_presupuesto: 'personalizado' }).eq('usuario_id', window.currentUserId).then(() => {})
   }
   actualizarAnalisis()
 }
@@ -2748,21 +2772,37 @@ function pintarPlanGuiado(escribiendo) {
   q('.pg-saltos').innerHTML = filas.map((f, k) => `<button type="button" class="${k === _pgIdx ? 'on' : ''}" data-k="${k}" aria-label="${MF.esc(nombreCat(f._planCat))}">${MF.esc(emojiCat(f._planCat))}</button>`).join('')
   q('.pg-saltos').querySelectorAll('[data-k]').forEach(b => { b.onclick = () => irPlanGuiado(+b.dataset.k) })
   q('.pg-saltos .on')?.scrollIntoView({ inline: 'center', block: 'nearest' })
-  // Medidor: % de lo que entra que se va en gastos, frente al objetivo
-  const ing = totalIngresos(), pG = ing ? totalGastos() / ing * 100 : 0, obj = Math.round(100 - metaAhorro), tope = Math.max(110, pG + 5)
+  // Medidor: tu gasto medio de hoy, hasta dónde bajarlo para tu objetivo y cómo vas con el plan.
+  // La marca blanca (el máximo) late siempre; la barra y la cifra del plan laten cuando cambian
+  const ing = totalIngresos(), gas = Math.round(totalGastos()), hoy = Math.round(_totalReal || 0)
+  const ahorroPct = Math.round(metaAhorro), maxGas = Math.round(ing * (100 - metaAhorro) / 100)
+  const tope = Math.max(ing, gas, hoy, 1) * 1.04
   const med = q('.pg-med')
-  med.className = 'pg-med ' + (pG <= obj + 0.5 ? 'ok' : pG > 100 ? 'mal' : 'cerca')
-  q('.pg-med-top b').textContent = `${Math.round(pG)} %`
-  q('.pg-obj').innerHTML = `objetivo ${obj} % <span aria-hidden="true">✏️</span>`
-  q('.pg-gastos').innerHTML = ing
-    ? `<b>${fmt(Math.round(totalGastos()))}</b> en gastos · máximo ${fmt(Math.round(ing * obj / 100))}`
-    : `<b>${fmt(Math.round(totalGastos()))}</b> en gastos`
+  med.className = 'pg-med ' + (!ing ? 'cerca' : gas <= maxGas + 1 ? 'ok' : gas > ing ? 'mal' : 'cerca')
+  q('.pg-hoy-l').textContent = hoy ? 'Tu gasto medio hoy' : 'Aún sin gastos medios'
+  q('.pg-hoy').textContent = hoy ? fmt(hoy) : ''
+  q('.pg-obj').innerHTML = `ahorrar ${ahorroPct} % <span aria-hidden="true">✏️</span>`
+  q('.pg-med-meta').innerHTML = !ing ? 'Escribe tu ingreso para calcular tu máximo de gastos.'
+    : hoy > maxGas
+      ? `Para ahorrar el ${ahorroPct} % (${fmt(Math.round(ing - maxGas))}) tus gastos tienen que <b>bajar a ${fmt(maxGas)}</b>.`
+      : `Para ahorrar el ${ahorroPct} % (${fmt(Math.round(ing - maxGas))}) tus gastos <b>no pueden pasar de ${fmt(maxGas)}</b>.`
+  const faltan = gas - maxGas
+  q('.pg-gastos').innerHTML = `Tu plan: <b class="pg-plan">${fmt(gas)}</b> ` + (!ing ? ''
+    : faltan > 1 ? `<span class="pg-falta">· baja ${fmt(faltan)} más</span>`
+    : `<span class="pg-ok">· ✓ ahorras ${fmt(Math.round(ing - gas))}</span>`)
+  q('.pg-med-barra i').style.width = Math.min(100, gas / tope * 100) + '%'
+  q('.pg-med-barra em').style.left = Math.min(100, maxGas / tope * 100) + '%'
+  const marcaHoy = q('.pg-med-barra u')
+  marcaHoy.hidden = !hoy
+  marcaHoy.style.left = Math.min(100, hoy / tope * 100) + '%'
+  if (_pgUltimoGas !== null && _pgUltimoGas !== gas) {
+    ;[q('.pg-plan'), q('.pg-med-barra i')].forEach(e => { e.classList.remove('late'); void e.offsetWidth; e.classList.add('late') })
+  }
+  _pgUltimoGas = gas
   const ahorroAhora = Math.round(metaAhorro)
   q('.pg-meta-chips').innerHTML = [10, 15, 20, 25, 30].map(p => `<button type="button" class="pg-chip${p === ahorroAhora ? ' on' : ''}" data-pct="${p}">${p} %<small class="num">${ing ? fmt(Math.round(ing * p / 100)) : ''}</small></button>`).join('')
   const otro = q('.pg-meta-otro input')
   if (document.activeElement !== otro) otro.value = [10, 15, 20, 25, 30].includes(ahorroAhora) ? '' : ahorroAhora
-  q('.pg-med-barra i').style.width = Math.min(100, pG / tope * 100) + '%'
-  q('.pg-med-barra em').style.left = (obj / tope * 100) + '%'
   q('.pg-ant').disabled = false
   q('.pg-ant').textContent = _pgIdx === 0 ? '← Tu ahorro' : '← Anterior'
   q('.pg-sig').disabled = false
@@ -2800,7 +2840,10 @@ function pintarAhorroPG(escribiendo) {
     ei.disabled = !ing
   }
   const objetivo = Math.round(ing * metaAhorro / 100)
-  q('.pg-a-nota').textContent = ing ? `Tu objetivo: ahorrar ${fmt(objetivo)} al mes. Para gastos te quedan ${fmt(Math.round(ing - objetivo))}.` : ''
+  const media = Math.round(_totalReal || 0), maxG = Math.round(ing - objetivo)
+  q('.pg-a-nota').textContent = !ing ? ''
+    : media > maxG ? `Tu objetivo: ahorrar ${fmt(objetivo)} al mes. Hoy gastas de media ${fmt(media)}: tendrás que bajar a ${fmt(maxG)}.`
+    : `Tu objetivo: ahorrar ${fmt(objetivo)} al mes. Para gastos te quedan ${fmt(maxG)}.`
   q('.pg-ant').disabled = true
   q('.pg-ant').textContent = '← Anterior'
   q('.pg-sig').disabled = !ing
@@ -2827,10 +2870,9 @@ function planExiste() {
 }
 function renderBannerPlan() {
   const ing = totalIngresos(), hay = planExiste() && ing > 0
-  const btn = document.querySelector('.btn-plan-guiado b')
-  if (btn) btn.textContent = hay ? 'Revisar mi plan' : 'Planifica tu ahorro'
-  const sub = document.querySelector('.btn-plan-guiado small')
-  if (sub) sub.textContent = hay ? 'Cuánto ahorras y lo que le dejas a cada cosa' : 'Primero cuánto quieres ahorrar; luego, categoría por categoría'
+  // Con plan hecho, el banner ya lleva «Revisar»: el botón sobraría
+  const btnPlan = document.querySelector('.btn-plan-guiado')
+  if (btnPlan) btnPlan.hidden = hay
   pintarBienvenida()
   ;['plan-banner', 'plan-banner-meta'].forEach(id => {
     const el = document.getElementById(id)
