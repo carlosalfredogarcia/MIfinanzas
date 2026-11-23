@@ -770,6 +770,12 @@ function totalIngresos() {
 }
 
 let gastosOriginal = {}
+// Quien empieza: sin meses cerrados no hay medias reales; el plan se hace con lo que cree que gasta
+let _hayMovs = true
+const sinHistoria = () => !Object.keys(gastosOriginal).length
+// Las categorías más comunes, para que alguien nuevo pueda hacer su plan desde el primer día
+const CATS_INICIO = ['Alquiler', 'Supermercado', 'Luz', 'Agua', 'Internet', 'Línea', 'Gasolina', 'Salidas', 'Ropa', 'Gastos Imprevistos']
+  .map(n => MF.CATS_DEFAULT.split(',').find(c => MF.sinEmoji(c) === n)).filter(Boolean)
 
 async function cargarGastos() {
   if (!window.currentUserId) {
@@ -860,6 +866,7 @@ async function cargarGastos() {
   const numMeses = mesesCerrados.length || 1
   ahorroRealMedio = mesesCerrados.length ? mesesCerrados.reduce((t, d) => t + d.ingresos - d.gastos, 0) / mesesCerrados.length : null
   mesesBase = mesesCerrados.map(d => d.mes)
+  _hayMovs = gastos.length > 0 || (fijos || []).length > 0
   mesesResumen = mesesCerrados.slice().reverse().map(d => ({ nombre: d.mesNombre, ingresos: d.ingresos, gastos: d.gastos }))
 
 
@@ -1369,8 +1376,11 @@ function renderGastos() {
     return row
   }
 
-  Object.keys(gastosOriginal)
-    .sort((a, b) => gastosOriginal[b] - gastosOriginal[a])
+  // Sin meses cerrados: lo que ya planificó y, si no hay nada, las categorías más comunes
+  const catsPlan = sinHistoria()
+    ? (Object.keys(guardado).length ? Object.keys(guardado) : CATS_INICIO)
+    : Object.keys(gastosOriginal).sort((a, b) => gastosOriginal[b] - gastosOriginal[a])
+  catsPlan
     .filter(cat => !enGrupos.has(cat))
     .forEach(cat => {
       allItems.push({ tipo: categoriaTipos[cat] ?? 'opcional', el: _buildRow(cat) })
@@ -2330,6 +2340,7 @@ function pintarVeredicto(ing, total) {
       ? 'Gastas más de lo que entra. No pasa nada: planifica cada categoría y le damos la vuelta.'
       : `Te sobra dinero cada mes (${Math.round(saldo / ing * 100)} % de lo que entra). Vamos a convertirlo en un plan de ahorro.`
   if (ing && total) { elSaldo.dataset.cuenta = saldo; contar(elSaldo) }
+  renderBannerPlan()
 }
 let _totalReal = 0
 
@@ -2562,6 +2573,19 @@ function montarPlanGuiado() {
         <label class="pg-meta-otro">Otro <input type="number" inputmode="numeric" min="5" max="50" class="num" aria-label="Porcentaje que quieres ahorrar"> %</label>
       </div>
     </div>
+    <div class="pg-ahorro" hidden>
+      <div class="pg-emoji" aria-hidden="true">🐷</div>
+      <h2 class="pg-nom">¿Cuánto quieres ahorrar cada mes?</h2>
+      <p class="pg-a-sub"></p>
+      <label class="pg-a-ing" hidden><span>Primero, ¿cuánto entra al mes?</span><span class="pg-a-ing-campo"><input type="number" inputmode="decimal" class="num" placeholder="0" aria-label="Lo que entra al mes"><b class="pg-mon"></b></span></label>
+      <div class="pg-a-ops" role="radiogroup" aria-label="Cuánto quieres ahorrar"></div>
+      <div class="pg-a-medida" hidden>
+        <label><input type="number" inputmode="decimal" class="num pg-a-pct" min="1" max="90" aria-label="Porcentaje que quieres ahorrar"><span>%</span></label>
+        <span class="pg-a-o">o</span>
+        <label><input type="number" inputmode="decimal" class="num pg-a-eur" min="0" aria-label="Cantidad que quieres ahorrar al mes"><span class="pg-mon"></span><small>al mes</small></label>
+      </div>
+      <p class="pg-a-nota"></p>
+    </div>
     <div class="pg-saltos" role="group" aria-label="Ir a una categoría"></div>
     <div class="pg-cuerpo">
       <div class="pg-emoji" aria-hidden="true"></div>
@@ -2584,10 +2608,30 @@ function montarPlanGuiado() {
   q('.pg-ant').onclick = () => irPlanGuiado(_pgIdx - 1)
   q('.pg-sig').onclick = () => {
     if (_pgIdx < filasPlan().length - 1) return irPlanGuiado(_pgIdx + 1)
-    cerrarPlanGuiado()
-    const queda = Math.round(totalIngresos() - totalGastos())
-    toast(queda > 0 ? `Plan listo: ahorras ${fmt(queda)} al mes. ¡A por ello!` : `Aún gastas ${fmt(-queda)} más de lo que entra. Revisa las opcionales: lo vas a conseguir.`, queda > 0 ? 'ok' : 'err', 4500)
+    terminarPlan()
   }
+  // Paso «¿Cuánto quieres ahorrar?»
+  q('.pg-a-ops').addEventListener('click', e => {
+    const b = e.target.closest('[data-op]'); if (!b) return
+    if (b.dataset.op === 'medida') { _pgMedida = true; pintarAhorroPG(); q('.pg-a-pct').focus(); return }
+    _pgMedida = false
+    ponerMetaAhorro(+b.dataset.op); pintarAhorroPG()
+  })
+  q('.pg-a-pct').addEventListener('input', e => {
+    const n = parseFloat(e.target.value); if (isNaN(n)) return
+    ponerMetaAhorro(Math.max(1, Math.min(90, n))); pintarAhorroPG(true)
+  })
+  q('.pg-a-eur').addEventListener('input', e => {
+    const n = parseFloat(e.target.value), ing = totalIngresos(); if (isNaN(n) || !ing) return
+    ponerMetaAhorro(Math.max(1, Math.min(90, n / ing * 100))); pintarAhorroPG(true)
+  })
+  q('.pg-a-ing input').addEventListener('input', e => {
+    const real = document.getElementById('p-ingresos-total')
+    real.value = e.target.value
+    real.dispatchEvent(new Event('input'))
+    pintarAhorroPG(true)
+  })
+  _pg.addEventListener('keydown', e => { if (e.key === 'Enter' && e.target.closest('.pg-ahorro')) { e.preventDefault(); e.target.blur(); q('.pg-sig').click() } })
   q('.pg-menos').onclick = () => ponerValorPG(Math.max(0, (parseFloat(q('.pg-inp').value) || 0) - 10))
   q('.pg-mas').onclick = () => ponerValorPG((parseFloat(q('.pg-inp').value) || 0) + 10)
   q('.pg-inp').addEventListener('input', e => ponerValorPG(Math.max(0, parseFloat(e.target.value) || 0), true))
@@ -2639,9 +2683,11 @@ function ponerMetaAhorro(pct) {
   }
   actualizarAnalisis()
 }
+// i = -1: empieza por «¿Cuánto quieres ahorrar?»; 0…: directamente en esa categoría
 function abrirPlanGuiado(i) {
   if (!filasPlan().length) return
   montarPlanGuiado()
+  _pgMedida = ![10, 15, 25].includes(Math.round(metaAhorro * 10) / 10)
   _pg.hidden = false
   document.documentElement.style.overflow = 'hidden'
   irPlanGuiado(i)
@@ -2652,7 +2698,15 @@ function cerrarPlanGuiado() {
 }
 function irPlanGuiado(i) {
   const n = filasPlan().length
-  _pgIdx = Math.max(0, Math.min(n - 1, i))
+  _pgIdx = Math.max(-1, Math.min(n - 1, i))
+  const enAhorro = _pgIdx === -1
+  ;['.pg-med', '.pg-saltos', '.pg-cuerpo'].forEach(c => { _pg.querySelector(c).hidden = enAhorro })
+  _pg.querySelector('.pg-ahorro').hidden = !enAhorro
+  if (enAhorro) {
+    pintarAhorroPG()
+    _pg.querySelector('.pg-ahorro').classList.remove('pg-entra'); void _pg.offsetWidth; _pg.querySelector('.pg-ahorro').classList.add('pg-entra')
+    return
+  }
   pintarPlanGuiado()
   _pg.querySelector('.pg-cuerpo').classList.remove('pg-entra'); void _pg.offsetWidth; _pg.querySelector('.pg-cuerpo').classList.add('pg-entra')
 }
@@ -2673,11 +2727,12 @@ function pintarPlanGuiado(escribiendo) {
   q('.pg-cuenta').textContent = `${_pgIdx + 1} de ${filas.length}`
   q('.pg-emoji').textContent = emojiCat(cat)
   q('.pg-nom').textContent = nombreCat(cat)
-  q('.pg-media').innerHTML = media ? `Tu media real: <b>${fmt(media)}</b> al mes${mesesBase.length ? ` <small>(${mesesBase.slice().reverse().join(', ')})</small>` : ''}` : 'Aún no tienes gastos aquí'
+  q('.pg-media').innerHTML = media ? `Tu media real: <b>${fmt(media)}</b> al mes${mesesBase.length ? ` <small>(${mesesBase.slice().reverse().join(', ')})</small>` : ''}` : sinHistoria() ? '¿Cuánto crees que gastas aquí al mes?' : 'Aún no tienes gastos aquí'
   if (!escribiendo) q('.pg-inp').value = Math.round(val)
   q('.pg-mon').textContent = window.moneda || '€'
   const opciones = [['Como siempre', media], ['−10 %', Math.round(media * 0.9 / 5) * 5], ['−25 %', Math.round(media * 0.75 / 5) * 5], ['La mitad', Math.round(media / 2 / 5) * 5], ['Nada', 0]]
     .filter(([, v], k, a) => k === 0 || (media > 0 && a.findIndex(x => x[1] === v) === k))
+  q('.pg-chips').hidden = !media
   q('.pg-chips').innerHTML = opciones.map(([t, v]) => `<button type="button" class="pg-chip${Math.round(val) === v ? ' on' : ''}" data-v="${v}">${t}<small class="num">${fmt(v)}</small></button>`).join('')
   q('.pg-chips').querySelectorAll('[data-v]').forEach(b => { b.onclick = () => ponerValorPG(+b.dataset.v) })
   const tipo = categoriaTipos[cat] ?? 'opcional'
@@ -2708,8 +2763,103 @@ function pintarPlanGuiado(escribiendo) {
   if (document.activeElement !== otro) otro.value = [10, 15, 20, 25, 30].includes(ahorroAhora) ? '' : ahorroAhora
   q('.pg-med-barra i').style.width = Math.min(100, pG / tope * 100) + '%'
   q('.pg-med-barra em').style.left = (obj / tope * 100) + '%'
-  q('.pg-ant').disabled = _pgIdx === 0
+  q('.pg-ant').disabled = false
+  q('.pg-ant').textContent = _pgIdx === 0 ? '← Tu ahorro' : '← Anterior'
+  q('.pg-sig').disabled = false
   q('.pg-sig').textContent = _pgIdx === filas.length - 1 ? 'Terminar ✓' : 'Siguiente →'
+}
+
+// ── «¿Cuánto quieres ahorrar?»: lo primero del plan. Después, categoría por categoría ──
+let _pgMedida = false
+const OPCIONES_AHORRO = [[10, 'Básico', 'Para empezar sin agobios'], [15, 'Equilibrado', 'Disfrutar y avanzar'], [25, 'Ahorrador', 'Ir a por todas']]
+function pintarAhorroPG(escribiendo) {
+  const q = c => _pg.querySelector(c), ing = totalIngresos(), pct = Math.round(metaAhorro * 10) / 10
+  q('.pg-cuenta').textContent = 'Tu ahorro'
+  _pg.querySelectorAll('.pg-mon').forEach(e => { e.textContent = window.moneda || '€' })
+  const campoIng = q('.pg-a-ing')
+  if (!ing && campoIng.hidden) campoIng.hidden = false
+  const sinGastos = sinHistoria()
+  const hoy = Math.round(ing - (_totalReal || 0))
+  q('.pg-a-sub').textContent = !ing
+    ? 'Escribe lo que cobras al mes y elige cuánto quieres guardar.'
+    : sinGastos
+      ? 'Elige una opción. Luego pondremos lo que crees que gastas en cada cosa.'
+      : hoy > 0
+        ? `Hoy, con tus gastos de media, te quedan ${fmt(hoy)} al mes (${Math.round(hoy / ing * 100)} % de lo que entra).`
+        : `Hoy gastas ${fmt(-hoy)} más de lo que entra. Elige una meta y la buscamos categoría por categoría.`
+  q('.pg-a-ops').innerHTML = OPCIONES_AHORRO.map(([p, t, d]) => {
+    const on = !_pgMedida && pct === p
+    return `<button type="button" role="radio" aria-checked="${on}" class="pg-a-op${on ? ' on' : ''}" data-op="${p}"><span><b>${t}</b><small>${d}</small></span><span class="pg-a-cifra"><b class="num">${p} %</b>${ing ? `<small class="num">${fmt(Math.round(ing * p / 100))}/mes</small>` : ''}</span></button>`
+  }).join('') + `<button type="button" role="radio" aria-checked="${_pgMedida}" class="pg-a-op${_pgMedida ? ' on' : ''}" data-op="medida"><span><b>A tu medida</b><small>Tú pones el % o la cantidad</small></span><span class="pg-a-cifra"><b aria-hidden="true">✏️</b></span></button>`
+  const medida = q('.pg-a-medida')
+  medida.hidden = !_pgMedida
+  if (_pgMedida) {
+    const pi = q('.pg-a-pct'), ei = q('.pg-a-eur')
+    if (document.activeElement !== pi) pi.value = Math.round(metaAhorro * 10) / 10
+    if (document.activeElement !== ei) ei.value = ing ? Math.round(ing * metaAhorro / 100) : ''
+    ei.disabled = !ing
+  }
+  const objetivo = Math.round(ing * metaAhorro / 100)
+  q('.pg-a-nota').textContent = ing ? `Tu objetivo: ahorrar ${fmt(objetivo)} al mes. Para gastos te quedan ${fmt(Math.round(ing - objetivo))}.` : ''
+  q('.pg-ant').disabled = true
+  q('.pg-ant').textContent = '← Anterior'
+  q('.pg-sig').disabled = !ing
+  q('.pg-sig').textContent = 'Seguir: categoría por categoría →'
+}
+
+// Terminar: se guarda el plan y sale el banner «Tu plan» en Metas
+function terminarPlan() {
+  cerrarPlanGuiado()
+  guardarGastosLocal()
+  _planHecho = true
+  try { localStorage.setItem('mf_plan_hecho_' + window.currentUserId, new Date().toISOString().slice(0, 10)) } catch(e) {}
+  renderBannerPlan()
+  const queda = Math.round(totalIngresos() - totalGastos())
+  toast(queda > 0 ? `Plan listo: ahorras ${fmt(queda)} al mes. ¡A por ello!` : `Aún gastas ${fmt(-queda)} más de lo que entra. Revisa las opcionales: lo vas a conseguir.`, queda > 0 ? 'ok' : 'err', 4500)
+  document.getElementById('plan-banner')?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+}
+
+// Banner «Tu plan» (en Tu plan y en Tu meta): lo que ahorras con el plan frente a tu objetivo
+let _planHecho = false
+function planExiste() {
+  if (_planHecho || Object.keys(_gastosGuardados).length) return true
+  try { return !!localStorage.getItem('mf_plan_hecho_' + window.currentUserId) } catch(e) { return false }
+}
+function renderBannerPlan() {
+  const ing = totalIngresos(), hay = planExiste() && ing > 0
+  const btn = document.querySelector('.btn-plan-guiado b')
+  if (btn) btn.textContent = hay ? 'Revisar mi plan' : 'Planifica tu ahorro'
+  const sub = document.querySelector('.btn-plan-guiado small')
+  if (sub) sub.textContent = hay ? 'Cuánto ahorras y lo que le dejas a cada cosa' : 'Primero cuánto quieres ahorrar; luego, categoría por categoría'
+  pintarBienvenida()
+  ;['plan-banner', 'plan-banner-meta'].forEach(id => {
+    const el = document.getElementById(id)
+    if (!el) return
+    el.hidden = !hay
+    if (!hay) return
+    const gas = Math.round(totalGastos()), ahorro = Math.round(ing - gas), obj = Math.round(ing * metaAhorro / 100)
+    const pct = Math.round(ahorro / ing * 100), cumple = ahorro >= obj - 1
+    el.className = 'plan-banner ' + (ahorro <= 0 ? 'mal' : cumple ? 'ok' : 'cerca')
+    el.innerHTML = `<div class="pb-top"><span class="pb-lbl">Tu plan</span><button type="button" class="pb-edit">Revisar ✏️</button></div>
+      <b class="pb-cifra num">${ahorro > 0 ? `Ahorras ${fmt(ahorro)} al mes` : 'Tu plan aún no deja ahorro'}</b>
+      <div class="pb-barra" aria-hidden="true"><i style="width:${Math.min(100, gas / Math.max(ing, gas) * 100)}%"></i><em style="left:${Math.min(100, (ing - obj) / Math.max(ing, gas) * 100)}%"></em></div>
+      <p class="pb-det num">Gastos ${fmt(gas)} de ${fmt(Math.round(ing))} · ahorro ${pct > 0 ? pct : 0} %</p>
+      <p class="pb-msg">${ahorro <= 0 ? `Gastas ${fmt(-ahorro)} más de lo que entra: baja alguna opcional.`
+        : cumple ? `✓ Cumples tu objetivo de ahorrar ${fmt(obj)} (${Math.round(metaAhorro)} %).`
+        : `Te faltan ${fmt(obj - ahorro)} para tu objetivo de ${fmt(obj)} (${Math.round(metaAhorro)} %).`}</p>`
+    el.querySelector('.pb-edit').onclick = () => abrirPlanGuiado(-1)
+  })
+}
+
+// Quien entra sin datos: se lo decimos claro, le contamos cómo funciona y puede planificar con lo que cree
+function pintarBienvenida() {
+  const el = document.getElementById('metas-bienvenida')
+  if (!el) return
+  el.hidden = !sinHistoria()
+  if (el.hidden) return
+  el.querySelector('.mb-txt').textContent = _hayMovs
+    ? 'Llevas poco tiempo apuntando: cuando cierre tu primer mes completo te diremos lo que gastas de verdad. Mientras, haz tu plan con lo que crees que gastas y lo vamos ajustando.'
+    : 'Todavía no tenemos gastos tuyos, así que no podemos hablarte con tus números reales. Haz tu plan con lo que crees que gastas y lo vamos viendo: cuando apuntes tus gastos, te orientamos con base.'
 }
 // Tocar el nombre de una categoría en la lista abre su pantalla
 document.getElementById('gastos-lista-plan').addEventListener('click', e => {

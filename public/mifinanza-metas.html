@@ -42,6 +42,21 @@
       <h2 id="paso-2-t">Tu plan</h2>
       <p>Lo que entra, lo que gastas <b>de verdad</b> de media y cuánto quieres ahorrar. Sé sincero: un plan que puedas cumplir vale más que uno perfecto.</p>
     </div>
+    <!-- Quien entra sin datos: cómo funciona la app y plan con lo que cree que gasta -->
+    <section class="metas-bienvenida" id="metas-bienvenida" aria-labelledby="mb-t" hidden>
+      <h3 id="mb-t">Aún no tenemos tus gastos</h3>
+      <p class="mb-txt"></p>
+      <ol class="mb-pasos">
+        <li><b>Apunta tus gastos</b> con el botón <b>+</b> (o díctalos), o importa el extracto de tu banco en Movimientos.</li>
+        <li><b>Haz tu plan</b> aquí: cuánto quieres ahorrar y lo que le dejas a cada cosa.</li>
+        <li><b>Ponte una meta</b> y sigue cada mes cómo vas en Seguimiento.</li>
+      </ol>
+      <div class="mb-botones">
+        <button type="button" class="mb-plan" onclick="abrirPlanGuiado(-1)">Hacer mi plan con lo que creo</button>
+        <button type="button" class="mb-apuntar" onclick="window.mfApunte && mfApunte.abrir('gasto')">Apuntar un gasto</button>
+      </div>
+    </section>
+    <div class="plan-banner" id="plan-banner" aria-live="polite" hidden></div>
     <div class="veredicto" id="real-veredicto" aria-live="polite"></div>
     <div class="planificador planificador-p1 plan-oculto">
     <div class="bloque-acordeon">
@@ -65,7 +80,7 @@
     <div class="tipos-ahorro" id="tipos-ahorro" role="radiogroup" aria-label="Tipo de ahorro"></div>
     <div class="propuesta" id="propuesta" aria-live="polite"></div>
     </div>
-    <button type="button" class="btn-plan-guiado" onclick="abrirPlanGuiado(0)"><span aria-hidden="true">✍️</span><span><b>Planificar categoría por categoría</b></span><span aria-hidden="true">→</span></button>
+    <button type="button" class="btn-plan-guiado" onclick="abrirPlanGuiado(-1)"><span aria-hidden="true">✍️</span><span><b>Planifica tu ahorro</b><small>Primero cuánto quieres ahorrar; luego, categoría por categoría</small></span><span aria-hidden="true">→</span></button>
     <div class="planificador planificador-p2">
     <div class="plan-oculto" hidden>
     <div class="analisis-panel">
@@ -121,6 +136,7 @@
       <h2 id="paso-3-t">Tu meta</h2>
       <p>Ahora sí, con base real. Contamos lo que has ahorrado de verdad y lo que tu plan te permite ahorrar en los meses que quedan.</p>
     </div>
+    <div class="plan-banner" id="plan-banner-meta" aria-live="polite" hidden></div>
     <div class="meta-vacia" id="meta-vacia" hidden>
       <div class="meta-vacia-ico" aria-hidden="true">🎯</div>
       <b>Aún no tienes una meta</b>

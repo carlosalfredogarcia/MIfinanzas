@@ -1088,3 +1088,58 @@ body { font-family: 'Manrope', sans-serif; }
 @media (prefers-reduced-motion: reduce) { .paso { animation: none; } .med-barra i { transition: none; } }
 input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
 input[type=number] { -moz-appearance: textfield; }
+
+/* Plan guiado: «¿Cuánto quieres ahorrar?» antes de las categorías */
+.pg [hidden] { display: none !important; }
+.pg-ahorro { flex: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: column; align-items: stretch; text-align: center; padding: 14px 22px 10px; }
+.pg-ahorro .pg-emoji { align-self: center; }
+.pg-ahorro .pg-nom { font-size: 24px; }
+.pg-a-sub { margin: 0 auto 14px; max-width: 340px; font-size: 14px; line-height: 1.45; color: var(--subtext); font-weight: 600; }
+.pg-a-ing { display: flex; flex-direction: column; gap: 8px; margin: 0 0 14px; padding: 12px 14px; border-radius: 16px; background: rgba(245,158,11,.08); border: 1px solid rgba(245,158,11,.35); font-size: 14px; font-weight: 800; color: #fcd34d; }
+.pg-a-ing-campo { display: flex; align-items: baseline; justify-content: center; gap: 6px; }
+.pg-a-ing input { width: 6ch; background: none; border: 0; border-bottom: 2px solid rgba(255,255,255,.2); outline: none; color: #fff; font: 800 32px 'Manrope', sans-serif; text-align: center; }
+.pg-a-ops { display: flex; flex-direction: column; gap: 8px; }
+.pg-a-op { display: flex; align-items: center; justify-content: space-between; gap: 12px; width: 100%; padding: 14px 16px; border-radius: 16px; border: 1px solid var(--border); background: #111827; color: var(--text); font: inherit; text-align: left; cursor: pointer; }
+.pg-a-op > span:first-child { display: flex; flex-direction: column; gap: 2px; }
+.pg-a-op b { font-size: 16px; font-weight: 800; }
+.pg-a-op small { font-size: 12.5px; font-weight: 600; color: var(--subtext); }
+.pg-a-cifra { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; white-space: nowrap; }
+.pg-a-op.on { border-color: rgba(16,185,129,.75); background: rgba(16,185,129,.13); }
+.pg-a-op.on .pg-a-cifra b { color: var(--green-txt); }
+.pg-a-medida { display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 12px; }
+.pg-a-medida label { display: flex; align-items: baseline; gap: 4px; padding: 8px 12px; border-radius: 14px; background: #111827; border: 1px solid rgba(16,185,129,.45); font-weight: 800; color: var(--subtext); }
+.pg-a-medida input { width: 4.5ch; background: none; border: 0; outline: none; color: #fff; font: 800 24px 'Manrope', sans-serif; text-align: right; }
+.pg-a-medida small { font-size: 11px; }
+.pg-a-o { font-size: 13px; font-weight: 700; color: var(--subtext); }
+.pg-a-nota { margin: 14px 0 0; font-size: 14px; font-weight: 700; color: var(--green-txt); }
+.pg-a-nota:empty { display: none; }
+.pg-sig:disabled { opacity: .45; cursor: default; box-shadow: none; }
+
+/* Banner «Tu plan» */
+.plan-banner { margin: 0 20px 14px; padding: 16px 18px; border-radius: 20px; background: linear-gradient(140deg, rgba(16,185,129,.18), rgba(17,24,39,.6) 60%, rgba(99,102,241,.14)); border: 1px solid rgba(16,185,129,.45); }
+.plan-banner[hidden] { display: none; }
+.plan-banner.cerca { border-color: rgba(245,158,11,.5); background: linear-gradient(140deg, rgba(245,158,11,.14), rgba(17,24,39,.6) 60%); }
+.plan-banner.mal { border-color: rgba(239,68,68,.5); background: linear-gradient(140deg, rgba(239,68,68,.14), rgba(17,24,39,.6) 60%); }
+.pb-top { display: flex; align-items: center; justify-content: space-between; }
+.pb-lbl { font-size: 12px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; color: var(--green-txt); }
+.plan-banner.cerca .pb-lbl { color: #fbbf24; } .plan-banner.mal .pb-lbl { color: var(--red-txt); }
+.pb-edit { border: 1px solid rgba(255,255,255,.16); background: rgba(255,255,255,.05); color: var(--text); font: 700 12px 'Manrope', sans-serif; padding: 6px 10px; border-radius: 999px; cursor: pointer; }
+.pb-cifra { display: block; margin: 6px 0 10px; font-size: 24px; font-weight: 800; letter-spacing: -.02em; color: #fff; }
+.pb-barra { position: relative; height: 10px; border-radius: 999px; background: rgba(16,185,129,.55); overflow: visible; }
+.pb-barra i { position: absolute; inset: 0 auto 0 0; border-radius: 999px 0 0 999px; background: #ef4444; }
+.pb-barra em { position: absolute; top: -4px; width: 3px; height: 18px; margin-left: -1px; border-radius: 2px; background: #fff; }
+.pb-det { margin: 8px 0 0; font-size: 13px; font-weight: 700; color: var(--subtext); }
+.pb-msg { margin: 6px 0 0; font-size: 14px; font-weight: 700; line-height: 1.4; color: var(--green-txt); }
+.plan-banner.cerca .pb-msg { color: #fcd34d; } .plan-banner.mal .pb-msg { color: var(--red-txt); }
+
+/* Bienvenida para quien aún no tiene gastos */
+.metas-bienvenida { margin: 0 20px 14px; padding: 18px; border-radius: 20px; background: #111827; border: 1px solid rgba(99,102,241,.4); }
+.metas-bienvenida[hidden] { display: none; }
+.metas-bienvenida h3 { margin: 0 0 6px; font-size: 18px; font-weight: 800; }
+.mb-txt { margin: 0 0 12px; font-size: 14px; line-height: 1.5; color: #cbd5e1; }
+.mb-pasos { margin: 0 0 14px; padding-left: 20px; display: flex; flex-direction: column; gap: 8px; font-size: 14px; line-height: 1.45; color: var(--subtext); }
+.mb-pasos b { color: var(--text); }
+.mb-botones { display: flex; flex-direction: column; gap: 8px; }
+.mb-plan, .mb-apuntar { width: 100%; padding: 14px; border-radius: 14px; font: 800 15px 'Manrope', sans-serif; cursor: pointer; }
+.mb-plan { border: 0; color: #fff; background: linear-gradient(110deg, #10b981, #14b8a6 60%, #6366f1); }
+.mb-apuntar { border: 1px solid var(--border); background: none; color: var(--text); }

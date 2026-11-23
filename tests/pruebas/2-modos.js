@@ -1,5 +1,5 @@
 // Vistas internas: los modos de Estadísticas y los 4 pasos de Metas
-const { completo } = require('../datos')
+const { completo, vacio } = require('../datos')
 
 module.exports = [
   {
@@ -83,7 +83,19 @@ module.exports = [
       t.ok((await disp()) !== dispAntes, 'El disponible no cambia con lo que entra')
       const pct = () => pg.$eval('.pg-med-top b', b => parseInt(b.textContent))
       await pg.click('.btn-plan-guiado'); await pg.waitForTimeout(500)
+      // Lo primero: cuánto quieres ahorrar (con lo que entra, 5.000)
+      t.igual(await pg.$eval('.pg-cuenta', e => e.textContent), 'Tu ahorro')
+      t.contiene(await pg.$eval('.pg-ahorro .pg-nom', e => e.textContent), '¿Cuánto quieres ahorrar')
+      await pg.click('.pg-a-op[data-op="15"]'); await pg.waitForTimeout(200)
+      t.contiene(await pg.$eval('.pg-a-nota', e => e.textContent), '750')
+      // A tu medida: en € se convierte a %
+      await pg.click('.pg-a-op[data-op="medida"]'); await pg.waitForTimeout(200)
+      await pg.fill('.pg-a-eur', '1000'); await pg.waitForTimeout(200)
+      t.igual(await pg.inputValue('.pg-a-pct'), '20')
+      t.contiene(await pg.$eval('.pg-sig', e => e.textContent), 'categoría por categoría')
+      await pg.click('.pg-sig'); await pg.waitForTimeout(500)
       t.contiene(await pg.$eval('.pg-cuenta', e => e.textContent), '1 de ')
+      t.contiene(await pg.$eval('.pg-obj', e => e.textContent), 'objetivo 80 %')
       const nombre1 = await pg.$eval('.pg-nom', e => e.textContent), antes = await pct()
       await pg.click('.pg-chip:has-text("La mitad")'); await pg.waitForTimeout(300)
       t.ok(await pct() < antes, 'Bajar la categoría no baja el % de gastos')
@@ -107,11 +119,44 @@ module.exports = [
       t.ok(await pg.$eval('.pg', e => e.hidden), 'No se cierra')
       // Desde la barra de iconos se salta a una categoría
       await pg.click('.btn-plan-guiado'); await pg.waitForTimeout(400)
+      await pg.click('.pg-sig'); await pg.waitForTimeout(400)
       await pg.click('.pg-saltos button >> nth=3'); await pg.waitForTimeout(400)
       t.contiene(await pg.$eval('.pg-cuenta', e => e.textContent), '4 de ')
       // Consejo sincero si se baja mucho
       await pg.click('.pg-chip:has-text("Nada")'); await pg.waitForTimeout(300)
       t.ok(await pg.$eval('.pg-aviso', e => e.classList.contains('ojo') || e.textContent === ''), 'Sin aviso al bajar a 0')
+      // Terminar: sale el banner «Tu plan» en Tu plan y en Tu meta
+      await pg.evaluate(() => irPlanGuiado(filasPlan().length - 1)); await pg.waitForTimeout(300)
+      t.contiene(await pg.$eval('.pg-sig', e => e.textContent), 'Terminar')
+      await pg.click('.pg-sig'); await pg.waitForTimeout(600)
+      t.ok(await pg.isVisible('#plan-banner'), 'No sale el banner del plan')
+      t.contiene(await pg.$eval('#plan-banner', e => e.textContent), 'objetivo')
+      t.contiene(await pg.$eval('.btn-plan-guiado', e => e.textContent), 'Revisar mi plan')
+      await pg.evaluate(() => irPaso(3)); await pg.waitForTimeout(400)
+      t.ok(await pg.isVisible('#plan-banner-meta'), 'No sale el banner en Tu meta')
+      t.sinErrores(pg)
+      await pg.context().close()
+    },
+  },
+  {
+    nombre: 'metas: alguien nuevo sin gastos, cómo funciona y plan con lo que cree',
+    async prueba(t) {
+      const pg = await t.abrir('mifinanza-metas.html', { datos: vacio(), espera: 2500 })
+      await pg.evaluate(() => irPaso(2)); await pg.waitForTimeout(400)
+      t.ok(await pg.isVisible('#metas-bienvenida'), 'No sale la bienvenida')
+      t.contiene(await pg.$eval('#metas-bienvenida', e => e.textContent), 'Todavía no tenemos gastos tuyos')
+      t.contiene(await pg.$eval('#metas-bienvenida', e => e.textContent), 'Apunta tus gastos')
+      await pg.click('.mb-plan'); await pg.waitForTimeout(500)
+      t.ok(await pg.isVisible('.pg-a-ing'), 'No pide lo que entra')
+      t.ok(await pg.$eval('.pg-sig', b => b.disabled), 'Deja seguir sin lo que entra')
+      await pg.fill('.pg-a-ing input', '1500'); await pg.waitForTimeout(200)
+      await pg.click('.pg-a-op[data-op="10"]'); await pg.waitForTimeout(200)
+      await pg.click('.pg-sig'); await pg.waitForTimeout(400)
+      t.contiene(await pg.$eval('.pg-media', e => e.textContent), 'crees que gastas')
+      t.contiene(await pg.$eval('.pg-nom', e => e.textContent), 'Alquiler')
+      await pg.fill('.pg-inp', '600'); await pg.waitForTimeout(200)
+      await pg.evaluate(() => irPlanGuiado(filasPlan().length - 1)); await pg.click('.pg-sig'); await pg.waitForTimeout(600)
+      t.contiene(await pg.$eval('#plan-banner', e => e.textContent), 'Ahorras')
       t.sinErrores(pg)
       await pg.context().close()
     },

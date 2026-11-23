@@ -61,6 +61,14 @@ El recorrido que hace el usuario hoy, y que el diseño debe convertir en pasos c
   sigue en el HTML con `hidden` y los datos de `colchon_movimientos` no se tocan. No volver a
   mostrarlo sin que lo pida.
 
+## Plan guiado (23/11/2026, pedido por el usuario)
+
+- El botón «Planifica tu ahorro» abre primero **«¿Cuánto quieres ahorrar cada mes?»** (Básico 10 %, Equilibrado 15 %,
+  Ahorrador 25 % o «A tu medida» en % o en €; si no hay ingresos, los pide ahí). Después, categoría por categoría.
+- Al terminar sale el **banner «Tu plan»** arriba de Tu plan y en Tu meta: ahorro del plan frente al objetivo y «Revisar».
+- **Quien entra sin meses cerrados**: tarjeta «Aún no tenemos tus gastos» con cómo funciona la app (apuntar → plan →
+  meta) y plan con lo que cree que gasta (categorías más comunes, sin medias). Cuando registre gastos, se habla con base.
+
 ## Contrato técnico (no romper)
 
 - Archivos: `public/mifinanza-metas.html` (estructura), `public/css/metas.css` y `public/js/metas.js`
