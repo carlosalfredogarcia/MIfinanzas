@@ -1221,3 +1221,17 @@ input[type=number] { -moz-appearance: textfield; }
 @media (prefers-reduced-motion: reduce) { .rdist-dest-row.rdist-late { animation: none; } }
 .sc-cubrir-explica { margin: 0 16px 8px; }
 .sc-cubrir-caja { padding: 10px; }
+
+/* Seguimiento (24/11): «Saldo disponible», gastado en rojo frente al plan en verde, y cada categoría en su cajita */
+.seg-hero-pie { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; margin-top: 10px; font-size: 13px; font-weight: 700; color: var(--subtext); }
+.seg-gastado { color: var(--red-txt); font-size: 15px; }
+.seg-plan { color: var(--green-txt); font-size: 15px; }
+.seg-vs { font-size: 11px; text-transform: uppercase; letter-spacing: .1em; opacity: .7; }
+.sc-card-margen { padding-top: 8px; }
+.sc-lista-grupo .sc-lista-row-wrap { margin: 0 12px 10px; padding: 4px 14px 2px; border: 1px solid rgba(255,255,255,.08); border-radius: 16px; background: rgba(10,14,26,.45); }
+.sc-lista-grupo .sc-lista-row-wrap:last-child { border-bottom: 1px solid rgba(255,255,255,.08); }
+.sc-card-pasadas .sc-lista-row-wrap { border-color: rgba(239,68,68,.3); }
+.sc-saldo { display: inline-flex; flex-direction: column; align-items: flex-end; gap: 0; padding: 5px 10px; border-radius: 12px; background: rgba(16,185,129,.12); border: 1px solid rgba(16,185,129,.35); line-height: 1.15; }
+.sc-saldo small { font-size: 10px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--subtext); }
+.sc-saldo b { font-size: 15px; font-weight: 800; color: var(--green-txt); }
+.pb-musculo { font-size: 15px; letter-spacing: 0; }

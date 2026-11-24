@@ -2148,8 +2148,8 @@ function renderTablaComparativa() {
 
     const labelHtml = `<span class="sc-lista-label">${t.label}</span>`
     const pctFila = t.estimado > 0 ? t.real / t.estimado : (t.real > 0 ? 1.01 : 0)
-    const barra = t.esFijo ? `<div class="sc-fila-nums num"><span>${fmt(t.real, 0)} este mes</span>${verGastos}</div>` : `<div class="sc-fila-barra${t.diff > 0 ? ' over' : pctFila > 0.85 ? ' cerca' : ''}"><i style="--w:${Math.min(1, pctFila).toFixed(3)}"></i></div>
-      <div class="sc-fila-nums num"><span>${fmt(t.real, 0)} gastado de ${fmt(t.estimado, 0)}</span>${verGastos}</div>`
+    const barra = t.esFijo ? `<div class="sc-fila-nums num"><span>${fmt(t.real, 2)} este mes</span>${verGastos}</div>` : `<div class="sc-fila-barra${t.diff > 0 ? ' over' : pctFila > 0.85 ? ' cerca' : ''}"><i style="--w:${Math.min(1, pctFila).toFixed(3)}"></i></div>
+      <div class="sc-fila-nums num"><span>${fmt(t.real, 2)} gastado de ${fmt(t.estimado, 2)}</span>${verGastos}</div>`
 
     let rightHtml
     if (t.esFijo) {
@@ -2157,7 +2157,7 @@ function renderTablaComparativa() {
     } else if (t.diff > 0) {
       rightHtml = `<div class="sc-lista-row-right"><span class="sc-lista-pill sc-lista-pill-over">Pasado ${fmt(Math.abs(t.diff))}</span>${pin}</div>`
     } else {
-      rightHtml = `<div class="sc-lista-row-right"><span class="sc-lista-pill sc-lista-pill-free">Te quedan ${fmt(Math.abs(t.diff))}</span>${pin}</div>`
+      rightHtml = `<div class="sc-lista-row-right"><span class="sc-saldo"><small>Saldo</small><b class="num">${fmt(Math.abs(t.diff), 2)}</b></span>${pin}</div>`
     }
 
     // Qué hace cada botón, dicho claro
@@ -2170,24 +2170,23 @@ function renderTablaComparativa() {
   // Las que se han pasado, aparte y en rojo, con lo que se puede hacer
   const pasadasHtml = !pasadas.length ? '' : `<div class="sc-lista-card sc-card-pasadas">
       <div class="sc-grupo-cab"><span>⚠️ Te has pasado</span><small class="num">${pasadas.length} ${pasadas.length === 1 ? 'categoría' : 'categorías'} · ${fmt(exceso)} de más</small></div>
-      <p class="sc-cubrir-txt sc-cubrir-explica">Cubre lo que te has pasado con el saldo de otra categoría: tú eliges de cuál y cuánto. Tienes <b class="num">${fmt(libre)}</b> libres en las categorías con saldo.</p>
+      <p class="sc-cubrir-txt sc-cubrir-explica">Cubre lo que te has pasado con el saldo de otra categoría: tú eliges de cuál y cuánto.</p>
       <div class="sc-lista-grupo">${pasadas.map(_filaLista).join('')}</div>
     </div>`
 
   // Lo que queda del mes, en grande, junto a las categorías con saldo
   const pctMes = totalEstimado > 0 ? Math.min(100, totalGastado / totalEstimado * 100) : 0
   const hero = teQuedan >= 0
-    ? `<span class="v-lbl">Te quedan este mes</span><b class="v-cifra num">${fmt(teQuedan, 0)}</b>
-       <p>Para ${diasQuedan} día${diasQuedan === 1 ? '' : 's'} · <b class="num">${fmt(teQuedan / diasQuedan, 0)} al día</b></p>`
-    : `<span class="v-lbl">Este mes</span><b class="v-cifra num">−${fmt(Math.abs(teQuedan), 0)}</b>
+    ? `<span class="v-lbl">Saldo disponible</span><b class="v-cifra num">${fmt(teQuedan, 2)}</b>
+       <p>Para ${diasQuedan} día${diasQuedan === 1 ? '' : 's'} · <b class="num">${fmt(teQuedan / diasQuedan, 2)} al día</b></p>`
+    : `<span class="v-lbl">Saldo disponible</span><b class="v-cifra num">−${fmt(Math.abs(teQuedan), 2)}</b>
        <p>Te has pasado ${fmt(Math.abs(teQuedan))} del total estimado. Reparte el exceso entre las categorías con saldo.</p>`
   const margenHtml = `<div class="sc-bloque-margen">
       <div class="veredicto seg-hero ${teQuedan >= 0 ? 'pos' : 'neg'}">${hero}
         <div class="seg-hero-barra" role="img" aria-label="${Math.round(pctMes)} % del plan gastado"><i style="--w:${(pctMes / 100).toFixed(3)}"></i></div>
-        <span class="seg-hero-pie num">${fmt(totalGastado, 0)} gastado de ${fmt(totalEstimado, 0)} del plan</span>
+        <div class="seg-hero-pie num"><span><b class="seg-gastado">${fmt(totalGastado, 2)}</b> gastado</span><span class="seg-vs">vs</span><b class="seg-plan">${fmt(totalEstimado, 2)} del plan</b></div>
       </div>
       ${margen.length ? `<div class="sc-lista-card sc-card-margen">
-        <div class="sc-grupo-cab"><span>✅ Con saldo disponible</span><small class="num">${fmt(libre)} libres</small></div>
         <div class="sc-lista-grupo">${margen.map(_filaLista).join('')}</div>
       </div>` : ''}
     </div>`
@@ -2862,7 +2861,7 @@ function renderBannerPlan() {
     el.className = 'veredicto plan-banner ' + (ahorro <= 0 ? 'neg' : cumple ? 'pos' : 'cerca')
     el.setAttribute('role', 'button'); el.tabIndex = 0
     el.setAttribute('aria-label', 'Tu plan: toca para planificar tus gastos')
-    el.innerHTML = `<span class="v-lbl">Disponible con tu plan</span>
+    el.innerHTML = `<span class="v-lbl"><span class="pb-musculo" aria-hidden="true">💪</span> Disponible con tu plan</span>
       <b class="v-cifra num">${(ahorro > 0 ? '+' : '') + fmt(ahorro)} <small>al mes</small></b>
       <div class="v-balanza">
         <div class="v-fila"><span>Ingreso</span><i class="v-entra" style="--w:${(ing / tope).toFixed(3)}"></i><b class="num">${fmt(Math.round(ing))}</b></div>
