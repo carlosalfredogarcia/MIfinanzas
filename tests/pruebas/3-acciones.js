@@ -462,7 +462,7 @@ module.exports = [
       await pg.click('[data-ayuda]'); await pg.waitForTimeout(900)
       t.ok(await pg.$('.mfh.mfh-ver'), 'No se abrió la ayuda')
       // Cada paso: el foco rodea su parte y la burbuja se ve entera sin taparla
-      const PARTES = ['.period-bar', '#saldo-amount', '.spark-wrap', '.pills-row > .pill:first-child', '.pills-row > .pill:last-child', '.salud-card', '.cats-card', '.fijos-card', '.mf-plus']
+      const PARTES = ['.period-bar', '#saldo-amount', '.spark-wrap', '.pills-row > .pill:first-child', '.pills-row > .pill:last-child', '.cats-card', '.fijos-card', '.mf-plus']
       const titulos = []
       for (const [k, sel] of PARTES.entries()) {
         const p = await pg.evaluate(sel => {
@@ -482,7 +482,7 @@ module.exports = [
         t.igual(p.boton, k === PARTES.length - 1 ? 'Entendido' : 'Siguiente')
         await pg.click('.mfh-sig'); await pg.waitForTimeout(1100)
       }
-      t.igual(titulos, ['El mes que estás viendo', 'Saldo actual', 'Cómo acabó cada mes', 'Ingresos', 'Gastos', 'Salud financiera', 'A dónde va tu dinero', 'Gastos fijos', 'Apunta en un momento'])
+      t.igual(titulos, ['El mes que estás viendo', 'Saldo actual', 'Cómo acabó cada mes', 'Ingresos', 'Gastos', 'A dónde va tu dinero', 'Gastos fijos', 'Apunta en un momento'])
       t.ok(!(await pg.$('.mfh.mfh-ver')), '«Entendido» no cierra la ayuda')
       t.ok(!(await pg.$('.mfh-activa')), 'El botón + sigue apartado')
       // Otra vez: flechas del teclado, «Atrás», un toque fuera de la burbuja no abre la tarjeta de debajo, Esc cierra

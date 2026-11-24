@@ -851,6 +851,7 @@ window.MF_EN = {
     'al mes.': 'left a month.',
     'Ver las {0} categorías': 'See all {0} categories',
     'Ver menos': 'See less',
+    'Arriba, lo que te queda este mes. Debajo, a dónde va tu dinero: en qué categorías se te va.': 'At the top, what you have left this month. Below, where your money goes: which categories it goes on.',
     ': te reparto el exceso bajando un poco las categorías con saldo.': ': I’ll spread the excess by lowering the categories with room a little.',
     'Disponible con tus gastos reales': 'Available with your real spending',
     'Gastos reales': 'Real spending',

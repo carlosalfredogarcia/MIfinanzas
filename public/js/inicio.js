@@ -28,47 +28,6 @@ actualizarCabecera()
 function mesAnterior() { mesVer--; if(mesVer<0){mesVer=11;anioVer--} actualizarCabecera(); cargarDashboard() }
 function mesSiguiente() { mesVer++; if(mesVer>11){mesVer=0;anioVer++} actualizarCabecera(); cargarDashboard() }
 
-// Salud financiera: anillo, etiqueta y marcador de la barra
-function actualizarSalud(pctGastado, saldo, totalIng) {
-  const ring = document.getElementById('salud-ring')
-  const badge = document.getElementById('salud-badge')
-  const resto = document.getElementById('salud-resto')
-  const circ = 2 * Math.PI * 54  // r=54 → 339,29
-
-  if (totalIng <= 0) {
-    ring.setAttribute('class', 'ring-fg')
-    ring.style.strokeDashoffset = circ
-    document.getElementById('salud-pct').textContent = '—'
-    document.getElementById('salud-pct').className = 'ring-pct num'
-    badge.textContent = 'Sin ingresos'
-    badge.className = 'salud-badge warn'
-    resto.innerHTML = 'Aún no has registrado ingresos este mes.' + (saldo < 0 ? ` Llevas <strong>${fmt(-saldo)}</strong> gastados.` : '')
-    document.getElementById('salud-marker').style.left = '0%'
-    document.getElementById('salud-svg').setAttribute('aria-label', 'Sin ingresos registrados este mes')
-    return
-  }
-
-  const p = Math.max(0, pctGastado)
-  ring.style.strokeDashoffset = circ * (1 - Math.min(1, p / 100))
-
-  let estado, clase
-  if (p < 80)       { estado = 'Bajo control'; clase = '' }
-  else if (p <= 95) { estado = 'Atención';     clase = 'warn' }
-  else              { estado = 'Al límite';    clase = 'danger' }
-  ring.setAttribute('class', 'ring-fg' + (clase ? ' ' + clase : ''))  // en SVG, className no se puede asignar
-  badge.textContent = estado
-  badge.className = 'salud-badge' + (clase ? ' ' + clase : '')
-  // El porcentaje se pone en rojo cuando el mes está al límite o pasado (más del 95 %).
-  const pctEl = document.getElementById('salud-pct')
-  pctEl.textContent = pctTxt(p)
-  pctEl.className = 'ring-pct num' + (clase === 'danger' ? ' danger' : '')
-
-  resto.innerHTML = saldo >= 0
-    ? `Te quedan <strong>${fmt(saldo)}</strong> hasta fin de mes.`
-    : `<span style="color:var(--red-txt)">Llevas ${fmt(-saldo)} en negativo.</span>`
-  document.getElementById('salud-marker').style.left = Math.min(99, Math.max(1, p)) + '%'
-  document.getElementById('salud-svg').setAttribute('aria-label', `Has gastado el ${pctTxt(p)} de tus ingresos. ${estado}.`)
-}
 
 // Línea de saldo a fin de mes de los últimos 6 meses (hasta el mes que se está viendo).
 async function cargarSparkline(uid) {
@@ -177,9 +136,6 @@ async function cargarDashboard() {
   saldoEl.className = 'saldo-amount num' + (saldo < 0 ? ' negativo' : '')
   saldoEl.textContent = fmt(saldo)
 
-  // Salud financiera
-  const pctGastado = totalIng > 0 ? (totalGastadoTodo / totalIng) * 100 : 0
-  actualizarSalud(pctGastado, saldo, totalIng)
 
   pintarCategorias([...(gastos || []), ...(fijos || [])])
 

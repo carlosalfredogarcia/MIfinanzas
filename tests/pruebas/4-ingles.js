@@ -28,10 +28,10 @@ module.exports = [
     nombre: 'inglés: la guía de bienvenida y la ayuda de Inicio, traducidas',
     async prueba(t) {
       const pg = await t.abrir('inicio.html', { datos: completo(), idioma: 'en', guia: true, espera: 2500 })
-      t.contiene(await pg.$eval('.mfg', e => e.innerText), '80–95 %: careful')
+      t.contiene(await pg.$eval('.mfg', e => e.innerText), 'Below, where your money goes')
       await pg.click('.mfg-saltar'); await pg.waitForTimeout(400)
       await pg.click('[data-ayuda]'); await pg.waitForTimeout(900)
-      t.igual(await pg.$eval('.mfh-cuenta', e => e.textContent), '1 of 9')
+      t.igual(await pg.$eval('.mfh-cuenta', e => e.textContent), '1 of 8')
       for (let i = 0; i < 8; i++) { await pg.click('.mfh-sig'); await pg.waitForTimeout(600) }
       t.igual(await pg.$eval('.mfh-sig', e => e.textContent), 'Got it')
       const faltan = (await pg.evaluate(() => [...window.__FALTAN__])).filter(x => !DATOS_USUARIO.has(x.replace(/^\P{L}+/u, '')))

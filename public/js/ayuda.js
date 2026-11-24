@@ -11,8 +11,6 @@
       { el: '.spark-wrap', tit: 'Cómo acabó cada mes', txt: 'La línea es lo que te sobró (o te faltó) en cada uno de los últimos 6 meses. Si sube, vas a mejor.' },
       { el: '.pills-row > .pill:first-child', tit: 'Ingresos', txt: 'Todo el dinero que te ha entrado este mes: nómina, Bizum, ventas… Se apunta con el botón + → Ingreso.' },
       { el: '.pills-row > .pill:last-child', tit: 'Gastos', txt: 'Todo lo que has gastado este mes, gastos fijos incluidos.', nota: 'Toca la tarjeta y los ves uno a uno en Movimientos.' },
-      { el: '.salud-card', tit: 'Salud financiera', txt: 'Qué parte de tus ingresos ya has gastado este mes. La rayita blanca de la barra marca por dónde vas.',
-        chips: [['#10b981', 'Menos del 80 %: vas bien'], ['#f59e0b', '80–95 %: cuidado'], ['#ef4444', 'Más del 95 %: al límite']], nota: 'Tócala para hacer tu plan en Metas.' },
       { el: '.cats-card', tit: 'A dónde va tu dinero', txt: 'Lo que llevas gastado este mes en cada categoría, de mayor a menor, gastos fijos incluidos.',
         nota: 'Tócala para ver todas tus estadísticas.' },
       { el: '.fijos-card', tit: 'Gastos fijos', txt: 'Lo que pagas todos los meses: alquiler, luz, gimnasio… Se cuentan solos, sin apuntarlos. Cada barra es la parte del total que se lleva ese gasto.',
