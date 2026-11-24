@@ -12,11 +12,12 @@ let navegador
 // RECOGER=1 npm test → guarda en tests/sin-traducir.txt los textos que faltan en js/idioma-en.js
 const RECOGER = process.env.RECOGER
 const sinTraducir = new Set()
-async function lanzar() {
-  return navegador ||= await chromium.launch({ executablePath: CHROME, args: ['--no-sandbox'] })
+// Un solo navegador aunque varias pruebas empiecen a la vez (se guarda la promesa, no el resultado)
+function lanzar() {
+  return navegador ||= chromium.launch({ executablePath: CHROME, args: ['--no-sandbox'] })
 }
 async function cerrarNavegador() {
-  if (navegador) await navegador.close()
+  if (navegador) await (await navegador).close()
   if (RECOGER) fs.writeFileSync(path.join(__dirname, 'sin-traducir.txt'), [...sinTraducir].sort().join('\n') + '\n')
 }
 

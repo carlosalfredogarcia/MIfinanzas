@@ -60,6 +60,9 @@ Lista viva: al empezar una conversación nueva, leer esto y `CLAUDE.md`. Al term
 
 ## De Claude (cuando el usuario lo pida)
 
+- **Sesión de inglés** (al final, cuando el usuario diga que hemos terminado): traducir en js/idioma-en.js todo lo
+  nuevo desde el 24/11 (`cd tests && INGLES=1 RECOGER=1 npm test` → tests/sin-traducir.txt) y pasar `INGLES=1 npm test`.
+
 - Metas rediseñada (28/10/2026): veredicto con balanza (paso 1), propuesta de recortes que se aplica y se deshace
   (paso 2), meta sugerida que nunca sale «difícil» y botón «Dejarla en X €» (paso 3), cifra grande de lo que queda
   del mes (paso 4). Vídeo demo parado: el usuario no quiere el vídeo automático; cuando mande su nota de voz,

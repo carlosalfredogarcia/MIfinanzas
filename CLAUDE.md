@@ -70,8 +70,9 @@ tests/                      pruebas en Chromium con Supabase simulado (ver abajo
   € detrás con espacio que no se parte, otros símbolos delante). Porcentajes sin decimales.
 - Nada repetido entre pantallas: si algo sirve a dos o más, va a `js/comun.js` (o a `js/nav.js` si es de la barra).
 - Orden de carga en cada pantalla: aviso de navegador antiguo (script en línea) → js/idioma.js y js/android.js (en <head>, tras <title>) → supabase (CDN) → js/auth.js → js/comun.js → [js/datepicker.js] → js/<pantalla>.js → js/nav.js.
-- Inglés: las pantallas se escriben en español. Todo texto nuevo debe tener su traducción en js/idioma-en.js
-  (`cd tests && RECOGER=1 npm test` lista en tests/sin-traducir.txt lo que falta; la prueba «inglés» falla si queda algo).
+- Inglés: las pantallas se escriben en español. **Desde el 24/11 las traducciones NO se hacen en cada cambio**
+  (lo pidió el usuario): se harán todas juntas en una sesión al final (ver PENDIENTES.md). Para esa sesión:
+  `cd tests && INGLES=1 RECOGER=1 npm test` lista en tests/sin-traducir.txt lo que falta en js/idioma-en.js.
 - Diseño: fondo #0a0e1a, tarjetas #111827, bordes #1f2937, esmeralda #10b981, rojo #ef4444, índigo #6366f1,
   dorado #f59e0b; letra Manrope; cifras con tabular-nums; hojas que suben desde abajo con «Deshacer» en vez de alertas.
 - Rápido: las consultas de una pantalla van juntas en un Promise.all (nunca una detrás de otra) y solo con las
@@ -85,6 +86,10 @@ tests/                      pruebas en Chromium con Supabase simulado (ver abajo
 ```
 cd tests && npm install && npm test
 ```
+Rápido (el usuario se quejó de esperas largas, 24/11): las pruebas van de 5 en 5 a la vez (~1 min); las de inglés
+solo con `INGLES=1`. Cambio pequeño en una pantalla → solo sus pruebas (`npm test -- metas`, `-- inicio`…) y publicar.
+La pasada completa, una sola vez antes de publicar cambios grandes o de varias pantallas. Nunca repetirla para nada.
+Avisar al usuario de en qué se está cada pocos minutos.
 Abren cada pantalla con datos fijos (`tests/datos.js`) y fecha fija (21/10/2026) y comparan el texto con
 `tests/fotos/*.txt`. Si un cambio es intencionado: revisar la diferencia y `npm run actualizar`.
 `npm test -- metas` ejecuta solo las pruebas cuyo nombre contiene «metas».
