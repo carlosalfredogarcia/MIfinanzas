@@ -3,9 +3,3 @@
 [build]
   publish = "."
 
-# El contacto de ALFREGA (botón «Guardar contacto»): que el móvil lo abra como contacto
-[[headers]]
-  for = "/alfrega.vcf"
-  [headers.values]
-    Content-Type = "text/vcard; charset=utf-8"
-    Content-Disposition = "inline; filename=ALFREGA.vcf"

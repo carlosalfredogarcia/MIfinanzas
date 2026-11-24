@@ -44,7 +44,7 @@ kit/                        página del QR del Kit de Seguridad Infantil (ALFREG
                             alfrega-kit.netlify.app). Se publica SOLA desde GitHub (main, base directory kit) desde el
                             21 nov: no subir zips. Los QR ya están impresos: NUNCA renombrar ni borrar el proyecto
                             alfrega-kit en Netlify (cambiaría la dirección). El bloque «Para negocios» va con los
-                            colores de alfrega.es (beige #f0e8e0 y dorado #b8922a); sin «te regalo 30 €». Habla de webs con reservas Y de CRM a medida, con un solo botón «Prueba un mes gratis» (sin el recuadro de las 800 reservas). Debajo, «Guardar contacto de ALFREGA» (kit/alfrega.vcf, cabecera text/vcard en netlify.toml) y «Pasárselo a alguien con negocio» (menú de compartir del móvil o WhatsApp).
+                            colores de alfrega.es (beige #f0e8e0 y dorado #b8922a); sin «te regalo 30 €». Habla de webs con reservas Y de CRM a medida, con un solo botón «Prueba un mes gratis» (sin el recuadro de las 800 reservas). Debajo, dos botones verdes que van DIRECTOS a WhatsApp (wa.me/?text=…): «Guardarlo en mi WhatsApp» (se lo manda a su propio chat «Tú») y «Compartirlo por WhatsApp» (el usuario no quiso contacto .vcf ni el menú de compartir).
                             Lleva a mifinanzas.alfrega.es/descubre?desde=kit.
 netlify/functions/          servidor: import-csv.js (CSV y Excel; IA para extractos de bancos, usa ANTHROPIC_API_KEY)
                             e import-doc.js (PDF, capturas y fotos: el móvil los parte en trozos y los manda a la vez;
