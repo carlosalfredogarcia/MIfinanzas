@@ -93,13 +93,8 @@
   .negocio li { font-size: 15px; font-weight: 600; padding: 4px 0; color: #1a1a1a; }
   .negocio li::before { content: '✓ '; color: #b8922a; font-weight: 800; }
   .neg-btn { display: block; margin-top: 20px; padding: 16px; border-radius: 999px; text-align: center; text-decoration: none; font-weight: 700; font-size: 17px; color: #1b1406; background: linear-gradient(135deg, #f6e2a8 0%, #d4af5a 45%, #b8922a 100%); box-shadow: 0 10px 30px -10px rgba(212,175,90,.7), inset 0 1px 0 rgba(255,255,255,.5); }
-  .neg-guardar { margin-top: 18px; padding-top: 16px; border-top: 1px solid rgba(60,45,30,.13); }
-  .neg-guardar p { font-size: 14px !important; font-weight: 600 !important; color: #6b5c4a !important; margin-bottom: 10px; text-align: center; }
-  .neg-sec { display: block; width: 100%; margin-top: 8px; padding: 13px 14px; border-radius: 999px; text-align: center; text-decoration: none; font: inherit; font-family: 'Manrope', system-ui, sans-serif; font-weight: 700; font-size: 15px; color: #3d372f; background: rgba(255,255,255,.7); border: 1px solid rgba(184,146,42,.45); cursor: pointer; }
+  .neg-sec { display: block; width: 100%; margin-top: 14px; padding: 13px 14px; border-radius: 999px; text-align: center; text-decoration: none; font: inherit; font-family: 'Manrope', system-ui, sans-serif; font-weight: 700; font-size: 15px; color: #3d372f; background: rgba(255,255,255,.7); border: 1px solid rgba(184,146,42,.45); cursor: pointer; }
   .neg-sec:active { background: #fff; }
-  .neg-sec.wa { color: #fff; background: #25d366; border-color: #25d366; }
-  .neg-sec.wa:active { background: #1fb457; }
-  .negocio .neg-nota { font-size: 12.5px !important; font-weight: 600 !important; margin: 6px 0 4px !important; }
   .neg-link { display: block; margin-top: 12px; text-align: center; color: #9c7826; font-weight: 700; font-size: 15px; text-decoration: none; }
 
   footer { text-align: center; padding: 34px 20px calc(30px + env(safe-area-inset-bottom)); color: var(--muted); font-size: 13px; font-weight: 700; }
@@ -163,13 +158,8 @@
       </ul>
       <a class="neg-btn" href="https://alfrega.es/negocios#prueba">Prueba un mes gratis</a>
       <a class="neg-link" href="https://alfrega.es/negocios">Ver ejemplos y precios →</a>
-      <!-- Para que no se pierda: guardar el contacto en la agenda o pasárselo a alguien en el momento -->
-      <div class="neg-guardar">
-        <p>¿No es para ti ahora? Guárdalo para después:</p>
-        <a class="neg-sec wa" id="guardar-wa" href="#" target="_blank" rel="noopener">💾 Guardarlo en mi WhatsApp</a>
-        <p class="neg-nota">Elige tu propio chat («Tú») y te queda guardado.</p>
-        <a class="neg-sec wa" id="compartir-wa" href="#" target="_blank" rel="noopener">📤 Compartirlo por WhatsApp</a>
-      </div>
+      <!-- Un solo botón discreto: pasárselo a alguien por WhatsApp (mensaje ya escrito) -->
+      <a class="neg-sec" id="compartir-wa" href="#" target="_blank" rel="noopener">💬 Compártelo con un amigo o conocido</a>
     </section>
 
     <section class="app sube" aria-labelledby="app-t">
@@ -202,10 +192,8 @@
   }
   car.addEventListener('scroll', marcar, { passive: true }); marcar()
 
-  // Directo a WhatsApp, con el mensaje ya escrito: para guardárselo uno mismo (chat «Tú») o pasárselo a alguien
-  var web = 'https://alfrega.es'
-  document.getElementById('guardar-wa').href = 'https://wa.me/?text=' + encodeURIComponent('📌 Para más adelante: ALFREGA, webs con reservas para negocios. El primer mes es gratis. WhatsApp 640 309 239 · ' + web)
-  document.getElementById('compartir-wa').href = 'https://wa.me/?text=' + encodeURIComponent('Mira, este chico hace webs con reservas para negocios (estéticas, barberías…). El primer mes es gratis: ' + web)
+  // Compartir por WhatsApp con el mensaje ya escrito (elige a quién)
+  document.getElementById('compartir-wa').href = 'https://wa.me/?text=' + encodeURIComponent('Mira, este chico hace webs con reservas para negocios (estéticas, barberías…). El primer mes es gratis: https://alfrega.es')
 
   // Las secciones aparecen al llegar a ellas
   const io = 'IntersectionObserver' in window && new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('ver'); io.unobserve(e.target) } }), { threshold: .15 })
