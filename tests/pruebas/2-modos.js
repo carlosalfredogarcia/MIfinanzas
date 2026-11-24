@@ -59,6 +59,25 @@ module.exports = [
       t.ok(await pg.$('#aviso-deshacer.ver'), 'No sale «Deshacer»')
       await pg.click('#aviso-deshacer button'); await pg.waitForTimeout(700)
       t.igual(await pasadas(), antes)
+      // Pasadas aparte en rojo, «te quedan» junto a las que tienen saldo, y qué hace cada botón
+      t.ok(await pg.isVisible('.sc-card-pasadas'), 'Las pasadas no van aparte')
+      t.ok(await pg.isVisible('.sc-bloque-margen .seg-hero + .sc-card-margen'), '«Te quedan» no va con las de saldo')
+      t.contiene(await pg.$eval('.sc-cubrir-explica', e => e.textContent), 'bajando un poco las categorías con saldo')
+      // Ver gastos abre los movimientos de la categoría
+      await pg.click('.sc-card-margen .sc-ver'); await pg.waitForTimeout(400)
+      t.ok(await pg.$eval('.sc-card-margen .sc-det-panel', e => e.dataset.open === '1'), 'Ver gastos no abre')
+      // Elegir yo: «Aquí» lo pone todo en una categoría con saldo y, al confirmar, deja de estar pasada (sin céntimos colgando)
+      const nombre = await pg.$eval('.sc-pasada .sc-lista-label', e => e.textContent)
+      await pg.click('.sc-pasada .sc-elegir-btn'); await pg.waitForTimeout(400)
+      t.contiene(await pg.$eval('.rdist-explica', e => e.textContent), 'Repartir el exceso')
+      t.ok(await pg.$eval('#rdist-confirmar', b => b.disabled), 'Se puede confirmar sin repartir nada')
+      t.ok(await pg.$('.rdist-dest-row.rdist-late'), 'Las categorías con saldo no laten')
+      // «Aquí» en cada una hasta colocarlo todo (cada una pone lo que falta, sin pasar de su saldo)
+      const nTodo = await pg.locator('.rdist-todo').count()
+      for (let k = 0; k < nTodo; k++) { await pg.locator('.rdist-todo').nth(k).click(); await pg.waitForTimeout(60) }
+      await pg.click('#rdist-confirmar'); await pg.waitForTimeout(200)
+      await pg.evaluate(() => ejecutarConfirmRedistrib()); await pg.waitForTimeout(700)
+      t.ok(!(await pg.$$eval('.sc-pasada .sc-lista-label', (es, n) => es.some(e => e.textContent === n), nombre)), nombre + ' sigue pasada tras repartirlo')
       t.sinErrores(pg)
       await pg.context().close()
     },
@@ -73,7 +92,7 @@ module.exports = [
       for (const sel of ['#p-ingresos-total', '#gastos-lista-plan', '#medidor', '#tipos-ahorro', '#propuesta', '#disponible-card'])
         t.ok(!(await pg.isVisible(sel)), sel + ' sigue a la vista en Tu plan')
       // Lo que entra se cambia con el lápiz del banner, y el disponible se recalcula
-      const disp = () => pg.$eval('.v-disp b', b => b.textContent)
+      const disp = () => pg.$eval('.v-saldo', b => b.textContent)
       const dispAntes = await disp()
       await pg.click('.v-editar'); await pg.waitForTimeout(200)
       t.ok(await pg.isVisible('.v-ing-inp'), 'El lápiz no abre el campo de lo que entra')
@@ -171,7 +190,7 @@ module.exports = [
       t.contiene(await pg.$eval('.pg-nom', e => e.textContent), 'Alquiler')
       await pg.fill('.pg-inp', '600'); await pg.waitForTimeout(200)
       await pg.evaluate(() => irPlanGuiado(filasPlan().length - 1)); await pg.click('.pg-sig'); await pg.waitForTimeout(600)
-      t.contiene(await pg.$eval('#plan-banner', e => e.textContent), 'Ahorras')
+      t.contiene(await pg.$eval('#plan-banner', e => e.textContent), 'Disponible con tu plan')
       t.sinErrores(pg)
       await pg.context().close()
     },

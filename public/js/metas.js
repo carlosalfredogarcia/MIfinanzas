@@ -956,15 +956,16 @@ function abrirRedistrib(idx) {
     : destinos.map(t => {
         const tIdx = _redistribTodas.indexOf(t)
         const libre = Math.abs(t.diff)
-        return `<div class="rdist-dest-row">
+        return `<div class="rdist-dest-row rdist-late">
           <div class="rdist-dest-info">
             <div class="rdist-dest-name">${t.label}</div>
             <div class="rdist-dest-libre" id="rdist-libre-${tIdx}" data-base="${libre.toFixed(2)}">${fmt(libre)} libre</div>
           </div>
+          <button type="button" class="rdist-todo" onclick="rdistTodoAqui(${tIdx})">Aquí</button>
           <div class="rdist-dest-inputwrap">
-            <input class="rdist-input" type="number" inputmode="decimal" min="0" step="0.01" placeholder="0.00"
+            <input class="rdist-input" type="number" inputmode="decimal" min="0" step="0.01" placeholder="0"
                    data-rdist-idx="${tIdx}" oninput="rdistActualizarMargen()">
-            <span class="rdist-euro">€</span>
+            <span class="rdist-euro">${window.moneda || '€'}</span>
           </div>
         </div>`
       }).join('')
@@ -974,14 +975,11 @@ function abrirRedistrib(idx) {
       <span class="rdist-top-cat">${origen.label}</span>
       <span class="rdist-top-pill">+${fmt(exceso)} pasado</span>
     </div>
-    <div class="rdist-section-lbl">Repartir exceso en</div>
-    <div class="rdist-origen-row">
-      <span class="rdist-origen-icon">📌</span>
-      <span class="rdist-origen-name">${origen.label}</span>
-      <span class="rdist-origen-exc">${fmt(exceso)} de exceso</span>
+    <div class="rdist-explica">
+      <b>Repartir el exceso: ${fmt(exceso)}</b>
+      <span>¿En qué categorías con saldo lo colocas? Escribe cuánto en cada una (o toca «Aquí» para ponerlo todo). A esas se les baja el plan y a ${MF.esc(origen.label)} se le sube.</span>
     </div>
-    <div class="rdist-sep"></div>
-    <div class="rdist-section-lbl">¿Dónde lo absorbes?</div>
+    <div class="rdist-section-lbl">Categorías con saldo disponible</div>
     ${destFilas}
     <div class="rdist-progress-wrap">
       <div class="rdist-progress-top">
@@ -990,7 +988,7 @@ function abrirRedistrib(idx) {
       </div>
       <div class="rdist-progress-bar"><div class="rdist-progress-fill" id="rdist-prog-fill" style="width:0%"></div></div>
     </div>
-    <button class="rdist-confirmar-btn" onclick="pedirConfirmRedistrib()">Confirmar traspaso</button>
+    <button class="rdist-confirmar-btn" id="rdist-confirmar" onclick="pedirConfirmRedistrib()" disabled>Confirmar traspaso</button>
   `
   document.getElementById('rdist-modal').classList.add('rdist-open')
 }
@@ -1006,8 +1004,10 @@ async function cubrirExceso(idxs) {
   if (libre < 1) { toast('No queda margen en otras categorías: este mes toca ajustar el plan', 'err', 3500); return }
   const parte = Math.min(1, libre / exceso)
   const plan = {}
-  destinos.forEach(t => { plan[t.cat] = t.estimado - (-t.diff) * Math.min(1, exceso / libre) })
-  origenes.forEach(t => { plan[t.cat] = t.estimado + t.diff * parte })
+  // El plan va en euros enteros y lo gastado lleva céntimos: la pasada se redondea hacia arriba
+  // (si no, 0,28 € de exceso volvían a aparecer) y las que ceden, hacia abajo
+  destinos.forEach(t => { plan[t.cat] = Math.max(0, Math.floor(t.estimado - (-t.diff) * Math.min(1, exceso / libre))) })
+  origenes.forEach(t => { plan[t.cat] = parte >= 1 ? Math.ceil(t.real) : Math.round(t.estimado + t.diff * parte) })
   _antesCubrir = [...origenes, ...destinos].map(t => [t.cat, t.estimado])
   await guardarPlanCats(plan)
   const cubierto = Math.min(exceso, libre)
@@ -1068,6 +1068,22 @@ function rdistActualizarMargen() {
   const fillEl = document.getElementById('rdist-prog-fill')
   if (numsEl) numsEl.textContent = fmt(total) + ' / ' + fmt(exceso)
   if (fillEl) fillEl.style.width = pct.toFixed(1) + '%'
+  const btn = document.getElementById('rdist-confirmar')
+  if (btn) btn.disabled = total <= 0
+  // Cuando ya está todo colocado, dejan de latir
+  document.querySelectorAll('.rdist-dest-row').forEach(r => r.classList.toggle('rdist-late', total < exceso - 0.005))
+}
+// «Aquí»: pone en esa categoría lo que falte por colocar (sin pasar de su saldo)
+function rdistTodoAqui(tIdx) {
+  const origen = _redistribTodas[_redistribOrigenIdx]
+  if (!origen) return
+  const inps = [...document.querySelectorAll('.rdist-input')], inp = inps.find(i => +i.dataset.rdistIdx === tIdx)
+  if (!inp) return
+  inp.value = ''
+  const puesto = inps.reduce((t, i) => t + (parseFloat(i.value) || 0), 0)
+  const libre = Math.abs(_redistribTodas[tIdx].diff)
+  inp.value = Math.max(0, Math.min(libre, Math.abs(origen.diff) - puesto)).toFixed(2)
+  rdistActualizarMargen()
 }
 
 function pedirConfirmRedistrib() {
@@ -1095,14 +1111,15 @@ async function confirmarRedistrib() {
     if (amt <= 0) continue
     const dest = _redistribTodas[parseInt(inp.dataset.rdistIdx)]
     if (!dest?.cat) continue
-    const newMonto = Math.max(0, dest.estimado - amt)
+    const newMonto = Math.max(0, Math.floor(dest.estimado - amt))
     const destRow = [...document.querySelectorAll('.var-row')].find(r => r._planCat === dest.cat)
     if (destRow) { const di = destRow.querySelector('.variable-input'); if (di) di.value = Math.round(newMonto) }
     upserts.push({ user_id: window.currentUserId, categoria: dest.cat, monto: newMonto, updated_at: new Date().toISOString() })
     totalTransferido += amt
   }
   if (totalTransferido > 0) {
-    const newOrigenMonto = origen.estimado + totalTransferido
+    // Si cubre todo el exceso, el plan llega a lo gastado redondeado hacia arriba (sin céntimos colgando)
+    const newOrigenMonto = totalTransferido >= origen.diff - 0.005 ? Math.ceil(origen.real) : Math.round(origen.estimado + totalTransferido)
     const origenRow = [...document.querySelectorAll('.var-row')].find(r => r._planCat === origen.cat)
     if (origenRow) { const oi = origenRow.querySelector('.variable-input'); if (oi) oi.value = Math.round(newOrigenMonto) }
     upserts.push({ user_id: window.currentUserId, categoria: origen.cat, monto: newOrigenMonto, updated_at: new Date().toISOString() })
@@ -1112,7 +1129,7 @@ async function confirmarRedistrib() {
   }
   cerrarRedistrib()
   actualizarPlanificador()
-  toast('Gastos estimados actualizados', 'ok', 3000)
+  toast(`Listo: ${fmt(totalTransferido)} colocados en otras categorías`, 'ok', 3000)
 }
 
 function toggleListaOculto() {
@@ -2165,41 +2182,61 @@ function renderTablaComparativa() {
     const panelContent = isOpen ? _buildDetalleHtml(t.cat, t.estimado, t.real) : ''
     const panelMaxH = isOpen ? '600px' : '0'
     const chev = `<span class="sc-det-chev" id="sc-det-chev-${safeId}" style="transform:${chevRot}">▾</span>`
+    const verGastos = `<button type="button" class="sc-ver" onclick="scToggleDetalle('${t.catEsc}',${t.estimado},${t.real})">Ver gastos ${chev}</button>`
 
-    // Chevron goes right after the name (left side); pin goes far right
-    const labelHtml = `<span class="sc-lista-label">${t.label}${chev}</span>`
+    const labelHtml = `<span class="sc-lista-label">${t.label}</span>`
     const pctFila = t.estimado > 0 ? t.real / t.estimado : (t.real > 0 ? 1.01 : 0)
-    const barra = t.esFijo ? '' : `<div class="sc-fila-barra${t.diff > 0 ? ' over' : pctFila > 0.85 ? ' cerca' : ''}"><i style="--w:${Math.min(1, pctFila).toFixed(3)}"></i></div>
-      <div class="sc-fila-nums num">${fmt(t.real, 0)} de ${fmt(t.estimado, 0)}</div>`
+    const barra = t.esFijo ? `<div class="sc-fila-nums num"><span>${fmt(t.real, 0)} este mes</span>${verGastos}</div>` : `<div class="sc-fila-barra${t.diff > 0 ? ' over' : pctFila > 0.85 ? ' cerca' : ''}"><i style="--w:${Math.min(1, pctFila).toFixed(3)}"></i></div>
+      <div class="sc-fila-nums num"><span>${fmt(t.real, 0)} gastado de ${fmt(t.estimado, 0)}</span>${verGastos}</div>`
 
     let rightHtml
     if (t.esFijo) {
       rightHtml = `<div class="sc-lista-row-right">${pin}</div>`
     } else if (t.diff > 0) {
-      rightHtml = `<div class="sc-lista-row-right"><span class="sc-lista-pill sc-lista-pill-over">${fmt(Math.abs(t.diff))} pasado</span>${pin}</div>`
+      rightHtml = `<div class="sc-lista-row-right"><span class="sc-lista-pill sc-lista-pill-over">Pasado ${fmt(Math.abs(t.diff))}</span>${pin}</div>`
     } else {
-      rightHtml = `<div class="sc-lista-row-right"><span class="sc-lista-pill sc-lista-pill-free">${fmt(Math.abs(t.diff))} libre</span>${pin}</div>`
+      rightHtml = `<div class="sc-lista-row-right"><span class="sc-lista-pill sc-lista-pill-free">Te quedan ${fmt(Math.abs(t.diff))}</span>${pin}</div>`
     }
 
-    const cubrir = !t.esFijo && t.diff > 0 ? `<div class="sc-cubrir"><button type="button" class="sc-cubrir-btn" onclick="cubrirExceso([${idx}])">Cubrir con lo que sobra</button><button type="button" class="sc-elegir-btn" onclick="abrirRedistrib(${idx})">Elegir yo</button></div>` : ''
+    // Qué hace cada botón, dicho claro
+    const cubrir = !t.esFijo && t.diff > 0 ? `<div class="sc-cubrir-caja">
+      <div class="sc-cubrir"><button type="button" class="sc-cubrir-btn" onclick="cubrirExceso([${idx}])">Cubrir con lo que sobra</button><button type="button" class="sc-elegir-btn" onclick="abrirRedistrib(${idx})">Elegir yo</button></div></div>` : ''
     return `<div class="sc-lista-row-wrap${t.diff > 0 && !t.esFijo ? ' sc-pasada' : ''}"><div class="sc-lista-row sc-lista-row-clickable" onclick="scToggleDetalle('${t.catEsc}',${t.estimado},${t.real})">${labelHtml}${rightHtml}</div>${barra}${cubrir}<div class="sc-det-panel" id="sc-det-panel-${safeId}" style="max-height:${panelMaxH}" data-open="${isOpen?'1':'0'}">${panelContent}</div></div>`
   }
 
-  const gruposHtml = []
   const exceso = pasadas.reduce((s, t) => s + t.diff, 0), libre = margen.reduce((s, t) => s - t.diff, 0)
-  if (pasadas.length > 1) gruposHtml.push(`<div class="sc-aviso-pasadas"><div><b>${pasadas.length} categorías se han pasado</b><span class="num">${fmt(exceso)} de más · tienes ${fmt(libre)} libres en otras</span></div>
-    <button type="button" class="sc-cubrir-btn" onclick="cubrirExceso([${pasadas.map(t => _redistribTodas.indexOf(t)).join(',')}])">Cubrir todo</button></div>`)
-  if (pasadas.length > 0) gruposHtml.push(`<div class="sc-lista-grupo"><div class="sc-lista-grupo-title">⚠️ Pasadas</div>${pasadas.map(_filaLista).join('')}</div>`)
-  if (margen.length > 0) {
-    if (gruposHtml.length) gruposHtml.push('<div class="sc-lista-sep"></div>')
-    gruposHtml.push(`<div class="sc-lista-grupo"><div class="sc-lista-grupo-title">✅ Con margen</div>${margen.map(_filaLista).join('')}</div>`)
-  }
+  // Las que se han pasado, aparte y en rojo, con lo que se puede hacer
+  const pasadasHtml = !pasadas.length ? '' : `<div class="sc-lista-card sc-card-pasadas">
+      <div class="sc-grupo-cab"><span>⚠️ Te has pasado</span><small class="num">${pasadas.length} ${pasadas.length === 1 ? 'categoría' : 'categorías'} · ${fmt(exceso)} de más</small></div>
+      <p class="sc-cubrir-txt sc-cubrir-explica"><b>Cubrir con lo que sobra</b>: te reparto el exceso bajando un poco las categorías con saldo. <b>Elegir yo</b>: tú decides en cuáles.</p>
+      ${pasadas.length > 1 ? `<div class="sc-aviso-pasadas"><div><b>Cubrir todo de una vez</b><span class="num">Tienes ${fmt(libre)} libres en las categorías con saldo</span></div>
+        <button type="button" class="sc-cubrir-btn" onclick="cubrirExceso([${pasadas.map(t => _redistribTodas.indexOf(t)).join(',')}])">Cubrir todo</button></div>` : ''}
+      <div class="sc-lista-grupo">${pasadas.map(_filaLista).join('')}</div>
+    </div>`
+
+  // Lo que queda del mes, en grande, junto a las categorías con saldo
+  const pctMes = totalEstimado > 0 ? Math.min(100, totalGastado / totalEstimado * 100) : 0
+  const hero = teQuedan >= 0
+    ? `<span class="v-lbl">Te quedan este mes</span><b class="v-cifra num">${fmt(teQuedan, 0)}</b>
+       <p>Para ${diasQuedan} día${diasQuedan === 1 ? '' : 's'} · <b class="num">${fmt(teQuedan / diasQuedan, 0)} al día</b></p>`
+    : `<span class="v-lbl">Este mes</span><b class="v-cifra num">−${fmt(Math.abs(teQuedan), 0)}</b>
+       <p>Te has pasado ${fmt(Math.abs(teQuedan))} del total estimado. Reparte el exceso entre las categorías con saldo.</p>`
+  const margenHtml = `<div class="sc-bloque-margen">
+      <div class="veredicto seg-hero ${teQuedan >= 0 ? 'pos' : 'neg'}">${hero}
+        <div class="seg-hero-barra" role="img" aria-label="${Math.round(pctMes)} % del plan gastado"><i style="--w:${(pctMes / 100).toFixed(3)}"></i></div>
+        <span class="seg-hero-pie num">${fmt(totalGastado, 0)} gastado de ${fmt(totalEstimado, 0)} del plan</span>
+      </div>
+      ${margen.length ? `<div class="sc-lista-card sc-card-margen">
+        <div class="sc-grupo-cab"><span>✅ Con saldo disponible</span><small class="num">${fmt(libre)} libres</small></div>
+        <div class="sc-lista-grupo">${margen.map(_filaLista).join('')}</div>
+      </div>` : ''}
+    </div>`
+
+  let fijosHtml = ''
   if (ocultas.length > 0) {
-    if (gruposHtml.length) gruposHtml.push('<div class="sc-lista-sep"></div>')
     const maxH = _listaOcultoOpen ? '2000px' : '0'
     const chevRot = _listaOcultoOpen ? 'rotate(180deg)' : ''
-    gruposHtml.push(`
-      <div>
+    fijosHtml = `<div class="sc-lista-card">
         <div class="sc-lista-oculto-toggle" onclick="toggleListaOculto()">
           <span class="sc-lista-oculto-label">📌 Fijos</span>
           <span class="sc-lista-oculto-chev" id="sc-lista-oculto-chev" style="transform:${chevRot}">▾</span>
@@ -2207,25 +2244,9 @@ function renderTablaComparativa() {
         <div class="sc-lista-oculto-body" id="sc-lista-oculto-body" style="max-height:${maxH}">
           <div class="sc-lista-grupo" style="padding-top:0">${ocultas.map(_filaLista).join('')}</div>
         </div>
-      </div>`)
+      </div>`
   }
-
-  // Lo que queda del mes, en grande: cuánto, para cuántos días y cuánto al día
-  const pctMes = totalEstimado > 0 ? Math.min(100, totalGastado / totalEstimado * 100) : 0
-  const hero = teQuedan >= 0
-    ? `<span class="v-lbl">Te quedan este mes</span><b class="v-cifra num">${fmt(teQuedan, 0)}</b>
-       <p>Para ${diasQuedan} día${diasQuedan === 1 ? '' : 's'} · <b class="num">${fmt(teQuedan / diasQuedan, 0)} al día</b></p>`
-    : `<span class="v-lbl">Este mes</span><b class="v-cifra num">−${fmt(Math.abs(teQuedan), 0)}</b>
-       <p>Te has pasado ${fmt(Math.abs(teQuedan))} del total estimado. Reparte el exceso entre las categorías con margen.</p>`
-  cont.innerHTML = `
-    <div class="veredicto seg-hero ${teQuedan >= 0 ? 'pos' : 'neg'}">${hero}
-      <div class="seg-hero-barra" role="img" aria-label="${Math.round(pctMes)} % del plan gastado"><i style="--w:${(pctMes / 100).toFixed(3)}"></i></div>
-      <span class="seg-hero-pie num">${fmt(totalGastado, 0)} gastado de ${fmt(totalEstimado, 0)} del plan</span>
-    </div>
-    <div class="sc-lista-card">
-      ${gruposHtml.join('')}
-    </div>
-  `
+  cont.innerHTML = pasadasHtml + margenHtml + fijosHtml
 }
 
 // ═════════════ Recorrido guiado en 4 pasos ═════════════
@@ -2304,7 +2325,7 @@ function pintarVeredicto(ing, total) {
   const ver = document.getElementById('real-veredicto')
   if (!ver) return
   if (!ver.querySelector('.v-cifra')) {
-    ver.innerHTML = `<span class="v-lbl">Con tus gastos de hoy</span>
+    ver.innerHTML = `<span class="v-lbl">Disponible con tus gastos reales</span>
       <b class="v-cifra num"><span class="v-saldo"></span> <small>al mes</small></b>
       <div class="v-balanza">
         <div class="v-fila v-fila-ing"><span>Ingreso</span><i class="v-entra"></i>
@@ -2312,9 +2333,8 @@ function pintarVeredicto(ing, total) {
           <label class="v-ing-campo" hidden><input type="number" inputmode="decimal" class="v-ing-inp num" aria-label="Tu ingreso del mes" placeholder="0"><span class="v-ing-mon"></span></label>
         </div>
         <div class="v-ing-pie"><span class="v-ing-ayuda"></span><button type="button" class="v-reset" hidden>↺ Restablecer</button></div>
-        <div class="v-fila"><span>Sale</span><i class="v-sale"></i><b class="num v-gas"></b></div>
+        <div class="v-fila"><span>Gastos reales</span><i class="v-sale"></i><b class="num v-gas"></b></div>
       </div>
-      <div class="v-disp"><span>Disponible con tu plan</span><b class="num"></b></div>
       <p class="v-msg"></p>`
     const btn = ver.querySelector('.v-editar'), campo = ver.querySelector('.v-ing-campo'), inp = ver.querySelector('.v-ing-inp')
     const abrir = () => {
@@ -2354,9 +2374,6 @@ function pintarVeredicto(ing, total) {
     : _ingOverride ? (ap ? `Lo has cambiado tú · apuntado este mes: ${fmt(ap)}` : 'Lo has escrito tú')
     : 'Lo que has apuntado este mes · toca para cambiarlo'
   ver.querySelector('.v-gas').textContent = fmt(Math.round(total))
-  const d = ver.querySelector('.v-disp b')
-  d.textContent = (disp > 0 ? '+' : '') + fmt(disp)
-  d.classList.toggle('neg', disp < 0)
   ver.querySelector('.v-msg').textContent = !ing
     ? 'Escribe tu ingreso del mes: con eso hacemos tu plan.'
     : saldo < 0
@@ -2879,17 +2896,24 @@ function renderBannerPlan() {
     if (!el) return
     el.hidden = !hay
     if (!hay) return
+    // La misma tarjeta que la de tus gastos reales, pero con tu plan: ingreso, gastos con el plan y disponible
     const gas = Math.round(totalGastos()), ahorro = Math.round(ing - gas), obj = Math.round(ing * metaAhorro / 100)
-    const pct = Math.round(ahorro / ing * 100), cumple = ahorro >= obj - 1
-    el.className = 'plan-banner ' + (ahorro <= 0 ? 'mal' : cumple ? 'ok' : 'cerca')
-    el.innerHTML = `<div class="pb-top"><span class="pb-lbl">Tu plan</span><button type="button" class="pb-edit">Revisar ✏️</button></div>
-      <b class="pb-cifra num">${ahorro > 0 ? `Ahorras ${fmt(ahorro)} al mes` : 'Tu plan aún no deja ahorro'}</b>
-      <div class="pb-barra" aria-hidden="true"><i style="width:${Math.min(100, gas / Math.max(ing, gas) * 100)}%"></i><em style="left:${Math.min(100, (ing - obj) / Math.max(ing, gas) * 100)}%"></em></div>
-      <p class="pb-det num">Gastos ${fmt(gas)} de ${fmt(Math.round(ing))} · ahorro ${pct > 0 ? pct : 0} %</p>
-      <p class="pb-msg">${ahorro <= 0 ? `Gastas ${fmt(-ahorro)} más de lo que entra: baja alguna opcional.`
+    const cumple = ahorro >= obj - 1, tope = Math.max(ing, gas, 1)
+    el.className = 'veredicto plan-banner ' + (ahorro <= 0 ? 'neg' : cumple ? 'pos' : 'cerca')
+    el.setAttribute('role', 'button'); el.tabIndex = 0
+    el.setAttribute('aria-label', 'Tu plan: toca para planificar tus gastos')
+    el.innerHTML = `<span class="v-lbl">Disponible con tu plan</span>
+      <b class="v-cifra num">${(ahorro > 0 ? '+' : '') + fmt(ahorro)} <small>al mes</small></b>
+      <div class="v-balanza">
+        <div class="v-fila"><span>Ingreso</span><i class="v-entra" style="--w:${(ing / tope).toFixed(3)}"></i><b class="num">${fmt(Math.round(ing))}</b></div>
+        <div class="v-fila"><span>Gastos con tu plan</span><i class="v-sale" style="--w:${(gas / tope).toFixed(3)}"></i><b class="num">${fmt(gas)}</b></div>
+      </div>
+      <p class="v-msg">${ahorro <= 0 ? `Gastas ${fmt(-ahorro)} más de lo que entra: baja alguna opcional.`
         : cumple ? `✓ Cumples tu objetivo de ahorrar ${fmt(obj)} (${Math.round(metaAhorro)} %).`
-        : `Te faltan ${fmt(obj - ahorro)} para tu objetivo de ${fmt(obj)} (${Math.round(metaAhorro)} %).`}</p>`
-    el.querySelector('.pb-edit').onclick = () => abrirPlanGuiado(-1)
+        : `Te faltan ${fmt(obj - ahorro)} para tu objetivo de ${fmt(obj)} (${Math.round(metaAhorro)} %).`}</p>
+      <span class="pb-boton">✏️ Planificar tus gastos</span>`
+    el.onclick = () => abrirPlanGuiado(-1)
+    el.onkeydown = e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); abrirPlanGuiado(-1) } }
   })
 }
 
