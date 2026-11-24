@@ -993,32 +993,6 @@ function abrirRedistrib(idx) {
   document.getElementById('rdist-modal').classList.add('rdist-open')
 }
 
-// Un toque: el exceso de las categorías pasadas se cubre con lo que sobra en las demás (proporcional al margen)
-let _antesCubrir = null
-async function cubrirExceso(idxs) {
-  if (!window.currentUserId) return
-  const origenes = idxs.map(i => _redistribTodas[i]).filter(t => t && t.cat && t.diff > 0)
-  const destinos = _redistribTodas.filter(t => t.cat && !t.esFijo && t.diff < 0)
-  const exceso = origenes.reduce((s, t) => s + t.diff, 0), libre = destinos.reduce((s, t) => s - t.diff, 0)
-  if (!origenes.length) return
-  if (libre < 1) { toast('No queda margen en otras categorías: este mes toca ajustar el plan', 'err', 3500); return }
-  const parte = Math.min(1, libre / exceso)
-  const plan = {}
-  // El plan va en euros enteros y lo gastado lleva céntimos: la pasada se redondea hacia arriba
-  // (si no, 0,28 € de exceso volvían a aparecer) y las que ceden, hacia abajo
-  destinos.forEach(t => { plan[t.cat] = Math.max(0, Math.floor(t.estimado - (-t.diff) * Math.min(1, exceso / libre))) })
-  origenes.forEach(t => { plan[t.cat] = parte >= 1 ? Math.ceil(t.real) : Math.round(t.estimado + t.diff * parte) })
-  _antesCubrir = [...origenes, ...destinos].map(t => [t.cat, t.estimado])
-  await guardarPlanCats(plan)
-  const cubierto = Math.min(exceso, libre)
-  avisoDeshacer(parte < 1 ? `Cubiertos ${fmt(cubierto)} de ${fmt(exceso)}: no había más margen` : `Cubiertos ${fmt(cubierto)} con lo que te sobraba`)
-}
-async function deshacerCubrir() {
-  if (!_antesCubrir) return
-  await guardarPlanCats(Object.fromEntries(_antesCubrir))
-  _antesCubrir = null
-  document.getElementById('aviso-deshacer')?.classList.remove('ver')
-}
 async function guardarPlanCats(plan) {
   const ahora = new Date().toISOString()
   Object.entries(plan).forEach(([cat, monto]) => {
@@ -1027,18 +1001,6 @@ async function guardarPlanCats(plan) {
   })
   await dbClient.from('user_gasto_plan').upsert(Object.entries(plan).map(([categoria, monto]) => ({ user_id: window.currentUserId, categoria, monto: Math.round(monto), updated_at: ahora })), { onConflict: 'user_id,categoria' })
   actualizarPlanificador()
-}
-// Aviso abajo con «Deshacer» (en vez de una alerta)
-function avisoDeshacer(msg) {
-  let a = document.getElementById('aviso-deshacer')
-  if (!a) {
-    a = document.createElement('div'); a.id = 'aviso-deshacer'; a.className = 'aviso-deshacer'; a.setAttribute('role', 'status')
-    a.innerHTML = '<span></span><button type="button" onclick="deshacerCubrir()">Deshacer</button>'
-    document.body.appendChild(a)
-  }
-  a.querySelector('span').textContent = msg
-  a.classList.add('ver')
-  clearTimeout(a._t); a._t = setTimeout(() => a.classList.remove('ver'), 6000)
 }
 
 function cerrarRedistrib() {
@@ -2200,7 +2162,7 @@ function renderTablaComparativa() {
 
     // Qué hace cada botón, dicho claro
     const cubrir = !t.esFijo && t.diff > 0 ? `<div class="sc-cubrir-caja">
-      <div class="sc-cubrir"><button type="button" class="sc-cubrir-btn" onclick="cubrirExceso([${idx}])">Cubrir con lo que sobra</button><button type="button" class="sc-elegir-btn" onclick="abrirRedistrib(${idx})">Elegir yo</button></div></div>` : ''
+      <div class="sc-cubrir"><button type="button" class="sc-cubrir-btn" onclick="abrirRedistrib(${idx})">Cubrir el gasto con otra categoría</button></div></div>` : ''
     return `<div class="sc-lista-row-wrap${t.diff > 0 && !t.esFijo ? ' sc-pasada' : ''}"><div class="sc-lista-row sc-lista-row-clickable" onclick="scToggleDetalle('${t.catEsc}',${t.estimado},${t.real})">${labelHtml}${rightHtml}</div>${barra}${cubrir}<div class="sc-det-panel" id="sc-det-panel-${safeId}" style="max-height:${panelMaxH}" data-open="${isOpen?'1':'0'}">${panelContent}</div></div>`
   }
 
@@ -2208,9 +2170,7 @@ function renderTablaComparativa() {
   // Las que se han pasado, aparte y en rojo, con lo que se puede hacer
   const pasadasHtml = !pasadas.length ? '' : `<div class="sc-lista-card sc-card-pasadas">
       <div class="sc-grupo-cab"><span>⚠️ Te has pasado</span><small class="num">${pasadas.length} ${pasadas.length === 1 ? 'categoría' : 'categorías'} · ${fmt(exceso)} de más</small></div>
-      <p class="sc-cubrir-txt sc-cubrir-explica"><b>Cubrir con lo que sobra</b>: te reparto el exceso bajando un poco las categorías con saldo. <b>Elegir yo</b>: tú decides en cuáles.</p>
-      ${pasadas.length > 1 ? `<div class="sc-aviso-pasadas"><div><b>Cubrir todo de una vez</b><span class="num">Tienes ${fmt(libre)} libres en las categorías con saldo</span></div>
-        <button type="button" class="sc-cubrir-btn" onclick="cubrirExceso([${pasadas.map(t => _redistribTodas.indexOf(t)).join(',')}])">Cubrir todo</button></div>` : ''}
+      <p class="sc-cubrir-txt sc-cubrir-explica">Cubre lo que te has pasado con el saldo de otra categoría: tú eliges de cuál y cuánto. Tienes <b class="num">${fmt(libre)}</b> libres en las categorías con saldo.</p>
       <div class="sc-lista-grupo">${pasadas.map(_filaLista).join('')}</div>
     </div>`
 

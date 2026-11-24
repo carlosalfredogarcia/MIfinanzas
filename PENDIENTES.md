@@ -4,10 +4,9 @@ Lista viva: al empezar una conversación nueva, leer esto y `CLAUDE.md`. Al term
 
 ## Del usuario (en el ordenador)
 
-- **«Continuar con Google»**: ya configurado en Google Cloud y Supabase (23/11). Falta **publicar la app de Google**:
-  Google Cloud → Google Auth Platform → Público → «Publicar app» (antes completar «Información de la marca»: nombre
-  «MiFinanza», correo de asistencia, logo, enlace a privacidad.html). Mientras esté en «Prueba» solo entran las
-  cuentas de la lista de usuarios de prueba.
+- **«Continuar con Google»**: configurado en Google Cloud y Supabase, pero el botón está APAGADO (24/11) hasta que
+  Google apruebe la app (Google Auth Platform → Público → «Publicar app», con la información de la marca completa).
+  Cuando esté aprobada: en public/js/acceso.js poner `GOOGLE_LISTO = true`.
 
 0. **Icono de la app de Google Play**: la web y la app instalada desde el navegador ya usan el logo
    nuevo (`public/icon.svg`, `icon-512.png`), pero la app de Play (TWA com.mifinanza.app) lleva el

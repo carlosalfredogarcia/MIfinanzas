@@ -64,7 +64,9 @@ inicializar()
 
 // «Continuar con Google»: un toque, sin escribir correo ni contraseña. Sirve para entrar y para crear la cuenta.
 // El botón solo aparece si Google está activado en Supabase (Authentication → Sign In / Providers)
-fetch(SUPABASE_URL + '/auth/v1/settings', { headers: { apikey: SUPABASE_KEY } })
+// Apagado (24/11) hasta que Google apruebe la app: para volver a mostrarlo, poner GOOGLE_LISTO = true
+const GOOGLE_LISTO = false
+if (GOOGLE_LISTO) fetch(SUPABASE_URL + '/auth/v1/settings', { headers: { apikey: SUPABASE_KEY } })
   .then(r => r.json())
   .then(c => { if (c && c.external && c.external.google) document.getElementById('social').hidden = false })
   .catch(() => {})

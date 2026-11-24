@@ -47,28 +47,26 @@ module.exports = [
     },
   },
   {
-    nombre: 'metas: seguimiento, cubrir lo pasado de un toque y deshacer',
+    nombre: 'metas: seguimiento, cubrir lo pasado con otra categoría que eliges tú',
     async prueba(t) {
       const pg = await t.abrir('mifinanza-metas.html', { datos: completo(), espera: 2500 })
       await pg.evaluate(() => irPaso(4)); await pg.waitForTimeout(600)
       const pasadas = () => pg.$$eval('.sc-pasada', e => e.length)
       const antes = await pasadas()
       t.ok(antes > 0, 'No hay categorías pasadas en los datos de prueba')
-      await pg.click(antes > 1 ? '.sc-aviso-pasadas .sc-cubrir-btn' : '.sc-cubrir-btn'); await pg.waitForTimeout(700)
-      t.ok(await pasadas() < antes, 'Cubrir no reparte el exceso')
-      t.ok(await pg.$('#aviso-deshacer.ver'), 'No sale «Deshacer»')
-      await pg.click('#aviso-deshacer button'); await pg.waitForTimeout(700)
-      t.igual(await pasadas(), antes)
+      // Ya no hay «Cubrir con lo que sobra» ni «Cubrir todo»: solo elegir uno mismo
+      t.ok(!(await pg.$('.sc-aviso-pasadas')), 'Sigue «Cubrir todo»')
+      t.igual(await pg.$$eval('.sc-pasada .sc-cubrir button', bs => [...new Set(bs.map(b => b.textContent))]), ['Cubrir el gasto con otra categoría'])
       // Pasadas aparte en rojo, «te quedan» junto a las que tienen saldo, y qué hace cada botón
       t.ok(await pg.isVisible('.sc-card-pasadas'), 'Las pasadas no van aparte')
       t.ok(await pg.isVisible('.sc-bloque-margen .seg-hero + .sc-card-margen'), '«Te quedan» no va con las de saldo')
-      t.contiene(await pg.$eval('.sc-cubrir-explica', e => e.textContent), 'bajando un poco las categorías con saldo')
+      t.contiene(await pg.$eval('.sc-cubrir-explica', e => e.textContent), 'tú eliges de cuál')
       // Ver gastos abre los movimientos de la categoría
       await pg.click('.sc-card-margen .sc-ver'); await pg.waitForTimeout(400)
       t.ok(await pg.$eval('.sc-card-margen .sc-det-panel', e => e.dataset.open === '1'), 'Ver gastos no abre')
       // Elegir yo: «Aquí» lo pone todo en una categoría con saldo y, al confirmar, deja de estar pasada (sin céntimos colgando)
       const nombre = await pg.$eval('.sc-pasada .sc-lista-label', e => e.textContent)
-      await pg.click('.sc-pasada .sc-elegir-btn'); await pg.waitForTimeout(400)
+      await pg.click('.sc-pasada .sc-cubrir-btn'); await pg.waitForTimeout(400)
       t.contiene(await pg.$eval('.rdist-explica', e => e.textContent), 'Repartir el exceso')
       t.ok(await pg.$eval('#rdist-confirmar', b => b.disabled), 'Se puede confirmar sin repartir nada')
       t.ok(await pg.$('.rdist-dest-row.rdist-late'), 'Las categorías con saldo no laten')
