@@ -93,6 +93,10 @@
   .negocio li { font-size: 15px; font-weight: 600; padding: 4px 0; color: #1a1a1a; }
   .negocio li::before { content: '✓ '; color: #b8922a; font-weight: 800; }
   .neg-btn { display: block; margin-top: 20px; padding: 16px; border-radius: 999px; text-align: center; text-decoration: none; font-weight: 700; font-size: 17px; color: #1b1406; background: linear-gradient(135deg, #f6e2a8 0%, #d4af5a 45%, #b8922a 100%); box-shadow: 0 10px 30px -10px rgba(212,175,90,.7), inset 0 1px 0 rgba(255,255,255,.5); }
+  .neg-guardar { margin-top: 18px; padding-top: 16px; border-top: 1px solid rgba(60,45,30,.13); }
+  .neg-guardar p { font-size: 14px !important; font-weight: 600 !important; color: #6b5c4a !important; margin-bottom: 10px; text-align: center; }
+  .neg-sec { display: block; width: 100%; margin-top: 8px; padding: 13px 14px; border-radius: 999px; text-align: center; text-decoration: none; font: inherit; font-family: 'Manrope', system-ui, sans-serif; font-weight: 700; font-size: 15px; color: #3d372f; background: rgba(255,255,255,.7); border: 1px solid rgba(184,146,42,.45); cursor: pointer; }
+  .neg-sec:active { background: #fff; }
   .neg-link { display: block; margin-top: 12px; text-align: center; color: #9c7826; font-weight: 700; font-size: 15px; text-decoration: none; }
 
   footer { text-align: center; padding: 34px 20px calc(30px + env(safe-area-inset-bottom)); color: var(--muted); font-size: 13px; font-weight: 700; }
@@ -156,6 +160,12 @@
       </ul>
       <a class="neg-btn" href="https://alfrega.es/negocios#prueba">Prueba un mes gratis</a>
       <a class="neg-link" href="https://alfrega.es/negocios">Ver ejemplos y precios →</a>
+      <!-- Para que no se pierda: guardar el contacto en la agenda o pasárselo a alguien en el momento -->
+      <div class="neg-guardar">
+        <p>¿No es para ti ahora? Guárdalo para después:</p>
+        <a class="neg-sec" href="alfrega.vcf">📇 Guardar contacto de ALFREGA</a>
+        <button class="neg-sec" id="compartir" type="button">📤 Pasárselo a alguien con negocio</button>
+      </div>
     </section>
 
     <section class="app sube" aria-labelledby="app-t">
@@ -187,6 +197,14 @@
     puntos.querySelectorAll('i').forEach((p, k) => p.classList.toggle('on', k === i))
   }
   car.addEventListener('scroll', marcar, { passive: true }); marcar()
+
+  // Compartir: el menú del móvil (WhatsApp, Telegram…) con el mensaje ya escrito; si no lo tiene, WhatsApp
+  document.getElementById('compartir').addEventListener('click', function () {
+    var texto = 'Mira, este chico hace webs con reservas para negocios (estéticas, barberías…). El primer mes es gratis:'
+    var url = 'https://alfrega.es'
+    if (navigator.share) navigator.share({ title: 'ALFREGA · Webs con reservas', text: texto, url: url }).catch(function () {})
+    else window.location.href = 'https://wa.me/?text=' + encodeURIComponent(texto + ' ' + url)
+  })
 
   // Las secciones aparecen al llegar a ellas
   const io = 'IntersectionObserver' in window && new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('ver'); io.unobserve(e.target) } }), { threshold: .15 })
