@@ -46,6 +46,10 @@ kit/                        página del QR del Kit de Seguridad Infantil (ALFREG
                             alfrega-kit en Netlify (cambiaría la dirección). El bloque «Para negocios» va con los
                             colores de alfrega.es (beige #f0e8e0 y dorado #b8922a); sin «te regalo 30 €». Habla de webs con reservas Y de CRM a medida, con un solo botón «Prueba un mes gratis» (sin el recuadro de las 800 reservas). Debajo, UN solo botón discreto «Compártelo con un amigo o conocido» que abre WhatsApp con el mensaje escrito (wa.me/?text=…). El usuario no quiso contacto .vcf, ni menú de compartir, ni botones verdes de «guardar».
                             Lleva a mifinanzas.alfrega.es/descubre?desde=kit.
+escobilla/                  página del QR de la escobilla con dispensador (regalo de ALFREGA; sitio de Netlify
+                            escobilla-alfrega.netlify.app, base directory escobilla). Los QR ya están impresos: NUNCA
+                            renombrar ni borrar ese proyecto en Netlify. Al final lleva el MISMO bloque «Para negocios y
+                            empresas» que kit/ (si cambia uno, cambiar el otro).
 netlify/functions/          servidor: import-csv.js (CSV y Excel; IA para extractos de bancos, usa ANTHROPIC_API_KEY)
                             e import-doc.js (PDF, capturas y fotos: el móvil los parte en trozos y los manda a la vez;
                             modelo en IMPORT_MODEL). Lo compartido, en netlify/lib/comun.js

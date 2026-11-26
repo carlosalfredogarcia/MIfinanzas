@@ -1,0 +1,4 @@
+# Página del QR de la escobilla con dispensador (regalo de ALFREGA).
+# En Netlify, el sitio escobilla-alfrega usa como «Base directory» esta carpeta (escobilla), así que publica solo esto.
+[build]
+  publish = "."
