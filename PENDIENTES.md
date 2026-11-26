@@ -55,6 +55,7 @@ Lista viva: al empezar una conversación nueva, leer esto y `CLAUDE.md`. Al term
 - El QR impreso abre `alfrega-kit.netlify.app` (confirmado): al conectar ese sitio, las 300 cajas ya llevan a la página nueva.
 - Vídeo de Carlos (20–30 s, vertical): subirlo como `kit/img/carlos.mp4` y activar el <video> de «Un mensaje para ti».
 - 17/11/2026: la página del kit lleva una parte «Para negocios» (webs con reservas de ALFREGA, WhatsApp, enlace a alfrega.es/negocios y 30 € por recomendar), encima de MiFinanza. Ya publicada.
+- 26/11/2026: los enlaces a alfrega.es/negocios llevan `?desde=kit` (página del kit) y `?desde=escobilla` (página de la escobilla): así la Gestión de ALFREGA sabe de dónde vino cada solicitud.
 - Carlos decidió **un solo QR** para todas las guarderías (sin enlace distinto por guardería).
 
 ## De Claude (cuando el usuario lo pida)
